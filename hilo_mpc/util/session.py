@@ -20,3 +20,48 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
+
+import shutil
+import tempfile
+
+
+class Session:
+    """"""
+    def __init__(self) -> None:
+        """Constructor method"""
+        self._temp_dir = None
+
+    def __enter__(self) -> 'TempDir':
+        """Method for entering runtime context"""
+        self._temp_dir = TempDir()
+        return self._temp_dir
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Method for exiting runtime context"""
+        shutil.rmtree(self._temp_dir.path)
+        self._temp_dir.close()
+        self._temp_dir = None
+
+
+class TempDir:
+    """"""
+    def __init__(self) -> None:
+        """Constructor method"""
+        self._path = tempfile.mkdtemp()
+
+    @property
+    def path(self) -> str:
+        """
+        Path to temporarily created directory
+
+        :return: Path to temporarily created directory
+        :rtype: str
+        """
+        return self._path + '/'
+
+    def close(self) -> None:
+        """
+
+        :return:
+        """
+        self._path = None
