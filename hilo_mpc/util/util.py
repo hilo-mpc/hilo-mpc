@@ -236,7 +236,7 @@ def convert(obj, _type, **kwargs):
                                 raise TypeError(f"Wrong type of arguments for supplied list: {type(k).__name__}")
                     return convert(res, _type, **kwargs)
             else:
-                raise TypeError("Wrong type of arguments for function {}".format(whoami()))
+                raise TypeError("Wrong type of arguments for function {}".format(who_am_i()))
     elif isinstance(obj, str):
         shape = _get_shape(**kwargs)
         return fx.sym(parse(obj), shape)
@@ -266,7 +266,7 @@ def convert(obj, _type, **kwargs):
     elif isinstance(obj, ValuesView):
         return convert(list(obj), _type, **kwargs)
     else:
-        raise TypeError("Wrong type of arguments for function {}".format(whoami()))
+        raise TypeError("Wrong type of arguments for function {}".format(who_am_i()))
 
 
 def dump_clean(obj):
@@ -320,7 +320,7 @@ def parse(string):
     return string
 
 
-def whoami():
+def who_am_i():
     """
 
     :return:
