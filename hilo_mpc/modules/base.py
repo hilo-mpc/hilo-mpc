@@ -26,6 +26,7 @@ from typing import Optional
 import warnings
 
 import casadi as ca
+import numpy as np
 
 from .object import Object
 from ..util.util import setup_warning, check_compiler, convert, dump_clean, lower_case, AOT, JIT
@@ -64,7 +65,7 @@ class Base(Object):
 
     def __call__(self, *args, **kwargs):
         """Calling method"""
-        # TODO: Add typing information
+        # TODO: Typing hints
         which = kwargs.pop('which', None)
         if which is None:
             which = '_function'
@@ -361,6 +362,219 @@ class Base(Object):
 
 class Container(Object):
     """"""
+    # TODO: Support for pandas Series and DataFrame?
+    # TODO: Typing hints
+    def __init__(self, data_format, values=None, shape=None, id=None, name=None, parent=None):
+        """Constructor method"""
+        super().__init__(id=id, name=name)
+        self._parent = parent
+
+        if data_format in [ca.SX, ca.MX, ca.DM]:
+            self._fx = data_format
+        elif isinstance(data_format, str):
+            if data_format in ['sx', 'SX']:
+                self._fx = ca.SX
+            elif data_format in ['mx', 'MX']:
+                self._fx = ca.MX
+            elif data_format in ['dm', 'DM']:
+                self._fx = ca.DM
+            elif data_format in ['list', 'tuple', 'ndarray', 'Series', 'DataFrame']:
+                self._fx = ca.DM
+            else:
+                raise ValueError(f"Format {data_format} not recognized")
+        elif isinstance(data_format, (list, tuple)):
+            self._fx = ca.DM
+        elif isinstance(data_format, np.ndarray):
+            self._fx = ca.DM
+        else:
+            raise ValueError(f"Type {type(data_format)} not recognized")
+
+        self._axis = 0
+        self._values = convert(values if self._fx is not ca.DM else None, self._fx, shape=shape)
+        self._shape = shape
+        self._update_shape(shape)
+
+        if self._id is None:
+            self._create_id()
+
+    # def __str__(self) -> str:
+    #     """String representation method"""
+    #     return ""
+
+    def __repr__(self) -> str:
+        """Representation method"""
+        args = f"'{self._fx.__name__}'"
+        if self._values is not None:
+            elements = ", ".join([f"'{element.name()}'" for element in self._values.elements()])
+            args += f", values=[{elements}]"
+        if self._shape is not None:
+            args += f", shape=({', '.join([str(dim) for dim in self._shape])})"
+        if self._id is not None:
+            args += f", id='{self._id}'"
+        if self.name is not None:
+            args += f", name='{self.name}'"
+        if self._parent is not None:
+            args += f", parent={repr(self._parent)}"
+        return f"{self.__class__.__name__}({args})"
+
+    def __len__(self) -> int:
+        """Length method"""
+        return self.size1()
+
+    def __getitem__(self, item):
+        """Item getter method"""
+        return self._values[item]
+
+    def __setitem__(self, key, value):
+        """Item setter method"""
+        self._values[key] = value
+
+    def __delitem__(self, key):
+        """Item deletion method"""
+        # NOTE: Right now, only working for vectors not matrices
+        # NOTE: del is not able to work with lists of indices and SX_remove is not able to deal with slices
+        # TODO: Is it possible to deal with matrices?
+        if isinstance(key, (list, tuple)):
+            to_remove = key
+        elif isinstance(key, slice):
+            if key.stop is not None:
+                to_remove = list(range(key.stop)[key])
+            else:
+                dim = getattr(self, f'size{self._axis + 1}')
+                to_remove = list(range(dim())[key])
+        elif key == -1:
+            dim = getattr(self, f'size{self._axis + 1}')
+            to_remove = [dim() - 1]
+        else:
+            to_remove = [key]
+
+        if self._axis == 0:
+            if self._fx == ca.MX:
+                # NOTE: Apparently the remove method doesn't exist for MX variables
+                self._values = ca.vertcat(*[self._values[k, :] for k in range(self._shape[0]) if k not in to_remove])
+            else:
+                self._values.remove(to_remove, [])
+        elif self._axis == 1:
+            if self._fx == ca.MX:
+                # TODO: Test this
+                self._values = ca.horzcat(*[self._values[:, k] for k in range(self._shape[1]) if k not in to_remove])
+            else:
+                self._values.remove([], to_remove)
+        else:
+            raise ValueError(f"Axis attribute (axis={self._axis}) out of bounds")
+        self._update_shape(None)
+        self._update_parent()
+
+    def __iter__(self):
+        """Item iteration method"""
+        yield from self._values.elements()
+
+    def __reversed__(self):
+        """Reverse item iteration method"""
+        yield from self._values.elements()[::-1]
+
+    def _update_shape(self, shape):
+        """
+
+        :param shape:
+        :return:
+        """
+        if shape is not None:
+            if self._fx is ca.DM:
+                self._values.reshape(shape)
+                self._shape = self._values.shape
+            else:
+                if shape != self._values.shape:
+                    raise ValueError(f"Shape dimensions don't match: {shape} and {self._values.shape}")
+                else:
+                    pass
+        else:
+            self._shape = self._values.shape
+
+    def _update_parent(self):
+        """
+
+        :return:
+        """
+        if self._parent is not None:
+            self._parent._update_dimensions()
+
+    @property
+    def parent(self):
+        """
+
+        :return:
+        """
+        return self._parent
+
+    @parent.setter
+    def parent(self, parent):
+        if self._parent != parent:
+            self._parent = parent
+
+    @property
+    def values(self):
+        """
+
+        :return:
+        """
+        return self._values
+
+    @property
+    def shape(self):
+        """
+
+        :return:
+        """
+        return self._shape
+
+    def is_constant(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
+        return self._values.is_constant(*args)
+
+    def is_empty(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
+        return self._values.is_empty(*args)
+
+    def is_scalar(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
+        return self._values.is_scalar(*args)
+
+    def size(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
+        return self._values.size(*args)
+
+    def size1(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
+        return self._values.size1(*args)
+
+    def size2(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
+        return self._values.size2(*args)
 
 
 class Vector(Container):
