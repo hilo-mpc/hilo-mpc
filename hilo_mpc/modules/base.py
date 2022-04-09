@@ -1078,6 +1078,131 @@ class Vector(Container):
 
 class Equations:
     """"""
+    # TODO: Inherit from Object
+    # TODO: Switch between SX and MX
+    def __init__(self, data_format, expression=None):
+        """Constructor method"""
+        if data_format in [ca.SX, ca.MX, ca.DM]:
+            self._fx = data_format
+        elif isinstance(data_format, str):
+            if data_format.lower() == 'sx':
+                self._fx = ca.SX
+            elif data_format.lower() == 'mx':
+                self._fx = ca.MX
+            elif data_format.lower() == 'dm':
+                self._fx = ca.DM
+            else:
+                raise ValueError(f"Format {data_format} not recognized")
+        else:
+            raise TypeError(f"Type {type(data_format)} not supported")
+
+        self._equations = []
+        for key, val in expression.items():
+            self._equations.append(key)
+            if not isinstance(val, self._fx):
+                setattr(self, '_' + key, convert(val, self._fx))
+            else:
+                setattr(self, '_' + key, val)
+
+    def __contains__(self, item):
+        """Item check method"""
+        if hasattr(self, '_' + item):
+            return True
+        else:
+            return False
+
+    def _add(self, attr, obj, **kwargs):
+        """
+
+        :param attr:
+        :param obj:
+        :param kwargs:
+        :return:
+        """
+        pointer = getattr(self, '_' + attr)
+        if isinstance(obj, Vector):
+            setattr(self, '_' + attr, ca.vertcat(pointer, copy(obj.values)))
+        elif isinstance(obj, self._fx):
+            setattr(self, '_' + attr, ca.vertcat(pointer, copy(obj)))
+        elif isinstance(obj, (list, tuple)):
+            setattr(self, '_' + attr, ca.vertcat(pointer, convert(obj, self._fx, name=attr)))
+        else:
+            raise TypeError(f"Wrong type of arguments for function {who_am_i()}")
+
+    def _set(self, attr, obj, **kwargs):
+        """
+
+        :param attr:
+        :param obj:
+        :param kwargs:
+        :return:
+        """
+        if isinstance(obj, Vector):
+            setattr(self, '_' + attr, copy(obj.values))
+        elif isinstance(obj, self._fx):
+            setattr(self, '_' + attr, copy(obj))
+        elif isinstance(obj, (list, tuple)):
+            _fx = kwargs.get('_fx', None)  # for lbg and ubg of Problem class
+            setattr(self, '_' + attr, convert(obj, _fx or self._fx, name=attr))
+        else:
+            raise TypeError(f"Wrong type of arguments for function {who_am_i()}")
+
+    def _substitute(self, keys, values):
+        """
+
+        :param keys:
+        :param values:
+        :return:
+        """
+        for attr in self._equations:
+            eq = getattr(self, '_' + attr)
+            if not eq.is_empty():
+                self._set(attr, ca.substitute(eq, keys, values))
+
+    def _switch_data_type(self, *args, reverse=False):
+        """
+
+        :param args:
+        :param reverse:
+        :return:
+        """
+        equations = [getattr(self, '_' + attr) for attr in self._equations]
+        transformer = ca.Function('transformer', [*args], equations)
+
+        new_args = []
+        for arg in args:
+            if not arg.is_empty():
+                new_arg = ca.vertcat(*[ca.MX.sym(var.name()) for var in arg.elements()])
+            else:
+                new_arg = ca.MX()
+            new_args.append(new_arg)
+
+        equations = transformer(*new_args)
+
+        return new_args, equations
+
+    def sym(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
+        return self._fx.sym(*args)
+
+    def to_function(self, name, *args, **kwargs):
+        """
+
+        :param name:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        arg_names = [arg.name() for arg in args]
+        return ca.Function(name,
+                           args,
+                           [getattr(self, '_' + key) for key in self._equations],
+                           arg_names,
+                           ['out' + str(k) for k in range(len(self._equations))])
 
 
 class RightHandSide(Equations):
