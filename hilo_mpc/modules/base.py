@@ -2154,6 +2154,154 @@ class Series(Object):
 
 class TimeSeries(Series):
     """"""
+    # TODO: Typing hints
+    def __init__(self, backend=None, id=None, name=None, parent=None, **kwargs):
+        """Constructor method"""
+        super().__init__(backend=backend, id=id, name=name, parent=parent)
+
+        self._n_x = 0
+        self._n_y = 0
+        self._n_z = 0
+        self._n_u = 0
+        self._n_p = 0
+        self._n_t = 0
+
+        self._dt = None
+        self._grid = None
+
+        self._abscissa = 't'
+
+    def __del__(self):
+        """Deletion method"""
+        super().__del__()
+        self._dt = None
+        self._grid = None
+
+    def _update_dimensions(self):
+        """
+
+        :return:
+        """
+        for k in ['x', 'y', 'z', 'u', 'p', 't']:
+            if k in self._data:
+                setattr(self, '_n_' + k, self._data[k].size1())
+
+    def _update_kwargs(self, other, kwargs):
+        """
+
+        :param other:
+        :param kwargs:
+        :return:
+        """
+        other_has_dt = hasattr(other, 'dt')
+        other_has_grid = hasattr(other, 'grid')
+
+        if self._dt is not None:
+            if other_has_dt and other.dt is not None and self._dt != other.dt:
+                warnings.warn(f"Sampling time 'dt' is different between {self.name} (dt={self._dt}) and {other.name} "
+                              f"(dt={other.dt}). Choosing dt={self._dt}.")
+            elif not other_has_dt:
+                warnings.warn(f"{other.name} doesn't have the attribute sampling time 'dt'. Choosing dt={self._dt} from"
+                              f" {self.name}.")
+            elif other.dt is None:
+                warnings.warn(f"Sampling time 'dt' is not set for {other.name}. Choosing dt={self._dt} from "
+                              f"{self.name}.")
+            kwargs['dt'] = self._dt
+        elif self._grid is not None:
+            if other_has_grid and other.grid is not None and not ca.is_equal(self._grid, other.grid):
+                warnings.warn(f"Grid is different between {self.name} and {other.name}."
+                              f"\n{self.name}: {self._grid}\n{other.name}: {other.grid}\n"
+                              f"Choosing grid from {self.name}.")
+            elif not other_has_grid:
+                warnings.warn(f"{other.name} doesn't have the attribute grid. Choosing grid from {self.name}.")
+            elif other.grid is None:
+                warnings.warn(f"Grid is not set for {other.name}. Choosing grid from {self.name}.")
+            kwargs['grid'] = self._grid
+        elif other_has_dt and other.dt is not None:
+            kwargs['dt'] = other.dt
+        elif other_has_grid and other.grid is not None:
+            kwargs['grid'] = other.grid
+
+    @property
+    def dt(self):
+        """
+
+        :return:
+        """
+        return self._dt
+
+    @property
+    def grid(self):
+        """
+
+        :return:
+        """
+        return self._grid
+
+    def get_function_args(self, **kwargs):
+        """
+
+        :param kwargs:
+        :return:
+        """
+        steps = kwargs.get('steps', 1)
+        skip = kwargs.get('skip', None)
+        if skip is not None:
+            if not isinstance(skip, (list, tuple)):
+                skip = [skip]
+        else:
+            skip = []
+
+        if steps == 1:
+            args = {}
+            if 't' in self._data and 't' not in skip:
+                args['t0'] = self._data['t'][:, -1]
+            if 'x' in self._data and 'x' not in skip:
+                args['x0'] = self._data['x'][:, -1]
+            if 'z' in self._data and 'z' not in skip:
+                args['z0'] = self._data['z'][:, -1]
+            if 'u' in self._data and 'u' not in skip:
+                if 'p' in self._data and 'p' not in skip:
+                    args['p'] = ca.vertcat(self._data['u'][:, -1], self._data['p'][:, -1])
+                else:
+                    args['p'] = self._data['u'][:, -1]
+            else:
+                if 'p' in self._data and 'p' not in skip:
+                    args['p'] = self._data['p'][:, -1]
+            return args
+        elif steps > 1:
+            args = {}
+            if 't' in self._data and 't' not in skip:
+                args['t0'] = self._data['t'][:, -1]
+            if 'x' in self._data and 'x' not in skip:
+                args['x0'] = self._data['x'][:, -1]
+            if 'z' in self._data and 'z' not in skip:
+                args['z0'] = ca.repmat(self._data['z'][:, -1], 1, steps)
+            if 'u' in self._data and 'u' not in skip:
+                if 'p' in self._data and 'p' not in skip:
+                    args['p'] = ca.vertcat(self._data['u'][:, -steps:], self._data['p'][:, -steps:])
+                else:
+                    args['p'] = self._data['u'][:, -steps:]
+            else:
+                if 'p' in self._data and 'p' not in skip:
+                    args['p'] = self._data['p'][:, -steps:]
+            return args
+        else:
+            raise ValueError("The 'steps' argument has to be greater than 0.")
+
+    def setup(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        if 'dt' in args:
+            self._dt = kwargs.pop('dt')
+        elif 'grid' in args:
+            self._grid = convert(kwargs.pop('grid'), ca.DM)
+        args = tuple(k for k in args if k not in ['dt', 'grid'])
+        super().setup(*args, **kwargs)
 
 
 class OptimizationSeries(Series):
