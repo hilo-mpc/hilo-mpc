@@ -20,3 +20,37 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
+
+from .plot import *
+from ...util.util import is_list_like
+
+
+PLOT_CLASSES = {
+    'line': LinePlot,
+    'dashed': DashedPlot,
+    'dotted': DottedPlot,
+    'dotdash': DotDashPlot,
+    'dashdot': DashDotPlot,
+    'step': StepPlot,
+    'scatter': ScatterPlot
+}
+
+
+def plot(data, kind, **kwargs):
+    """
+
+    :param data:
+    :param kind:
+    :param kwargs:
+    :return:
+    """
+    if is_list_like(kind):
+        plot_obj = MultiPlot(data, kind, **kwargs)
+    else:
+        plot_obj = PLOT_CLASSES[kind](data, **kwargs)
+    plot_obj.generate()
+    plot_obj.draw()
+    return plot_obj.result
+
+
+__all__ = []

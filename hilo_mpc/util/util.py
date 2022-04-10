@@ -387,6 +387,30 @@ def dump_clean(obj):
         print(obj)
 
 
+def is_array_like(obj):
+    """
+
+    :param obj:
+    :return:
+    """
+    # TODO: Typing hints
+    return is_list_like(obj) and hasattr(obj, 'dtype')
+
+
+def is_integer(n):
+    """
+
+    :param n:
+    :return:
+    """
+    # TODO: Typing hints
+    if isinstance(n, int):
+        return True
+    if isinstance(n, float):
+        return n.is_integer()
+    return False
+
+
 def is_list_like(obj):
     """
 
@@ -423,6 +447,23 @@ def parse(string):
     # TODO: Parse string, e.g. if equations are given in strings (could be useful later for writing equations in GUI)
     # Check if any of the strings in 'OPERATORS' is in 'string'
     return string
+
+
+def random_state(state=None):
+    """
+
+    :param state:
+    :return:
+    """
+    # TODO: Typing hints
+    if is_integer(state) or is_array_like(state):
+        return np.random.RandomState(state)
+    elif isinstance(state, np.random.RandomState):
+        return state
+    elif state is None:
+        return np.random
+    else:
+        raise ValueError("Argument 'random_state' must be an integer, array-like, a NumPy RandomState, or None")
 
 
 def who_am_i() -> str:
