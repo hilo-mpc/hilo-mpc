@@ -31,7 +31,8 @@ import casadi as ca
 import numpy as np
 
 from .object import Object
-from ..util.util import setup_warning, check_compiler, convert, dump_clean, lower_case, who_am_i, AOT, JIT
+from ..util.util import setup_warning, check_compiler, check_if_list_of_type, convert, dump_clean, is_list_like,\
+    lower_case, who_am_i, AOT, JIT
 
 if platform.system() == 'Linux':
     from hilo_mpc.util.unix import compile_so
@@ -1207,6 +1208,709 @@ class Equations:
 
 class RightHandSide(Equations):
     """"""
+    # TODO: Typing hints
+    def __init__(self, equations=None, discrete=False, use_sx=True, parent=None):
+        """Constructor method"""
+        expression = {}
+        if isinstance(equations, dict):
+            ode = equations.get('ode', None)
+            alg = equations.get('alg', None)
+            meas = equations.get('meas', None)
+            expression['ode'] = ode
+            expression['alg'] = alg
+            expression['meas'] = meas
+        else:
+            expression['ode'] = []
+            expression['alg'] = []
+            expression['meas'] = []
+
+        if use_sx:
+            super().__init__(ca.SX, expression=expression)
+        else:
+            super().__init__(ca.MX, expression=expression)
+
+        self._matrix_notation = None
+        self._discrete = discrete
+        self._use_sx = use_sx
+        self._parent = parent
+
+    def _generate_matrix_notation(self, states, inputs, parameters, sampling_time, time):
+        """
+
+        :param states:
+        :param inputs:
+        :param parameters:
+        :param sampling_time:
+        :param time:
+        :return:
+        """
+        matrix_notation = {}
+        if not self._ode.is_empty():
+            equations = ca.vertcat(self._ode, self._alg)
+            matrix_notation['A'] = ca.Function('A', [parameters, sampling_time, time], [ca.jacobian(equations, states)])
+            matrix_notation['B'] = ca.Function('B', [parameters, sampling_time, time], [ca.jacobian(equations, inputs)])
+        if not self._meas.is_empty():
+            matrix_notation['C'] = ca.Function('C', [parameters, sampling_time, time], [ca.jacobian(self._meas, states)]
+                                               )
+            matrix_notation['D'] = ca.Function('D', [parameters, sampling_time, time], [ca.jacobian(self._meas, inputs)]
+                                               )
+        if not matrix_notation:
+            matrix_notation = None
+        self._matrix_notation = matrix_notation
+
+    def _is_time_variant(self, t):
+        """
+
+        :param t:
+        :return:
+        """
+        return ca.depends_on(self._ode, t), ca.depends_on(self._alg, t), ca.depends_on(self._meas, t)
+
+    @property
+    def ode(self):
+        """
+
+        :return:
+        """
+        return self._ode
+
+    # @ode.setter
+    def set_ode(self, obj, **kwargs):
+        """
+
+        :param obj:
+        :param kwargs:
+        :return:
+        """
+        self._set('ode', obj, **kwargs)
+
+    @property
+    def alg(self):
+        """
+
+        :return:
+        """
+        return self._alg
+
+    # @alg.setter
+    def set_alg(self, obj, **kwargs):
+        """
+
+        :param obj:
+        :param kwargs:
+        :return:
+        """
+        self._set('alg', obj, **kwargs)
+
+    @property
+    def meas(self):
+        """
+
+        :return:
+        """
+        return self._meas
+
+    # @meas.setter
+    def set_meas(self, obj, **kwargs):
+        """
+
+        :param obj:
+        :param kwargs:
+        :return:
+        """
+        self._set('meas', obj, **kwargs)
+
+    @property
+    def matrix_notation(self):
+        """
+
+        :return:
+        """
+        return self._matrix_notation
+
+    @property
+    def discrete(self):
+        """
+
+        :return:
+        """
+        return self._discrete
+
+    @discrete.setter
+    def discrete(self, boolean):
+        if boolean is not self._discrete:
+            self._discrete = boolean
+
+    @property
+    def continuous(self):
+        """
+
+        :return:
+        """
+        return not self._discrete
+
+    @continuous.setter
+    def continuous(self, boolean):
+        if boolean is self._discrete:
+            self._discrete = not boolean
+
+    @property
+    def parent(self):
+        """
+
+        :return:
+        """
+        return self._parent
+
+    @parent.setter
+    def parent(self, arg):
+        if self._parent != arg:
+            self._parent = arg
+
+    def add(self, obj, **kwargs):
+        """
+
+        :param obj:
+        :param kwargs:
+        :return:
+        """
+        if isinstance(obj, RightHandSide):
+            self._ode = ca.vertcat(self._ode, obj.ode)
+            self._alg = ca.vertcat(self._alg, obj.alg)
+            self._meas = ca.vertcat(self._meas, obj.meas)
+        elif isinstance(obj, dict):
+            for attr in ['ode', 'alg', 'meas']:
+                value = obj.get(attr)
+                if value is not None:
+                    self._add(attr, value, **kwargs)
+        else:
+            raise TypeError("Wrong type of arguments for function {}".format(who_am_i()))
+
+    def check_quadrature_function(self, quad, dt, t, x, y, z, u, p):
+        """
+
+        :param quad:
+        :param dt:
+        :param t:
+        :param x:
+        :param y:
+        :param z:
+        :param u:
+        :param p:
+        :return:
+        """
+        # TODO: Quadrature function could also be time-variant
+        time_variant = self._is_time_variant(t)
+
+        variables = [dt, t, x, y, z, u, p]
+        ode = self._ode
+        alg = self._alg
+        meas = self._meas
+
+        eval_sx = True
+        if isinstance(quad, ca.Function):
+            # TODO: Is there a better way to check whether eval_sx is defined for a specific function, i.e., if we can
+            #  use SX variables as arguments to the function?
+            try:
+                quad = quad.expand()
+            except RuntimeError:
+                eval_sx = False
+
+            name_in = quad.name_in()
+            name_out = quad.name_out()
+
+            if eval_sx:
+                all_the_variables = ca.vertcat(*variables)
+                all_the_names = [var.name() for var in all_the_variables.elements()]
+            else:
+                sx_vars = check_if_list_of_type(variables, ca.SX)
+                if sx_vars and self._fx is ca.SX:
+                    all_the_names = [el.name() for var in variables for el in var.elements()]
+                    if not any(time_variant):
+                        del variables[1]
+                        del all_the_names[1]
+                    if not self._discrete:
+                        del variables[0]
+                        del all_the_names[0]
+
+                    variables, equations = self._switch_data_type(*variables)
+                    all_the_variables = ca.vertcat(*variables)
+                    ode, alg, meas = equations
+
+                    if not dt.is_empty():
+                        dt = ca.MX.sym('dt')
+                    else:
+                        dt = ca.MX()
+                    if not t.is_empty():
+                        t = ca.MX.sym('t')
+                    else:
+                        t = ca.MX()
+                    variables = [dt, t] + variables
+                elif not sx_vars and self._fx is ca.MX:
+                    all_the_variables = ca.vertcat(*variables)
+                    all_the_names = [all_the_variables[k].name() for k in range(all_the_variables.size1())]
+                else:
+                    if sx_vars:
+                        raise RuntimeError("Data format mismatch. Variables are given in the SX format, but equations"
+                                           " are in the MX format.")
+                    else:
+                        raise RuntimeError("Data format mismatch. Variables are given in the MX format, but equations"
+                                           " are in the SX format.")
+
+            vars_in = {var: all_the_variables[all_the_names.index(var)] for var in name_in}
+
+            quad = quad(**vars_in)
+            quad = ca.vertcat(*[quad[var] for var in name_out])
+        elif isinstance(quad, ca.MX) and quad.is_empty():
+            sx_vars = check_if_list_of_type(variables, ca.SX)
+            if sx_vars and self._fx is ca.SX:
+                all_the_names = [el.name() for var in variables for el in var.elements()]
+                if not any(time_variant):
+                    del variables[1]
+                    del all_the_names[1]
+                if not self._discrete:
+                    del variables[0]
+                    del all_the_names[0]
+
+                variables, equations = self._switch_data_type(*variables)
+                ode, alg, meas = equations
+
+                if not dt.is_empty():
+                    dt = ca.MX.sym('dt')
+                else:
+                    dt = ca.MX()
+                if not t.is_empty():
+                    t = ca.MX.sym('t')
+                else:
+                    t = ca.MX()
+                variables = [dt, t] + variables
+
+        return variables, (ode, alg, meas, quad), time_variant
+
+    def copy(self):
+        """
+
+        :return:
+        """
+        new = RightHandSide()
+        new.set(self)
+        return new
+
+    def generate_matrix_notation(self, states, inputs, parameters, sampling_time, time):
+        """
+
+        :param states:
+        :param inputs:
+        :param parameters:
+        :param sampling_time:
+        :param time:
+        :return:
+        """
+        # TODO: Add more flexibility processing the arguments (e.g., check for Vector vs. SX, ...)
+        self._generate_matrix_notation(states, inputs, parameters, sampling_time, time)
+
+    def set(self, obj, **kwargs):
+        """
+
+        :param obj:
+        :param kwargs:
+        :return:
+        """
+        if isinstance(obj, RightHandSide):
+            self._ode = obj.ode
+            self._alg = obj.alg
+            self._meas = obj.meas
+        elif isinstance(obj, dict):
+            for attr in ['ode', 'alg', 'meas']:
+                value = obj.get(attr, None)
+                if value is not None:
+                    self._set(attr, value, **kwargs)
+        else:
+            raise TypeError("Wrong type of arguments for function {}".format(who_am_i()))
+
+    def substitute(self, obj, *args, **kwargs):
+        """
+
+        :param obj:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        if len(args) == 1:
+            keys = obj.values
+            values = convert(args[0], self._fx)
+            if not values.is_empty():
+                if not self._ode.is_empty():
+                    self._set('ode', ca.substitute(self._ode, keys, values))
+
+        if kwargs:
+            keys = obj.get_by_name(kwargs.keys())
+            values = convert(kwargs.values(), self._fx)
+            if not values.is_empty():
+                self._substitute(keys, values)
+
+    def scale(self, var, names, value, eq=None):
+        """
+
+        :param var:
+        :param names:
+        :param value:
+        :param eq:
+        :return:
+        """
+        if not is_list_like(names):
+            names = [names]
+        if not is_list_like(value):
+            value = [value]
+        else:
+            if hasattr(value, 'ndim') and value.ndim > 1:
+                value = value.flatten()
+
+        if var.size1() != len(value) != len(names):
+            raise ValueError(f"Dimension mismatch. Expected {var.size1()}x{var.size2()}, got {len(value)}x1.")
+
+        scale_kwargs = {f'{name}': var[k] * value[k] for k, name in enumerate(names)}
+        self.substitute(var, **scale_kwargs)
+
+        if eq is not None:
+            index = var.index(names)
+            if not index:
+                index = slice(0, var.size1())
+            attr = getattr(self, '_' + eq)
+            attr[index] /= value
+            self._set(eq, attr)
+
+    def to_function(self, name, *args, **kwargs):
+        """
+
+        :param name:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        # TODO: Maybe prioritize Vector variables and solver from kwargs
+        if self._parent is not None:
+            dt = self._parent.dt
+            t = self._parent.t
+            x = self._parent.x
+            y = self._parent.y
+            z = self._parent.z
+            u = self._parent.u
+            p = self._parent.p
+            solver = self._parent.solver
+        else:
+            # TODO: Deal with mixture of SX and MX
+            dt = kwargs.get('dt')
+            t = kwargs.get('t')
+            x = kwargs.get('x')
+            y = kwargs.get('y')
+            z = kwargs.get('z')
+            u = kwargs.get('u')
+            p = kwargs.get('p')
+            solver = kwargs.get('solver')
+
+            if dt is None:
+                dt = ca.SX()
+            if t is None:
+                t = ca.SX()
+            if x is None:
+                x = ca.SX()
+            if y is None:
+                y = ca.SX()
+            if z is None:
+                z = ca.SX()
+            if u is None:
+                u = ca.SX()
+            if p is None:
+                p = ca.SX()
+
+        append_dynamics_framework = kwargs.get('append_dynamics_framework', True)
+
+        generate_matrix_notation = kwargs.get('generate_matrix_notation', False)
+        if generate_matrix_notation:
+            self._generate_matrix_notation(ca.vertcat(x, z), u, p, dt, t)
+
+        options = kwargs.get('opts', None)
+        if options is None:
+            options = {}
+
+        quad = kwargs.get('quadrature')
+        if quad is not None:
+            variables, equations, time_variant = self.check_quadrature_function(quad, dt, t, x, y, z, u, p)
+            dt, t, x, y, z, u, p = variables
+            ode, alg, meas, quad = equations
+        else:
+            time_variant = self._is_time_variant(t)
+
+            ode = self._ode
+            alg = self._alg
+            meas = self._meas
+            quad = self._fx()
+
+        external_parameters = kwargs.get('external_parameters')
+        if external_parameters is None:
+            external_parameters = tuple()
+
+        if not self._discrete:
+            if append_dynamics_framework:
+                name += '_continuous'
+
+            if any(time_variant):
+                t0 = self._fx.sym('t0')
+
+            dae = {}
+            if any(time_variant) and not t.is_empty():
+                dae['t'] = t
+            if not x.is_empty():
+                dae['x'] = x
+            if not z.is_empty():
+                dae['z'] = z
+            parameter_args = []
+            if not u.is_empty():
+                parameter_args.append(u)
+            if not p.is_empty():
+                parameter_args.append(p)
+            if any(time_variant):
+                parameter_args.append(t0)
+            for p_ext in external_parameters:
+                if not p_ext.is_empty():
+                    parameter_args.append(p_ext)
+            dae['p'] = ca.vertcat(*parameter_args)
+            if not ode.is_empty():
+                if time_variant[0]:
+                    dae['ode'] = ca.substitute(ode, t, t + t0)
+                else:
+                    dae['ode'] = ode
+            if not alg.is_empty():
+                if time_variant[1]:
+                    dae['alg'] = ca.substitute(alg, t, t + t0)
+                else:
+                    dae['alg'] = alg
+            if not quad.is_empty():
+                dae['quad'] = quad
+
+            integrator = None
+            meas_fun = None
+            function = ca.integrator(name, solver, dae, options)
+
+            if not meas.is_empty():
+                if any(time_variant) and not t.is_empty():
+                    del dae['t']
+                if not x.is_empty():
+                    dae['x0'] = dae.pop('x')
+                if not z.is_empty():
+                    dae['z0'] = dae.pop('z')
+                if not ode.is_empty():
+                    del dae['ode']
+                if not alg.is_empty():
+                    del dae['alg']
+                if not quad.is_empty():
+                    del dae['quad']
+                if any(time_variant):
+                    dae['yf'] = ca.substitute(meas, t, t0 + options['tf'])
+                else:
+                    dae['yf'] = meas
+                meas_fun = ca.Function('meas_fun', dae, ca.integrator_in(), ca.integrator_out() + ['yf'])
+
+                x0 = ca.MX.sym('x0', x.shape)
+                z0 = ca.MX.sym('z0', z.shape)
+                if 'p' in dae:
+                    up = ca.MX.sym('p', dae['p'].shape)
+                else:
+                    up = ca.MX()
+
+                integrator = function
+                result = integrator(x0=x0, z0=z0, p=up)
+                xf = result['xf']
+                zf = result['zf']
+                qf = result['qf']
+                result = meas_fun(x0=xf, z0=zf, p=up)
+                y = result['yf']
+
+                if not x.is_empty():
+                    dae['x0'] = x0
+                if not z.is_empty():
+                    dae['z0'] = z0
+                if not up.is_empty():
+                    dae['p'] = up
+                if not ode.is_empty():
+                    dae['xf'] = xf
+                dae['yf'] = y
+                if not alg.is_empty():
+                    dae['zf'] = zf
+                if not quad.is_empty():
+                    dae['qf'] = qf
+
+                function = ca.Function(name, dae, ca.integrator_in(), ca.integrator_out() + ['yf'])
+        else:
+            # TODO: Deal with initial time 't0' in options
+            if append_dynamics_framework:
+                if self._parent is not None:
+                    if hasattr(self._parent, 'solver'):
+                        name += '_discrete'
+                else:
+                    name += '_discrete'
+
+            X = kwargs.get('X')
+            Z = kwargs.get('Z')
+            if X is None:
+                X = self._fx()
+            if Z is None:
+                Z = self._fx()
+
+            dae = {}
+            if not x.is_empty():
+                dae['x0'] = x
+            if not z.is_empty():
+                dae['z0'] = z
+            parameter_args = []
+            if not u.is_empty():
+                parameter_args.append(u)
+            if not p.is_empty():
+                parameter_args.append(p)
+            if any(time_variant):
+                parameter_args.append(t)
+            for p_ext in external_parameters:
+                if not p_ext.is_empty():
+                    parameter_args.append(p_ext)
+            dae['p'] = ca.vertcat(*parameter_args)
+            col_in = []
+            if not X.is_empty():
+                dae['x_col'] = X
+                col_in.append('x_col')
+            if not Z.is_empty():
+                dae['z_col'] = Z
+                col_in.append('z_col')
+
+            if 'tf' in options:
+                # NOTE: Somehow, if we have explicit Runge-Kutta on a DAE or collocation, we need to substitute 't' as
+                #  well for the time-variant cases, since the function will have 't' as a free variable although none
+                #  of the equations depend on 't'
+                if isinstance(t, ca.MX) and not any(time_variant):
+                    to_substitute = ca.vertcat(dt, t)
+                    substitute = [options['tf'], 0.]
+                else:
+                    to_substitute = dt
+                    substitute = options['tf']
+
+                if not ode.is_empty():
+                    dae['xf'] = ca.substitute(ode, to_substitute, substitute)
+                if not alg.is_empty():
+                    dae['zf'] = ca.substitute(alg, to_substitute, substitute)
+                if not quad.is_empty():
+                    dae['qf'] = ca.substitute(quad, to_substitute, substitute)
+
+                function = ca.Function(name, dae, ca.integrator_in() + col_in, ca.integrator_out())
+            elif 'grid' in options:
+                dae['dt'] = dt
+                col_in = ['dt'] + col_in
+
+                if isinstance(t, ca.MX) and not any(time_variant):
+                    to_substitute = t
+                    substitute = [0.]
+                    if not ode.is_empty():
+                        dae['xf'] = ca.substitute(ode, t, 0.)
+                    if not alg.is_empty():
+                        dae['zf'] = ca.substitute(alg, t, 0.)
+                    if not quad.is_empty():
+                        dae['qf'] = ca.substitute(quad, t, 0.)
+                else:
+                    to_substitute = self._fx()
+                    substitute = []
+                    if not ode.is_empty():
+                        dae['xf'] = ode
+                    if not alg.is_empty():
+                        dae['zf'] = alg
+                    if not quad.is_empty():
+                        dae['qf'] = quad
+
+                function = ca.Function(name, dae, ca.integrator_in() + col_in, ca.integrator_out())
+                diff = ca.diff(options['grid'])
+
+                if not ode.is_empty():
+                    del dae['xf']
+                if not alg.is_empty():
+                    del dae['zf']
+                if not quad.is_empty():
+                    del dae['qf']
+
+                function = function.mapaccum(diff.size1())
+                dae['dt'] = diff
+                result = function(**dae)
+
+                if not ode.is_empty():
+                    dae['xf'] = result['xf']
+                if not alg.is_empty():
+                    dae['zf'] = result['zf']
+                if not quad.is_empty():
+                    dae['qf'] = result['qf']
+
+                col_in = col_in[1:]
+                del dae['dt']
+                function = ca.Function(name, dae, ca.integrator_in() + col_in, ca.integrator_out())
+            else:
+                raise KeyError("Options dictionary incomplete. Either 'tf' or 'grid' is missing.")
+            integrator = None
+            meas_fun = None
+
+            if not meas.is_empty():
+                if not ode.is_empty():
+                    del dae['xf']
+                if not alg.is_empty():
+                    del dae['zf']
+                if not quad.is_empty():
+                    del dae['qf']
+                if not to_substitute.is_empty() and substitute:
+                    dae['yf'] = ca.substitute(meas, to_substitute, substitute)
+                else:
+                    dae['yf'] = meas
+                # TODO: Do we need col_in here as well?
+                meas_fun = ca.Function('meas', dae, ca.integrator_in(), ca.integrator_out() + ['yf'])
+                del dae['yf']
+
+                integrator = function
+                result = integrator(**dae)
+                xf = result['xf']
+                zf = result['zf']
+                qf = result['qf']
+                result = meas_fun(x0=xf, z0=zf, p=dae.get('p', self._fx()))
+                y = result['yf']
+
+                if not ode.is_empty():
+                    dae['xf'] = xf
+                dae['yf'] = y
+                if not alg.is_empty():
+                    dae['zf'] = zf
+                if not quad.is_empty():
+                    dae['qf'] = qf
+
+                # TODO: Do we need col_in here as well?
+                function = ca.Function(name, dae, ca.integrator_in(), ca.integrator_out() + ['yf'])
+
+        return function, integrator, meas_fun
+
+    def is_empty(self, *args):
+        """
+
+        :param args:
+        :return:
+        """
+        return self._ode.is_empty(*args) and self._alg.is_empty(*args) and self._meas.is_empty(*args)
+
+    def is_time_variant(self, t=None):
+        """
+
+        :param t:
+        :return:
+        """
+        if self._parent is not None and not self._parent.t.is_empty():
+            if t is not None:
+                warnings.warn("Setting the keyword parameter 't' while having a parent object is not supported. Using "
+                              "parent object.")
+            return any(self._is_time_variant(self._parent.t))
+        elif t is not None and isinstance(t, self._fx):
+            return any(self._is_time_variant(t))
+        return None
 
 
 class Problem(Equations):

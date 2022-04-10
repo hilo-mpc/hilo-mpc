@@ -77,6 +77,7 @@ def _get_shape(**kwargs):
     :param kwargs:
     :return:
     """
+    # TODO: Typing hints
     n_dim = kwargs.get('n_dim', None)
     shape = kwargs.get('shape', None)
     if n_dim is None and shape is None:
@@ -143,6 +144,20 @@ def check_compiler(method: str, compiler: str) -> (Optional[str], Optional[str],
     return None, None, None
 
 
+def check_if_list_of_type(a, types):
+    """
+
+    :param a:
+    :param types:
+    :return:
+    """
+    # TODO: Typing hints
+    if not isinstance(a, list):
+        return False
+    else:
+        return all(isinstance(item, types) for item in a)
+
+
 def convert(obj, _type, **kwargs):
     """
 
@@ -151,6 +166,7 @@ def convert(obj, _type, **kwargs):
     :param kwargs:
     :return:
     """
+    # TODO: Typing hints
     # TODO: Convoluted. Simplify if possible.
     # TODO: Add support for dict?
     # TODO: Is there a nice way to convert SX to MX and vice versa?
@@ -275,6 +291,7 @@ def dump_clean(obj):
     :param obj:
     :return:
     """
+    # TODO: Typing hints
     # FIXME: Strings also have the attribute __iter__
     if isinstance(obj, dict):
         for k, v in obj.items():
@@ -291,6 +308,16 @@ def dump_clean(obj):
                 print(v)
     else:
         print(obj)
+
+
+def is_list_like(obj):
+    """
+
+    :param obj:
+    :return:
+    """
+    # TODO: Typing hints
+    return isinstance(obj, (list, tuple, set, np.ndarray))
 
 
 def lower_case(obj: Any) -> Any:
@@ -315,12 +342,13 @@ def parse(string):
     :param string:
     :return:
     """
+    # TODO: Typing hints
     # TODO: Parse string, e.g. if equations are given in strings (could be useful later for writing equations in GUI)
     # Check if any of the strings in 'OPERATORS' is in 'string'
     return string
 
 
-def who_am_i():
+def who_am_i() -> str:
     """
 
     :return:
