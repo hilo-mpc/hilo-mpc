@@ -32,7 +32,7 @@ import numpy as np
 
 from .object import Object
 from ..util.util import setup_warning, check_compiler, check_if_list_of_type, convert, dump_clean, is_list_like,\
-    lower_case, who_am_i, AOT, JIT
+    lower_case, who_am_i, _split_expression, AOT, JIT
 
 if platform.system() == 'Linux':
     from hilo_mpc.util.unix import compile_so
@@ -51,6 +51,7 @@ class Base(Object):
     :param display: Whether to display certain messages, defaults to True
     :type display: bool
     """
+    # TODO: Add __str__
     def __init__(self, id: Optional[str] = None, name: Optional[str] = None, display: bool = True) -> None:
         """Constructor method"""
         super().__init__(id=id, name=name)
@@ -367,6 +368,7 @@ class Container(Object):
     """"""
     # TODO: Support for pandas Series and DataFrame?
     # TODO: Typing hints
+    # TODO: Add __str__
     def __init__(self, data_format, values=None, shape=None, id=None, name=None, parent=None):
         """Constructor method"""
         super().__init__(id=id, name=name)
@@ -584,6 +586,7 @@ class Vector(Container):
     """"""
     # TODO: Add duplicate check for names
     # TODO: Typing hints
+    # TODO: Add __str__
     def __init__(
             self,
             data_format,
@@ -1079,6 +1082,8 @@ class Vector(Container):
 
 class Equations:
     """"""
+    # TODO: Typing hints
+    # TODO: Add __repr__ & __str__
     # TODO: Inherit from Object
     # TODO: Switch between SX and MX
     def __init__(self, data_format, expression=None):
@@ -1209,6 +1214,7 @@ class Equations:
 class RightHandSide(Equations):
     """"""
     # TODO: Typing hints
+    # TODO: Add __repr__ & __str__
     def __init__(self, equations=None, discrete=False, use_sx=True, parent=None):
         """Constructor method"""
         expression = {}
@@ -1915,6 +1921,231 @@ class RightHandSide(Equations):
 
 class Problem(Equations):
     """"""
+    # TODO: Typing hints
+    # TODO: Add __repr__ & __str__
+    def __init__(self, equations=None, sense=None, parent=None):
+        """Constructor method"""
+        super().__init__(ca.SX)
+
+        if isinstance(equations, dict):
+            # TODO: More precise processing of constraints (lower and upper bounds)
+            obj = equations.get('obj', None)
+            cons = equations.get('cons', None)
+            if not isinstance(obj, self._fx):
+                self._obj = convert(obj, self._fx)
+            else:
+                self._obj = obj
+            if not isinstance(cons, self._fx):
+                self._cons = convert(cons, self._fx)
+            else:
+                self._cons = cons
+        else:
+            self._obj = self._fx()
+            self._cons = self._fx()
+            self._lbg = ca.DM()
+            self._ubg = ca.DM()
+
+        if isinstance(sense, str):
+            if sense.lower() in ['min', 'minimise', 'minimize', '1']:
+                self._sense = 'min'
+            elif sense.lower() in ['max', 'maximise', 'maximize', '-1']:
+                self._sense = 'max'
+            else:
+                raise ValueError(f"Optimization direction {sense} not understood")
+        elif isinstance(sense, int):
+            if sense == 1:
+                self._sense = 'min'
+            elif sense == -1:
+                self._sense = 'max'
+            else:
+                raise ValueError(f"Optimization direction {sense} not understood")
+        elif sense is not None:
+            raise TypeError(f"Wrong type '{type(sense)}' for input argument 'sense'")
+        else:
+            self._sense = 'min'
+
+        self._parent = parent
+        self._equations.extend(['obj', 'cons'])
+
+    def _process_constraints(self, constraints, **kwargs):
+        """
+
+        :param constraints:
+        :param kwargs:
+        :return:
+        """
+        # TODO: Add support for dynamic constraints
+        g = []
+        lbg = []
+        ubg = []
+
+        x = kwargs.get('x', None)
+        p = kwargs.get('p', None)
+        if x is None:
+            x = self._fx()
+        if p is None:
+            p = self._fx()
+        fun = None
+
+        if isinstance(constraints, (list, tuple)):
+            if all(isinstance(constraint, self._fx) for constraint in constraints):
+                fun = ca.Function('fun', [x, p], constraints)
+        else:
+            if isinstance(constraints, self._fx):
+                fun = ca.Function('fun', [x, p], [constraints])
+
+        if fun is not None:
+            split_expr = _split_expression(fun, ca.vertcat(x, p), '<', '<=', '==', '>=', '>')
+            for expr in split_expr:
+                if len(expr) == 3:
+                    g.append(expr[1])
+                    lbg.append(expr[0])
+                    ubg.append(expr[2])
+                elif len(expr) == 2:
+                    if isinstance(expr[0], self._fx):
+                        if isinstance(expr[1], self._fx):
+                            raise RuntimeError(f"Something went wrong while parsing the input arguments for function "
+                                               f"{who_am_i()} of class {self.__class__.__name__}. Inform the "
+                                               f"maintainer.")
+                        g.append(expr[0])
+                        lbg.append(-ca.inf)
+                        ubg.append(expr[1])
+                    elif isinstance(expr[1], self._fx):
+                        g.append(expr[1])
+                        lbg.append(expr[0])
+                        ubg.append(ca.inf)
+                    else:
+                        raise RuntimeError(f"Something went wrong while parsing the input arguments for function "
+                                           f"{who_am_i()} of class {self.__class__.__name__}. Inform the maintainer.")
+                else:
+                    index = split_expr.index(expr)
+                    raise ValueError(f"Ambiguous constraint '{constraints[index]}'. Following forms are allowed: "
+                                     f"'lbg <= g <= ubg', 'lbg <= g', 'g <= ubg'")
+
+        return g, lbg, ubg
+
+    @property
+    def objective(self):
+        """
+
+        :return:
+        """
+        return self._obj
+
+    obj = objective
+
+    def get_objective(self):
+        """
+
+        :return:
+        """
+        return self._obj
+
+    # @objective.setter
+    def set_objective(self, obj, **kwargs):
+        """
+
+        :param obj:
+        :param kwargs:
+        :return:
+        """
+        self._set('obj', obj, **kwargs)
+
+    @property
+    def sense(self):
+        """
+
+        :return:
+        """
+        return self._sense
+
+    @sense.setter
+    def sense(self, arg):
+        arg = arg.lower().strip()
+        if arg in ['min', 'minimize', 'minimise'] and self._sense == 'max':
+            self._sense = 'min'
+        elif arg in ['max', 'maximize', 'maximise'] and self._sense == 'min':
+            self._sense = 'max'
+        elif arg not in ['min', 'minimize', 'minimise', 'max', 'maximize', 'maximise']:
+            print("Argument not recognized. Ignoring it.")
+
+    @property
+    def constraints(self):
+        """
+
+        :return:
+        """
+        # TODO: Niceify output
+        return self._cons
+
+    cons = constraints
+
+    def set(self, obj, **kwargs):
+        """
+
+        :param obj:
+        :param kwargs:
+        :return:
+        """
+        if isinstance(obj, Problem):
+            self._obj = obj.obj
+            self._cons = obj.cons
+        elif isinstance(obj, dict):
+            for attr in ['obj', 'cons']:
+                value = obj.get(attr, None)
+                if value is not None:
+                    if attr == 'cons':
+                        g, lbg, ubg = self._process_constraints(value, **kwargs)
+                        self._set(attr, g, **kwargs)
+                        self._set('lbg', lbg, _fx=ca.DM)
+                        self._set('ubg', ubg, _fx=ca.DM)
+                    else:
+                        self._set(attr, value, **kwargs)
+        else:
+            raise TypeError(f"Wrong type '{type(obj).__name__}' of argument for function {who_am_i()}")
+
+    def to_solver(self, name, interface, **kwargs):
+        """
+
+        :param name:
+        :param interface:
+        :param kwargs:
+        :return:
+        """
+        if self._parent is not None:
+            x = self._parent.x
+            p = self._parent.p
+            solver = self._parent.solver
+        else:
+            x = kwargs.get('x', None)
+            p = kwargs.get('p', None)
+            solver = kwargs.get('solver', None)
+
+            if x is None:
+                x = self._fx()
+            if p is None:
+                p = self._fx()
+
+        options = kwargs.get('opts', None)
+        if options is None:
+            options = {}
+
+        problem = {}
+        if not x.is_empty():
+            problem['x'] = x
+        if not p.is_empty():
+            problem['p'] = p
+        if not self._obj.is_empty():
+            if self._sense == 'max':
+                problem['f'] = -self._obj
+            else:
+                problem['f'] = self._obj
+        if not self._cons.is_empty():
+            problem['g'] = self._cons
+
+        solver = interface(name, solver, problem, options)
+
+        return solver
 
 
 class Series(Object):

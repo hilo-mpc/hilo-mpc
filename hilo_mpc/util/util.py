@@ -71,6 +71,32 @@ def setup_warning(function: Function) -> Function:
     return cast(Function, wrapper)
 
 
+def _convert_operators(*args):
+    """
+
+    :param args:
+    :return:
+    """
+    ret = set()
+    for arg in args:
+        if arg == '<' or arg == '>':
+            ret.add(ca.OP_LT)
+        elif arg == '<=' or arg == '>=':
+            ret.add(ca.OP_LE)
+        elif arg == '==':
+            ret.add(ca.OP_EQ)
+        elif arg == '+':
+            ret.add(ca.OP_ADD)
+        elif arg == '-':
+            ret.add(ca.OP_SUB)
+        elif arg == '*':
+            ret.add(ca.OP_MUL)
+        elif arg == '/':
+            ret.add(ca.OP_DIV)
+
+    return tuple(ret)
+
+
 def _get_shape(**kwargs):
     """
 
@@ -115,6 +141,57 @@ def _get_shape(**kwargs):
                                 .format(type(int), type(tuple), type(shape)))
 
     return shape
+
+
+def _split_expression(fun, var, *args):
+    """
+
+    :param fun:
+    :param var:
+    :param args:
+    :return:
+    """
+    work = fun.sz_w() * ['']
+    n_var = var.numel()
+    split_ops = _convert_operators(*args)
+    split_expr = []
+    for k in range(fun.n_instructions()):
+        op = fun.instruction_id(k)
+        o = fun.instruction_output(k)
+        o0 = -1
+        o1 = -1
+        if o:
+            o0 = o[0]
+        if len(o) > 1:
+            o1 = o[1]
+        i = fun.instruction_input(k)
+        i0 = -1
+        i1 = -1
+        if i:
+            i0 = i[0]
+        if len(i) > 1:
+            i1 = i[1]
+        if op in split_ops:
+            work[o0] = [work[i0], work[i1]]
+        elif op == ca.OP_CONST:
+            work[o0] = fun.instruction_constant(k)
+        elif op == ca.OP_INPUT:
+            work[o0] = var[i0 * n_var + i1]
+        elif op == ca.OP_OUTPUT:
+            # work[o1] = work[i0]
+            split_expr.append(work[i0])
+        elif op == ca.OP_ADD:
+            work[o0] = work[i0] + work[i1]
+        elif op == ca.OP_SUB:
+            work[o0] = work[i0] - work[i1]
+        elif op == ca.OP_MUL:
+            work[o0] = work[i0] * work[i1]
+        elif op == ca.OP_DIV:
+            work[o0] = work[i0] / work[i1]
+        else:
+            raise ValueError(f"Operation with id '{op}' is unknown or not implemented")
+
+    return split_expr
 
 
 def check_compiler(method: str, compiler: str) -> (Optional[str], Optional[str], Optional[str]):
