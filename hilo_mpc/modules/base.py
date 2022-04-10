@@ -2158,3 +2158,20 @@ class TimeSeries(Series):
 
 class OptimizationSeries(Series):
     """"""
+    # TODO: Typing hints
+    # TODO: Add objective value to data (and maybe g and lam_g / lam_x too)
+    def __init__(self, backend=None, id=None, name=None, parent=None, **kwargs):
+        """Constructor method"""
+        super().__init__(backend=backend, id=id, name=name, parent=parent)
+
+        self._n_x = 0
+        self._n_p = 0
+
+    def _update_dimensions(self):
+        """
+
+        :return:
+        """
+        for k in ['x', 'p']:
+            if k in self._data:
+                setattr(self, '_n_' + k, self._data[k].size1())
