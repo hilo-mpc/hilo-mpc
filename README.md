@@ -11,6 +11,7 @@ build control and estimation problems. The machine learning models can be used (
 of the estimation or control problems 
 
 ![plot](doc/source/images/overview.png)
+
 The following machine learning models are currently supported:
 
 - Artificial feed-forward neural networks
@@ -49,11 +50,16 @@ Citing HILO-MPC
 ---------------
 If you use HILO-MPC for your research, please cite it using the following bibtex entry:
 
-``
-    @article{pohlodek2022hilompc,
-      title={Flexible development and evaluation of machine-learning-supported optimal control and estimation methods via HILO-MPC},
+``   
+@article{pohlodek2022hilompc, 
+       title={Flexible development and evaluation of machine-learning-supported optimal control and estimation methods via HILO-MPC},
       author={Pohlodek, Johannes and Morabito, Bruno and Schlauch, Christian, and Zometa, Pablo and Findeisen, Rolf},
       journal={arXiv preprint arXiv:2203.13671},
       year={2022}
     }
 ``
+
+or
+
+J. Pohlodek, B. Morabito, C. Schlauch, P. Zometa, R. Findeisen. 
+Flexible development and evaluation of machine-learning-supported optimal control and estimation methods via HILO-MPC. arXiv preprint arXiv:2203.13671
