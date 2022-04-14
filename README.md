@@ -5,10 +5,10 @@ HILO-MPC is a toolbox for **easy, flexible and fast development of machine-learn
 It can be used for model predictive control, moving horizon estimation, Kalman filters and has interfaces to embedded am 
 embedded MPC software. 
 
-HILO-MPC can leverage `Tensorflow <https://www.tensorflow.org/>`_ and `PyTorch <https://pytorch.org/>`_
-to create machine learning models, and the  `CasADi <https://web.casadi.org/>`_ framework to efficiently
-build control and estimation problems. The machine learning models can be used (almost) during in the setup
-of the estimation or control problems 
+HILO-MPC can leverage [Tensorflow](https://www.tensorflow.org/) and [PyTorch](https://pytorch.org/)
+to create machine learning models, and the  [CasADi](https://web.casadi.org/) framework to efficiently
+build control and estimation problems. The machine learning models can be used (almost) everywhere in the setup
+of the estimation or control problems. 
 
 ![plot](doc/source/images/overview.png)
 
