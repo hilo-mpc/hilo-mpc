@@ -23,6 +23,7 @@
 
 # TODO: Typing hints
 
+from typing import TypeVar
 import warnings
 
 import casadi as ca
@@ -30,6 +31,9 @@ import numpy as np
 
 from .util import check_and_wrap_to_list, check_if_has_duplicates, check_if_list_of_type, check_if_list_of_none, \
     check_if_square, who_am_i
+
+
+Symbolic = TypeVar('Symbolic', ca.SX, ca.MX)
 
 
 class GenericCost:
@@ -524,3 +528,311 @@ class QuadraticCost(GenericCost):
         # TODO: generalize this
         warnings.warn("This setter is supposed to be used only if muAO-MPC is used to solve the linear MPC problem.")
         self._P = arg
+
+
+EXPLICIT_METHODS = {
+    'forward_euler': {
+        'A': np.array([[0.]]),
+        'b': np.array([1.]),
+        'c': np.array([0.])
+    },
+    'midpoint': {
+        'A': np.array([[0., 0.],
+                       [.5, 0.]]),
+        'b': np.array([0., 1.]),
+        'c': np.array([0., .5])
+    },
+    'heun': {
+        '2': {
+            'A': np.array([[0., 0.],
+                           [1., 0.]]),
+            'b': np.array([.5, .5]),
+            'c': np.array([0., 1.])
+        },
+        '3': {
+            'A': np.array([[0., 0., 0.],
+                           [1 / 3, 0., 0.],
+                           [0., 2 / 3, 0.]]),
+            'b': np.array([.25, 0., .75]),
+            'c': np.array([0., 1 / 3, 2 / 3])
+        }
+    },
+    'ralston': {
+        '2': {
+            'A': np.array([[0., 0.],
+                           [2 / 3, 0.]]),
+            'b': np.array([.25, .75]),
+            'c': np.array([0., 2 / 3])
+        },
+        '3': {
+            'A': np.array([[0., 0., 0.],
+                           [.5, 0., 0.],
+                           [0., .75, 0.]]),
+            'b': np.array([2 / 9, 1 / 3, 4 / 9]),
+            'c': np.array([0., .5, .75])
+        },
+        '4': {}
+    },
+    'generic': {
+        '2': {},
+        '3': {}
+    },
+    'kutta': {
+        'A': np.array([[0., 0., 0.],
+                       [.5, 0., 0.],
+                       [-1., 2., 0.]]),
+        'b': np.array([1 / 6, 2 / 3, 1 / 6]),
+        'c': np.array([0., .5, 1.])
+    },
+    'ssprk3': {
+        'A': np.array([[0., 0., 0.],
+                       [1., 0., 0.],
+                       [.25, .25, 0.]]),
+        'b': np.array([1 / 6, 1 / 6, 2 / 3]),
+        'c': np.array([0., 1., .5])
+    },
+    'classic': {
+        'A': np.array([[0., 0., 0., 0.],
+                       [.5, 0., 0., 0.],
+                       [0., .5, 0., 0.],
+                       [0., 0., 1., 0.]]),
+        'b': np.array([1 / 6, 1 / 3, 1 / 3, 1 / 6]),
+        'c': np.array([0., .5, .5, 1.])
+    },
+    '3_8_rule': {
+        'A': np.array([[0., 0., 0., 0.],
+                       [1 / 3, 0., 0., 0.],
+                       [-1 / 3, 0., 0., 0.],
+                       [1., -1., 1., 0.]]),
+        'b': np.array([1 / 8, 3 / 8, 3 / 8, 1 / 8]),
+        'c': np.array([0., 1 / 3, 2 / 3, 1.])
+    }
+}
+
+
+class RungeKutta:
+    """"""
+    @staticmethod
+    def _construct_polynomial_basis(
+            degree: int,
+            method: str,
+            h: Symbolic
+    ) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+        """
+
+        :param degree:
+        :param method:
+        :return:
+        """
+        B = np.zeros(degree + 1)
+        C = np.zeros((degree + 1, degree + 1))
+        D = np.zeros(degree + 1)
+        # T = np.zeros(degree + 1)
+        T = h.zeros(degree + 1)
+        tau = [0.] + ca.collocation_points(degree, method)
+
+        for i in range(degree + 1):
+            L = np.poly1d([1.])
+            for j in range(degree + 1):
+                if j != i:
+                    L *= np.poly1d([1., -tau[j]]) / (tau[i] - tau[j])
+
+            D[i] = L(1.)
+
+            Ldot = np.polyder(L)
+            for j in range(degree + 1):
+                C[i, j] = Ldot(tau[j])
+
+            Lint = np.polyint(L)
+            B[i] = Lint(1.)
+
+            T[i] = h * tau[i]
+
+        return B, C, D, T
+
+    @classmethod
+    def _collocation(cls, problem, **opts):
+        """
+
+        :param problem:
+        :param opts:
+        :return:
+        """
+        # TODO: Add support for algebraic variables (DAE)
+        ode = problem.get('ode')
+        alg = problem.get('alg')
+        quad = problem.get('quad')
+        meas = problem.get('meas')
+        t = problem.get('t')
+        x = problem.get('x')
+        z = problem.get('z')
+        u = problem.get('u')
+        p = problem.get('p')
+        dt = problem.get('dt')
+
+        if meas is not None:
+            if not isinstance(meas, (ca.SX, ca.MX)):
+                # TODO: What is this supposed to do?
+                if not meas.is_empty():
+                    meas = ca.Function('meas', [x, z, u, p], [meas])
+                else:
+                    meas = ca.SX()
+
+        degree = opts.get('degree', None)
+        collocation_points = opts.get('collocation_points', None)
+        if degree is None:
+            degree = 2
+        if collocation_points is None:
+            collocation_points = 'radau'
+        n_x = x.size1()
+        n_z = z.size1()
+        function = ca.Function('function', [t, x, z, u, p], [ode, alg, quad])
+
+        B, C, D, T = cls._construct_polynomial_basis(degree, collocation_points, dt)  # h instead of dt
+
+        J = 0.
+        ce = []
+
+        xc = []
+        zc = []  # not sure about this
+        for k in range(degree):
+            xk = x.sym('x_' + str(k), n_x)
+            xc.append(xk)
+            zk = z.sym('z_' + str(k), n_z)  # not sure about this
+            zc.append(zk)  # not sure about this
+
+        xf = D[0] * x
+        zf = 0.  # not sure about this
+        for i in range(1, degree + 1):
+            xp = C[0, i] * x
+            for j in range(degree):
+                xp += C[j + 1, i] * xc[j]
+
+            fi, gi, qi = function(t + T[i - 1], xc[i - 1], zc[i - 1], u, p)  # not sure about this
+            # (zc[i - 1] instead of z)
+            ce.append(dt * fi - xp)  # h instead of dt
+            ce.append(gi)  # not sure about this
+
+            xf += D[i] * xc[i - 1]
+            zf += D[i] * zc[i - 1]  # not sure about this
+
+            J += B[i] * qi * dt  # h instead of dt
+
+        # xc = ca.vertcat(*xc)
+        # zc = ca.vertcat(*zc)
+        ce = ca.vertcat(*ce)
+
+        if meas is not None:
+            if isinstance(meas, ca.Function):
+                meas = meas(xf, zf, u, p)  # not sure about this (zf instead of z)
+
+        problem['ode'] = xf
+        problem['alg'] = zf  # not sure about this (zf instead of alg)
+        problem['quad'] = J
+        problem['meas'] = meas
+        problem['collocation_points_ode'] = xc
+        problem['collocation_points_alg'] = zc  # not sure about this
+        problem['collocation_equations'] = ce
+
+    @classmethod
+    def _explicit(cls, problem, **opts):
+        """
+
+        :param problem:
+        :param opts:
+        :return:
+        """
+        # TODO: Integrate algebraic variables
+        # TODO: Deal with None values
+        ode = problem.get('ode')
+        alg = problem.get('alg')
+        quad = problem.get('quad')
+        h = problem.get('dt')
+        t = problem.get('t')
+        x = problem.get('x')
+        z = problem.get('z')
+        u = problem.get('u')
+        p = problem.get('p')
+
+        order = opts.get('order')
+        if order is None:
+            order = 1
+        dyn = ca.Function('dyn', [t, x, z, u, p], [ode, quad])
+        alg = ca.Function('alg', [t, x, z, u, p], [alg])
+        butcher_tableau = opts.get('butcher_tableau', None)
+        if butcher_tableau is None:
+            if order == 1:
+                butcher_tableau = 'forward_euler'
+            elif order == 2:
+                butcher_tableau = 'midpoint'
+            elif order == 3:
+                butcher_tableau = 'kutta'
+            elif order == 4:
+                butcher_tableau = 'classic'
+            else:
+                raise NotImplementedError(f"Explicit Runge-Kutta discretization for order {order} is not yet "
+                                          f"implemented.")
+        if butcher_tableau in ['heun', 'ralston', 'generic']:
+            butcher_tableau = EXPLICIT_METHODS[butcher_tableau][str(order)]
+        else:
+            butcher_tableau = EXPLICIT_METHODS[butcher_tableau]
+        A = butcher_tableau['A']
+        b = butcher_tableau['b']
+        c = butcher_tableau['c']
+        k = []
+        ka = []
+        kq = []
+        Z = z.sym('Z', (z.size1(), order))
+        for i in range(order):
+            ki = 0
+            for j in range(i):
+                ki += A[i, j] * k[j]
+            dk, dkq = dyn(t + h * c[i], x + h * ki, Z[:, i], u, p)
+            k.append(dk)
+            ka.append(alg(t + h * c[i], dk, Z[:, i], u, p))
+            kq.append(dkq)
+
+        ode = x
+        quad = 0
+        for i in range(order):
+            ode += h * b[i] * k[i]
+            quad += h * b[i] * kq[i]
+        alg = ca.vertcat(*ka)
+
+        problem['discretization_points'] = Z[:]
+        problem['ode'] = ode
+        problem['alg'] = alg
+        problem['quad'] = quad
+
+    @classmethod
+    def discretize(cls, problem, **opts):
+        """
+
+        :param problem:
+        :param opts:
+        :return:
+        """
+        class_ = opts.pop('class', 'explicit')
+        method = opts.pop('method', 'rk')
+
+        if class_ == 'explicit':
+            if method == 'rk':
+                cls._explicit(problem, **opts)
+        elif class_ == 'implicit':
+            if method == 'collocation':
+                cls._collocation(problem, **opts)
+        else:
+            raise ValueError(f"Runge-Kutta class {class_} not recognized")
+
+
+def continuous2discrete(problem, category='runge-kutta', **opts):
+    """
+
+    :param problem:
+    :param category:
+    :param opts:
+    :return:
+    """
+    # TODO: Maybe add inplace feature? (If inplace=False, then a new dictionary will be returned)
+    if category == 'runge-kutta':
+        RungeKutta.discretize(problem, **opts)

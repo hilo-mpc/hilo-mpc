@@ -277,11 +277,22 @@ def check_if_list_of_type(a, types):
 
 def check_if_list_of_none(a):
     """
+    Check if a list contains only None
 
     :param a:
     :return:
     """
     return all(item is None for item in a)
+
+
+def check_if_list_of_string(a):
+    """
+    Check if a list contains only strings
+
+    :param a:
+    :return:
+    """
+    return all(isinstance(item, str) for item in a)
 
 
 def check_if_square(arg):
@@ -454,6 +465,30 @@ def dump_clean(obj):
         print(obj)
 
 
+def generate_c_code(functions, path, name, opts=None):
+    """
+
+    :param functions:
+    :param path:
+    :param name:
+    :param opts:
+    :return:
+    """
+    if functions:
+        if opts is None:
+            opts = {}
+        generator = ca.CodeGenerator(name, opts)
+        if isinstance(functions, list):
+            for f in functions:
+                generator.add(f)
+        else:
+            generator.add(functions)
+        c_name = generator.generate(path)
+        return c_name
+    else:
+        return None
+
+
 def is_array_like(obj):
     """
 
@@ -478,6 +513,19 @@ def is_integer(n):
     return False
 
 
+def is_iterable(obj) -> bool:
+    """
+
+    :param obj:
+    :return:
+    """
+    try:
+        iter(obj)
+    except TypeError:
+        return False
+    return True
+
+
 def is_list_like(obj):
     """
 
@@ -486,6 +534,17 @@ def is_list_like(obj):
     """
     # TODO: Typing hints
     return isinstance(obj, (list, tuple, set, np.ndarray))
+
+
+def is_square(array):
+    """
+
+    :param array:
+    :return:
+    """
+    if array.ndim == 1:
+        return False
+    return all([len(row) == len(array) for row in array])
 
 
 def lower_case(obj: Any) -> Any:
