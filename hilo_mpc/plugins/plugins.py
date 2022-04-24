@@ -21,6 +21,12 @@
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from distutils.version import StrictVersion
+import os
+
+
+_PYTORCH_VERSION = '1.2.0'
+_TENSORFLOW_VERSION = '2.3.0'
 _BOKEH_VERSION = ''
 _MATPLOTLIB_VERSION = ''
 
@@ -50,6 +56,23 @@ class Manager:
         self._backend = arg
 
 
+class LearningManager(Manager):
+    """"""
+    def setup(self, kind, *args, **kwargs):
+        """
+
+        :param kind:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        if isinstance(self._backend, str):
+            backend = _get_learning_backend(self._backend)
+        else:
+            backend = self._backend
+        return backend.setup(kind, *args, **kwargs)
+
+
 class PlotManager(Manager):
     """"""
     def plot(self, data, kind='line', **kwargs):
@@ -67,6 +90,42 @@ class PlotManager(Manager):
                 raise AttributeError(f"Supplied backend '{self._backend}' has no attribute 'plot'")
             plot_backend = self._backend
         return plot_backend.plot(data, kind, **kwargs)
+
+
+def _get_learning_backend(backend):
+    """
+
+    :param backend:
+    :return:
+    """
+    if backend == 'pytorch':
+        try:
+            import torch
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Backend 'PyTorch' is not installed")
+        if StrictVersion(torch.__version__.split('+')[0]) < StrictVersion(_PYTORCH_VERSION):
+            raise RuntimeError(f"Backend 'PyTorch' is installed with version '{torch.__version__}', but version "
+                               f"'{_PYTORCH_VERSION}' or higher is required")
+        import hilo_mpc.plugins.pytorch as module
+    elif backend == 'tensorflow':
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+        try:
+            import tensorflow
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Backend 'TensorFlow' is not installed")
+        if StrictVersion(tensorflow.__version__) < StrictVersion(_TENSORFLOW_VERSION):
+            raise RuntimeError(f"Backend 'TensorFlow' is installed with version '{tensorflow.__version__}', but version"
+                               f" '{_TENSORFLOW_VERSION}' or higher is required")
+        import hilo_mpc.plugins.tensorflow as module
+    elif backend in ['sklearn', 'scikit-learn']:
+        try:
+            import sklearn
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Backend 'Scikit-learn' is not installed")
+        import hilo_mpc.plugins.sklearn as module
+    else:
+        raise ValueError(f"Backend '{backend}' not recognized")
+    return module
 
 
 def _get_plot_backend(backend):

@@ -20,3 +20,20 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
+
+from .wrapper import *
+
+
+def setup(kind, *args, **kwargs):
+    """
+
+    :param kind:
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    wrapper_obj = get_wrapper(kind, *args, **kwargs)
+    return wrapper_obj
+
+
+__all__ = []

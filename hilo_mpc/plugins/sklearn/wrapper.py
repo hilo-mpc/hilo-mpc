@@ -20,3 +20,36 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
+
+from sklearn.preprocessing import StandardScaler
+
+
+class _SklearnWrapper:
+    """"""
+    def __init__(self, module, **kwargs):
+        """Constructor method"""
+        self._module = module
+
+    def __call__(self, *args, **kwargs):
+        """Calling method"""
+        return self._module(*args, **kwargs)
+
+
+MODULES = {
+    'StandardScaler': StandardScaler
+}
+
+
+def get_wrapper(kind, *args, **kwargs):
+    """
+
+    :param kind:
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    module = MODULES[kind]
+    return _SklearnWrapper(module, **kwargs)
+
+
+__all__ = ['get_wrapper']
