@@ -530,6 +530,193 @@ class QuadraticCost(GenericCost):
         self._P = arg
 
 
+class GenericConstraint:
+    """Class for generic constraints"""
+    def __init__(self, model, name='constraint'):
+        """Constructor method"""
+        self._is_soft = False
+        self._ub = None
+        self._lb = None
+        self._function = None
+        self._name = name
+        self._formatted_name = name.replace(' ', '_')
+        self._model = model
+        self._is_set = False
+        self._size = 0
+        self._cost = None
+        self._weight = None
+        self.e_soft_value = 0
+        self._max_violation = ca.inf
+
+    def _check_and_setup(self, x_scale=None, u_scale=None, y_scale=None, p_scale=None):
+        """
+
+        :param x_scale:
+        :param u_scale:
+        :param y_scale:
+        :param p_scale:
+        :return:
+        """
+        if self.constraint is not None:
+            for i in range(self._model.n_x):
+                self.constraint = ca.substitute(self.constraint, self._model.x[i], self._model.x[i] * x_scale[i])
+
+            for i in range(self._model.n_u):
+                self.constraint = ca.substitute(self.constraint, self._model.u[i], self._model.u[i] * u_scale[i])
+
+            for i in range(self._model.n_y):
+                self.constraint = ca.substitute(self.constraint, self._model.y[i], self._model.y[i] * y_scale[i])
+
+        if self.is_set:
+            if self.size != len(self._ub):
+                raise ValueError("The dimensions of the terminal constraint function and its upper bound are not "
+                                 "compatible. The terminal constraint must have dimension (n x 1) where n is the number"
+                                 " of upper bounds.")
+            if self.size != len(self._lb):
+                raise ValueError("The dimensions of the terminal constraint function and its lower bound are not "
+                                 "compatible. The terminal constraint must have dimension (n x 1) where n is the lower "
+                                 "of upper bounds.")
+            if self.is_soft:
+                e = ca.SX.sym('e', self.size)
+                self._cost = ca.Function(f'cost_{self._formatted_name}', [e],
+                                         [ca.mtimes(ca.mtimes(e.T, self._weight), e)])
+        else:
+            if self._function is not None:
+                if self.is_soft:
+                    if self._weight is None:
+                        self._weight = np.diag(np.ones(self.size) * 10000)
+                    e = ca.SX.sym('e', self.size)
+                    self._cost = ca.Function(f'cost_{self._formatted_name}', [e],
+                                             [ca.mtimes(ca.mtimes(e.T, self._weight), e)])
+
+                if self.lb is None:
+                    self.lb = -np.inf * np.ones(self._size)
+
+                if self.ub is None:
+                    self.ub = np.inf * np.ones(self._size)
+
+                self._is_set = True
+
+    @property
+    def cost(self):
+        """
+
+        :return:
+        """
+        if self.is_set:
+            return self._cost
+
+    @property
+    def constraint(self):
+        """
+
+        :return:
+        """
+        return self._function
+
+    @constraint.setter
+    def constraint(self, arg):
+        if arg is not None:
+            if not isinstance(arg, ca.SX) and not isinstance(arg, ca.MX):
+                raise TypeError(f"The {self._name} must be of type casadi SX/MX or None.")
+        self._function = arg
+
+    @property
+    def ub(self):
+        """
+
+        :return:
+        """
+        return self._ub
+
+    @ub.setter
+    def ub(self, arg):
+        if arg is not None:
+            arg = check_and_wrap_to_list(arg)
+        self._ub = arg
+
+    @property
+    def lb(self):
+        """
+
+        :return:
+        """
+        return self._lb
+
+    @lb.setter
+    def lb(self, arg):
+        if arg is not None:
+            arg = check_and_wrap_to_list(arg)
+        self._lb = arg
+
+    @property
+    def is_soft(self):
+        """
+
+        :return:
+        """
+        return self._is_soft
+
+    @is_soft.setter
+    def is_soft(self, arg):
+        if not isinstance(arg, bool):
+            raise TypeError("is_soft must be of type bool")
+        self._is_soft = arg
+
+    @property
+    def max_violation(self):
+        """
+
+        :return:
+        """
+        return self._max_violation
+
+    @max_violation.setter
+    def max_violation(self, arg):
+        if arg is not None:
+            arg = check_and_wrap_to_list(arg)
+        self._max_violation = arg
+
+    @property
+    def is_set(self):
+        """
+
+        :return:
+        """
+        if self.is_soft:
+            if all(v is not None for v in [self._weight, self._function, self._ub, self._lb]):
+                return True
+            else:
+                return False
+        else:
+            if all(v is not None for v in [self._function, self._ub, self._lb]):
+                return True
+            else:
+                return False
+
+    @property
+    def size(self):
+        """
+
+        :return:
+        """
+        if self.constraint is not None:
+            self._size = self.constraint.size1()
+        return self._size
+
+    @property
+    def weight(self):
+        """
+
+        :return:
+        """
+        return self._weight
+
+    @weight.setter
+    def weight(self, arg):
+        self._weight = arg
+
+
 EXPLICIT_METHODS = {
     'forward_euler': {
         'A': np.array([[0.]]),
