@@ -45,6 +45,7 @@ _STEP_KWARGS = {
     'step_mode': 'where'
 }
 _SCATTER_KWARGS = {
+    'marker': 'marker',
     'marker_color': 'c',
     'marker_size': 's'
 }
@@ -60,10 +61,14 @@ class BasePlot(metaclass=ABCMeta):
     """"""
     _layout_type = 'grid'
     _pop_attributes = [
-        'tight_layout'
+        'tight_layout',
+        'dpi',
+        'background_fill_color'
     ]
     _attr_defaults = {
-        'tight_layout': True
+        'tight_layout': True,
+        'dpi': None,
+        'background_fill_color': None
     }
 
     def __init__(
@@ -317,7 +322,7 @@ class BasePlot(metaclass=ABCMeta):
 
         elif self.subplots and self.legend:
             for k, ax in enumerate(self.axes):
-                if ax.get_visible() and self.legend[k]:
+                if ax.get_visible() and (self.legend or (is_list_like(self.legend) and self.legend[k])):
                     ax.legend(loc='best')
 
     @abstractmethod
@@ -392,20 +397,36 @@ class BasePlot(metaclass=ABCMeta):
 
         :return:
         """
+        fig_kwargs = {}
+        subplot_kwargs = {}
+        if self.figsize is not None:
+            if isinstance(self.figsize, (list, tuple, set)) and len(self.figsize) <= 2:
+                if len(self.figsize) == 1:
+                    width = height = self.figsize[0]
+                else:
+                    width = self.figsize[0]
+                    height = self.figsize[1]
+                fig_kwargs['figsize'] = (width, height)
+
+            if self.dpi is not None:
+                fig_kwargs['dpi'] = self.dpi
+
+        if self.background_fill_color is not None:
+            subplot_kwargs['facecolor'] = self.background_fill_color
+        fig_kwargs['tight_layout'] = self.tight_layout
+
         if self.subplots:
             fig_kwargs = {}
             if self.interactive:
                 fig_kwargs['interactive'] = True
                 fig_kwargs['x_data'] = [data['x'] for data in self.data.values()]
                 fig_kwargs['tight_layout'] = False
-            else:
-                fig_kwargs['tight_layout'] = self.tight_layout
             fig, axes, sliders = _subplots(n_axes=self.n_plots, layout=self.layout, layout_type=self._layout_type,
                                            **fig_kwargs)
         else:
             if self.ax is None:
-                fig = self.plt.figure(figsize=self.figsize)
-                axes = fig.add_subplot(111)
+                fig = self.plt.figure(**fig_kwargs)
+                axes = fig.add_subplot(111, **subplot_kwargs)
             else:
                 fig = self.ax.get_figure()
                 if self.figsize is not None:
@@ -560,8 +581,18 @@ class MultiPlot(BasePlot):
         for sub, plots in self.data.items():
             index = plots['x']
             colors = self._get_colors(num_colors=len(plots['y']))
+            kind = self.kind[sub]
+            zorder = len(kind) * [None]
+            # NOTE: Scatter has zorder=1 by default, so it will be drawn below lines. Setting zorder of scatter to 2
+            #  and zorder of lines to 1 to be able to see scatters in plots with dense lines.
+            if 'line' in kind and 'scatter' in kind:
+                for key, value in enumerate(kind):
+                    if value == 'line':
+                        zorder[key] = 1
+                    elif value == 'scatter':
+                        zorder[key] = 2
             for k, (key, values) in enumerate(plots['y'].items()):
-                yield sub, index[key], key, values, colors[k], self.kind[sub][k]
+                yield sub, k, index[key], key, values, colors[k], kind[k], zorder[k]
 
     def _make_plot(self):
         """
@@ -570,13 +601,20 @@ class MultiPlot(BasePlot):
         """
         it = self._iter_data()
 
-        for (k, x, label, y, colors, kind) in it:
-            ax = self._get_ax(k)
+        for (subplot, k, x, label, y, colors, kind, zorder) in it:
+            ax = self._get_ax(subplot)
             kwargs = self._get_kwargs(kind)
 
+            if kind == 'scatter':
+                if is_list_like(kwargs['marker']):
+                    kwargs['marker'] = kwargs['marker'][subplot][k]
+                if is_list_like(kwargs['s']):
+                    kwargs['s'] = kwargs['s'][subplot][k]
             kwargs['color'] = colors
             kwargs['legend'] = False
             kwargs['ax'] = ax
+            if zorder is not None:
+                kwargs['zorder'] = zorder
 
             data = {
                 0: {
@@ -748,6 +786,14 @@ class ScatterPlot(BasePlot):
             else:
                 marker = self.marker
             kwargs['marker'] = marker
+            marker_size = kwargs.get('size')
+            if marker_size is None:
+                marker_size = kwargs.pop('marker_size', None)
+            if marker_size is not None:
+                if is_list_like(marker_size):
+                    kwargs['s'] = marker_size[k]
+                else:
+                    kwargs['s'] = marker_size
 
             # TODO: If we additionally supply the marker_color ('c') keyword this will lead to an error during plotting
             kwargs['color'] = color
@@ -758,7 +804,8 @@ class ScatterPlot(BasePlot):
 
             if x_range is None:
                 lines = _get_all_lines(ax)
-                left, right = _get_x_lim(lines)
+                bboxes = _get_all_bboxes(ax)
+                left, right = _get_x_lim(lines, bboxes=bboxes)
             else:
                 left, right = x_range
             ax.set_xlim(left, right)
@@ -809,6 +856,19 @@ def _get_all_lines(ax):
         lines += ax.left_ax.get_lines()
 
     return lines
+
+
+def _get_all_bboxes(ax):
+    """
+
+    :param ax:
+    :return:
+    """
+    bboxes = []
+    for collection in ax.collections:
+        bboxes.append(collection.axes.dataLim)
+
+    return bboxes
 
 
 def _get_layout(n_plots, layout=None, layout_type='grid'):
@@ -951,10 +1011,11 @@ def _get_standard_colors(num_colors=None, colormap=None, color_type='default', c
     return colors
 
 
-def _get_x_lim(lines):
+def _get_x_lim(lines, bboxes=None):
     """
 
     :param lines:
+    :param bboxes:
     :return:
     """
     left, right = np.inf, -np.inf
@@ -962,6 +1023,10 @@ def _get_x_lim(lines):
         x = line.get_xdata(orig=False)
         left = min(np.nanmin(x), left)
         right = max(np.nanmax(x), right)
+    if bboxes is not None:
+        for bbox in bboxes:
+            left = min(bbox.xmin, left)
+            right = max(bbox.xmax, right)
     return left, right
 
 
