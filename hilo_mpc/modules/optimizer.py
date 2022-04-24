@@ -688,3 +688,75 @@ class Optimizer(Base, metaclass=ABCMeta):
         :return:
         """
         return self._function.stats()
+
+
+class LinearProgram(Optimizer):
+    """
+    Linear programming problem
+
+    :param id:
+    :type id: str, optional
+    :param name:
+    :type name: str, optional
+    :param solver:
+    :type solver: str, optional
+    :param solver_options:
+    :type solver_options:
+    :param plot_backend:
+    :type plot_backend:
+    """
+    def __init__(
+            self,
+            id: Optional[str] = None,
+            name: Optional[str] = None,
+            solver: Optional[str] = None,
+            solver_options: Optional[dict[str, Union[str, Numeric]]] = None,
+            plot_backend: Optional[str] = None
+    ) -> None:
+        if solver is None:
+            solver = 'clp'
+        super().__init__(id=id, name=name, solver=solver, solver_options=solver_options, plot_backend=plot_backend)
+
+    def _update_solver(self) -> None:
+        """
+
+        :return:
+        """
+        # TODO: Handle options in case of solver switches
+        if isinstance(self._solver, str):
+            if not ca.has_conic(self._solver) and not self._solver == 'ampl':
+                if self._display:
+                    print(f"Solver '{self._solver}' is either not available on your system or is not a suitable solver."
+                          f"Switching to 'clp'...")
+                self._solver = 'clp'
+        else:
+            self._solver = 'clp'
+
+    def check_solver(self, solver: str) -> bool:
+        """
+
+        :param solver:
+        :return:
+        """
+        if isinstance(solver, str):
+            if ca.has_conic(solver):
+                return True
+            else:
+                return False
+        else:
+            raise TypeError("Solver type must be a string")
+
+    def setup(self, **kwargs):
+        """
+
+        :param kwargs:
+        :return:
+        """
+        self._check_linearity()
+        if not self._is_linear:
+            raise RuntimeError("Linear programming was chosen as the optimizer, but the supplied problem is not linear")
+
+        super().setup(interface=ca.qpsol, **kwargs)
+
+
+LP = LinearProgram
