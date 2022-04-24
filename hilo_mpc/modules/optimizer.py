@@ -32,6 +32,7 @@ import casadi as ca
 import numpy as np
 
 from .base import Base, Vector, Problem, OptimizationSeries
+from ..util.optimizer import SciPyOptimizer as scisol
 from ..util.util import dump_clean, generate_c_code, who_am_i, JIT
 
 
@@ -39,6 +40,9 @@ Numeric = Union[int, float]
 NumArray = Union[Sequence[Numeric], np.ndarray]
 ArrayLike = Union[list, tuple, dict, NumArray, ca.DM, Vector]
 Symbolic = TypeVar('Symbolic', ca.SX, ca.MX)
+
+
+SCIPY_OPTIMIZERS = ['CG', 'BFGS', 'Newton-CG', 'Nelder-Mead', 'L-BFGS-B', 'Powell']
 
 
 class Optimizer(Base, metaclass=ABCMeta):
@@ -713,6 +717,7 @@ class LinearProgram(Optimizer):
             solver_options: Optional[dict[str, Union[str, Numeric]]] = None,
             plot_backend: Optional[str] = None
     ) -> None:
+        """Constructor method"""
         if solver is None:
             solver = 'clp'
         super().__init__(id=id, name=name, solver=solver, solver_options=solver_options, plot_backend=plot_backend)
@@ -767,3 +772,90 @@ class QuadraticProgram(LinearProgram):
 
 
 QP = QuadraticProgram
+
+
+class NonlinearProgram(Optimizer):
+    """
+    Nonlinear programming problem
+
+    :param id:
+    :type id: str, optional
+    :param name:
+    :type name: str, optional
+    :param solver:
+    :type solver: str, optional
+    :param solver_options:
+    :type solver_options:
+    :param plot_backend:
+    :type plot_backend:
+    """
+    def __init__(
+            self,
+            id: Optional[str] = None,
+            name: Optional[str] = None,
+            solver: Optional[str] = None,
+            solver_options: Optional[dict[str, Union[str, Numeric]]] = None,
+            plot_backend: Optional[str] = None
+    ) -> None:
+        """Constructor method"""
+        if solver is None:
+            solver = 'ipopt'
+        super().__init__(id=id, name=name, solver=solver, solver_options=solver_options, plot_backend=plot_backend)
+
+    def _update_solver(self) -> None:
+        """
+
+        :return:
+        """
+        # TODO: Handle options in case of solver switches
+        if isinstance(self._solver, str):
+            if not ca.has_nlpsol(self._solver) and self._solver not in SCIPY_OPTIMIZERS and not self._solver == 'ampl':
+                if self._display:
+                    print(f"Solver '{self._solver}' is either not available on your system or is not a suitable solver."
+                          f" Switching to 'ipopt'...")
+                self._solver = 'ipopt'
+        else:
+            self._solver = 'ipopt'
+
+    def check_solver(self, solver: str) -> bool:
+        """
+
+        :param solver:
+        :return:
+        """
+        if isinstance(solver, str):
+            if ca.has_nlpsol(solver) or solver in SCIPY_OPTIMIZERS:
+                return True
+            else:
+                return False
+        else:
+            raise TypeError("Solver type must be a string")
+
+    def setup(self, **kwargs):
+        """
+
+        :param kwargs:
+        :return:
+        """
+        self._check_linearity()
+        if self._is_linear:
+            warnings.warn("Nonlinear programming was chosen as the optimizer, but the supplied problem is linear. "
+                          "Switching to linear programming for this problem might result in a better performance.")
+
+        if self._solver not in SCIPY_OPTIMIZERS:
+            super().setup(interface=ca.nlpsol, **kwargs)
+        else:
+            super().setup(interface=scisol, **kwargs)
+
+
+NLP = NonlinearProgram
+
+
+__all__ = [
+    'LinearProgram',
+    'LP',
+    'QuadraticProgram',
+    'QP',
+    'NonlinearProgram',
+    'NLP'
+]
