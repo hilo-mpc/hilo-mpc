@@ -2186,6 +2186,20 @@ class TimeSeries(Series):
         self._dt = None
         self._grid = None
 
+    def _check_samples(self) -> None:
+        """
+
+        :return:
+        """
+        if 't' in self._data:
+            self._n_samples = self._data['t'].shape[1]
+        elif 'x' in self._data:
+            self._n_samples = self._data['x'].shape[1]
+        elif 'y' in self._data:
+            self._n_samples = self._data['y'].shape[1]
+        elif 'z' in self._data:
+            self._n_samples = self._data['z'].shape[1]
+
     def _update_dimensions(self):
         """
 
@@ -2232,7 +2246,7 @@ class TimeSeries(Series):
             kwargs['grid'] = other.grid
 
     @property
-    def dt(self):
+    def dt(self) -> Optional[Union[int, float]]:
         """
 
         :return:
@@ -2240,12 +2254,24 @@ class TimeSeries(Series):
         return self._dt
 
     @property
-    def grid(self):
+    def grid(self) -> Optional[ca.DM]:
         """
 
         :return:
         """
         return self._grid
+
+    def copy(self):
+        """
+
+        :return:
+        """
+        new = super().copy()
+        if self._dt is not None:
+            new.setup('dt', dt=self._dt)
+        elif self._grid is not None:
+            new.setup('grid', grid=self._grid)
+        return new
 
     def get_function_args(self, **kwargs):
         """
