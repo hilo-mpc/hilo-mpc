@@ -194,6 +194,30 @@ def _split_expression(fun, var, *args):
     return split_expr
 
 
+def check_and_wrap_to_list(arg):
+    """
+    Check if the input is an np.array or a list.
+
+    :param arg:
+    :return:
+    """
+    if isinstance(arg, np.ndarray):
+        arg_ = arg.squeeze().tolist()
+        if isinstance(arg_, int) or isinstance(arg_, float):
+            # if arg is a np,array with a single value the .tolist() method returns a integer or float.
+            arg_ = [arg]
+    elif isinstance(arg, list):
+        arg_ = arg
+    elif isinstance(arg, float) or isinstance(arg, int) or isinstance(arg, str):
+        arg_ = [arg]
+    elif isinstance(arg, ca.DM):
+        arg_ = np.array(arg).squeeze(-1).tolist()
+    else:
+        raise TypeError(f"Type {type(arg)} not supported. Must be list,float,ca.DM or numpy array ")
+
+    return arg_
+
+
 def check_compiler(method: str, compiler: str) -> (Optional[str], Optional[str], Optional[str]):
     """
 
@@ -221,6 +245,22 @@ def check_compiler(method: str, compiler: str) -> (Optional[str], Optional[str],
     return None, None, None
 
 
+def check_if_has_duplicates(vector):
+    """
+    Checks if list contains duplicates
+
+    :param vector:
+    :return:
+    """
+    if not isinstance(vector, list):
+        raise TypeError("Vector must be a list.")
+
+    if len(vector) == len(set(vector)):
+        return False
+    else:
+        return True
+
+
 def check_if_list_of_type(a, types):
     """
 
@@ -233,6 +273,33 @@ def check_if_list_of_type(a, types):
         return False
     else:
         return all(isinstance(item, types) for item in a)
+
+
+def check_if_list_of_none(a):
+    """
+
+    :param a:
+    :return:
+    """
+    return all(item is None for item in a)
+
+
+def check_if_square(arg):
+    """
+
+    :param arg: DM or NP matrix
+    :return: True if matrix is square, False if not
+    """
+    if len(arg.shape) > 2:
+        raise ValueError("The input can have at most two dimensions.")
+
+    if len(arg.shape) == 1:
+        return False
+    if len(arg.shape) == 2:
+        if arg.shape[0] == arg.shape[1]:
+            return True
+        else:
+            return False
 
 
 def convert(obj, _type, **kwargs):
