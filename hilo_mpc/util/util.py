@@ -218,6 +218,23 @@ def check_and_wrap_to_list(arg):
     return arg_
 
 
+def check_and_wrap_to_DM(arg):
+    """
+
+    :param arg:
+    :return:
+    """
+    if isinstance(arg, np.ndarray):
+        arg_ = ca.DM(arg.squeeze())
+    elif isinstance(arg, list) or isinstance(arg, float) or isinstance(arg, int):
+        arg_ = ca.DM(arg)
+    elif isinstance(arg, ca.DM):
+        arg_ = arg
+    else:
+        raise TypeError(f"Type {type(arg)} not supported. Must be list,float,ca.DM or numpy array ")
+    return arg_
+
+
 def check_compiler(method: str, compiler: str) -> (Optional[str], Optional[str], Optional[str]):
     """
 
@@ -590,6 +607,27 @@ def random_state(state=None):
         return np.random
     else:
         raise ValueError("Argument 'random_state' must be an integer, array-like, a NumPy RandomState, or None")
+
+
+def scale_vector(vector, scaler):
+    """
+
+    :param vector: NP array, list or ca.DM vector
+    :param scaler:
+    :return:
+    """
+
+    vector = check_and_wrap_to_list(vector)
+    scaler = check_and_wrap_to_list(scaler)
+
+    if len(vector) != len(scaler):
+        raise ValueError(f"The length of scaler and vector must be equal. The vector has length {len(vector)} while the"
+                         f" scaler {len(scaler)}")
+    s_vector = vector.copy()
+    for k, i in enumerate(vector):
+        s_vector[k] = i / scaler[k]
+
+    return s_vector
 
 
 def who_am_i() -> str:
