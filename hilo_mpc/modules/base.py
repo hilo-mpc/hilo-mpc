@@ -1247,26 +1247,21 @@ class RightHandSide(Equations):
         self._use_sx = use_sx
         self._parent = parent
 
-    def _generate_matrix_notation(self, states, inputs, parameters, sampling_time, time):
+    def _generate_matrix_notation(self, states, inputs):
         """
 
         :param states:
         :param inputs:
-        :param parameters:
-        :param sampling_time:
-        :param time:
         :return:
         """
         matrix_notation = {}
         if not self._ode.is_empty():
             equations = ca.vertcat(self._ode, self._alg)
-            matrix_notation['A'] = ca.Function('A', [parameters, sampling_time, time], [ca.jacobian(equations, states)])
-            matrix_notation['B'] = ca.Function('B', [parameters, sampling_time, time], [ca.jacobian(equations, inputs)])
+            matrix_notation['A'] = ca.jacobian(equations, states)
+            matrix_notation['B'] = ca.jacobian(equations, inputs)
         if not self._meas.is_empty():
-            matrix_notation['C'] = ca.Function('C', [parameters, sampling_time, time], [ca.jacobian(self._meas, states)]
-                                               )
-            matrix_notation['D'] = ca.Function('D', [parameters, sampling_time, time], [ca.jacobian(self._meas, inputs)]
-                                               )
+            matrix_notation['C'] = ca.jacobian(self._meas, states)
+            matrix_notation['D'] = ca.jacobian(self._meas, inputs)
         if not matrix_notation:
             matrix_notation = None
         self._matrix_notation = matrix_notation
@@ -1399,23 +1394,25 @@ class RightHandSide(Equations):
         else:
             raise TypeError("Wrong type of arguments for function {}".format(who_am_i()))
 
-    def check_quadrature_function(self, quad, dt, t, x, y, z, u, p):
+    def check_quadrature_function(self, quad, dt, t, x, z, u, p, *p_ext):
         """
 
         :param quad:
         :param dt:
         :param t:
         :param x:
-        :param y:
         :param z:
         :param u:
         :param p:
+        :param p_ext:
         :return:
         """
         # TODO: Quadrature function could also be time-variant
         time_variant = self._is_time_variant(t)
 
-        variables = [dt, t, x, y, z, u, p]
+        variables = [dt, t, x, z, u, p]
+        if p_ext:
+            variables.extend(p_ext)
         ode = self._ode
         alg = self._alg
         meas = self._meas
@@ -1450,15 +1447,18 @@ class RightHandSide(Equations):
                     all_the_variables = ca.vertcat(*variables)
                     ode, alg, meas = equations
 
-                    if not dt.is_empty():
-                        dt = ca.MX.sym('dt')
-                    else:
-                        dt = ca.MX()
                     if not t.is_empty():
                         t = ca.MX.sym('t')
                     else:
                         t = ca.MX()
-                    variables = [dt, t] + variables
+                    if not self._discrete:
+                        if not dt.is_empty():
+                            dt = ca.MX.sym('dt')
+                        else:
+                            dt = ca.MX()
+                        variables = [dt, t] + variables
+                    else:
+                        variables.insert(1, t)
                 elif not sx_vars and self._fx is ca.MX:
                     all_the_variables = ca.vertcat(*variables)
                     all_the_names = [all_the_variables[k].name() for k in range(all_the_variables.size1())]
@@ -1488,15 +1488,18 @@ class RightHandSide(Equations):
                 variables, equations = self._switch_data_type(*variables)
                 ode, alg, meas = equations
 
-                if not dt.is_empty():
-                    dt = ca.MX.sym('dt')
-                else:
-                    dt = ca.MX()
                 if not t.is_empty():
                     t = ca.MX.sym('t')
                 else:
                     t = ca.MX()
-                variables = [dt, t] + variables
+                if not self._discrete:
+                    if not dt.is_empty():
+                        dt = ca.MX.sym('dt')
+                    else:
+                        dt = ca.MX()
+                    variables = [dt, t] + variables
+                else:
+                    variables.insert(1, t)
 
         return variables, (ode, alg, meas, quad), time_variant
 
@@ -1505,22 +1508,19 @@ class RightHandSide(Equations):
 
         :return:
         """
-        new = RightHandSide()
+        new = RightHandSide(discrete=self._discrete, use_sx=self._use_sx)
         new.set(self)
         return new
 
-    def generate_matrix_notation(self, states, inputs, parameters, sampling_time, time):
+    def generate_matrix_notation(self, states, inputs):
         """
 
         :param states:
         :param inputs:
-        :param parameters:
-        :param sampling_time:
-        :param time:
         :return:
         """
         # TODO: Add more flexibility processing the arguments (e.g., check for Vector vs. SX, ...)
-        self._generate_matrix_notation(states, inputs, parameters, sampling_time, time)
+        self._generate_matrix_notation(states, inputs)
 
     def set(self, obj, **kwargs):
         """
@@ -1606,30 +1606,26 @@ class RightHandSide(Equations):
             dt = self._parent.dt
             t = self._parent.t
             x = self._parent.x
-            y = self._parent.y
             z = self._parent.z
             u = self._parent.u
             p = self._parent.p
             solver = self._parent.solver
         else:
-            # TODO: Deal with mixture of SX and MX
             dt = kwargs.get('dt')
             t = kwargs.get('t')
             x = kwargs.get('x')
-            y = kwargs.get('y')
             z = kwargs.get('z')
             u = kwargs.get('u')
             p = kwargs.get('p')
             solver = kwargs.get('solver')
 
+            # TODO: Switch to self._fx()?
             if dt is None:
                 dt = ca.SX()
             if t is None:
                 t = ca.SX()
             if x is None:
                 x = ca.SX()
-            if y is None:
-                y = ca.SX()
             if z is None:
                 z = ca.SX()
             if u is None:
@@ -1641,16 +1637,33 @@ class RightHandSide(Equations):
 
         generate_matrix_notation = kwargs.get('generate_matrix_notation', False)
         if generate_matrix_notation:
-            self._generate_matrix_notation(ca.vertcat(x, z), u, p, dt, t)
+            self._generate_matrix_notation(ca.vertcat(x, z), u)
 
         options = kwargs.get('opts', None)
         if options is None:
             options = {}
 
+        external_parameters = kwargs.get('external_parameters')
+        if external_parameters is None:
+            external_parameters = []
+
         quad = kwargs.get('quadrature')
         if quad is not None:
-            variables, equations, time_variant = self.check_quadrature_function(quad, dt, t, x, y, z, u, p)
-            dt, t, x, y, z, u, p = variables
+            variables, equations, time_variant = self.check_quadrature_function(quad, dt, t, x, z, u, p,
+                                                                                *external_parameters)
+            dt = variables[0]
+            t = variables[1]
+            x = variables[2]
+            z = variables[3]
+            u = variables[4]
+            p = variables[5]
+            external_parameters = []
+            if len(variables) > 6:
+                external_parameters.append(variables[6])
+            if len(variables) > 7:
+                external_parameters.append(variables[7])
+            if len(variables) > 8:
+                external_parameters.append(variables[8])
             ode, alg, meas, quad = equations
         else:
             time_variant = self._is_time_variant(t)
@@ -1659,10 +1672,6 @@ class RightHandSide(Equations):
             alg = self._alg
             meas = self._meas
             quad = self._fx()
-
-        external_parameters = kwargs.get('external_parameters')
-        if external_parameters is None:
-            external_parameters = tuple()
 
         if not self._discrete:
             if append_dynamics_framework:
