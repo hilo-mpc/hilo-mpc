@@ -1941,25 +1941,19 @@ class Problem(Equations):
     # TODO: Add __repr__ & __str__
     def __init__(self, equations=None, sense=None, parent=None):
         """Constructor method"""
-        super().__init__(ca.SX)
-
+        expression = {}
         if isinstance(equations, dict):
-            # TODO: More precise processing of constraints (lower and upper bounds)
             obj = equations.get('obj', None)
             cons = equations.get('cons', None)
-            if not isinstance(obj, self._fx):
-                self._obj = convert(obj, self._fx)
-            else:
-                self._obj = obj
-            if not isinstance(cons, self._fx):
-                self._cons = convert(cons, self._fx)
-            else:
-                self._cons = cons
+            expression['obj'] = obj
+            expression['cons'] = cons
         else:
-            self._obj = self._fx()
-            self._cons = self._fx()
+            expression['obj'] = []
+            expression['cons'] = []
             self._lbg = ca.DM()
             self._ubg = ca.DM()
+
+        super().__init__(ca.SX, expression=expression)
 
         if isinstance(sense, str):
             if sense.lower() in ['min', 'minimise', 'minimize', '1']:
@@ -1981,7 +1975,6 @@ class Problem(Equations):
             self._sense = 'min'
 
         self._parent = parent
-        self._equations.extend(['obj', 'cons'])
 
     def _process_constraints(self, constraints, **kwargs):
         """
@@ -2142,7 +2135,7 @@ class Problem(Equations):
             if p is None:
                 p = self._fx()
 
-        options = kwargs.get('opts', None)
+        options = kwargs.get('options', None)
         if options is None:
             options = {}
 
