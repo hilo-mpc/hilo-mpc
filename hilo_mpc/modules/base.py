@@ -27,7 +27,7 @@ from abc import ABCMeta, abstractmethod
 from collections.abc import KeysView
 from copy import copy
 import platform
-from typing import Optional, Sequence, Type, TypeVar, Union
+from typing import Any, Optional, Sequence, Union
 import warnings
 
 import casadi as ca
@@ -2163,9 +2163,6 @@ class Problem(Equations):
         return solver
 
 
-Parent = TypeVar('Parent', bound=Base)
-
-
 class Series(Object, metaclass=ABCMeta):
     """"""
     # TODO: Typing hints
@@ -2174,7 +2171,7 @@ class Series(Object, metaclass=ABCMeta):
             backend: Optional[Union[str, PlotManager]] = None,
             id: Optional[str] = None,
             name: Optional[str] = None,
-            parent: Optional[Type[Parent]] = None
+            parent: Optional[Any] = None
     ) -> None:
         """Constructor method"""
         super().__init__(id=id, name=name)

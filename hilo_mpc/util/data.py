@@ -23,12 +23,14 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Optional, Sequence, TypeVar, Union
 import warnings
 
+import casadi as ca
 import numpy as np
 
-from ..modules.base import Base
+from ..modules.base import Base, TimeSeries
 from ..modules.controller.base import Controller
 from ..util.util import is_list_like
 
@@ -77,6 +79,564 @@ _CHIRP_CHIRP = """
 
 class DataSet:
     """"""
+    def __init__(
+            self,
+            features: Sequence[str],
+            labels: Sequence[str],
+            add_time: bool = False,
+            properties: Optional[dict[str, Union[Numeric, dict[str, Sequence[str]]]]] = None,
+            plot_backend: Optional[str] = None
+    ) -> None:
+        """Constructor method"""
+        self._raw_data = TimeSeries(backend=plot_backend, parent=self)
+        self._train_data = TimeSeries(backend=plot_backend, parent=self)
+        self._test_data = TimeSeries(backend=plot_backend, parent=self)
+
+        n_features = len(features)
+        n_labels = len(labels)
+
+        vector = deepcopy(properties)
+        if vector is None:
+            vector = {}
+        if add_time:
+            if 'sampling_time' not in vector:
+                vector['sampling_time'] = 1.
+            if 'time' not in vector:
+                vector['time'] = {}
+        if 'x' not in vector:
+            vector['x'] = {}
+        if 'y' not in vector:
+            vector['y'] = {}
+
+        if add_time:
+            vector['dt'] = vector.pop('sampling_time')
+            vector['t'] = vector.pop('time')
+            vec = vector['t']
+            vec['values_or_names'] = ['t']
+            if 'description' not in vec:
+                vec['description'] = ['time...']
+            if 'labels' not in vec:
+                vec['labels'] = ['time']
+            if 'units' not in vec:
+                vec['units'] = ['h']
+            vec['shape'] = (1, 0)
+            vec['data_format'] = ca.DM
+
+        vec = vector['x']
+        vec['values_or_names'] = features
+        if 'description' not in vec:
+            vec['description'] = n_features * ['']
+        if 'labels' not in vec:
+            vec['labels'] = n_features * ['']
+        if 'units' not in vec:
+            vec['units'] = n_features * ['']
+        vec['shape'] = (n_features, 0)
+        vec['data_format'] = ca.DM
+
+        vec = vector['y']
+        vec['values_or_names'] = labels
+        if 'description' not in vec:
+            vec['description'] = n_labels * ['']
+        if 'labels' not in vec:
+            vec['labels'] = n_labels * ['']
+        if 'units' not in vec:
+            vec['units'] = n_labels * ['']
+        vec['shape'] = (n_labels, 0)
+        vec['data_format'] = ca.DM
+
+        names = vector.keys()
+
+        self._raw_data.setup(*names, **vector)
+        self._train_data.setup(*names, **vector)
+        self._test_data.setup(*names, **vector)
+        self._train_index = []
+        self._test_index = []
+        self._x_noise_added = False
+        self._y_noise_added = False
+
+    def __len__(self) -> int:
+        """Length method"""
+        return self._raw_data.n_samples
+
+    def _reduce_data(
+            self,
+            method: str,
+            distance_threshold: Optional[Numeric] = None,
+            downsample_factor: Optional[int] = None
+    ) -> (int, NumArray):
+        """
+
+        :param method:
+        :param distance_threshold:
+        :param downsample_factor:
+        :return:
+        """
+        if self._raw_data.is_empty():
+            raise ValueError("No raw data available")
+
+        data_removal = method.lower().replace(' ', '_')
+        if data_removal == 'euclidean_distance' and distance_threshold is None:
+            warnings.warn("No distance threshold supplied for data selection using Euclidean distance. "
+                          "Applying default value of 0.5.")
+            distance_threshold = .5
+        if data_removal == 'downsample' and downsample_factor is None:
+            warnings.warn("No downsample factor supplied for data selection using downsampling. "
+                          "Applying default value of 10.")
+            downsample_factor = 10
+
+        inputs = self._raw_data.get_by_id('x').full()
+        index = np.array([])
+
+        k = 0
+        dim = inputs.shape[1]
+        n_inputs = inputs.shape[1]
+        while True:
+            if data_removal == 'euclidean_distance':
+                euclidean_distance = np.zeros(n_inputs)
+                euclidean_distance[:k + 1] = distance_threshold * np.ones(k + 1)
+
+                distance = inputs[:, None, k] - inputs[:, k + 1:]
+                k += 1
+                if distance.size == 0:
+                    break
+
+                euclidean_distance[k:] = np.linalg.norm(distance, axis=0)
+
+                index_keep = euclidean_distance >= distance_threshold
+                if index.size == 0:
+                    index = np.flatnonzero(index_keep)
+                else:
+                    index = index[index_keep]
+            elif data_removal == 'downsample':
+                index = np.arange(0, inputs.shape[1], downsample_factor)
+                break
+            else:
+                raise NotImplementedError(f"Data selection method '{method}' not implemented or recognized")
+
+            inputs = inputs[:, index_keep]
+
+            n_inputs = inputs.shape[1]
+            if n_inputs <= k:
+                break
+
+        return dim, index
+
+    def _plot_selected_data(self, label: str, index: NumArray, *args, **kwargs):
+        """
+
+        :param label:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        x_data = self._raw_data.to_dict(*[arg[0] for arg in args], subplots=True, suffix=label, index=index)
+        x_data = [value for value in x_data.values()]
+        y_data = self._raw_data.to_dict(*[arg[1] for arg in args], subplots=True, suffix=label, index=index)
+        y_data_keys = y_data.keys()
+        y_data = [value for value in y_data.values()]
+        for key, label in enumerate(y_data_keys):
+            x_data[key]['label'] = label
+            y_data[key]['label'] = label
+            y_data[key]['kind'] = 'scatter'
+
+        plot_kwargs = kwargs.copy()
+        plot_kwargs['marker'] = kwargs.get('marker', 'o')
+        plot_kwargs['marker_size'] = kwargs.get('marker_size')
+        if plot_kwargs['marker_size'] is None:
+            if self._raw_data.plot_backend == 'bokeh':
+                plot_kwargs['marker_size'] = 5
+            elif self._raw_data.plot_backend == 'matplotlib':
+                plot_kwargs['marker_size'] = 20
+
+        return self.plot_raw_data(*args, x_data=x_data, y_data=y_data, **plot_kwargs)
+
+    @property
+    def features(self) -> list[str]:
+        """
+
+        :return:
+        """
+        return self._raw_data.get_names('x')
+
+    @property
+    def labels(self) -> list[str]:
+        """
+
+        :return:
+        """
+        return self._raw_data.get_names('y')
+
+    @property
+    def raw_data(self) -> (NumArray, NumArray):
+        """
+
+        :return:
+        """
+        if self._x_noise_added:
+            feature_key = 'x_noisy'
+        else:
+            feature_key = 'x'
+        if self._y_noise_added:
+            label_key = 'y_noisy'
+        else:
+            label_key = 'y'
+        features = self._raw_data.get_by_id(feature_key).full()
+        labels = self._raw_data.get_by_id(label_key).full()
+
+        return features, labels
+
+    @property
+    def train_data(self) -> (NumArray, NumArray):
+        """
+
+        :return:
+        """
+        if self._x_noise_added:
+            feature_key = 'x_noisy'
+        else:
+            feature_key = 'x'
+        if self._y_noise_added:
+            label_key = 'y_noisy'
+        else:
+            label_key = 'y'
+        features = self._raw_data.get_by_id(feature_key).full()
+        labels = self._raw_data.get_by_id(label_key).full()
+
+        return features[:, self._train_index], labels[:, self._train_index]
+
+    @property
+    def test_data(self) -> (NumArray, NumArray):
+        """
+
+        :return:
+        """
+        if self._x_noise_added:
+            feature_key = 'x_noisy'
+        else:
+            feature_key = 'x'
+        if self._y_noise_added:
+            label_key = 'y_noisy'
+        else:
+            label_key = 'y'
+        features = self._raw_data.get_by_id(feature_key).full()
+        labels = self._raw_data.get_by_id(label_key).full()
+
+        return features[:, self._test_index], labels[:, self._test_index]
+
+    @property
+    def sampling_time(self) -> Optional[float]:
+        """
+
+        :return:
+        """
+        return self._raw_data.dt
+
+    dt = sampling_time
+
+    @property
+    def time_unit(self) -> Optional[str]:
+        """
+
+        :return:
+        """
+        if 't' in self._raw_data:
+            return self._raw_data.get_units('t')
+        return None
+
+    def add_data(
+            self,
+            features: NumArray,
+            labels: NumArray,
+            time: Optional[NumArray] = None,
+            feature_noise: Optional[NumArray] = None,
+            label_noise: Optional[NumArray] = None
+    ) -> None:
+        """
+
+        :param features:
+        :param labels:
+        :param time:
+        :param feature_noise:
+        :param label_noise:
+        :return:
+        """
+        self._raw_data.add('x', features)
+        self._raw_data.add('y', labels)
+        if time is not None:
+            if 't' in self._raw_data:
+                self._raw_data.add('t', time)
+            else:
+                warnings.warn("No data array was set up for the time... No changes applied with respect to the time "
+                              "vector")
+        if feature_noise is not None:
+            if not self._x_noise_added:
+                self._x_noise_added = True
+            self._raw_data.add('x_noise', feature_noise)
+        if label_noise is not None:
+            if not self._y_noise_added:
+                self._y_noise_added = True
+            self._raw_data.add('y_noise', label_noise)
+
+    def set_data(
+            self,
+            features: NumArray,
+            labels: NumArray,
+            time: Optional[NumArray] = None,
+            feature_noise: Optional[NumArray] = None,
+            label_noise: Optional[NumArray] = None
+    ) -> None:
+        """
+
+        :param features:
+        :param labels:
+        :param time:
+        :param feature_noise:
+        :param label_noise:
+        :return:
+        """
+        self._raw_data.set('x', features)
+        self._raw_data.set('y', labels)
+        if time is not None:
+            if 't' in self._raw_data:
+                self._raw_data.set('t', time)
+            else:
+                warnings.warn("No data array was set up for the time... No changes applied with respect to the time "
+                              "vector")
+        if feature_noise is not None:
+            if not self._x_noise_added:
+                self._x_noise_added = True
+            self._raw_data.set('x_noise', feature_noise)
+        if label_noise is not None:
+            if not self._y_noise_added:
+                self._y_noise_added = True
+            self._raw_data.set('y_noise', label_noise)
+
+    def add_noise(
+            self,
+            *args,
+            distribution: Union[str, Sequence[str]] = 'normal',
+            seed: Optional[int] = None,
+            **kwargs
+    ) -> None:
+        """
+
+        :param args:
+        :param distribution:
+        :param seed:
+        :param kwargs:
+        :return:
+        """
+        if not self._x_noise_added:
+            self._x_noise_added = True
+        if not self._y_noise_added:
+            self._y_noise_added = True
+        self._raw_data.make_some_noise(*args, distribution=distribution, seed=seed, **kwargs)
+
+    def select_train_data(
+            self,
+            method: str,
+            distance_threshold: Optional[Numeric] = None,
+            downsample_factor: Optional[int] = None
+    ) -> None:
+        """
+
+        :param method:
+        :param distance_threshold:
+        :param downsample_factor:
+        :return:
+        """
+        dim, index = self._reduce_data(method, distance_threshold=distance_threshold,
+                                       downsample_factor=downsample_factor)
+        self._train_index = index
+
+        print(f"{len(index)}/{dim} data points selected for training")
+
+    def select_test_data(
+            self,
+            method: str,
+            distance_threshold: Optional[Numeric] = None,
+            downsample_factor: Optional[int] = None
+    ) -> None:
+        """
+
+        :param method:
+        :param distance_threshold:
+        :param downsample_factor:
+        :return:
+        """
+        dim, index = self._reduce_data(method, distance_threshold=distance_threshold,
+                                       downsample_factor=downsample_factor)
+        self._test_index = index
+
+        print(f"{len(index)}/{dim} data points selected for testing")
+
+    def plot_raw_data(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        plot_kwargs = kwargs.copy()
+        if self._raw_data.plot_backend == 'bokeh':
+            plot_kwargs["line_width"] = kwargs.get("line_width", 2)
+        elif self._raw_data.plot_backend == 'matplotlib':
+            plot_kwargs["line_width"] = kwargs.get("line_width", 1)
+        # NOTE: The following 2 lines will be ignored for backend 'matplotlib'
+        plot_kwargs["major_label_text_font_size"] = kwargs.get("major_label_text_font_size", "12pt")
+        plot_kwargs["axis_label_text_font_size"] = kwargs.get("axis_label_text_font_size", "12pt")
+        return self._raw_data.plot(*args, **plot_kwargs)
+
+    def plot_train_data(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self._plot_selected_data('train', self._train_index, *args, **kwargs)
+
+    def plot_test_data(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self._plot_selected_data('test', self._test_index, *args, **kwargs)
+
+    def copy(self, ignore_time: bool = False) -> 'DataSet':
+        """
+
+        :param ignore_time:
+        :return:
+        """
+        add_time = 't' in self._raw_data and not self._raw_data['t'].is_empty() and not ignore_time
+        if add_time:
+            properties = {
+                'sampling_time': self._raw_data.dt,
+                'time': {
+                    'description': [self._raw_data.get_description('t')],
+                    'labels': [self._raw_data.get_labels('t')],
+                    'units': [self._raw_data.get_units('t')]
+                }
+            }
+        else:
+            properties = {}
+        properties['x'] = {
+            'description': self._raw_data.get_description('x'),
+            'labels': self._raw_data.get_labels('x'),
+            'units': self._raw_data.get_units('x')
+        }
+        properties['y'] = {
+            'description': self._raw_data.get_description('y'),
+            'labels': self._raw_data.get_labels('y'),
+            'units': self._raw_data.get_units('y')
+        }
+        data_set = DataSet(self._raw_data.get_names('x'), self._raw_data.get_names('y'), add_time=add_time,
+                           properties=properties, plot_backend=self._raw_data.plot_backend)
+
+        features = self._raw_data.get_by_id('x')
+        labels = self._raw_data.get_by_id('y')
+        kwargs = {}
+        if add_time:
+            kwargs['time'] = self._raw_data.get_by_id('t')
+        feature_noise = self._raw_data.get_by_id('x_noise')
+        if not feature_noise.is_empty():
+            kwargs['feature_noise'] = feature_noise
+        label_noise = self._raw_data.get_by_id('y_noise')
+        if not label_noise.is_empty():
+            kwargs['label_noise'] = label_noise
+
+        data_set.set_data(features, labels, **kwargs)
+
+        return data_set
+
+    def sort(self, arg: str, order: str = 'descending') -> None:
+        """
+
+        :param arg:
+        :param order:
+        :return:
+        """
+        data = self._raw_data.get_by_name(arg)
+        if data is not None and not data.is_empty():
+            idx = np.argsort(data, axis=None)
+            if order == 'descending':
+                idx = idx[::-1]
+            elif order != 'ascending':
+                raise ValueError(f"Keyword argument order='{order}' not recognized")
+
+            for arg in self._raw_data:
+                data = self._raw_data.get_by_id(arg)
+                noise = self._raw_data.get_by_id(arg + '_noise')
+                self._raw_data.set(arg, data[:, idx])
+                if not noise.is_empty():
+                    self._raw_data.set(arg + '_noise', noise)
+
+    def append(self, other: list['DataSet'], ignore_index: bool = False, sort: bool = True) -> 'DataSet':
+        """
+
+        :param other:
+        :param ignore_index:
+        :param sort:
+        :return:
+        """
+        new_data_set = self.copy(ignore_time=ignore_index)
+
+        # TODO: Add support for pandas objects
+        if not ignore_index:
+            dt = new_data_set._raw_data.dt
+            time_unit = new_data_set._raw_data.get_units('t')
+        else:
+            dt = None
+            time_unit = None
+        features = new_data_set._raw_data.get_names('x')
+        labels = new_data_set._raw_data.get_names('y')
+        for data_set in other:
+            if not ignore_index:
+                other_dt = data_set.dt
+                other_time_unit = data_set.time_unit
+                if dt != other_dt or time_unit != other_time_unit:
+                    warnings.warn(f"Different sampling times for supplied data sets. The data set to be appended has a "
+                                  f"sampling time of dt='{other_dt} {other_time_unit}', but the data set to be extended"
+                                  f" has a sampling time of dt='{dt} {time_unit}'. If time information is not required "
+                                  f"in your case, ignore this message or set the flag ignore_index to True to prevent "
+                                  f"the message from being shown in future.")
+                if (other_dt is None and dt is not None) or (other_time_unit is None and time_unit is not None):
+                    warnings.warn('An ambiguous data set with respect to time was supplied')
+            if features != data_set.features:
+                # TODO: Sort features of other data set, if just the order is different
+                raise ValueError(f"Mismatch in the features. Got {data_set.features}, expected {features}.")
+            if labels != data_set.labels:
+                # TODO: Sort labels of other data set, if just the order is different
+                raise ValueError(f"Mismatch in the labels. Got {data_set.labels}, expected {labels}.")
+
+            # TODO: What to do here, when training data selection was executed? Do we just ignore it?
+            other_features = data_set._raw_data.get_by_id('x')
+            other_labels = data_set._raw_data.get_by_id('y')
+            other_kwargs = {}
+            if not ignore_index:
+                other_t = data_set._raw_data.get_by_id('t')
+                if not other_t.is_empty():
+                    other_kwargs['time'] = other_t
+            feature_noise = new_data_set._raw_data.get_by_id('x_noise')
+            other_feature_noise = data_set._raw_data.get_by_id('x_noise')
+            if not feature_noise.is_empty() and not other_feature_noise.is_empty():
+                other_kwargs['feature_noise'] = other_feature_noise
+            label_noise = new_data_set._raw_data.get_by_id('y_noise')
+            other_label_noise = data_set._raw_data.get_by_id('y_noise')
+            if not label_noise.is_empty() and not other_label_noise.is_empty():
+                other_kwargs['label_noise'] = other_label_noise
+
+            # NOTE: We ignore description, labels and units of the other data sets for now, since they should be the
+            #  same ideally.
+            new_data_set.add_data(other_features, other_labels, **other_kwargs)
+
+        if sort:
+            new_data_set.sort('t', order='ascending')
+
+        return new_data_set
 
 
 class DataGenerator:
