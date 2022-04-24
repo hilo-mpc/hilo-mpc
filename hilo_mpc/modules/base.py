@@ -21,16 +21,22 @@
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from __future__ import annotations
+
+from abc import ABCMeta, abstractmethod
 from collections.abc import KeysView
 from copy import copy
 import platform
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence, Type, TypeVar, Union
 import warnings
 
 import casadi as ca
 import numpy as np
 
 from .object import Object
+from ..plugins.plugins import PlotManager
+from ..util.io import save_mat
+from ..util.plotting import get_plot_backend
 from ..util.util import setup_warning, check_compiler, check_if_list_of_type, convert, dump_clean, is_list_like,\
     lower_case, who_am_i, _split_expression, AOT, JIT
 
@@ -2157,8 +2163,1359 @@ class Problem(Equations):
         return solver
 
 
-class Series(Object):
+Parent = TypeVar('Parent', bound=Base)
+
+
+class Series(Object, metaclass=ABCMeta):
     """"""
+    # TODO: Typing hints
+    def __init__(
+            self,
+            backend: Optional[Union[str, PlotManager]] = None,
+            id: Optional[str] = None,
+            name: Optional[str] = None,
+            parent: Optional[Type[Parent]] = None
+    ) -> None:
+        """Constructor method"""
+        super().__init__(id=id, name=name)
+
+        if backend is None:
+            backend = get_plot_backend()
+            if backend is None:
+                self._plot_manager = None
+                warnings.warn("Plots are disabled, since no backend was selected.")
+        else:
+            if isinstance(backend, str):
+                self._plot_manager = PlotManager(backend)
+            elif isinstance(backend, PlotManager):
+                self._plot_manager = backend
+            else:
+                self._plot_manager = None
+                warnings.warn("Backend for plots not recognized. Plots are disabled.")
+        self._parent = parent
+        self._data = {}
+        self._reference = {}
+        self._lower_bound = {}
+        self._upper_bound = {}
+        self._noise = {}
+
+        if self._id is None:
+            self._create_id()
+
+        self._names = []
+        self._abscissa = None
+
+        self._n_samples = 0
+
+    def __del__(self):
+        """Deletion method"""
+        self._data = {}
+        self._reference = {}
+        self._lower_bound = {}
+        self._upper_bound = {}
+        self._noise = {}
+        self._names = []
+
+    def __getitem__(self, item: str):
+        """Item getter method"""
+        if item in self._names:
+            return self._get_by_name(item)
+        else:
+            return self.get_by_id(item)
+
+    def __delitem__(self, key):
+        """Item deletion method"""
+        self.remove(key)
+
+    def __iter__(self):
+        """Item iteration method"""
+        yield from self._data
+
+    def __contains__(self, item):
+        """Item check method"""
+        if item in self._data:
+            return True
+        return False
+
+    def _check_samples(self) -> None:
+        """
+
+        :return:
+        """
+        n_samples = 0
+        for value in self._data.values():
+            n_values = value.shape[1]
+            if n_values != 0:
+                if n_samples == 0:
+                    n_samples = n_values
+                elif n_samples != n_values:
+                    raise ValueError(f"Dimension mismatch in the items of the {self.__class__.__name__} object")
+        self._n_samples = n_samples
+
+    @abstractmethod
+    def _update_dimensions(self) -> None:
+        """
+
+        :return:
+        """
+        pass
+
+    def _update_kwargs(self, other, kwargs):
+        """
+
+        :param other:
+        :param kwargs:
+        :return:
+        """
+        pass
+
+    @property
+    def plot_backend(self):
+        """
+
+        :return:
+        """
+        if self._plot_manager is None:
+            return None
+        return self._plot_manager.backend
+
+    @plot_backend.setter
+    def plot_backend(self, backend):
+        if self._plot_manager is None:
+            if backend is not None:
+                self._plot_manager = PlotManager(backend)
+        elif self._plot_manager is not None:
+            if backend is None:
+                self._plot_manager = None
+            else:
+                self._plot_manager.backend = backend
+
+    @property
+    def n_samples(self) -> int:
+        """
+
+        :return:
+        """
+        self._check_samples()
+        return self._n_samples
+
+    def add(self, arg, value):
+        """
+
+        :param arg:
+        :param value:
+        :return:
+        """
+        # TODO: Add pandas.Series and pandas.DataFrame
+        allowed_types = (int, float, list, tuple, np.ndarray, ca.DM, Vector)
+        to_be_listed = (int, float)
+        if isinstance(value, Vector):
+            if not value.is_constant():
+                raise TypeError("Input arguments of class Vector containing symbolic expressions are not yet "
+                                "supported.")
+        if isinstance(value, dict):
+            old_value = value
+            value = len(old_value) * [None]
+            for key, val in old_value.items():
+                index = self._data[arg].index(key)[0]
+                value[index] = val
+
+        # NOTE: Ignore information about initial or final value
+        arg = arg.split(':')
+        arg = arg[0]
+
+        arg = arg.rsplit('_')
+        if len(arg) == 1:
+            index = ''
+        elif len(arg) == 2:
+            index = arg[1]
+        else:
+            raise ValueError(f"Unsupported key {'_'.join(arg)}")
+        arg = arg[0]
+
+        if arg in self._data and not index:
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._data[arg].add([value], axis=1)
+                else:
+                    self._data[arg].add(value, axis=1)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k).__name__ for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        elif index in ['ref', 'reference']:
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._reference[arg].add([value], axis=1)
+                else:
+                    self._reference[arg].add(value, axis=1)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k).__name__ for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        elif index in ['lb', 'lower_bound']:
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._lower_bound[arg].add([value], axis=1)
+                else:
+                    self._lower_bound[arg].add(value, axis=1)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k).__name__ for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        elif index in ['ub', 'upper_bound']:
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._upper_bound[arg].add([value], axis=1)
+                else:
+                    self._upper_bound[arg].add(value, axis=1)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k).__name__ for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        elif index == 'noise':
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._noise[arg].add([value], axis=1)
+                else:
+                    self._noise[arg].add(value, axis=1)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k).__name__ for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        else:
+            if not self._data:
+                raise KeyError("Data container is empty")
+
+    def append(self, other):
+        """
+
+        :param other:
+        :return:
+        """
+        raise NotImplementedError("The append functionality will be implemented in future releases")
+
+    def clear(self):
+        """
+
+        :return:
+        """
+        self.__del__()
+
+    def copy(self):
+        """
+
+        :return:
+        """
+        if self.name is not None:
+            new = self.__class__(backend=self._plot_manager.backend, name='copy_of_' + self.name)
+        else:
+            new = self.__class__(backend=self._plot_manager.backend)
+
+        kwargs = {key: {
+            'data_format': ca.DM,
+            'description': value.description,
+            'labels': value.labels,
+            'units': value.units,
+            'shape': (value.shape[0], 0),
+            'values_or_names': value.names
+        } for key, value in self.items()}
+        new.setup(*kwargs.keys(), **kwargs)
+
+        for key, value in self._data.items():
+            if not value.is_empty():
+                new.set(key, value.values)
+        for key, value in self._reference.items():
+            if not value.is_empty():
+                new.set(key + '_ref', value.values)
+        for key, value in self._lower_bound.items():
+            if not value.is_empty():
+                new.set(key + '_lb', value.values)
+        for key, value in self._upper_bound.items():
+            if not value.is_empty():
+                new.set(key + '_ub', value.values)
+        for key, value in self._noise.items():
+            if not value.is_empty():
+                new.set(key + '_noise', value.values)
+
+        return new
+
+    def get_by_id(self, arg):
+        """
+
+        :param arg:
+        :return:
+        """
+        arg = arg.split(':')
+        if len(arg) == 1:
+            bc = ''
+        elif len(arg) == 2:
+            bc = arg[1]
+            if bc not in ['0', 'f']:
+                raise ValueError(f"Unsupported appendage '{bc}'. Use '0' to indicate initial values and 'f' to indicate"
+                                 f" final values.")
+        else:
+            raise ValueError(f"Unsupported key {'_'.join(arg)}")
+        arg = arg[0]
+
+        arg = arg.rsplit('_')
+        if len(arg) == 1:
+            index = ''
+        elif len(arg) == 2:
+            index = arg[1]
+        else:
+            raise ValueError(f"Unsupported key {'_'.join(arg)}")
+        arg = arg[0]
+
+        if bc == '0' and arg in self._data and not index:
+            return self._data[arg][:, 0]
+        elif bc == 'f' and arg in self._data and not index:
+            return self._data[arg][:, -1]
+        elif arg in self._data and not bc and not index:
+            # NOTE: Used the method Vector.values here, to get consistent output (all is either SX, MX, or DM)
+            return self._data[arg].values
+        elif index in ['ref', 'reference']:
+            return self._reference[arg].values
+        elif index in ['lb', 'lower_bound']:
+            return self._lower_bound[arg].values
+        elif index in ['ub', 'upper_bound']:
+            return self._upper_bound[arg].values
+        elif index == 'noise':
+            return self._noise[arg].values
+        elif index == 'noisy':
+            return self._data[arg].values + self._noise[arg].values
+        return None
+
+    def _get_by_name(self, arg: str) -> Optional[ca.DM]:
+        """
+
+        :param arg:
+        :return:
+        """
+        # TODO: Add support for appendices (ref/reference, lb/lower bound, ub/upper bound, noise, noisy)
+        arg = arg.split(':')
+        if len(arg) == 1:
+            k = None
+        elif len(arg) == 2:
+            bc = arg[1]
+            if bc not in ['0', 'f']:
+                raise ValueError(f"Unsupported appendage '{bc}'. Use '0' to indicate initial values and 'f' to indicate"
+                                 f" final values.")
+            k = 0 if bc == '0' else -1
+        else:
+            raise ValueError(f"Unsupported key {'_'.join(arg)}")
+        arg = arg[0]
+
+        if arg.endswith(('noisy', 'noise', 'ref', 'reference', 'lb', 'lower_bound', 'ub', 'upper_bound')):
+            arg, container = arg.rsplit('_', 1)
+        else:
+            container = None
+
+        if container is None or container == 'noisy':
+            for value in self._data.values():
+                if arg in value:
+                    if not value.is_empty():
+                        if k is None:
+                            k = slice(0, value.shape[1])
+                        index = value.index(arg)
+                        if container == 'noisy':
+                            id_ = self.get_id(arg)
+                            return value[index, k] + self._noise[id_][index, k]
+                        else:
+                            return value[index, k]
+                    else:
+                        return value.values
+        return None
+
+    def get_by_name(self, *args: Sequence[str]) -> Optional[Union[ca.DM, list[Optional[ca.DM]]]]:
+        """
+
+        :param args:
+        :return:
+        """
+        if len(args) == 1:
+            return self._get_by_name(args[0])
+        return [self._get_by_name(arg) for arg in args]
+
+    def get_id(self, name: str) -> str:
+        """
+
+        :param name:
+        :return:
+        """
+        for key, value in self._data.items():
+            if name in value:
+                return key
+
+    def get_ref_by_name(self, name):
+        """
+
+        :param name:
+        :return:
+        """
+        # TODO: Update according to get_by_name()?
+        for value in self._reference.values():
+            if name in value:
+                if not value.is_empty():
+                    index = value.index(name)
+                    val = value[index, :]
+                    if not np.isnan(val).all():
+                        return val
+                else:
+                    return value.values
+        return None
+
+    def get_lb_by_name(self, name):
+        """
+
+        :param name:
+        :return:
+        """
+        # TODO: Update according to get_by_name()?
+        for value in self._lower_bound.values():
+            if name in value:
+                if not value.is_empty():
+                    index = value.index(name)
+                    val = value[index, :]
+                    if not np.isnan(val).all():
+                        return val
+                else:
+                    return value.values
+        return None
+
+    def get_ub_by_name(self, name):
+        """
+
+        :param name:
+        :return:
+        """
+        # TODO: Update according to get_by_name()?
+        for value in self._upper_bound.values():
+            if name in value:
+                if not value.is_empty():
+                    index = value.index(name)
+                    val = value[index, :]
+                    if not np.isnan(val).all():
+                        return val
+                else:
+                    return value.values
+        return None
+
+    def get_description(self, arg):
+        """
+
+        :param arg:
+        :return:
+        """
+        if arg in self._names:
+            for value in self._data.values():
+                if arg in value:
+                    index = value.index(arg)
+                    # NOTE: index should always be a list of length 1
+                    return value.description[index[0]]
+        else:
+            return self._data[arg].description
+
+    def get_function_args(self, **kwargs):
+        """
+
+        :param kwargs:
+        :return:
+        """
+        args = {}
+        if 'x' in self._data:
+            args['x0'] = self._data['x'][:, -1]
+        if 'p' in self._data:
+            args['p'] = self._data['p'][:, -1]
+        return args
+
+    def get_names(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        if not args:
+            return self._names
+        else:
+            names = []
+            ignore = kwargs.get('ignore', None)
+            if ignore is None:
+                ignore = False
+            for arg in args:
+                if ignore:
+                    if arg in self:
+                        names.extend(self._data[arg].names)
+                else:
+                    names.extend(self._data[arg].names)
+            return names
+
+    def get_labels(self, arg):
+        """
+
+        :param arg:
+        :return:
+        """
+        if arg in self._names:
+            for value in self._data.values():
+                if arg in value:
+                    index = value.index(arg)
+                    # NOTE: index should always be a list of length 1
+                    return value.labels[index[0]]
+        else:
+            return self._data[arg].labels
+
+    def get_units(self, arg):
+        """
+
+        :param arg:
+        :return:
+        """
+        if arg in self._names:
+            for value in self._data.values():
+                if arg in value:
+                    index = value.index(arg)
+                    # NOTE: index should always be a list of length 1
+                    return value.units[index[0]]
+        else:
+            return self._data[arg].units
+
+    def is_empty(self) -> bool:
+        """
+
+        :return:
+        """
+        return all(data.is_empty() for data in self._data.values())
+
+    def is_set_up(self) -> bool:
+        """
+
+        :return:
+        """
+        return bool(self._data)
+
+    def items(self):
+        """
+
+        :return:
+        """
+        yield from self._data.items()
+
+    def make_some_noise(self, *args, distribution='normal', inplace=True, seed=None, **kwargs):
+        """
+
+        :param args:
+        :param distribution:
+        :param inplace:
+        :param seed:
+        :param kwargs:
+        :return:
+        """
+        # TODO: Add support for changing variance (over time)?
+        if seed is not None:
+            np.random.seed(seed)
+
+        if not is_list_like(distribution):
+            distribution = len(args) * [distribution]
+
+        first_or_last = []
+        for arg in args:
+            arg = arg.split(':')
+            if len(arg) == 2:
+                bc = arg[1]
+                if bc not in ['0', 'f']:
+                    raise ValueError(f"Unsupported appendage '{bc}'. Use '0' to indicate initial values and 'f' to "
+                                     f"indicate final values.")
+                else:
+                    first_or_last.append(True)
+            else:
+                first_or_last.append(False)
+        if not all(first_or_last):
+            if any(first_or_last):
+                # TODO: Not a very informative error message. The actual problem is mixing variable identifiers
+                #  (x, y, z, u, p) with true variable names.
+                raise ValueError("Mixing of first and last values and vectors not allowed")
+            sol = None
+            if not inplace:
+                sol = self.get_by_name(*args)
+        else:
+            # TODO: Should we also distinguish between first and last
+            sol = [self.get_by_id(arg) for arg in args]
+            # NOTE: arg[:-2] because the appendages '0' (via ':0') and 'f' (via ':f') take a way 2 characters
+            args = tuple(arg[:-2] for arg in args)
+
+        noise_to_add = {key: np.zeros_like(value.values) if not all(first_or_last) else np.zeros((value.size1())) for
+                        key, value in self._data.items()}
+
+        for k, arg in enumerate(args):
+            if distribution[k] == 'normal':
+                _, std = _process_noise_inputs_normal(arg, **kwargs)
+
+                if not all(first_or_last):
+                    if inplace:
+                        id_ = self.get_id(arg)
+                        index = self._data[id_].index(arg)
+                        noise = std * np.random.randn(*self._data[id_][index, :].shape)
+                        noise_to_add[id_][index, :] = noise
+                    else:
+                        noise = std * np.random.randn(*sol[k].shape)
+                        sol[k] += noise
+                else:
+                    noise = std * np.random.randn(*sol[k].shape)
+                    sol[k] += noise
+                    if inplace:
+                        noise_to_add[arg] = noise
+
+        if inplace:
+            for key, value in noise_to_add.items():
+                self.add(key + '_noise', value)
+
+        return sol
+
+    def merge(self, other):
+        """
+
+        :param other:
+        :return:
+        """
+        raise NotImplementedError("The merge functionality will be implemented in future releases")
+
+    def plot(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        # TODO: Too convoluted. Maybe create a SeriesPlotter class that is called here?
+        # TODO: Add support for labels if labels or units are lists
+        # TODO: Add support for user-supplied legend labels
+        # TODO: Add support for user-supplied colors
+        ext_data = kwargs.pop('data', None)
+        ext_x_data = kwargs.pop('x_data', None)
+        ext_y_data = kwargs.pop('y_data', None)
+        kind = kwargs.pop('kind', None)
+        marker = kwargs.pop('marker', None)
+        marker_size = kwargs.pop('marker_size', None)
+        shape = kwargs.pop('shape', None)
+
+        if not args:
+            abscissas = self._data[self._abscissa].names
+            args = [(abscissa, var) for abscissa in abscissas for var in self._names if var not in abscissas]
+        n = len(args)
+
+        ref_data = {}
+        lb_data = {}
+        ub_data = {}
+        ext_data_suffix = kwargs.pop('data_suffix', None)
+        if ext_data_suffix is None:
+            ext_data_suffix = n * ['ext']
+        elif isinstance(ext_data_suffix, str):
+            ext_data_suffix = n * [ext_data_suffix]
+        ext_data_skip = kwargs.pop('data_skip', None)
+        if ext_data_skip is None:
+            ext_data_skip = []
+        elif isinstance(ext_data_skip, int):
+            ext_data_skip = [ext_data_skip]
+        for k, arg in enumerate(args):
+            for ref in self._reference.values():
+                if not ref.is_empty():
+                    for idx, val in enumerate(ref.names):
+                        if val in arg[1:] and ref[idx, :].is_regular():
+                            ref_data[val + '_ref'] = {
+                                'data': ref[idx, :],
+                                'kind': 'dashed',
+                                'color': 'k',
+                                'subplot': k
+                            }
+            for lb in self._lower_bound.values():
+                if not lb.is_empty():
+                    for idx, val in enumerate(lb.names):
+                        if val in arg[1:] and lb[idx, :].is_regular():
+                            lb_data[val + '_lb'] = {
+                                'data': lb[idx, :],
+                                'kind': 'dashed',
+                                'subplot': k
+                            }
+            for ub in self._upper_bound.values():
+                if not ub.is_empty():
+                    for idx, val in enumerate(ub.names):
+                        if val in arg[1:] and ub[idx, :].is_regular():
+                            ub_data[val + '_ub'] = {
+                                'data': ub[idx, :],
+                                'kind': 'dashed',
+                                'subplot': k
+                            }
+            if ext_data is not None and isinstance(ext_data, Series) and k not in ext_data_skip:
+                if ext_x_data is None:
+                    ext_x_data = []
+                if ext_y_data is None:
+                    ext_y_data = []
+                x = ext_data.get_by_name(arg[0])
+                for _arg in arg[1:]:
+                    idx = ext_data.get_id(_arg)
+                    if idx is not None:
+                        # TODO: This is a workaround for when noisy data is to be plotted, since noise does not
+                        #  necessarily exist in the supplied Series object. There is probably a better way to deal with
+                        #  this.
+                        val = ext_data.get_by_name(_arg)
+                        if not val.is_empty():
+                            if idx in ['u', 'p']:
+                                n_y = val.size2()
+                                n_x = x.size2()
+                                if n_y != n_x:
+                                    # NOTE: u should not have more entries than t
+                                    val_f = val[0, -1]
+                                    val = ca.horzcat(val, val_f * ca.DM.ones(1, n_x - n_y))
+                            ext_x_data.append({
+                                'data': x,
+                                'subplot': k,
+                                'label': _arg + '_' + ext_data_suffix[k]
+                            })
+                            ext_y_data.append({
+                                'data': val,
+                                'subplot': k,
+                                'label': _arg + '_' + ext_data_suffix[k],
+                                'kind': 'line' if idx != 'u' and idx != 'p' else 'step'
+                            })
+                        ref = ext_data.get_ref_by_name(_arg)
+                        if not ref.is_empty():
+                            ext_x_data.append({
+                                'data': x,
+                                'subplot': k,
+                                'label': _arg + '_ref_' + ext_data_suffix[k]
+                            })
+                            ext_y_data.append({
+                                'data': ref,
+                                'subplot': k,
+                                'label': _arg + '_ref_' + ext_data_suffix[k],
+                                'kind': 'dashed'
+                            })
+                        lb = ext_data.get_lb_by_name(_arg)
+                        if not lb.is_empty():
+                            ext_x_data.append({
+                                'data': x,
+                                'subplot': k,
+                                'label': _arg + '_lb_' + ext_data_suffix[k]
+                            })
+                            ext_y_data.append({
+                                'data': lb,
+                                'subplot': k,
+                                'label': _arg + '_lb_' + ext_data_suffix[k],
+                                'kind': 'dashed'
+                            })
+                        ub = ext_data.get_ub_by_name(_arg)
+                        if not ub.is_empty():
+                            ext_x_data.append({
+                                'data': x,
+                                'subplot': k,
+                                'label': _arg + '_ub_' + ext_data_suffix[k]
+                            })
+                            ext_y_data.append({
+                                'data': ub,
+                                'subplot': k,
+                                'label': _arg + '_ub_' + ext_data_suffix[k],
+                                'kind': 'dashed'
+                            })
+
+        if ext_x_data is not None:
+            n_x = len(ext_x_data)
+        else:
+            n_x = 0
+        if ext_y_data is not None:
+            n_y = len(ext_y_data)
+        else:
+            n_y = 0
+
+        if n_x > 0:
+            if n_y > 0:
+                if n_x > n_y or (n_x > 1 and n_x != n_y):
+                    raise ValueError(f"{n_x} datasets for the x-axis supplied, but only {n_y} datasets for the "
+                                     f"y-axis.\nTo plot external data, make sure that the number of datasets for "
+                                     f"the x-axis is either equal to the number of datasets for the y-axis or equal"
+                                     f" to 1.\nAlso make sure, that the dictionaries for the datasets for the x-axis "
+                                     f"and the dictionaries for the datasets for the y-axis share the corresponding "
+                                     f"labels, when both have the same amount of datasets.\nIf no dataset for the "
+                                     f"x-axis is supplied, the stored dataset will be used.")
+            else:
+                warnings.warn("Datasets for the x-axis were supplied, but no dataset for the y-axis. Ignoring supplied "
+                              "external datasets.")
+
+        data = {k: {'x': {}, 'y': {}} for k in range(n)}
+        xlabel = n * [None]
+        ylabel = n * [None]
+        legend = n * [False]
+        if kind is not None:
+            kind_supplied = True
+        else:
+            kind_supplied = False
+            kind = n * [None]
+        if marker is not None:
+            marker_supplied = True
+        else:
+            marker_supplied = False
+            marker = n * [None]
+        if marker_size is not None:
+            marker_size_supplied = True
+        else:
+            marker_size_supplied = False
+            marker_size = n * [None]
+        # color = n * [None]
+
+        def update_marker(
+                subplot: int,
+                m: Optional[str] = None,
+                ms: Optional[int] = None,
+                m_container: Optional[list[str]] = None,
+                ms_container: Optional[list[int]] = None
+        ) -> None:
+            """
+
+            :param subplot:
+            :param m:
+            :param ms:
+            :param m_container:
+            :param ms_container:
+            :return:
+            """
+            if m is not None:
+                if m_container is not None:
+                    m_container.append(m)
+                    ms_container.append(ms)
+                else:
+                    if isinstance(marker[subplot], list):
+                        marker[subplot].append(m)
+                    else:
+                        if marker[subplot] is not None:
+                            marker[subplot] = [marker[subplot], m]
+                        else:
+                            marker[subplot] = [m]
+                    if isinstance(marker_size[subplot], list):
+                        marker_size[subplot].append(ms)
+                    else:
+                        if marker_size[subplot] is not None:
+                            marker_size[subplot] = [marker_size[subplot], ms]
+                        else:
+                            marker_size[subplot] = [ms]
+
+        duplicate_y_counter = 0
+        for sub, arg in enumerate(args):
+            x = arg[0]
+            y = arg[1:]
+
+            if not isinstance(x, str):
+                raise TypeError(f"Wrong type {type(x).__name__} for argument 'x'")
+            if not isinstance(y, list):
+                if isinstance(y, (tuple, set)):
+                    y = list(y)
+                elif isinstance(y, np.ndarray):
+                    y = y.tolist()
+                else:
+                    y = [y]
+            if not all(isinstance(k, str) for k in y):
+                raise TypeError(f"Wrong type {(type(k).__name__ for k in y)} for argument 'y'")
+
+            label = self.get_labels(x)
+            if not label:
+                label = x
+            units = self.get_units(x)
+            x = self.get_by_name(x)
+            if x is not None:
+                x = x.full().flatten()
+                if label:
+                    xlabel[sub] = f"{label}"
+                    if units:
+                        xlabel[sub] += f" in [{units}]"
+
+            ext_data = {}
+            if n_y > 0:
+                keys = []
+                for ext in ext_y_data:
+                    if 'subplot' in ext and ext['subplot'] == sub:
+                        key = ext['label']
+                        keys.append(key)
+                        ext_data[key] = ext
+                    if 'kind' in ext and isinstance(kind, str):
+                        kind = n * [kind]
+                    if 'marker' in ext and isinstance(marker, str):
+                        marker = n * [marker]
+                    if 'marker_size' in ext and isinstance(marker_size, int):
+                        marker_size = n * [marker_size]
+
+                if ext_data:
+                    y.append(ext_data)
+
+                ext_data = {}
+                if n_x > 0:
+                    ext_data = {k.get('label'): k.get('data') for k in ext_x_data if
+                                k.get('label') in keys and k.get('subplot') == sub}
+
+            if ref_data or lb_data or ub_data:
+                add_data = {}
+                for key, val in ref_data.items():
+                    if 'subplot' in val and val['subplot'] == sub:
+                        add_data[key] = val
+                for key, val in lb_data.items():
+                    if 'subplot' in val and val['subplot'] == sub:
+                        add_data[key] = val
+                for key, val in ub_data.items():
+                    if 'subplot' in val and val['subplot'] == sub:
+                        add_data[key] = val
+                if add_data:
+                    y.append(add_data)
+
+            kind_k = []
+            marker_k = []
+            marker_size_k = []
+            # color_k = []
+            n_yy = len(y)
+            for k in y:
+                if isinstance(k, str) and k.endswith('_noisy'):
+                    k, appendix = k.rsplit('_', 1)
+                    appendix = '_' + appendix
+                else:
+                    appendix = ''
+                if isinstance(k, str):
+                    yk = self.get_by_name(k + appendix)
+                    if yk is not None:
+                        if yk.size1() == 1:
+                            if ('u' in self._data and k in self._data['u']) or (
+                                    'p' in self._data and k in self._data['p']):
+                                n_up = yk.size2()
+                                n_xx = x.size
+                                if n_up != n_xx:
+                                    # NOTE: u should not have more entries than t
+                                    ykf = yk[0, -1]
+                                    yk = ca.horzcat(yk, ykf * ca.DM.ones(1, n_xx - n_up))
+                                if not kind_supplied:
+                                    kind_k.append('step')
+                            else:
+                                if not kind_supplied:
+                                    kind_k.append('line')
+                            data[sub]['x'][k + appendix] = x
+                            data[sub]['y'][k + appendix] = yk.full().flatten()
+                        elif yk.size1() == 0:
+                            if not kind_supplied:
+                                if ('u' in self._data and k in self._data['u']) or (
+                                        'p' in self._data and k in self._data['p']):
+                                    kind_k.append('step')
+                                else:
+                                    kind_k.append('line')
+                            n_xx = x.size
+                            data[sub]['x'][k + appendix] = x
+                            data[sub]['y'][k + appendix] = np.full(n_xx, np.nan)
+                        else:
+                            # NOTE: Duplicate y names. Preliminary! Kind of a dirty hack. Right now only used in GP
+                            #  regression plots.
+                            ykk = yk[duplicate_y_counter, :]
+                            duplicate_y_counter += 1
+                            if ykk.size1() == 1:
+                                if ('u' in self._data and k in self._data['u']) or (
+                                        'p' in self._data and k in self._data['p']):
+                                    n_up = ykk.size2()
+                                    n_xx = x.size
+                                    if n_up != n_xx:
+                                        # NOTE: u should not have more entries than t
+                                        ykkf = ykk[0, -1]
+                                        ykk = ca.horzcat(ykk, ykkf * ca.DM.ones(1, n_xx - n_up))
+                                    if not kind_supplied:
+                                        kind_k.append('step')
+                                else:
+                                    if not kind_supplied:
+                                        kind_k.append('line')
+                                data[sub]['x'][k + appendix] = x
+                                data[sub]['y'][k + appendix] = ykk.full().flatten()
+                            elif ykk.size1() == 0:
+                                if not kind_supplied:
+                                    if ('u' in self._data and k in self._data['u']) or (
+                                            'p' in self._data and k in self._data['p']):
+                                        kind_k.append('step')
+                                    else:
+                                        kind_k.append('line')
+                                n_xx = x.size
+                                data[sub]['x'][k + appendix] = x
+                                data[sub]['y'][k + appendix] = np.full(n_xx, np.nan)
+                            else:
+                                raise RuntimeError("How did I get here?")
+
+                        label = self.get_labels(k)
+                        if label:
+                            if ylabel[sub] is None:
+                                ylabel[sub] = f"{label}"
+                                units = self.get_units(k)
+                                if units:
+                                    ylabel[sub] += f" in [{units}]"
+                            else:
+                                units = self.get_units(k)
+                                if units:
+                                    label += f" in [{units}]"
+                                if label != ylabel[sub]:
+                                    ylabel[sub] = [ylabel[sub], label]
+                        elif n_yy == 1:
+                            # NOTE: This is only accessed when we have one object to plot
+                            ylabel[sub] = k
+                            units = self.get_units(k)
+                            if units:
+                                ylabel[sub] += f" in [{units}]"
+                elif isinstance(k, dict):
+                    # NOTE: This is for external data
+                    # TODO: How to deal with xlabel and ylabel here?
+                    for key, value in k.items():
+                        if not kind_supplied:
+                            if 'kind' in value:
+                                kind_k.append(value['kind'])
+                                if value['kind'] == 'scatter':
+                                    update_marker(0, m=value.get('marker'), ms=value.get('marker_size'),
+                                                  m_container=marker_k, ms_container=marker_size_k)
+                            else:
+                                kind_k.append('line')
+                        else:
+                            if isinstance(kind[sub], list):
+                                if 'kind' in value:
+                                    kind[sub].append(value['kind'])
+                                    if value['kind'] == 'scatter':
+                                        update_marker(sub, m=value['marker'], ms=value['marker_size'])
+                                else:
+                                    kind[sub].append('line')
+                            else:
+                                if kind[sub] is not None:
+                                    if 'kind' in value:
+                                        kind[sub] = [kind[sub], value['kind']]
+                                        if value['kind'] == 'scatter':
+                                            update_marker(sub, m=value['marker'], ms=value['marker_size'])
+                                    else:
+                                        kind[sub] = [kind[sub], 'line']
+                                else:
+                                    if 'kind' in value:
+                                        kind[sub] = [value['kind']]
+                                        if value['kind'] == 'scatter':
+                                            update_marker(sub, m=value['marker'], ms=value['marker_size'])
+                                    else:
+                                        kind[sub] = ['line']
+                        y_data = _clean_external_data(value['data'])
+                        if key in ext_data:
+                            x_data = ext_data[key]
+                            x_data = _clean_external_data(x_data)
+                            data[sub]['x'][key] = x_data
+                        else:
+                            data[sub]['x'][key] = x
+                        data[sub]['y'][key] = y_data
+
+            if n_yy > 1:
+                legend[sub] = True
+            if not kind_supplied and kind[sub] is None:
+                kind[sub] = kind_k
+            if not marker_supplied and marker[sub] is None:
+                marker[sub] = marker_k
+            if not marker_size_supplied and marker_size[sub] is None:
+                marker_size[sub] = marker_size_k
+
+        if not kind_supplied:
+            # TODO: Something with collections.Counter (see https://stackoverflow.com/a/9623147)
+            # raise NotImplementedError
+            pass
+        if (is_list_like(marker) and any(m is not None for m in marker)) or isinstance(marker, str):
+            kwargs['marker'] = marker
+        if (is_list_like(marker_size) and any(ms is not None for ms in marker_size)) or isinstance(marker_size, int):
+            kwargs['marker_size'] = marker_size
+
+        if n > 1 and 'subplots' not in kwargs:
+            kwargs['subplots'] = True
+            if shape is not None:
+                kwargs['layout'] = shape
+        if 'xlabel' not in kwargs:
+            kwargs['xlabel'] = xlabel
+        if 'ylabel' not in kwargs:
+            kwargs['ylabel'] = ylabel
+        if 'legend' not in kwargs:
+            kwargs['legend'] = legend
+        if 'title' not in kwargs:
+            if n > 1:
+                kwargs['title'] = n * ["Such a nice plot"]
+            else:
+                kwargs['title'] = "Such a nice plot"
+        if 'fill_between' in kwargs:
+            fill_between = kwargs['fill_between']
+            if isinstance(fill_between, (list, set, tuple)):
+                for filler in fill_between:
+                    x_fill = filler.get('x')
+                    if x_fill is None:
+                        raise KeyError("The fill_between keyword argument was supplied without x-data")
+                    elif isinstance(x_fill, str):
+                        x = self.get_by_name(x_fill).full().flatten()
+                    else:
+                        x = _clean_external_data(x_fill)
+                    filler['x'] = x
+            else:
+                x_fill = fill_between.get('x')
+                if x_fill is None:
+                    raise KeyError("The fill_between keyword argument was supplied without x-data")
+                elif isinstance(x_fill, str):
+                    x = self.get_by_name(x_fill).full().flatten()
+                else:
+                    x = _clean_external_data(x_fill)
+                fill_between['x'] = x
+        if 'interactive' in kwargs and kwargs['interactive'] and self._plot_manager.backend == 'latex':
+            warnings.warn("Interactive plotting using the backend 'latex' is not supported. Switching 'interactive' to"
+                          " False...")
+            kwargs['interactive'] = False
+
+        return self._plot_manager.plot(data, kind=kind, **kwargs)
+
+    def remove(
+            self,
+            arg: str,
+            index: Optional[Sequence[int]] = None,
+            skip: Optional[Union[str, Sequence[str]]] = None
+    ) -> None:
+        """
+
+        :param arg:
+        :param index:
+        :param skip:
+        :return:
+        """
+        if skip is not None:
+            if isinstance(skip, str):
+                skip = [skip]
+        else:
+            skip = []
+
+        if 'data' not in skip:
+            if arg in self._data:
+                if not self._data[arg].is_empty():
+                    self._data[arg].remove(axis=1, index=index)
+            else:
+                if self._data:
+                    raise KeyError(f"Argument '{arg}' not found in data container.")
+                else:
+                    raise KeyError("Data container is empty")
+        if 'ref' not in skip and 'reference' not in skip:
+            if arg in self._reference:
+                if not self._reference[arg].is_empty():
+                    self._reference[arg].remove(axis=1, index=index)
+        if 'lb' not in skip and 'lower_bound' not in skip:
+            if arg in self._lower_bound:
+                if not self._lower_bound[arg].is_empty():
+                    self._lower_bound[arg].remove(axis=1, index=index)
+        if 'ub' not in skip and 'upper_bound' not in skip:
+            if arg in self._upper_bound:
+                if not self._upper_bound[arg].is_empty():
+                    self._upper_bound[arg].remove(axis=1, index=index)
+        if 'noise' not in skip:
+            if arg in self._noise:
+                if not self._noise[arg].is_empty():
+                    self._noise[arg].remove(axis=1, index=index)
+
+    def set(self, arg, value):
+        """
+
+        :param arg:
+        :param value:
+        :return:
+        """
+        # TODO: Add pandas.Series and pandas.DataFrame
+        allowed_types = (int, float, list, tuple, np.ndarray, ca.DM, Vector)
+        to_be_listed = (int, float)
+
+        arg = arg.split(':')
+        if len(arg) == 1:
+            ic = ''
+        elif len(arg) == 2:
+            ic = arg[1]
+            if ic not in ['0', 'f']:
+                raise ValueError(f"Unsupported appendage '{ic}'. Use '0' to indicate initial values.")
+            if ic != '0':
+                warnings.warn("You supplied the appendage 'f'. This is not supported for the set method.")
+        else:
+            raise ValueError(f"Unsupported key {'_'.join(arg)}")
+        arg = arg[0]
+
+        if isinstance(value, Vector):
+            if not value.is_constant():
+                raise TypeError("Input arguments of class Vector containing symbolic expressions are not yet "
+                                "supported.")
+
+        if isinstance(value, dict):
+            old_value = value
+            value = len(old_value) * [None]
+            for key, val in old_value.items():
+                index = self._data[arg].index(key)[0]
+                value[index] = val
+
+        arg = arg.rsplit('_')
+        if len(arg) == 1:
+            index = ''
+            arg = arg[0]
+        elif len(arg) == 2:
+            index = arg[1]
+            arg = arg[0]
+        else:
+            raise ValueError(f"Unsupported key {'_'.join(arg)}")
+
+        # TODO: Maybe we can combine the first two conditions
+        if arg in self._data and not ic and not index:
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._data[arg].set([value])
+                else:
+                    self._data[arg].set(value)
+            else:
+                raise TypeError("Expected argument 'value' of type {}, got {} instead."
+                                .format([type(k) for k in allowed_types], type(value)))
+        elif arg in self._data and ic == '0' and not index:
+            if isinstance(value, allowed_types):
+                if self._data[arg].is_empty() or self._data[arg].size2() == 1:
+                    if isinstance(value, to_be_listed):
+                        self._data[arg].set([value])
+                    else:
+                        self._data[arg].set(value)
+                else:
+                    # TODO: Update initial value in this case
+                    # NOTE: I'm not sure whether it could make sense to be able to do this. Also the same could be
+                    #  done for the final value or for any other value actually
+                    warnings.warn("Vector is not empty. No changes applied.", UserWarning)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k) for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        elif index in ['ref', 'reference']:
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._reference[arg].set([value], axis=1)
+                else:
+                    self._reference[arg].set(value, axis=1)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k).__name__ for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        elif index in ['lb', 'lower_bound']:
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._lower_bound[arg].set([value], axis=1)
+                else:
+                    self._lower_bound[arg].set(value, axis=1)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k).__name__ for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        elif index in ['ub', 'upper_bound']:
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._upper_bound[arg].set([value], axis=1)
+                else:
+                    self._upper_bound[arg].set(value, axis=1)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k).__name__ for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        elif index == 'noise':
+            if isinstance(value, allowed_types):
+                if isinstance(value, to_be_listed):
+                    self._noise[arg].set([value], axis=1)
+                else:
+                    self._noise[arg].set(value, axis=1)
+            else:
+                raise TypeError(f"Expected argument 'value' of type {[type(k).__name__ for k in allowed_types]}, "
+                                f"got {type(value)} instead.")
+        else:
+            if self._data:
+                raise KeyError("Argument '{}' not found in data container.")
+            else:
+                raise KeyError("Data container is empty")
+
+    def setup(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        if len(args) == 1 and isinstance(args[0], self.__class__):
+            self.merge(args[0])
+        else:
+            for arg in args:
+                self._data[arg] = Vector(**kwargs[arg], parent=self)
+                self._reference[arg] = Vector(**kwargs[arg], parent=self)
+                self._lower_bound[arg] = Vector(**kwargs[arg], parent=self)
+                self._upper_bound[arg] = Vector(**kwargs[arg], parent=self)
+                self._noise[arg] = Vector(**kwargs[arg], parent=self)
+                self._names.extend(self._data[arg].names)
+
+    def to_dict(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        subplots = kwargs.get('subplots', False)
+        if subplots:
+            plot = 0
+        suffix = kwargs.get('suffix', None)
+        if suffix is not None:
+            suffix = '_' + suffix
+        else:
+            suffix = ''
+        index = kwargs.get('index', None)
+
+        data = {}
+        duplicate_counter = {}
+        for arg in args:
+            current_counter = ''
+            if args.count(arg) > 1:
+                if arg not in duplicate_counter:
+                    duplicate_counter[arg] = 1
+                else:
+                    duplicate_counter[arg] += 1
+                current_counter += f'_{duplicate_counter[arg]}'
+
+            if arg.endswith('_noisy'):
+                arg, container = arg.rsplit('_', 1)
+                container = '_' + container
+            else:
+                container = ''
+
+            if arg in self._names:
+                arg_data = self.get_by_name(arg + container).full()
+                if index is not None:
+                    arg_data = arg_data[:, index]
+                if subplots:
+                    data[arg + current_counter + container + suffix] = {'data': arg_data}
+                    data[arg + current_counter + container + suffix]['subplot'] = plot
+                    plot += 1
+                else:
+                    data[arg + current_counter + container + suffix] = arg_data
+            elif arg in self._data:
+                for name in self._data[arg].names:
+                    arg_data = self.get_by_name(name).full()
+                    if index is not None:
+                        arg_data = arg_data[:, index]
+                    if subplots:
+                        data[name + current_counter + container + suffix] = {'data': arg_data}
+                        data[name + current_counter + container + suffix]['subplot'] = plot
+                        plot += 1
+                    else:
+                        data[name + current_counter + container + suffix] = arg_data
+            else:
+                msg = f"Argument '{arg}' not recognized"
+                raise ValueError(msg)
+
+        return data
+
+    def to_mat(self, *args, **kwargs):
+        """
+        Saves the solution to .mat file. Must take as an argument a string. Pass to the keyword argument 'file_name'
+        the name of the file. For example model.solution.to_mat('x','file_name'="results/file.mat")
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        file_name = kwargs.pop("file_name", "data.mat")
+        data = self.to_dict(*args, **kwargs)
+        save_mat(file_name, data)
+
+    def update(self, **kwargs):
+        """
+
+        :param kwargs:
+        :return:
+        """
+        for arg, value in kwargs.items():
+            self.add(arg, value)
 
 
 class TimeSeries(Series):
@@ -2358,3 +3715,70 @@ class OptimizationSeries(Series):
         for k in ['x', 'p']:
             if k in self._data:
                 setattr(self, '_n_' + k, self._data[k].size1())
+
+
+def _clean_external_data(array):
+    """
+
+    :param array:
+    :return:
+    """
+    if isinstance(array, ca.DM):
+        if not array.is_row():
+            if array.is_column():
+                array = array.T
+            else:
+                # Multiple rows -> We need to append multiple data lines (append index to name)
+                raise NotImplementedError
+        array = array.full().flatten()
+    elif isinstance(array, (list, set, tuple)):
+        # TODO: What if list of lists is supplied?
+        if any(isinstance(k, (list, set, tuple)) for k in array):
+            raise NotImplementedError
+        array = np.array(array)
+    elif isinstance(array, np.ndarray):
+        # TODO: What about multi-dimensional arrays
+        if array.ndim > 1:
+            if 1 in array.shape:
+                array = array.flatten()
+            else:
+                # Multiple rows -> We need to append multiple data lines (append index to name)
+                raise NotImplementedError
+    else:
+        raise TypeError(f"Wrong type '{type(array).__name__}' for 'data' values.")
+
+    return array
+
+
+def _process_noise_inputs_normal(arg, **kwargs):
+    """
+
+    :param arg:
+    :param kwargs:
+    :return:
+    """
+    mean = kwargs.get('mean')
+    if mean is None:
+        mean = kwargs.get('mu')
+    if isinstance(mean, dict):
+        mean = mean.get(arg)
+    if mean is None:
+        mean = 0.
+
+    std = kwargs.get('std')
+    if std is None:
+        std = kwargs.get('standard_deviation')
+    if isinstance(std, dict):
+        std = std.get(arg)
+    if std is None:
+        var = kwargs.get('var')
+        if var is None:
+            var = kwargs.get('variance')
+        if isinstance(var, dict):
+            var = var.get(arg)
+        if var is None:
+            std = 1.
+        else:
+            std = np.sqrt(var)
+
+    return mean, std
