@@ -20,6 +20,7 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
+
 # TODO: Typing hints
 
 from __future__ import annotations
