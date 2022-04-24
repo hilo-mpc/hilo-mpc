@@ -32,8 +32,9 @@ import warnings
 import casadi as ca
 import numpy as np
 
-from ..base import Base, Vector, Equations, RightHandSide
+from ..base import Base, Vector, Equations, RightHandSide, TimeSeries
 from ..machine_learning.base import LearningBase
+from ...util.data import DataSet, DataGenerator
 from ...util.dynamic_model import GenericCost, QuadraticCost, continuous2discrete
 from ...util.parsing import parse_dynamic_equations
 from ...util.util import check_if_list_of_string, convert, dump_clean, generate_c_code, is_iterable, is_list_like, \
@@ -44,6 +45,7 @@ Symbolic = TypeVar('Symbolic', ca.SX, ca.MX)
 Mod = TypeVar('Mod', bound='_Model')
 Numeric = Union[int, float]
 NumArray = Union[Sequence[Numeric], np.ndarray]
+ArrayLike = Union[list, tuple, dict, NumArray, ca.DM, Vector]
 
 
 class _Model(Base, metaclass=ABCMeta):
@@ -3229,3 +3231,1148 @@ class _Model(Base, metaclass=ABCMeta):
                 return
 
         self._rhs.scale(var, names, values, eq=eq)
+
+
+class Model(_Model):
+    """
+    Class representing the dynamic model of a system over time
+
+    :param id: The identifier of the model object. If no identifier is given, a random one will be generated.
+    :type id: str, optional
+    :param name: The name of the model object. By default the model object has no name.
+    :type name: str, optional
+    :param discrete: Whether or not the dynamics of the model are discrete, defaults to False (i.e. the model has
+        continuous-time dynamics)
+    :type discrete: bool, optional
+    :param solver: Name of the solver to be used for continuous-time integration, defaults to 'cvodes' if **discrete**
+        is set to False. If **discrete** is set to True the argument **solver** will not be used.
+    :type solver: str, optional
+    :param solver_options: Options to be passed to the selected **solver**. Only used when the model has continuous-time
+        dynamics. By default no options will be set.
+    :type solver_options: dict, optional
+    :param time_unit: The time unit of the model. Common time units are seconds ('s'), hours ('h') or days ('d'). Will
+        only be used for plotting and as an information storage. Defaults to 'h'.
+    :type time_unit: str
+    :param plot_backend: Plotting library that is used to visualize simulated data. At the moment only
+        `Matplotlib <https://matplotlib.org/>`_ and `Bokeh <https://bokeh.org/>`_ are supported. By default no plotting
+        library is selected, i.e. no plots can be generated.
+    :type plot_backend: str, optional
+    """
+    def __init__(
+            self,
+            id: Optional[str] = None,
+            name: Optional[str] = None,
+            discrete: bool = False,
+            solver: Optional[str] = None,
+            solver_options: Optional[dict] = None,
+            time_unit: str = "h",
+            plot_backend: Optional[str] = None
+    ) -> None:
+        """Constructor method"""
+        super().__init__(id=id, name=name, discrete=discrete, solver=solver, solver_options=solver_options,
+                         time_unit=time_unit, use_sx=True)
+
+        self._solution = TimeSeries(plot_backend, parent=self)
+        self._steady_state = TimeSeries(plot_backend, parent=self)
+        # TODO: Figure out if we really need self._collocation_points as a TimeSeries class, since the only occurrences
+        #  at the moment just involve the degree.
+        self._collocation_points = TimeSeries(plot_backend, parent=self)
+
+        self._dxdp_nnz = 0
+        self._dydp_nnz = 0
+        self._dzdp_nnz = 0
+
+    def __repr__(self) -> str:
+        args = ""
+        if self._id is not None:
+            args += f"id='{self._id}'"
+        if self.name is not None:
+            args += f", name='{self.name}'"
+        args += f", discrete={self._rhs.discrete}"
+        if self._solver is not None:
+            args += f", solver='{self._solver}'"
+        if self._solver_opts is not None and self._solver_opts:
+            args += f", solver_options={self._solver_opts}"
+        if self._solution.plot_backend is not None:
+            args += f", plot_backend='{self._solution.plot_backend}'"
+        return f"{type(self).__name__}({args})"
+
+    def __str__(self) -> str:
+        str_repr = f"\nModel {self.name}\n\n"
+        add_newline = False
+
+        for k, ode in enumerate(self._rhs.ode.elements()):
+            if k == 0:
+                str_repr += "# ODEs\n"
+                add_newline = True
+            str_repr += f"d{self._x.names[k]}/dt = {ode}\n"
+        if add_newline:
+            str_repr += "\n"
+            add_newline = False
+
+        for k, alg in enumerate(self._rhs.alg.elements()):
+            if k == 0:
+                str_repr += "# ALGs\n"
+                add_newline = True
+            str_repr += f"0 = {alg}\n"
+        if add_newline:
+            str_repr += "\n"
+            add_newline = False
+
+        for k, meas in enumerate(self._rhs.meas.elements()):
+            if k == 0:
+                str_repr += "# MEAS\n"
+            str_repr += f"{self._y.names[k]} = {meas}\n"
+
+        return str_repr
+
+    @property
+    def initial_time(self) -> Optional[ca.DM]:
+        """
+
+        :return:
+        :rtype: DM
+        """
+        if 't' not in self._solution or self._solution.get_by_id('t').is_empty():
+            # TODO: Put warnings here, to inform user?
+            return None
+        return self._solution.get_by_id('t:0')
+
+    t0 = initial_time
+
+    @property
+    def initial_dynamical_states(self) -> Optional[ca.DM]:
+        """
+
+        :return:
+        """
+        if 'x' not in self._solution or self._solution.get_by_id('x').is_empty():
+            # TODO: Put warnings here, to inform user?
+            return None
+        return self._solution.get_by_id('x:0')
+
+    x0 = initial_dynamical_states
+
+    @property
+    def initial_algebraic_states(self) -> Optional[ca.DM]:
+        """
+
+        :return:
+        """
+        if 'z' not in self._solution or self._solution.get_by_id('z').is_empty():
+            # TODO: Put warnings here, to inform user?
+            return None
+        return self._solution.get_by_id('z:0')
+
+    z0 = initial_algebraic_states
+
+    def set_initial_conditions(
+            self,
+            x0: Union[Numeric, ArrayLike],
+            t0: Union[int, float] = 0.,
+            z0: Optional[Union[Numeric, ArrayLike]] = None
+    ) -> None:
+        """
+
+        :param x0:
+        :param t0:
+        :param z0:
+        :return:
+        """
+        # TODO: Check consistency of solution object?
+        # TODO: See set_equilibrium_point (see TODO above)
+        if not self._solution.is_set_up():
+            raise RuntimeError("Model is not set up. Run Model.setup() before setting the initial conditions.")
+
+        # TODO: Support for time grids
+        self._solution.set('t', t0)
+
+        if not self._x.is_empty():
+            # NOTE: 'warnings.catch_warnings' is not thread-safe. Don't know if that needs to concern us.
+            # TODO: We could also rewrite TimeSeries.set so that it doesn't care if it's already populated and handle
+            #  the processing entirely here (if Vector is not empty)
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter('always')
+                self._solution.set('x', x0)
+                # self._solution.set('x0_noise', 0.)
+                self._solution.update(x_noise=ca.DM.zeros(self._n_x))
+            match = [k for k in w if k.category == UserWarning and str(k.message) ==
+                     "Vector is not empty. No changes applied."]
+            if match:
+                warnings.warn("The model has already been simulated. Please reset the solution of the model in order to"
+                              " record a new solution. No changes applied.")
+        else:
+            # TODO: Raise an error here?
+            warnings.warn("Initial dynamical states cannot be set, since no dynamical states are defined for the model."
+                          )
+
+        if not self._z.is_empty():
+            if z0 is None:
+                raise ValueError("The initial values for the algebraic states also have to be set in order to simulate "
+                                 "the model.")
+            # NOTE: 'warnings.catch_warnings' is not thread-safe. Don't know if that needs to concern us.
+            # TODO: We could also rewrite TimeSeries.set so that it doesn't care if it's already populated and handle
+            #  the processing entirely here (if Vector is not empty)
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter('always')
+                self._solution.set('z', z0)
+                # self._solution.set('z0_noise', 0.)
+                self._solution.update(z_noise=ca.DM.zeros(self._n_z))
+            match = [k for k in w if k.category == UserWarning and str(k.message) ==
+                     "Vector is not empty. No changes applied."]
+            if match:
+                warnings.warn("The model has already been simulated. Please reset the solution of the model in order to"
+                              " record a new solution. No changes applied.")
+        elif z0 is not None:
+            warnings.warn("Initial algebraic states cannot be set, since no algebraic states are defined for the model."
+                          )
+
+        if not self._y.is_empty():
+            if self._dydp_nnz > 0 and self._solution.get_by_id('p').is_empty():
+                raise RuntimeError("Please set the values for the parameters by executing the "
+                                   "'set_initial_parameter_values' method before setting the initial conditions.")
+
+            to_skip = ['t', 'u']
+            if self._dydp_nnz == 0:
+                to_skip.append('p')
+            args = self._solution.get_function_args(skip=to_skip)
+            if self._dydp_nnz == 0 and self._n_p > 0:
+                args['p'] = ca.DM.zeros(self._n_p)
+
+            # NOTE: dt is subtracted for time-variant systems due to the way the function for the measurement
+            #  equation is generated
+            # TODO: What about time grids?
+            dt = self._solution.dt
+            if dt is not None:
+                if 'p' in args:
+                    if not self._u.is_empty():
+                        args['p'] = ca.vertcat(ca.DM.zeros(self._n_u), args['p'])
+                    if self._is_time_variant:
+                        args['p'] = ca.vertcat(args['p'], t0 - dt)
+                else:
+                    if not self._u.is_empty():
+                        args['p'] = ca.DM.zeros(self._n_u)
+                        if self._is_time_variant:
+                            args['p'] = ca.vertcat(args['p'], t0 - dt)
+                    else:
+                        if self._is_time_variant:
+                            args['p'] = t0 - dt
+            else:
+                grid = self._solution.grid
+                raise NotImplementedError("Grids are not yet supported for calculating the initial measurements.")
+
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter('always')
+                self._solution.set('y', self._meas_function(**args)['yf'])
+                # TODO: Make the following line work (see Series.set)
+                # self._solution.set('y0_noise', 0.)
+                self._solution.update(y_noise=ca.DM.zeros(self._n_y))
+            match = [k for k in w if k.category == UserWarning and str(k.message) ==
+                     "Vector is not empty. No changes applied."]
+            if match:
+                warnings.warn("The model has already been simulated. Please reset the solution of the model in order to"
+                              " record a new solution. No changes applied.")
+
+    def set_initial_parameter_values(self, p: Union[Numeric, ArrayLike]) -> None:
+        """
+
+        :param p:
+        :return:
+        """
+        # TODO: See set_equilibrium_point
+        if not self._p.is_empty():
+            self._solution.add('p', p)
+        else:
+            warnings.warn(f"The model {self.name} doesn't have any parameters")
+
+    def set_equilibrium_point(
+            self,
+            x_eq: Optional[Union[Numeric, ArrayLike]] = None,
+            z_eq: Optional[Union[Numeric, ArrayLike]] = None,
+            u_eq: Optional[Union[Numeric, ArrayLike]] = None,
+            t0: Union[int, float] = 0.,
+            tol: float = 1e-8
+    ) -> None:
+        """
+
+        :param x_eq:
+        :param z_eq:
+        :param u_eq:
+        :param t0:
+        :param tol:
+        :return:
+        """
+        if not self._is_linearized:
+            print("Model is not linearized. Supplying an equilibrium point is not necessary. No changes applied.")
+            return
+
+        if x_eq is None and self._n_x > 0:
+            raise ValueError("Dynamical state information is missing from the equilibrium point.")
+        if z_eq is None and self._n_z > 0:
+            raise ValueError("Algebraic state information is missing from the equilibrium point.")
+        if u_eq is None and self._n_u > 0:
+            raise ValueError("Input information is missing from the equilibrium point.")
+
+        x_eq = convert(x_eq, ca.DM)
+        z_eq = convert(z_eq, ca.DM)
+        u_eq = convert(u_eq, ca.DM)
+
+        if x_eq.size1() != self._n_x:
+            raise ValueError(f"Dimension mismatch for the dynamical state information of the equilibrium point. "
+                             f"Got {x_eq.size1()}, expected {self._n_x}.")
+        if z_eq.size1() != self._n_z:
+            raise ValueError(f"Dimension mismatch for the algebraic state information of the equilibrium point. "
+                             f"Got {z_eq.size1()}, expected {self._n_z}.")
+        if u_eq.size1() != self._n_u:
+            raise ValueError(f"Dimension mismatch for the input information of the equilibrium point. "
+                             f"Got {u_eq.size1()}, expected {self._n_u}.")
+
+        if (self._dxdp_nnz > 0 or self._dzdp_nnz > 0) and self._solution.get_by_id('p').is_empty():
+            # NOTE: The symbolic linearization should also contain the parameters of the original nonlinear model, i.e.,
+            #  if the symbolic linearized model depends on parameters, so does the original nonlinear model, which we
+            #  will use to check the equilibrium point.
+            # TODO: Or maybe have a link to original Model object and execute that instead of storing a function in
+            #  self._steady_state?
+            raise RuntimeError("Please set the values for the parameters by executing the "
+                               "'set_initial_parameter_values' method before setting the equilibrium point.")
+
+        dt = self._solution.dt
+        if self._n_p > 0:
+            p = self._solution.get_by_id('p:f')
+        else:
+            p = []
+
+        if self._f0 is not None:
+            f0 = self._f0(dt, t0, x_eq, z_eq, u_eq, p)
+            if not ca.logic_all(ca.le(f0.fabs(), tol)):
+                raise ValueError(f"Supplied values are not an equilibrium point. Maximum error: "
+                                 f"{float(ca.mmax(f0.fabs())):.5f}")
+        if self._g0 is not None:
+            g0 = self._g0(dt, t0, x_eq, z_eq, u_eq, p)
+            if not ca.logic_all(ca.le(g0.fabs(), tol)):
+                raise ValueError(f"Supplied values are not an equilibrium point. Maximum error: "
+                                 f"{float(ca.mmax(g0.fabs())):.5f}")
+        self._steady_state.set('t', t0)
+        if not self._x_eq.is_empty():
+            self._steady_state.add('x', x_eq)
+        if not self._z_eq.is_empty():
+            self._steady_state.add('z', z_eq)
+        if not self._u_eq.is_empty():
+            self._steady_state.add('u', u_eq)
+
+    @property
+    def solution(self):
+        """
+
+        :return:
+        """
+        return self._solution
+
+    def copy(self, name=None, setup=False, **kwargs):
+        """
+
+        :param name:
+        :param setup:
+        :param kwargs:
+        :return:
+        """
+        dt = kwargs.pop('dt', None)
+        if dt is None:
+            grid = kwargs.pop('grid', None)
+            if grid is None:
+                if self.is_setup():
+                    dt = self._solution.dt
+                    if dt is None:
+                        grid = self._solution.grid
+
+        _model = super().copy(name=name, setup=False, **kwargs)
+        model = Model(plot_backend=self._solution.plot_backend)
+        model.__setstate__(_model.__getstate__())
+
+        if setup:
+            if not self._rhs.is_empty():
+                if dt is not None:
+                    model.setup(dt=dt)
+                elif grid is not None:
+                    model.setup(grid=grid)
+                else:
+                    model.setup()
+            else:
+                warnings.warn("Model to be copied has no right-hand side, so the new model cannot be set up.")
+        else:
+            if not self._rhs.is_empty():
+                if self.is_linear():
+                    self._rhs.generate_matrix_notation(ca.vertcat(self._x.values, self._z.values), self._u.values)
+
+        return model
+
+    def discretize(
+            self,
+            method: str,
+            order: Optional[int] = None,
+            butcher_tableau: Optional[str] = None,
+            degree: Optional[int] = None,
+            polynomial_type: Optional[str] = None,
+            inplace: bool = False
+    ) -> Optional['Model']:
+        """
+        Discretize a continuous-time model. Implemented discretization methods are explicit Runge-Kutta and collocation
+        schemes.
+
+        :note: The :meth:`~hilo_mpc.core.model.Model.discretize` method doesn't require a numerical sampling time
+            'dt', since the discretization is executed symbolically.
+
+        :note: If the model is already discrete, an according message will be displayed and the discretization attempt
+            will be aborted.
+
+        :param method: The method used for discretization. At the moment only explicit Runge-Kutta methods and
+            collocation schemes are supported. Accepted values are 'rk4' for the most widely known 4th order
+            Runge-Kutta method, 'erk' for general order explicit Runge-Kutta methods and 'collocation' for the implicit
+            collocation methods.
+        :type method: str
+        :param order: Order of the explicit Runge-Kutta method 'erk'. Supported orders are 1 to 4. Will be ignored if
+            'rk4' or 'collocation' is selected. Defaults to 1 for 'erk'.
+        :type order: int, optional
+        :param butcher_tableau: The Butcher tableau used in the discretization with the explicit Runge-Kutta method
+            'erk'. Will be ignored if 'rk4' or 'collocation' is selected. The default value of the Butcher tableau
+            depends on the order of the explicit Runge-Kutta method. For more information on the Butcher tableau refer
+            to the :ref:`Modules <modelling_module>` section.
+        :type butcher_tableau: str, optional
+        :param degree: Degree of the interpolating polynomial used in the collocation method. Will be ignored if 'erk'
+            or 'rk4' is selected. Defaults to 2 for 'collocation'.
+        :type degree: int, optional
+        :param polynomial_type: Polynomial used for calculating the collocation points, i.e. the roots of the
+            polynomial. At the moment only Gauss-Legendre polynomials and Gauss-Radau polynomials are supported. Set
+            **polynomial_type** to 'legendre' for Gauss-Legendre polynomials and to 'radau' for Gauss-Radau polynomials.
+            Will be ignored if 'erk' or 'rk4' is selected. Defaults to 'radau' for 'collocation'.
+        :type polynomial_type: str, optional
+        :param inplace: If True, do discretization on the current :class:`~hilo_mpc.core.model.Model` instance and
+            return None, otherwise a new discretized :class:`~hilo_mpc.core.model.Model` instance will be returned.
+            Defaults to False.
+        :type inplace: bool
+        :return: If argument **inplace** was set to True a new :class:`~hilo_mpc.core.model.Model` instance will be
+            returned, otherwise None
+        """
+        kwargs = {}
+        if method == 'collocation':
+            if degree is None:
+                degree = 2
+            kwargs['degree'] = degree
+            kwargs['collocation_points'] = polynomial_type
+        elif method == 'erk':
+            if order is None:
+                order = 1
+            kwargs['order'] = order
+            kwargs['butcher_tableau'] = butcher_tableau
+
+        _model = super().discretize(method, inplace=inplace, **kwargs)
+        if _model is not None:  # Basically means 'inplace' parameter was set to False
+            model = Model(plot_backend=self._solution.plot_backend)
+            model.__setstate__(_model.__getstate__())
+            if method == 'collocation':
+                model._collocation_points.degree = degree
+
+            return model
+        if method == 'collocation':
+            self._collocation_points.degree = degree
+
+    def linearize(self, name: str = None, trajectory: Optional[dict] = None) -> 'Model':
+        """
+
+        :param name:
+        :param trajectory:
+        :return:
+        """
+        _model = super().linearize(name=name, trajectory=trajectory)
+        model = Model(plot_backend=self._solution.plot_backend)
+        model.__setstate__(_model.__getstate__())
+
+        if not model.is_linear():
+            raise RuntimeError("Something went wrong. Linearized model is not linear.")
+
+        return model
+
+    def reset_solution(self, keep_initial_conditions: bool = True, keep_equilibrium_point: bool = True) -> None:
+        """
+
+        :param keep_initial_conditions:
+        :param keep_equilibrium_point:
+        :return:
+        """
+        if not self._solution.is_empty():
+            if keep_initial_conditions:
+                index = slice(1, None)
+            else:
+                index = None
+
+            # NOTE: To completely remove references and bounds (maybe there's a better way)
+            self._solution.remove('x', skip=['data', 'noise'])
+
+            self._solution.remove('t', index=index)
+            if self._n_x > 0:
+                self._solution.remove('x', index=index)
+            if self._n_y > 0:
+                self._solution.remove('y', index=index)
+            if self._n_z > 0:
+                self._solution.remove('z', index=index)
+            if self._n_u > 0:
+                self._solution.remove('u')
+            if self._n_p > 0:
+                self._solution.remove('p', index=index)
+
+        if not self._steady_state.is_empty():
+            index = None
+            if keep_equilibrium_point:
+                index = slice(1, None)
+            self._steady_state.remove('t', index=index)
+            if self._n_x > 0:
+                self._steady_state.remove('x', index=index)
+            if self._n_z > 0:
+                self._steady_state.remove('z', index=index)
+            if self._n_u > 0:
+                # NOTE: We don't want to clear the complete array here, since this is supposed to be a parameter.
+                self._steady_state.remove('u', index=index)
+
+    def setup(self, **kwargs):
+        """
+
+        :param kwargs:
+        :return:
+        """
+        # TODO: Add support for time grid
+        # TODO: Check time-dependent odes
+        self._solution.clear()
+
+        dt = kwargs.get('dt')
+        if dt is None:
+            grid = kwargs.get('grid')
+            if grid is None:
+                warnings.warn(f"Sampling time 'dt' was not supplied. Assuming a sampling time of "
+                              f"'dt=1{self._t.units[0]}'")
+                dt = 1.
+                kwargs['dt'] = dt
+        else:
+            grid = None
+
+        super().setup(**kwargs)
+
+        if self._n_x > 0 and self._n_p > 0:
+            self._dxdp_nnz = ca.jacobian(self._rhs.ode, self._p.values).nnz()
+        if self._n_y > 0 and self._n_p > 0:
+            self._dydp_nnz = ca.jacobian(self._rhs.meas, self._p.values).nnz()
+        if self._n_z > 0 and self._n_p > 0:
+            self._dzdp_nnz = ca.jacobian(self._rhs.alg, self._p.values).nnz()
+
+        if dt is not None:
+            names = ['dt']
+            vector = {
+                'dt': dt
+            }
+        else:
+            names = ['grid']
+            vector = {
+                'grid': grid
+            }
+        names += ['t']
+        vector['t'] = {
+            'values_or_names': self._t.names,
+            'description': self._t.description,
+            'labels': self._t.labels,
+            'units': self._t.units,
+            'shape': (1, 0),
+            'data_format': ca.DM
+        }
+        if self._x.names:
+            names += ['x']
+            vector['x'] = {
+                'values_or_names': self._x.names,
+                'description': self._x.description,
+                'labels': self._x.labels,
+                'units': self._x.units,
+                'shape': (self._n_x, 0),
+                'data_format': ca.DM
+            }
+        if self._y.names:
+            names += ['y']
+            vector['y'] = {
+                'values_or_names': self._y.names,
+                'description': self._y.description,
+                'labels': self._y.labels,
+                'units': self._y.units,
+                'shape': (self._n_y, 0),
+                'data_format': ca.DM
+            }
+        if self._z.names:
+            names += ['z']
+            vector['z'] = {
+                'values_or_names': self._z.names,
+                'description': self._z.description,
+                'labels': self._z.labels,
+                'units': self._z.units,
+                'shape': (self._n_z, 0),
+                'data_format': ca.DM
+            }
+        if self._u.names:
+            names += ['u']
+            vector['u'] = {
+                'values_or_names': self._u.names,
+                'description': self._u.description,
+                'labels': self._u.labels,
+                'units': self._u.units,
+                'shape': (self._n_u, 0),
+                'data_format': ca.DM
+            }
+        if self._p.names:
+            names += ['p']
+            vector['p'] = {
+                'values_or_names': self._p.names,
+                'description': self._p.description,
+                'labels': self._p.labels,
+                'units': self._p.units,
+                'shape': (self._n_p, 0),
+                'data_format': ca.DM
+            }
+        if self._n_q > 0:
+            names += ['q']
+            vector['q'] = {
+                'values_or_names': 'q',
+                'shape': (self._n_q, 0),
+                'data_format': ca.DM
+            }
+        self._solution.setup(*names, **vector)
+
+        if self._is_linearized:
+            if dt is not None:
+                names = ['dt']
+                vector = {
+                    'dt': dt
+                }
+            else:
+                names = ['grid']
+                vector = {
+                    'grid': grid
+                }
+            names += ['t']
+            vector['t'] = {
+                'values_or_names': self._t.names,
+                'description': self._t.description,
+                'labels': self._t.labels,
+                'units': self._t.units,
+                'shape': (1, 0),
+                'data_format': ca.DM
+            }
+            if not self._x_eq.is_empty():
+                names += ['x']
+                vector['x'] = {
+                    'values_or_names': self._x_eq.names,
+                    'description': self._x_eq.description,
+                    'labels': self._x_eq.labels,
+                    'units': self._x_eq.units,
+                    'shape': (self._n_x, 0),  # x_eq and x should have the same dimensions
+                    'data_format': ca.DM
+                }
+            if not self._z_eq.is_empty():
+                names += ['z']
+                vector['z'] = {
+                    'values_or_names': self._z_eq.names,
+                    'description': self._z_eq.description,
+                    'labels': self._z_eq.labels,
+                    'units': self._z_eq.units,
+                    'shape': (self._n_z, 0),  # z_eq and z should have the same dimensions
+                    'data_format': ca.DM
+                }
+            if not self._u_eq.is_empty():
+                names += ['u']
+                vector['u'] = {
+                    'values_or_names': self._u_eq.names,
+                    'description': self._u_eq.description,
+                    'labels': self._u_eq.labels,
+                    'units': self._u_eq.units,
+                    'shape': (self._n_u, 0),  # u_eq and u should have the same dimensions
+                    'data_format': ca.DM
+                }
+            self._steady_state.setup(*names, **vector)
+
+        names = []
+        vector = {}
+        if self._x_col.names:
+            names += ['x']
+            vector['x'] = {
+                'values_or_names': self._x_col.names,
+                'description': self._x_col.description,
+                'labels': self._x_col.labels,
+                'units': self._x_col.units,
+                'shape': (self._x_col.size1(), 0),
+                'data_format': ca.DM
+            }
+        if self._z_col.names:
+            names += ['z']
+            vector['z'] = {
+                'values_or_names': self._z_col.names,
+                'description': self._z_col.description,
+                'labels': self._z_col.labels,
+                'units': self._z_col.units,
+                'shape': (self._z_col.size1(), 0),
+                'data_format': ca.DM
+            }
+        self._collocation_points.setup(*names, **vector)
+
+    def simulate(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        # TODO: Throw error when SX and MX are mixed
+        # TODO: What if time grid is chosen?
+        # TODO: Deal with time span as an argument
+        # TODO: Deal with time-dependent DAEs
+        # TODO: Deal with sporadic measurement (not equidistant).
+        # NOTE: Sporadic measurement time points should be multiples of dt.
+        if self._function is None:
+            # NOTE: Not sure if we want to throw an error here
+            raise RuntimeError("Model is not set up. Run Model.setup() before running simulations.")
+
+        if self._solution.get_by_id('x').is_empty():
+            raise RuntimeError("No initial dynamical states found. Please set initial conditions before simulating the "
+                               "model!")
+
+        if self._n_z > 0 and self._solution.get_by_id('z').is_empty():
+            raise RuntimeError("No initial algebraic states found. Please set initial conditions before simulating the "
+                               "model!")
+
+        dt = self._solution.dt
+        tf = kwargs.get('tf')
+        if tf is None:
+            steps = kwargs.get('steps', 1)
+        else:
+            steps = int(tf / dt)
+        u = kwargs.get('u')
+        p = kwargs.get('p')
+        if u is not None:
+            u = convert(u, ca.DM, axis=1)
+            if u.size1() != self._n_u:
+                raise ValueError(f"Dimension mismatch. Supplied dimension for the inputs 'u' is "
+                                 f"{u.size1()}x{u.size2()}, but required dimension is {self._n_u}x{steps}.")
+            if steps > 1:
+                if u.size2() == 1:
+                    u = ca.repmat(u, 1, steps)
+                elif u.size2() != steps:
+                    raise ValueError(f"Dimension mismatch. Supplied dimension for the inputs 'u' is "
+                                     f"{u.size1()}x{u.size2()}, but required dimension is {self._n_u}x{steps}.")
+            else:
+                if u.size2() != steps:
+                    steps = u.size2()
+            self._solution.add('u', u)
+        else:
+            # NOTE: Instead of checking whether 'u' is contained in self._solution, we could also check if
+            #  self._n_u > 0, since we only get here if the model is set up
+            if 'u' in self._solution:
+                raise RuntimeError("No input 'u' to the system was supplied")
+        if p is not None:
+            p = convert(p, ca.DM, axis=1)
+            if p.size1() != self._n_p:
+                raise ValueError(f"Dimension mismatch. Supplied dimension for the parameters 'p' is "
+                                 f"{p.size1()}x{p.size2()}, but required dimension is {self._n_p}x{steps}.")
+            if steps > 1:
+                if p.size2() == 1:
+                    p = ca.repmat(p, 1, steps)
+                elif p.size2() != steps:
+                    raise ValueError(f"Dimension mismatch. Supplied dimension for the parameters 'p' is "
+                                     f"{p.size1()}x{p.size2()}, but required dimension is {self._n_p}x{steps}.")
+            else:
+                if p.size2() != steps:
+                    steps = p.size2()
+            self._solution.add('p', p)
+        else:
+            # NOTE: Instead of checking whether 'p' is contained in self._solution, we could also check if
+            #  self._n_p > 0, since we only get here if the model is set up
+            if 'p' in self._solution:
+                p = self._solution.get_by_id('p')
+                if p.is_empty():
+                    raise RuntimeError("No parameter 'p' of the system was supplied")
+                if steps > 1:
+                    p = ca.repmat(p[:, -1], 1, steps - p.size2())
+                    self._solution.add('p', p)
+                else:
+                    self._solution.add('p', p[:, -1])
+
+        if dt is not None:
+            if tf is None:
+                tf = steps * dt
+                # NOTE: Don't know if this is necessary
+                tf = ca.linspace(dt, tf, steps).T
+
+            if self._solution['t'].is_empty():
+                self._solution.add('t', 0.)
+        else:
+            steps = 1
+            grid = self._solution.grid
+            tf = grid[1:].reshape(1, -1)
+
+            if self._solution['t'].is_empty():
+                self._solution.add('t', grid[0])
+            else:
+                if self._solution['t:f'] != grid[0]:
+                    self._solution.add('t', grid[0])
+
+        # TODO: Add to_skip from kwargs
+        args = self._solution.get_function_args(steps=steps)
+        t0 = args.pop('t0')
+
+        if self._is_time_variant:
+            if steps > 1:
+                t_args = ca.horzcat(t0, tf[:, :-1])
+            else:
+                t_args = t0
+            if 'p' in args:
+                args['p'] = ca.vertcat(args['p'], t_args)
+            else:
+                args['p'] = t_args
+        tf += t0
+
+        if self._is_linearized and not self._linearization_about_trajectory:
+            x_eq_is_required = self._n_x > 0 and self._steady_state.get_by_id('x').is_empty()
+            z_eq_is_required = self._n_z > 0 and self._steady_state.get_by_id('z').is_empty()
+            u_eq_is_required = self._n_u > 0 and self._steady_state.get_by_id('u').is_empty()
+            if x_eq_is_required or z_eq_is_required or u_eq_is_required:
+                raise RuntimeError("Model is linearized, but no equilibrium point was set. Please set equilibrium point"
+                                   " before simulating the model!")
+
+            x_eq = kwargs.get('x_eq')
+            z_eq = kwargs.get('z_eq')
+            u_eq = kwargs.get('u_eq')
+            check_eq = False
+            if x_eq is not None:
+                x_eq = convert(x_eq, ca.DM, axis=1)
+                if x_eq.size1() != self._n_x:
+                    raise ValueError(f"Dimension mismatch. Supplied dimension for the equilibrium point 'x_eq' is "
+                                     f"{x_eq.size1()}x{x_eq.size2()}, but required dimension is {self._n_x}x{steps}.")
+                if steps > 1:
+                    if x_eq.size2() == 1:
+                        x_eq = ca.repmat(x_eq, 1, steps)
+                    elif x_eq.size2() != steps:
+                        raise ValueError(f"Dimension mismatch. Supplied dimension for the equilibrium point 'x_eq' is "
+                                         f"{x_eq.size1()}x{x_eq.size2()}, but required dimension is "
+                                         f"{self._n_x}x{steps}.")
+                    else:
+                        check_eq = True
+            else:
+                # NOTE: Instead of checking whether 'x' is contained in self._steady_state, we could also check if
+                #  self._n_x > 0, since we only get here if the model is set up
+                if 'x' in self._steady_state:
+                    x_eq = self._steady_state.get_by_id('x')
+                    if x_eq.is_empty():
+                        # NOTE: We should not get here
+                        raise RuntimeError("No parameter 'x_eq' of the system was supplied")
+                    if steps > 1:
+                        x_eq = ca.repmat(x_eq[:, -1], 1, steps - x_eq.size2() + 1)
+                        self._steady_state.add('x', x_eq[:, :-1])
+                    else:
+                        self._steady_state.add('x', x_eq[:, -1])
+                else:
+                    x_eq = ca.DM()
+            if z_eq is not None:
+                z_eq = convert(z_eq, ca.DM, axis=1)
+                if z_eq.size1() != self._n_z:
+                    raise ValueError(f"Dimension mismatch. Supplied dimension for the equilibrium point 'z_eq' is "
+                                     f"{z_eq.size1()}x{z_eq.size2()}, but required dimension is {self._n_z}x{steps}.")
+                if steps > 1:
+                    if z_eq.size2() == 1:
+                        z_eq = ca.repmat(z_eq, 1, steps)
+                    elif z_eq.size2() != steps:
+                        raise ValueError(f"Dimension mismatch. Supplied dimension for the equilibrium point 'z_eq' is "
+                                         f"{z_eq.size1()}x{z_eq.size2()}, but required dimension is "
+                                         f"{self._n_z}x{steps}.")
+                    else:
+                        check_eq = True
+            else:
+                # NOTE: Instead of checking whether 'z' is contained in self._steady_state, we could also check if
+                #  self._n_z > 0, since we only get here if the model is set up
+                if 'z' in self._steady_state:
+                    z_eq = self._steady_state.get_by_id('z')
+                    if z_eq.is_empty():
+                        # NOTE: We should not get here
+                        raise RuntimeError("No parameter 'z_eq' of the system was supplied")
+                    if steps > 1:
+                        z_eq = ca.repmat(z_eq[:, -1], 1, steps - z_eq.size2() + 1)
+                        self._steady_state.add('z', z_eq[:, :-1])
+                    else:
+                        self._steady_state.add('z', z_eq[:, -1])
+                else:
+                    z_eq = ca.DM()
+            if u_eq is not None:
+                u_eq = convert(u_eq, ca.DM, axis=1)
+                if u_eq.size1() != self._n_u:
+                    raise ValueError(f"Dimension mismatch. Supplied dimension for the equilibrium point 'u_eq' is "
+                                     f"{u_eq.size1()}x{u_eq.size2()}, but required dimension is {self._n_u}x{steps}.")
+                if steps > 1:
+                    if u_eq.size2() == 1:
+                        u_eq = ca.repmat(u_eq, 1, steps)
+                    elif u_eq.size2() != steps:
+                        raise ValueError(f"Dimension mismatch. Supplied dimension for the equilibrium point 'u_eq' is "
+                                         f"{u_eq.size1()}x{u_eq.size2()}, but required dimension is "
+                                         f"{self._n_u}x{steps}.")
+                    else:
+                        check_eq = True
+            else:
+                # NOTE: Instead of checking whether 'u' is contained in self._steady_state, we could also check if
+                #  self._n_u > 0, since we only get here if the model is set up
+                if 'u' in self._steady_state:
+                    u_eq = self._steady_state.get_by_id('u')
+                    if u_eq.is_empty():
+                        # NOTE: We should not get here
+                        raise RuntimeError("No parameter 'u_eq' of the system was supplied")
+                    if steps > 1:
+                        u_eq = ca.repmat(u_eq[:, -1], 1, steps - u_eq.size2() + 1)
+                        self._steady_state.add('u', u_eq[:, :-1])
+                    else:
+                        self._steady_state.add('u', u_eq[:, -1])
+                else:
+                    u_eq = ca.DM()
+            self._steady_state.add('t', tf)
+
+            if check_eq:
+                tol = kwargs.get('tol')
+                if tol is None:
+                    tol = 1e-8
+                if self._f0 is not None:
+                    f0 = self._f0(dt, t0, x_eq, z_eq, u_eq, args['p'][self._n_u:self._n_u + self._n_p, :])
+                    if not ca.logic_all(ca.le(f0.fabs(), tol)):
+                        raise ValueError(f"Supplied values are not an equilibrium point. Maximum error: "
+                                         f"{float(ca.mmax(f0.fabs())):.5f}")
+                if self._g0 is not None:
+                    g0 = self._g0(dt, t0, x_eq, z_eq, u_eq, args['p'][self._n_u:self._n_u + self._n_p, :])
+                    if not ca.logic_all(ca.le(g0.fabs(), tol)):
+                        raise ValueError(f"Supplied values are not an equilibrium point. Maximum error: "
+                                         f"{float(ca.mmax(g0.fabs())):.5f}")
+            args['p'] = ca.vertcat(args['p'], x_eq, z_eq, u_eq)
+
+        # NOTE: More often than not the rootfinder won't work with the latest values for the algebraic states stored
+        #  in the solution object as initial conditions. Here, we enable to set the initial conditions of the rootfinder
+        #  arbitrarily by the user.
+        z = kwargs.get('z')
+        if z is not None:
+            z = convert(z, ca.DM, axis=1)
+            if z.size1() != self._n_z:
+                raise ValueError(f"Dimension mismatch. Supplied dimension for the algebraic states 'z' is "
+                                 f"{z.size1()}x{z.size2()}, but required dimension is {self._n_z}x{steps}.")
+            if steps > 1:
+                if z.size2() == 1:
+                    z = ca.repmat(z, 1, steps)
+                elif z.size2() != steps:
+                    raise ValueError(f"Dimension mismatch. Supplied dimension for the algebraic states 'z' is "
+                                     f"{z.size1()}x{z.size2()}, but required dimension is {self._n_z}x{steps}.")
+            args['z0'] = z
+
+        if not self._x_col.is_empty():
+            x_col = kwargs.get('x_col')
+            if x_col is not None:
+                x_col = convert(x_col, ca.DM, axis=1)
+                if x_col.size1() != self._x_col.size1():
+                    raise ValueError(f"Dimension mismatch. Supplied dimension for the dynamical states at the "
+                                     f"collocation points 'x_col' is {x_col.size1()}x{x_col.size2()}, but required "
+                                     f"dimension is {self._x_col.size1()}x{steps}.")
+                if steps > 1:
+                    if x_col.size2() == 1:
+                        x_col = ca.repmat(x_col, 1, steps)
+                    elif x_col.size2() != steps:
+                        raise ValueError(f"Dimension mismatch. Supplied dimension for the dynamical states at the "
+                                         f"collocation points 'x_col' is {x_col.size1()}x{x_col.size2()}, but required "
+                                         f"dimension is {self._x_col.size1()}x{steps}.")
+                args['x_col'] = x_col
+            else:
+                args['x_col'] = ca.repmat(args['x0'], self._collocation_points.degree, steps)
+
+        if not self._z_col.is_empty():
+            z_col = kwargs.get('z_col')
+            if z_col is not None:
+                z_col = convert(z_col, ca.DM, axis=1)
+                if z_col.size1() != self._z_col.size1():
+                    raise ValueError(f"Dimension mismatch. Supplied dimension for the algebraic states at the "
+                                     f"collocation points 'z_col' is {z_col.size1()}x{z_col.size2()}, but required "
+                                     f"dimension is {self._z_col.size1()}x{steps}.")
+                if steps > 1:
+                    if z_col.size2() == 1:
+                        z_col = ca.repmat(z_col, 1, steps)
+                    elif z_col.size2() != steps:
+                        raise ValueError(f"Dimension mismatch. Supplied dimension for the algebraic states at the "
+                                         f"collocation points 'z_col' is {z_col.size1()}x{z_col.size2()}, but required "
+                                         f"dimension is {self._z_col.size1()}x{steps}.")
+                args['z_col'] = z_col
+            else:
+                args['z_col'] = ca.repmat(args['z0'], self._collocation_points.degree)
+
+        if steps > 1:
+            function = self._function.mapaccum(steps)
+            result = function(**args)
+        else:
+            result = self._function(**args)
+        result['t'] = tf
+        if self._n_x > 0:
+            result['x'] = result.pop('xf')
+        if self._n_z > 0:
+            result['z'] = result.pop('zf')
+        if self._n_y > 0:
+            result['y'] = result.pop('yf')
+        if self._n_q > 0:
+            result['q'] = result.pop('qf')
+        self._solution.update(**result)
+
+    def generate_data(
+            self,
+            signal_type: str,
+            *args,
+            output: str = 'absolute',
+            shift: int = 0,
+            add_noise: Optional[Union[dict[str, Numeric], dict[str, dict[str, Numeric]]]] = None,
+            n_samples: Optional[int] = None,
+            steps: Optional[int] = None,
+            bounds: Optional[dict[str, dict[str, Numeric]]] = None,
+            mean: Optional[dict[str, Numeric]] = None,
+            variance: Optional[dict[str, Numeric]] = None,
+            seed: Optional[int] = None,
+            chirps: Optional[dict[str, dict[str, Union[str, Numeric, Sequence[str], Sequence[Numeric]]]]] = None,
+            skip: Optional[Union[Sequence[str], Sequence[int]]] = None,
+            **kwargs
+    ) -> DataSet:
+        """
+
+        :param signal_type:
+        :param args:
+        :param output:
+        :param shift:
+        :param add_noise:
+        :param n_samples:
+        :param steps:
+        :param bounds:
+        :param mean:
+        :param variance:
+        :param seed:
+        :param chirps:
+        :param skip:
+        :param kwargs:
+        :return:
+        """
+        # TODO: Support for algebraic states and parameters
+        data_generator = DataGenerator(self, **kwargs)
+        signal_type = signal_type.replace(' ', '_').lower()
+        if signal_type in ['random_uniform', 'random_normal']:
+            if n_samples is None:
+                raise ValueError(f"Generating data using the {signal_type.replace('_', ' ')} signal requires "
+                                 f"information about the number of samples by supplying the keyword 'n_samples'")
+            if steps is None:
+                raise ValueError(f"Generating data using the {signal_type.replace('_', ' ')} signal requires "
+                                 f"information about the number of steps by supplying the keyword 'steps'")
+
+            lbs = []
+            ubs = []
+            for k in self._u.names:
+                name = bounds.get(k)
+                lb = None
+                ub = None
+                if name is not None:
+                    lb = name.get('lb')
+                    if lb is None:
+                        lb = name.get('lower_bound')
+                    ub = name.get('ub')
+                    if ub is None:
+                        ub = name.get('upper_bound')
+                if lb is None:
+                    lb = 0.
+                if ub is None:
+                    ub = 1.
+                lbs.append(lb)
+                ubs.append(ub)
+
+            if signal_type == 'random_uniform':
+                data_generator.random_uniform(n_samples, steps, lbs, ubs, seed=seed)
+            else:  # signal_type == 'random_normal'
+                mus = []
+                sigmas = []
+                for k in self._u.names:
+                    mu = None
+                    if mean is not None:
+                        mu = mean.get(k)
+                    mus.append(mu)
+                    sigma = None
+                    if variance is not None:
+                        sigma = variance.get(k)
+                    sigmas.append(sigma)
+
+                for k in range(self._n_u):
+                    if mus[k] is None:
+                        mus[k] = lbs[k] + (ubs[k] - lbs[k]) / 2
+                    if sigmas[k] is None:
+                        sigmas[k] = (1. / 3. * (ubs[k] - lbs[k]) / 2) ** 2  # 99.7% lie between lb and ub
+
+                data_generator.random_normal(n_samples, steps, mus, sigmas, seed=seed)
+        elif signal_type == 'chirp':
+            types = []
+            amplitudes = []
+            lengths = []
+            means = []
+            chirp_rates = []
+            initial_phases = []
+            initial_frequencies = []
+            initial_frequency_ratios = []
+            for k in self._u.names:
+                chirp = chirps.get(k)
+                if chirp is not None:
+                    type_ = chirp.get('type')
+                    if type_ is None:
+                        type_ = 'linear'
+                    types.append(type_)
+
+                    amplitude = chirp.get('amplitude')
+                    if amplitude is None:
+                        amplitude = 1.
+                    amplitudes.append(amplitude)
+
+                    length = chirp.get('length')
+                    if length is None:
+                        raise ValueError(f"No length(s) supplied for input '{k}'")
+                    lengths.append(length)
+
+                    mean = chirp.get('mean')
+                    if mean is None:
+                        mean = 0.
+                    means.append(mean)
+
+                    chirp_rate = chirp.get('chirp_rate')
+                    if chirp_rate is None:
+                        raise ValueError(f"No chirp rate(s) supplied for input '{k}'")
+                    chirp_rates.append(chirp_rate)
+
+                    initial_phases.append(chirp.get('initial_phase'))
+                    initial_frequencies.append(chirp.get('initial_frequency'))
+                    initial_frequency_ratios.append(chirp.get('initial_frequency_ratio'))
+                else:
+                    raise ValueError(f"No chirp signals supplied for input'{k}'")
+
+            data_generator.chirp(types, amplitudes, lengths, means, chirp_rates, initial_phase=initial_phases,
+                                 initial_frequency=initial_frequencies,
+                                 initial_frequency_ratio=initial_frequency_ratios)
+        elif signal_type == 'closed_loop':
+            if not args:
+                raise ValueError(f"No controller supplied for {signal_type.replace('_', ' ')} setup")
+            if steps is None:
+                raise ValueError(f"Generating data using the {signal_type.replace('_', ' ')} setup requires "
+                                 f"information about the number of steps by supplying the keyword 'steps'")
+
+            data_generator.closed_loop(*args, steps)
+
+        if add_noise is not None and 'seed' not in add_noise and seed is not None:
+            add_noise = add_noise.copy()
+            add_noise['seed'] = seed
+
+        if skip is not None:
+            if all(isinstance(k, str) for k in skip):
+                skip = self._x.index(skip)
+            elif any(isinstance(k, str) for k in skip):
+                raise ValueError("Mixed iterables for the keyword argument 'skip' are not allowed. Either use only "
+                                 "strings or only indices (integers) in your iterable.")
+        data_generator.run(output, skip=skip, shift=shift, add_noise=add_noise)
+
+        return data_generator.data
