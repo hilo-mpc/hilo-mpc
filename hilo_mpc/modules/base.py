@@ -24,7 +24,7 @@
 from collections.abc import KeysView
 from copy import copy
 import platform
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Union
 import warnings
 
 import casadi as ca
@@ -657,11 +657,18 @@ class Vector(Container):
         if isinstance(key, (list, tuple)):
             for k in reversed(key):
                 if self._axis == 0:
+                    if self._fx is ca.DM:
+                        # NOTE: The names won't be adjusted by self._update_names(), if the data format of the vector
+                        #  is DM.
+                        del self._names[k]
                     del self._description[k]
                     del self._labels[k]
                     del self._units[k]
         else:
             if self._axis == 0:
+                if self._fx is ca.DM:
+                    # NOTE: The names won't be adjusted by self._update_names(), if the data format of the vector is DM.
+                    del self._names[key]
                 del self._description[key]
                 del self._labels[key]
                 del self._units[key]
@@ -939,29 +946,21 @@ class Vector(Container):
         self._update_shape(None)
         self._update_parent()
 
-    def clear(self, axis: Optional[int] = None, index: Optional[Sequence[int]] = None) -> None:
+    def clear(self) -> None:
         """
 
-        :param axis:
-        :param index:
         :return:
         """
-        if axis is not None:
-            self._axis = axis
-
-        if index is None:
-            self._values = self._fx()
-            if self._fx is ca.DM:
-                self._update_shape(None)
-            else:  # SX or MX
-                self._update_names()
-                self._update_description(None)
-                self._update_labels(None)
-                self._update_units(None)
-                self._update_shape(None)
-                self._update_parent()
-        else:
-            self.__delitem__(index)
+        self._values = self._fx()
+        if self._fx is ca.DM:
+            self._update_shape(None)
+        else:  # SX or MX
+            self._update_names()
+            self._update_description(None)
+            self._update_labels(None)
+            self._update_units(None)
+            self._update_shape(None)
+            self._update_parent()
 
     def get_by_name(self, name):
         """
@@ -1003,14 +1002,20 @@ class Vector(Container):
         self.__delitem__(index)
         return ca.vertcat(*stack)
 
-    def remove(self, values):
+    def remove(self, index: Union[int, Sequence[int]], axis: Optional[int] = None) -> None:
         """
 
-        :param values:
+        :param index:
+        :param axis:
         :return:
         """
-        indices = self.index(values)
-        self.__delitem__(indices)
+        old_axis = self._axis
+        if axis is not None:
+            self._axis = axis
+
+        self.__delitem__(index)
+
+        self._axis = old_axis
 
     def set(self, obj, description=None, labels=None, units=None, **kwargs):
         """
