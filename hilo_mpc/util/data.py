@@ -999,7 +999,7 @@ class DataGenerator:
         :param steps:
         :return:
         """
-        controller_is_mpc = controller.type == 'MPC'
+        controller_is_mpc = controller.type == 'NMPC'
 
         def run() -> None:
             """
