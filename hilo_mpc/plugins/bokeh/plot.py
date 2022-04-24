@@ -37,7 +37,7 @@ from ...util.util import is_list_like, random_state
 
 _LINE_KWARGS = ['line_alpha', 'line_cap', 'line_color', 'line_dash', 'line_dash_offset', 'line_join', 'line_width']
 _STEP_KWARGS = ['step_mode']
-_SCATTER_KWARGS = ['marker_color', 'marker_size']
+_SCATTER_KWARGS = ['marker', 'marker_color', 'marker_size']
 
 
 class BasePlot(metaclass=ABCMeta):
@@ -47,6 +47,7 @@ class BasePlot(metaclass=ABCMeta):
     _pop_attributes = [
         'axis_label_text_font_size',
         'major_label_text_font_size',
+        'background_fill_color',
         'logy',
         'logx',
         'loglog'
@@ -54,6 +55,7 @@ class BasePlot(metaclass=ABCMeta):
     _attr_defaults = {
         'axis_label_text_font_size': None,
         'major_label_text_font_size': None,
+        'background_fill_color': None,
         'logy': False,
         'logx': False,
         'loglog': False
@@ -193,17 +195,23 @@ class BasePlot(metaclass=ABCMeta):
                 else:
                     self.axes.title.text = self.title
 
-    def _get_colors(self, num_colors=None, color_kwargs='color'):
+    def _get_colors(self, num_colors=None, color_kwargs='color', subplot=None):
         """
 
         :param num_colors:
         :param color_kwargs:
+        :param subplot:
         :return:
         """
         if num_colors is None:
             num_colors = self.n_plots
 
-        return _get_standard_colors(num_colors=num_colors, colormap=self.colormap, color=self.kwargs.get(color_kwargs))
+        if subplot is None:
+            color = self.kwargs.get(color_kwargs)
+        else:
+            color = self.kwargs.get(color_kwargs)[subplot]
+
+        return _get_standard_colors(num_colors=num_colors, colormap=self.colormap, color=color)
 
     def _get_glyph(self, k, get_interactive=False):
         """
@@ -216,7 +224,7 @@ class BasePlot(metaclass=ABCMeta):
             ax = self.axes.children
             if len(ax) == 2 and self.n_plots != 2:
                 ax = ax[1].children[k][0]
-            elif len(ax) == self.n_plots:
+            elif len(ax) >= self.n_plots:
                 ax = ax[k]
             else:
                 raise ValueError("Number of desired plots is not equal to the number of created plots")
@@ -400,6 +408,9 @@ class BasePlot(metaclass=ABCMeta):
         """
         fig_kwargs = {}
         if self.figsize is not None:
+            if self.background_fill_color is not None:
+                fig_kwargs['background_fill_color'] = self.background_fill_color
+
             if isinstance(self.figsize, (list, tuple, set)) and len(self.figsize) <= 2:
                 if len(self.figsize) == 1:
                     width = height = self.figsize[0]
@@ -625,7 +636,7 @@ class MultiPlot(BasePlot):
             keys = list(plots['y'])  # TODO: Check if len(plots['y']) and len(self.kind[sub]) are the same. The code
             # TODO: needs to be adjusted if this is not the case.
             for k, kind in enumerate(self.kind[sub]):
-                yield sub, [keys[k]], sources[k], colors[k], kind
+                yield sub, k, [keys[k]], sources[k], colors[k], kind
 
     def _make_plot(self):
         """
@@ -634,10 +645,15 @@ class MultiPlot(BasePlot):
         """
         it = self._iter_data()
 
-        for (subplot, labels, source, colors, kind) in it:
+        for (subplot, k, labels, source, colors, kind) in it:
             ax = self._get_glyph(subplot)
             kwargs = self._get_kwargs(kind)
 
+            if kind == 'scatter':
+                if is_list_like(kwargs['marker']):
+                    kwargs['marker'] = kwargs['marker'][subplot][k]
+                if is_list_like(kwargs['size']):
+                    kwargs['size'] = kwargs['size'][subplot][k]
             # NOTE: Going with list(color) for now since processing string representation is not yet implemented
             kwargs['color'] = colors
             kwargs['legend'] = True
@@ -811,6 +827,16 @@ class ScatterPlot(BasePlot):
                     marker = marker[k]
             else:
                 marker = self.marker
+            marker_size = kwargs.get('size')
+            if marker_size is None:
+                marker_size = kwargs.pop('marker_size', None)
+            if marker_size is not None:
+                if is_list_like(marker_size):
+                    marker_size = marker_size[subplot]
+                    if is_list_like(marker_size):
+                        kwargs['size'] = marker_size[k]
+                    else:
+                        kwargs['size'] = marker_size
 
             self._plot(ax, marker)(x='x', y='y' + str(k), **kwargs)
 
@@ -1078,18 +1104,20 @@ def _subplots(n_axes=None, subplot_kwargs=None, layout=None, layout_type='grid',
     if n_rows == 1 and n_cols > 1:
         figs = [fig]
         for k in range(1, n_plots):
-            fig = figure(**subplot_kwargs)
-            if x_data is not None:  # Means, that interactive flag was set to True
-                fig = column(fig, _slider(x_data[k]))
-            figs.append(fig)
+            if k < n_axes:
+                fig = figure(**subplot_kwargs)
+                if x_data is not None:  # Means, that interactive flag was set to True
+                    fig = column(fig, _slider(x_data[k]))
+                figs.append(fig)
         return row(*figs, **kwargs)
     elif n_cols == 1 and n_rows > 1:
         figs = [fig]
         for k in range(1, n_plots):
-            fig = figure(**subplot_kwargs)
-            if x_data is not None:  # Means, that interactive flag was set to True
-                fig = column(fig, _slider(x_data[k]))
-            figs.append(fig)
+            if k < n_axes:
+                fig = figure(**subplot_kwargs)
+                if x_data is not None:  # Means, that interactive flag was set to True
+                    fig = column(fig, _slider(x_data[k]))
+                figs.append(fig)
         return column(*figs, **kwargs)
     elif n_rows > 1 and n_cols > 1:
         grid = []
