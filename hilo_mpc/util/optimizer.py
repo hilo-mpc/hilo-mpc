@@ -34,6 +34,114 @@ Numeric = Union[int, float]
 Symbolic = TypeVar('Symbolic', ca.SX, ca.MX)
 
 
+class IpoptDebugger(ca.Callback):
+    """"""
+    def __init__(self, name, n_v, n_g, n_p, iter_step, ind_x, ind_u, opts=None):
+        """Constructor method"""
+        super().__init__()
+
+        self.n_v = n_v
+        self.n_g = n_g
+        self.np = n_p
+        self.ind_x = ind_x
+        self.ind_u = ind_u
+        self.x_sols = []
+        self.f_sols = []
+        self.g_sols = []
+        self.lam_x_sols = []
+        self.lam_g_sols = []
+        self.lam_p_sols = []
+        self.iter = []
+        self.iter_step = iter_step
+
+        # Initialize internal objects
+        if opts is None:
+            opts = {}
+        self.construct(name, opts)
+
+    def get_n_in(self):
+        """
+
+        :return:
+        """
+        return ca.nlpsol_n_out()
+
+    def get_n_out(self):
+        """
+
+        :return:
+        """
+        return 1
+
+    def get_name_in(self, i):
+        """
+
+        :param i:
+        :return:
+        """
+        return ca.nlpsol_out(i)
+
+    def get_name_out(self, i):
+        """
+
+        :param i:
+        :return:
+        """
+        return "ret"
+
+    def get_sparsity_in(self, i):
+        """
+
+        :param i:
+        :return:
+        """
+        n = ca.nlpsol_out(i)
+        if n == 'f':
+            return ca.Sparsity.scalar()
+        elif n in ('x', 'lam_x'):
+            return ca.Sparsity.dense(self.n_v)
+        elif n in ('g', 'lam_g'):
+            return ca.Sparsity.dense(self.n_g)
+        else:
+            return ca.Sparsity(0, 0)
+
+    def eval(self, arg):
+        """
+
+        :param arg:
+        :return:
+        """
+        # Create dictionary
+        if not self.iter:
+            self.iter = [0]
+        else:
+            self.iter.append(self.iter[-1] + self.iter_step)
+        darg = {}
+        for (i, s) in enumerate(ca.nlpsol_out()): darg[s] = arg[i]
+        x_sol = [float(elem) for elem in darg['x'].full()]
+
+        self.x_sols.append(x_sol)
+        self.f_sols.append(darg['f'].full()[0][0])
+        self.g_sols.append(darg['g'].full())
+        self.lam_x_sols.append(darg['lam_x'].full())
+        self.lam_g_sols.append(darg['lam_g'].full())
+        self.lam_p_sols.append(darg['lam_p'].full())
+
+        return [0]
+
+    def reset_solution(self):
+        """
+
+        :return:
+        """
+        self.x_sols = []
+        self.f_sols = []
+        self.g_sols = []
+        self.lam_x_sols = []
+        self.lam_g_sols = []
+        self.lam_p_sols = []
+
+
 class SciPyOptimizer:
     """
     Wrapper class for SciPy's optimizations
