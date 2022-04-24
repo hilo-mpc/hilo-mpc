@@ -1108,6 +1108,8 @@ class Equations:
             raise TypeError(f"Type {type(data_format)} not supported")
 
         self._equations = []
+        if expression is None:
+            expression = {}
         for key, val in expression.items():
             self._equations.append(key)
             if not isinstance(val, self._fx):
