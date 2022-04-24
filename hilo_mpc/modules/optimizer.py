@@ -760,3 +760,10 @@ class LinearProgram(Optimizer):
 
 
 LP = LinearProgram
+
+
+class QuadraticProgram(LinearProgram):
+    """"""
+
+
+QP = QuadraticProgram
