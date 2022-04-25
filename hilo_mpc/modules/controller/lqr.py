@@ -318,10 +318,6 @@ class LinearQuadraticRegulator(Controller, Base):
         return result['u']
 
 
-LQR = LinearQuadraticRegulator
-
-
 __all__ = [
-    'LinearQuadraticRegulator',
-    'LQR'
+    'LinearQuadraticRegulator'
 ]

@@ -1244,10 +1244,6 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
         self._state_noise_flag = arg
 
 
-MHE = MovingHorizonEstimator
-
-
 __all__ = [
-    'MovingHorizonEstimator',
-    'MHE'
+    'MovingHorizonEstimator'
 ]

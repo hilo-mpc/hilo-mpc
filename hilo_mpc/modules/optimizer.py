@@ -1130,7 +1130,7 @@ class DynamicOptimization(Base):
         """
         if not self._solution.is_empty():
             for k in self._solution:
-                self._solution.remove(k)
+                self._solution.remove(k, slice(0, None))
 
     def set_stage_constraints(self, stage_constraint=None, lb=None, ub=None, is_soft=False, max_violation=ca.inf,
                               weight=None, name='stage_constraint'):

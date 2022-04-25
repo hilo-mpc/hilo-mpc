@@ -1008,7 +1008,7 @@ class Vector(Container):
         self.__delitem__(index)
         return ca.vertcat(*stack)
 
-    def remove(self, index: Union[int, Sequence[int]], axis: Optional[int] = None) -> None:
+    def remove(self, index: Union[int, Sequence[int], slice], axis: Optional[int] = None) -> None:
         """
 
         :param index:
@@ -3258,7 +3258,7 @@ class Series(Object, metaclass=ABCMeta):
     def remove(
             self,
             arg: str,
-            index: Optional[Sequence[int]] = None,
+            index: Union[int, Sequence[int], slice],
             skip: Optional[Union[str, Sequence[str]]] = None
     ) -> None:
         """
@@ -3277,7 +3277,7 @@ class Series(Object, metaclass=ABCMeta):
         if 'data' not in skip:
             if arg in self._data:
                 if not self._data[arg].is_empty():
-                    self._data[arg].remove(axis=1, index=index)
+                    self._data[arg].remove(index, axis=1)
             else:
                 if self._data:
                     raise KeyError(f"Argument '{arg}' not found in data container.")
@@ -3286,19 +3286,19 @@ class Series(Object, metaclass=ABCMeta):
         if 'ref' not in skip and 'reference' not in skip:
             if arg in self._reference:
                 if not self._reference[arg].is_empty():
-                    self._reference[arg].remove(axis=1, index=index)
+                    self._reference[arg].remove(index, axis=1)
         if 'lb' not in skip and 'lower_bound' not in skip:
             if arg in self._lower_bound:
                 if not self._lower_bound[arg].is_empty():
-                    self._lower_bound[arg].remove(axis=1, index=index)
+                    self._lower_bound[arg].remove(index, axis=1)
         if 'ub' not in skip and 'upper_bound' not in skip:
             if arg in self._upper_bound:
                 if not self._upper_bound[arg].is_empty():
-                    self._upper_bound[arg].remove(axis=1, index=index)
+                    self._upper_bound[arg].remove(index, axis=1)
         if 'noise' not in skip:
             if arg in self._noise:
                 if not self._noise[arg].is_empty():
-                    self._noise[arg].remove(axis=1, index=index)
+                    self._noise[arg].remove(index, axis=1)
 
     def set(self, arg, value):
         """

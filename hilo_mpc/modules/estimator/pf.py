@@ -422,9 +422,6 @@ class ParticleFilter(_Estimator):
         self._solution.update(t=tf, x=x, X=X[:], P=P[:], y=y)
 
 
-PF = ParticleFilter
-
-
 def lhsnorm(mu, sigma, n):
     """
 
@@ -451,6 +448,5 @@ def lhsnorm(mu, sigma, n):
 
 
 __all__ = [
-    'ParticleFilter',
-    'PF'
+    'ParticleFilter'
 ]

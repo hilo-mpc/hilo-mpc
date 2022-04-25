@@ -362,9 +362,6 @@ class KalmanFilter(_KalmanFilter):
         pass
 
 
-KF = KalmanFilter
-
-
 class ExtendedKalmanFilter(_KalmanFilter):
     """
     Extended Kalman filter (EKF) class for state estimation (parameter estimation will follow soon)
@@ -406,9 +403,6 @@ class ExtendedKalmanFilter(_KalmanFilter):
         :return:
         """
         pass
-
-
-EKF = ExtendedKalmanFilter
 
 
 class UnscentedKalmanFilter(_KalmanFilter):
@@ -641,14 +635,8 @@ class UnscentedKalmanFilter(_KalmanFilter):
         self._check_parameter_bounds('kappa', arg)
 
 
-UKF = UnscentedKalmanFilter
-
-
 __all__ = [
     'KalmanFilter',
-    'KF',
     'ExtendedKalmanFilter',
-    'EKF',
-    'UnscentedKalmanFilter',
-    'UKF'
+    'UnscentedKalmanFilter'
 ]

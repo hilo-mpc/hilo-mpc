@@ -3692,35 +3692,35 @@ class Model(_Model):
             if keep_initial_conditions:
                 index = slice(1, None)
             else:
-                index = None
+                index = slice(0, None)
 
             # NOTE: To completely remove references and bounds (maybe there's a better way)
-            self._solution.remove('x', skip=['data', 'noise'])
+            self._solution.remove('x', slice(0, None), skip=['data', 'noise'])
 
-            self._solution.remove('t', index=index)
+            self._solution.remove('t', index)
             if self._n_x > 0:
-                self._solution.remove('x', index=index)
+                self._solution.remove('x', index)
             if self._n_y > 0:
-                self._solution.remove('y', index=index)
+                self._solution.remove('y', index)
             if self._n_z > 0:
-                self._solution.remove('z', index=index)
+                self._solution.remove('z', index)
             if self._n_u > 0:
-                self._solution.remove('u')
+                self._solution.remove('u', slice(0, None))
             if self._n_p > 0:
-                self._solution.remove('p', index=index)
+                self._solution.remove('p', index)
 
         if not self._steady_state.is_empty():
             index = None
             if keep_equilibrium_point:
                 index = slice(1, None)
-            self._steady_state.remove('t', index=index)
+            self._steady_state.remove('t', index)
             if self._n_x > 0:
-                self._steady_state.remove('x', index=index)
+                self._steady_state.remove('x', index)
             if self._n_z > 0:
-                self._steady_state.remove('z', index=index)
+                self._steady_state.remove('z', index)
             if self._n_u > 0:
                 # NOTE: We don't want to clear the complete array here, since this is supposed to be a parameter.
-                self._steady_state.remove('u', index=index)
+                self._steady_state.remove('u', index)
 
     def setup(self, **kwargs):
         """
