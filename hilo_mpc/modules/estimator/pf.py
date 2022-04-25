@@ -59,6 +59,7 @@ class ParticleFilter(_Estimator):
             prior_editing: bool = False,
             **kwargs
     ):
+        """Constructor method"""
         if model.is_linear():
             warnings.warn("The supplied model is linear. For better efficiency use an observer targeted at the "
                           "estimation of linear systems.")
