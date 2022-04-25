@@ -530,6 +530,291 @@ class QuadraticCost(GenericCost):
         self._P = arg
 
 
+class MHEQuadraticCost(GenericCost):
+    """"""
+    def __init__(self, model, use_sx=True):
+        """Constructor method"""
+        super().__init__(model, use_sx)
+
+        # List of references that have a fixed values for all MHE iterations
+        self._fixed_ref_list = []
+
+        # List of references that change at every time step of the MHE horizon
+        self._tv_ref_list = []
+
+        # List of references that change every at every iteration, but not withing the MHE horizon:
+        self._iter_ref_list = []
+
+        # Placeholders for the references, needed for trajectory-tracking problems
+        self.ref_placeholder = []
+        self._has_state_noise = False
+        self._w = []
+        self._x_guess = None
+        self._p_guess = None
+        self._n_tv_refs = 0
+        self._n_iter_var_refs = 0
+        self._name_long_to_short = {'states': 'x', 'inputs': 'u', 'measurements': 'y', 'parameters': 'p',
+                                    'state_noise': 'w'}
+
+    @staticmethod
+    def _check_dimensions(var_list, var_weight, var_ref, type):
+        """
+        Run some sanity checks on the user supplied values
+
+        :return:
+        """
+        if var_list is not None and var_weight is None:
+            raise ValueError(
+                f"You passed the following {type}: {var_list} to the cost function, "
+                f"but I do not have any weights for it/them. "
+                f"Please pass me the weights."
+            )
+
+        if var_list is None and var_weight is not None:
+            raise ValueError(f"You passed the {type} weights {var_weight} but without state names. "
+                             f"Please pass me the state names with quad_stage_cost.x.")
+
+        if not check_if_list_of_none([var_list, var_weight]):
+            if not len(var_list) == var_weight.shape[0]:
+                raise ValueError(f"{type} and weights dimensions must be compatible."
+                                 f"The {type} vector you passed me is {len(var_list)} long "
+                                 f"while cost {var_weight.shape}.")
+
+        if var_ref is not None:
+            if isinstance(var_ref, ca.SX):
+                var_ref_dim = var_ref.shape[0]
+            else:
+                var_ref_dim = len(var_ref)
+
+            if not len(var_list) == var_ref_dim:
+                raise ValueError(f"{type} and reference dimensions must be compatible."
+                                 f"The states vector you passed me is {len(var_list)} long while cost {var_ref_dim}.")
+
+    @staticmethod
+    def _create_weight_matrix(arg, name):
+        """
+
+        :param arg:
+        :param name:
+        :return:
+        """
+        if isinstance(arg, np.ndarray) or isinstance(arg, ca.DM):
+            if check_if_square(arg):
+                W = arg
+            elif arg.ndim == 1:
+                W = np.diag(arg)
+            else:
+                raise TypeError(f"{name} must be a square matrix, a 1-D array or a list of real numbers.")
+        elif isinstance(arg, list):
+            W = np.diag(arg)
+        elif isinstance(arg, float) or isinstance(arg, int):
+            W = np.diag([arg])
+        else:
+            raise TypeError(f"The {name} must be a list of floats, numpy array or CasADi DM.")
+        return W
+
+    def _add_cost_term(self, var, names, W, ref, ind, type, ref_type=None):
+        """
+
+        :param var:
+        :param names:
+        :param W:
+        :param ref:
+        :param ind:
+        :param type:
+        :param ref_type:
+        :return:
+        """
+        name = self._name_long_to_short[type]
+        if isinstance(ref, float) or isinstance(ref, int):
+            # Allow the user to input also float or integer as ref. This can be the case if just one variable is passed
+            ref = [ref]
+
+        W = self._create_weight_matrix(W, who_am_i())
+
+        self._check_dimensions(names, W, ref, type)
+
+        if ref is None:
+            # Then is a stabilization problem
+            self._cost += ca.mtimes(var.T, ca.mtimes(W, var))
+        else:
+            if ref_type == 'tv_ref':
+                # Time varying references. These reference change within the prediction horizon, i.e. they are function
+                # of the states and inputs
+                p_ref = ca.SX.sym(f'{name}_ref', ref.shape[0])
+                self._n_tv_refs += ref.shape[0]
+                self._tv_ref_list.append({'ref': ref, 'names': names, 'placeholder': p_ref, 'ind': ind, 'type': type})
+            elif ref_type == 'iter_var_ref':
+                # Iteration varying references. These reference change only once for every MHE iteration
+                ref = check_and_wrap_to_list(ref)
+                p_ref = ca.SX.sym(f'{name}_ref', len(ref))
+                self._n_iter_var_refs += len(ref)
+                self._iter_ref_list.append({'ref': ref, 'names': names, 'placeholder': p_ref, 'ind': ind, 'type': type})
+            elif ref_type == 'fixed_ref':
+                # Fixed references. The values of these reference do not change within the prediction horizon
+                ref = check_and_wrap_to_list(ref)
+                p_ref = ca.SX.sym(f'{name}_ref', len(ref))
+                self._fixed_ref_list.append(
+                    {'ref': ref, 'names': names, 'placeholder': p_ref, 'ind': ind, 'type': type}
+                )
+            else:
+                raise ValueError(f"{ref_type} is not known.")
+
+            self._cost += ca.mtimes((var - p_ref).T, ca.mtimes(W, (var - p_ref)))
+
+        self._is_set = True
+
+    def _setup(self, x_scale=None, w_scale=None, p_scale=None):
+        """
+        This scales the references of path following and trajectory tracking.
+
+        :param x_scale:
+        :param w_scale:
+        :param p_scale:
+        :return:
+        """
+        for fixed_ref in self._fixed_ref_list:
+            self._cost = ca.substitute(self._cost, fixed_ref['placeholder'], fixed_ref['ref'])
+        self._cost = ca.substitute(self._cost, self._model.x, self._model.x * ca.DM(x_scale))
+        if self._model.n_p > 0:
+            self._cost = ca.substitute(self._cost, self._model.p, self._model.p * ca.DM(p_scale))
+        if self._has_state_noise:
+            self._cost = ca.substitute(self._cost, self._w, self._w * ca.DM(w_scale))
+
+    def add_measurements(self, weights, names=None):
+        """
+
+        :param weights:
+        :param names:
+        :return:
+        """
+        if names is None:
+            names = self._model.measurement_names
+            ind_y = list(range(self._model.n_y))
+        else:
+            names = check_and_wrap_to_list(names)
+            ind_y = []
+            for i in names:
+                try:
+                    ind_y.append(self._model._y._names.index(i))
+                except ValueError:
+                    raise ValueError(
+                        f"The measurement {i} does not exist. The available states are {self._model._y._names}"
+                    )
+
+        y = self._model.y[ind_y]
+
+        # Substitute the measurement variables with the measurement equations.
+        # These are function of states,inputs or parameters
+        m_eq = ca.substitute(y, y, self._model.meas[ind_y])
+        self._add_cost_term(m_eq, names, weights, y, ind_y, 'measurements', 'tv_ref')
+
+    def add_inputs(self, names, weights):
+        """
+
+        :param names:
+        :param weights:
+        :return:
+        """
+        names = check_and_wrap_to_list(names)
+        ind_u = []
+        for i in names:
+            try:
+                ind_u.append(self._model._u._names.index(i))
+            except ValueError:
+                raise ValueError(
+                    f"The state {i} does not exist. The available states are {self._model._u._names}"
+                )
+
+        u = self._model.u[ind_u]
+        ref = ca.SX.sym('u_meas', len(ind_u))
+        self._add_cost_term(u, names, weights, ref, ind_u, 'inputs', 'tv_ref')
+
+    def add_state_noise(self, weights):
+        """
+
+        :param weights:
+        :return:
+        """
+        self._w = ca.SX.sym('w', self._model.n_x)
+        names = [f'w_{i}' for i in self._model.dynamical_state_names]
+        ind_w = list(range(self._model.n_x))
+        self._has_state_noise = True
+        self._add_cost_term(self._w, names, weights, None, ind_w, 'state_noise')
+
+    def add_states(self, weights, guess):
+        """
+
+        :param weights:
+        :param guess:
+        :return:
+        """
+        names = self._model.dynamical_state_names
+        guess = check_and_wrap_to_list(guess)
+        if len(guess) != self._model.n_x:
+            raise ValueError(f"The guess must have the same dimension of the model states."
+                             f"There are {self._model.n_x} states but guess has {len(guess)} values.")
+        ind_x = list(range(self._model.n_x))
+        self.x_guess = guess
+        self._add_cost_term(self._model.x, names, weights, guess, ind_x, 'states', 'iter_var_ref')
+
+    def add_parameters(self, weights, guess):
+        """
+
+        :param weights:
+        :param guess:
+        :return:
+        """
+        names = self._model.parameter_names
+        ind_p = list(range(self._model.n_p))
+        guess = check_and_wrap_to_list(guess)
+        if len(guess) != self._model.n_p:
+            raise ValueError(f"The guess must have the same dimension of the model parameters."
+                             f"There are {self._model.n_p} states but guess has {len(guess)} values.")
+        self.p_guess = guess
+        self._add_cost_term(self._model.p, names, weights, guess, ind_p, 'parameters', 'iter_var_ref')
+
+    @property
+    def w(self):
+        """
+
+        :return:
+        """
+        return self._w
+
+    @property
+    def x_guess(self):
+        """
+
+        :return:
+        """
+        return self._x_guess
+
+    @x_guess.setter
+    def x_guess(self, arg):
+        self._x_guess = arg
+
+    @property
+    def p_guess(self):
+        """
+
+        :return:
+        """
+        return self._p_guess
+
+    @p_guess.setter
+    def p_guess(self, arg):
+        self._p_guess = arg
+
+    @property
+    def n_iter_var_refs(self):
+        """
+
+        :return:
+        """
+        return self._n_iter_var_refs
+
+
 class GenericConstraint:
     """Class for generic constraints"""
     def __init__(self, model, name='constraint'):
