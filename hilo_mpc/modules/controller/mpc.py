@@ -2181,3 +2181,9 @@ class LMPC(Controller, DynamicOptimization):
         :return:
         """
         return self._horizon
+
+
+__all__ = [
+    'NMPC',
+    'LMPC'
+]

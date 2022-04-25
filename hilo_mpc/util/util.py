@@ -30,6 +30,8 @@ import warnings
 
 import casadi as ca
 import numpy as np
+from scipy.sparse import issparse
+from scipy.sparse.linalg import norm as sparse_norm
 
 if platform.system() == 'Windows':
     from .windows import get_vcvars, WINDOWS_COMPILERS
@@ -553,6 +555,45 @@ def is_list_like(obj):
     return isinstance(obj, (list, tuple, set, np.ndarray))
 
 
+def is_pd(x):
+    """
+    https://stackoverflow.com/a/63911811
+
+    :param x:
+    :return:
+    """
+    try:
+        np.linalg.cholesky(x)
+    except np.linalg.LinAlgError:
+        return False
+    return True
+
+
+def is_psd(x, tol=1e-14):
+    """
+    https://stackoverflow.com/a/63911811
+
+    :param x:
+    :param tol:
+    :return:
+    """
+    try:
+        regularized_x = x + np.eye(x.shape[0]) * tol
+        np.linalg.cholesky(regularized_x)
+    except np.linalg.LinAlgError:
+        return False
+    return True
+
+
+def is_real(x):
+    """
+
+    :param x:
+    :return:
+    """
+    return np.isreal(x).all()
+
+
 def is_square(array):
     """
 
@@ -562,6 +603,21 @@ def is_square(array):
     if array.ndim == 1:
         return False
     return all([len(row) == len(array) for row in array])
+
+
+def is_symmetric(x, tol=1e-8):
+    """
+    https://stackoverflow.com/a/67406237
+
+    :param x:
+    :param tol:
+    :return:
+    """
+    if issparse(x):
+        # TODO: Test this
+        return sparse_norm(x - x.T, ca.inf) < tol
+    else:
+        return np.linalg.norm(x - x.T, ca.inf) < tol
 
 
 def lower_case(obj: Any) -> Any:
