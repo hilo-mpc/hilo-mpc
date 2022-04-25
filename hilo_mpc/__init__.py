@@ -28,6 +28,7 @@ import hilo_mpc.modules.controller.pid as pid
 import hilo_mpc.modules.estimator.mhe as mhe
 import hilo_mpc.modules.estimator.kf as kf
 import hilo_mpc.modules.estimator.pf as pf
+import hilo_mpc.modules.machine_learning.nn.layer as layer
 import hilo_mpc.modules.control_loop as cl
 import hilo_mpc.modules.optimizer as opti
 import hilo_mpc.util.session as session
@@ -49,6 +50,9 @@ UnscentedKalmanFilter = kf.UnscentedKalmanFilter
 UKF = UnscentedKalmanFilter
 ParticleFilter = pf.ParticleFilter
 PF = ParticleFilter
+Layer = layer.Layer
+Dense = layer.Dense
+Dropout = layer.Dropout
 SimpleControlLoop = cl.SimpleControlLoop
 LinearProgram = opti.LinearProgram
 LP = LinearProgram
@@ -76,6 +80,9 @@ __all__ = [
     'UKF',
     'ParticleFilter',
     'PF',
+    'Layer',
+    'Dense',
+    'Dropout',
     'SimpleControlLoop',
     'LinearProgram',
     'LP',
