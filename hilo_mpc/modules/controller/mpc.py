@@ -1259,7 +1259,7 @@ class NMPC(Controller, DynamicOptimization):
             if self._lag_term_flag:
                 model.set_quadrature_function(self._lag_term)
                 references = self.quad_stage_cost.ref_placeholder
-                u_old = self.quad_stage_cost.input_change_paceholder
+                u_old = self.quad_stage_cost.input_change_placeholder
             else:
                 references = []
                 u_old = []
@@ -1275,7 +1275,7 @@ class NMPC(Controller, DynamicOptimization):
                     else:
                         references = ca.MX.sym('r', 0)
 
-                u_old = self.quad_stage_cost.input_change_paceholder
+                u_old = self.quad_stage_cost.input_change_placeholder
                 self._lag_term_fun = ca.Function('lagrange_term',
                                                  [problem['t'], problem['x'],
                                                   problem['u'], problem['z'], problem['p'],

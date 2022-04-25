@@ -1163,7 +1163,7 @@ class DataGenerator:
         }
 
         self._data_set = DataSet(features, labels, add_time=True, properties=properties,
-                                 plot_backend=self._module.solution.plot_device)
+                                 plot_backend=self._module.solution.plot_backend)
         self._data_set.set_data(inputs, outputs, time=time, feature_noise=input_noise, label_noise=output_noise)
 
 
