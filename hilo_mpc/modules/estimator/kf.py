@@ -361,3 +361,48 @@ class KalmanFilter(_KalmanFilter):
 
 
 KF = KalmanFilter
+
+
+class ExtendedKalmanFilter(_KalmanFilter):
+    """
+    Extended Kalman filter (EKF) class for state estimation (parameter estimation will follow soon)
+
+    :param model:
+    :param id: The identifier of the EKF object. If no identifier is given, a random one will be generated.
+    :param name: The name of the EKF object. By default the EKF object has no name.
+    :param plot_backend: Plotting library that is used to visualize estimated data. At the moment only
+        `Matplotlib <https://matplotlib.org/>`_ and `Bokeh <https://bokeh.org/>`_ are supported. By default no plotting
+        library is selected, i.e. no plots can be generated.
+    :param square_root_form: Not used at the moment (will be implemented in the future)
+    :note: The same methods and properties as for the :py:class:`Kalman filter <.KalmanFilter>` apply
+    """
+    def __init__(
+            self,
+            model: Model,
+            id: Optional[str] = None,
+            name: Optional[str] = None,
+            plot_backend: Optional[str] = None,
+            square_root_form: bool = True
+    ) -> None:
+        if model.is_linear():
+            warnings.warn("The supplied model is linear. For better efficiency use an observer targeted at the "
+                          "estimation of linear systems.")
+
+        super().__init__(model, id=id, name=name, plot_backend=plot_backend, square_root_form=square_root_form)
+
+    def _update_type(self) -> None:
+        """
+
+        :return:
+        """
+        self._type = "extended Kalman filter"
+
+    def _setup_parameters(self) -> None:
+        """
+
+        :return:
+        """
+        pass
+
+
+EKF = ExtendedKalmanFilter
