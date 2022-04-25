@@ -29,6 +29,7 @@ import hilo_mpc.modules.estimator.mhe as mhe
 import hilo_mpc.modules.estimator.kf as kf
 import hilo_mpc.modules.estimator.pf as pf
 import hilo_mpc.modules.machine_learning.nn.layer as layer
+import hilo_mpc.modules.machine_learning.nn.nn as nn
 import hilo_mpc.modules.control_loop as cl
 import hilo_mpc.modules.optimizer as opti
 import hilo_mpc.util.session as session
@@ -53,6 +54,8 @@ PF = ParticleFilter
 Layer = layer.Layer
 Dense = layer.Dense
 Dropout = layer.Dropout
+ArtificialNeuralNetwork = nn.ArtificialNeuralNetwork
+ANN = ArtificialNeuralNetwork
 SimpleControlLoop = cl.SimpleControlLoop
 LinearProgram = opti.LinearProgram
 LP = LinearProgram
@@ -83,6 +86,8 @@ __all__ = [
     'Layer',
     'Dense',
     'Dropout',
+    'ArtificialNeuralNetwork',
+    'ANN',
     'SimpleControlLoop',
     'LinearProgram',
     'LP',

@@ -30,6 +30,7 @@ _TENSORFLOW_VERSION = '2.3.0'
 _TENSORBOARD_VERSION = '2.3.0'
 _BOKEH_VERSION = ''
 _MATPLOTLIB_VERSION = ''
+_PANDAS_VERSION = '1.0.0'
 
 
 class Manager:
@@ -185,3 +186,19 @@ def _get_plot_backend(backend):
         raise ValueError(f"Backend '{backend}' not recognized")
 
     return module
+
+
+def check_version(library: str) -> None:
+    """
+
+    :param library:
+    :return:
+    """
+    if library == 'pandas':
+        try:
+            import pandas
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Plugin 'pandas' is not installed")
+        if StrictVersion(pandas.__version__) < StrictVersion(_PANDAS_VERSION):
+            raise RuntimeError(f"Plugin 'pandas' is installed with version '{pandas.__version__}', but version "
+                               f"{_PANDAS_VERSION}' or higher is required")
