@@ -58,13 +58,14 @@ class SimpleControlLoop:
         if not controller.is_setup():
             controller.setup()
         self._controller = controller
-        self._controller_is_mpc = self._controller.type in ['NMPC', 'LMPC']
+        self._controller_is_mpc = False
+        self._controller_is_pid = False
         self._controller_is_ann = hasattr(self._controller, 'predict')
-        if not self._controller_is_mpc and not self._controller_is_ann:
-            if self._controller.type == 'PID':
-                self._controller_is_pid = True
-            else:
-                self._controller_is_pid = False
+        if not self._controller_is_ann:
+            self._controller_is_mpc = self._controller.type in ['NMPC', 'LMPC']
+            if not self._controller_is_mpc:
+                if self._controller.type == 'PID':
+                    self._controller_is_pid = True
 
         if self._controller_is_mpc:
             # TODO do the same for the estimator
