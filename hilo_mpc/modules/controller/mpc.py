@@ -29,13 +29,14 @@ import casadi as ca
 import casadi.tools as catools
 import numpy as np
 
+from .base import Controller
 from ..optimizer import DynamicOptimization
 from ...util.dynamic_model import GenericCost, QuadraticCost, GenericConstraint, continuous2discrete
 from ...util.optimizer import IpoptDebugger
 from ...util.util import check_and_wrap_to_list, check_and_wrap_to_DM, scale_vector
 
 
-class NMPC(DynamicOptimization):
+class NMPC(Controller, DynamicOptimization):
     """Class for Nonlinear Model Predictive Control"""
     def __init__(self, model, id=None, name=None, plot_backend='bokeh', use_sx=True, stats=False):
         """Constructor method"""
@@ -55,7 +56,7 @@ class NMPC(DynamicOptimization):
         self._paths_var_list = []
         self._time = 0
 
-        ## Initialize the costs
+        # Initialize the costs
         self.stage_cost = GenericCost(self._model, use_sx=use_sx)
         self.terminal_cost = GenericCost(self._model, use_sx=use_sx)
         self.quad_stage_cost = QuadraticCost(self._model, use_sx=use_sx)
@@ -87,7 +88,7 @@ class NMPC(DynamicOptimization):
         self._e_term_stage_ind = []
 
         # In some cases, for example path following with interpolated path using spline, the objective
-        # function needs to be defined in MX variable instead of SX, because the casadi spline interpolation
+        # function needs to be defined in MX variable instead of SX, because the CasADi spline interpolation
         # is defined only in MX functions.
         self._use_sx = use_sx
 
@@ -191,6 +192,13 @@ class NMPC(DynamicOptimization):
         args += "\n=================================================================\n"
 
         return args
+
+    def _update_type(self) -> None:
+        """
+
+        :return:
+        """
+        self._type = 'NMPC'
 
     def _define_cost_terms(self):
         """
@@ -1883,3 +1891,293 @@ class NMPC(DynamicOptimization):
         :return:
         """
         return self._time_var
+
+
+class LMPC(Controller, DynamicOptimization):
+    """"""
+    def __init__(self, model, id=None, name=None, plot_backend='bokeh', use_sx=True):
+        """Constructor method"""
+        super().__init__(model, id=id, name=name, plot_backend=plot_backend)
+        if not model.is_linear():
+            raise TypeError("The model must be linear. Use the NMPC class instead.")
+        if not model.discrete:
+            raise TypeError("The model not discrete-time. Use the NMPC class instead.")
+
+        self._may_term_flag = False
+        self._lag_term_flag = False
+        self._prediction_horizon_is_set = False
+        self._control_horizon_is_set = False
+        self._change_input_term_flag = False
+        self._mixed_integer_flag = False
+        self._trajectory_following_flag = False
+        self._mpc_options_is_set = False
+        self._paths_var_list = []
+        self._time = 0
+        self._n_iterations = 0
+
+        # Initialize the costs
+        self._time_var = []
+
+        self._lag_term = 0
+        self._may_term = 0
+
+        self._minimize_final_time_flag = False
+        self._time_varying_parameters_ind = []
+        self.x_ub = []
+        self.x_lb = []
+        self.u_ub = []
+        self.u_lb = []
+        self.time_varying_parameters = []
+        self._x_scaling = []
+        self._u_scaling = []
+        self._y_scaling = []
+        self._prediction_horizon = []
+        self._control_horizon = []
+
+        self._e_soft_stage_ind = []
+        self._e_term_stage_ind = []
+
+        # In some cases, for example path following with interpolated path using spline, the objective
+        # function needs to be defined in MX variable instead of SX, because the CasADi spline interpolation
+        # is defined only in MX functions.
+        self._use_sx = use_sx
+
+        # Save dimensions of the model. This can be useful because the MPC can change these later, but we still need
+        # them
+        self._n_x = deepcopy(model.n_x)
+        self._n_u = deepcopy(model.n_u)
+        self._n_y = deepcopy(model.n_y)
+        self._n_z = deepcopy(model.n_z)
+        self._n_p = deepcopy(model.n_p)
+        self._n_m = 1
+        self._options = {}
+
+        self._solver_name = 'qpoases'
+
+    def _update_type(self) -> None:
+        """
+
+        :return:
+        """
+        self._type = 'LMPC'
+
+    def _parse_tvp_parameters_values(self, tvp):
+        """
+
+        :param tvp:
+        :return:
+        """
+        # Get horizon of tvp values
+        if tvp is not None:
+            self._time_varying_parameters_horizon = ca.DM.zeros(self._n_tvp, self.prediction_horizon)
+            tvp_counter = 0
+            for key, value in tvp.items():
+                if len(value) < self.prediction_horizon:
+                    raise TypeError(
+                        "When passing time-varying parameters, you need to pass a number of values at least "
+                        f"as long as the prediction horizon. The parameter {key} has {len(value)} values but the MPC "
+                        f"has a prediction horizon length of {self._prediction_horizon}."
+                    )
+
+                value = tvp[key]
+                self._time_varying_parameters_horizon[tvp_counter, :] = value[:self._prediction_horizon]
+                tvp_counter += 1
+        elif self._time_varying_parameters_values is not None:
+            self._get_tvp_parameters_values()
+        else:
+            raise ValueError(
+                f"Mate, I know there are {self._n_tvp} time varying parameters but you did not pass me any."
+                f"Please provide me with the values of the parameters, either to the optimize() method or to the "
+                f"set_time_varying_parameters() method."
+            )
+
+    def setup(self, options=None, solver_options=None, nlp_solver='qpoases'):
+        """
+
+        :param options:
+        :param solver_options:
+        :param nlp_solver:
+        :return:
+        """
+        if not self._scaling_is_set:
+            self.set_scaling()
+        if not self._time_varying_parameters_is_set:
+            self.set_time_varying_parameters()
+        if not self._box_constraints_is_set:
+            self.set_box_constraints()
+        if not self._initial_guess_is_set:
+            self.set_initial_guess()
+
+        if not self._nlp_solver_is_set:
+            self.set_nlp_solver(nlp_solver)
+        if not self._sampling_time_is_set:
+            self.set_sampling_interval()
+
+        n_x = self._n_x
+        n_u = self._n_u
+
+        A = self._model.state_matrix
+        B = self._model.input_matrix
+        Q = self.Q
+        R = self.R
+
+        dim_states = n_x * (self._horizon + 1)
+        dim_control = n_u * self._horizon
+
+        # Build Adis
+        aux1 = np.eye(self._horizon, self._horizon + 1)
+        Abar1 = ca.kron(aux1, A)
+        aux2 = np.zeros((self._horizon, self._horizon + 1))
+
+        # Save indices variables
+        u_ind = []
+        x_ind = []
+
+        offset_x = 0
+        x_ind.append([j for j in range(offset_x, offset_x + n_x)])
+        offset_x += n_x
+
+        offset_u = (self._horizon + 1) * n_x
+        for i in range(self._horizon):
+            aux2[i, i + 1] = -1
+            x_ind.append([j for j in range(offset_x, offset_x + n_x)])
+            u_ind.append([j for j in range(offset_u, offset_u + n_u)])
+            offset_x += n_x
+            offset_u += n_u
+
+        Abar2 = ca.kron(aux2, ca.DM.eye(n_x))
+        aux3 = np.eye(self._horizon, self._horizon)
+        Abar3 = ca.kron(aux3, B)
+
+        # Add constraints for the ode
+        Adis = ca.horzcat(Abar1 + Abar2, Abar3)
+
+        # generate parameters
+        bdis = ca.kron(ca.DM.zeros(self._model.n_x), ca.DM.ones(self.horizon))
+        # Add constraints for the polytope constraints
+        # TODO, they should be added to A
+
+        H_states = ca.kron(ca.DM.eye(self._horizon + 1), Q)
+        H_control = ca.kron(ca.DM.eye(self._horizon), R)
+
+        H = ca.diagcat(H_states, H_control)
+
+        g = ca.DM.zeros((dim_states + dim_control, 1))
+        lb_states = ca.kron(ca.DM.ones((self._horizon + 1, 1)), self._x_lb)
+        ub_states = ca.kron(ca.DM.ones((self._horizon + 1, 1)), self._x_ub)
+
+        lb_control = ca.kron(ca.DM.ones((self._horizon, 1)), self._u_lb)
+        ub_control = ca.kron(ca.DM.ones((self._horizon, 1)), self._u_ub)
+
+        v_lb = ca.vertcat(lb_states, lb_control)
+        v_ub = ca.vertcat(ub_states, ub_control)
+
+        qp = {
+            'h': H.sparsity(),
+            'a': Adis.sparsity()
+        }
+
+        # TODO move this check of the solver into the setup_solver method
+        if self._solver_name in self._solver_name_list_qp:
+            solver = ca.conic("solver", self._solver_name, qp, self._nlp_opts)
+        elif self._solver_name == 'muaompc':
+            try:
+                from hilo_mpc.extensions import muaompc
+            except ImportError as err:
+                message = f"{err}."
+                message += "\nTo use nlp_solver='muaompc' first install muaompc."
+                message += " Try:\n    pip install muaompc"
+                raise ImportError(message)
+
+            solver = muaompc.setup_solver(self)
+        else:
+            raise ValueError(
+                f"The solver {self._solver_name} does no exist. The possible solver are {self._solver_name_list_qp}."
+            )
+        self._solver = solver
+
+        self._H = ca.DM(H)
+        self._g = g
+        self._Ad = Adis
+        self._Ad_lb = bdis
+        self._Ad_ub = bdis
+        self._v_lb = v_lb
+        self._v_ub = v_ub
+        self._x_ind = x_ind
+        self._u_ind = u_ind
+
+    def optimize(self, x0, tvp=None, cp=None):
+        """
+
+        :param x0:
+        :param tvp:
+        :param cp:
+        :return:
+        """
+        # TODO: substitute all the values of all the variables remaining in the matrices
+        if self._solver_name == 'muaompc':
+            return self._solver(x0)
+
+        if self._model.n_p - self._n_tvp != 0:
+            if cp is not None:
+                cp = check_and_wrap_to_DM(cp)
+
+            if cp is None or cp.size1() != self._model.n_p - self._n_tvp:
+                raise ValueError(
+                    f"The model has {self._model.n_p - self._n_tvp} constant parameter(s): "
+                    f"{self._model.parameter_names}. You must pass me the value of these before running the "
+                    f"optimization to the 'cp' parameter."
+                )
+        else:
+            if cp is not None:
+                warnings.warn(
+                    "You are passing a parameter vector in the optimizer, but the model has no defined parameters. "
+                    "I am ignoring the vector."
+                )
+
+        x0 = check_and_wrap_to_DM(x0)
+
+        if self._n_tvp > 0:
+            self._parse_tvp_parameters_values(tvp)
+
+        Ad = self._Ad
+        Ad_ub = self._Ad_ub
+        Ad_lb = self._Ad_lb
+
+        Ad = ca.substitute(Ad, self._model.dt, self._sampling_interval)
+        Ad_ub = ca.substitute(Ad_ub, self._model.dt, self._sampling_interval)
+        Ad_lb = ca.substitute(Ad_lb, self._model.dt, self._sampling_interval)
+
+        if cp is not None:
+            ind_cp_par = [i for i in range(self._model.n_p) if i not in self._time_varying_parameters_ind]
+            Ad = ca.substitute(Ad, self._model.p[ind_cp_par], cp)
+            Ad_ub = ca.substitute(Ad_ub, self._model.p[ind_cp_par], cp)
+            Ad_lb = ca.substitute(Ad_lb, self._model.p[ind_cp_par], cp)
+
+        self._v_lb[self._x_ind[0][0:self._n_x]] = x0
+        self._v_ub[self._x_ind[0][0:self._n_x]] = x0
+
+        if self._n_tvp:
+            Ad_ub = ca.substitute(Ad_ub, self._tvp, self._time_varying_parameters_horizon)
+            Ad_lb = ca.substitute(Ad_lb, self._tvp, self._time_varying_parameters_horizon)
+
+        Ad = ca.DM(Ad)
+        Ad_ub = ca.DM(Ad_ub)
+        Ad_lb = ca.DM(Ad_lb)
+
+        sol = self._solver(h=self._H, g=self._g, a=Ad, lbx=self._v_lb, ubx=self._v_ub, lba=Ad_lb, uba=Ad_ub)
+
+        self._nlp_solution = sol
+        u_opt = sol['x'][self._u_ind[0]]
+
+        self._n_iterations += 1
+
+        return u_opt
+
+    @property
+    def prediction_horizon(self):
+        """
+
+        :return:
+        """
+        return self._horizon
