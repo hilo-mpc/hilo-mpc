@@ -322,5 +322,6 @@ LQR = LinearQuadraticRegulator
 
 
 __all__ = [
+    'LinearQuadraticRegulator',
     'LQR'
 ]
