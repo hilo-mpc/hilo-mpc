@@ -22,10 +22,11 @@
 #
 
 from abc import ABCMeta, abstractmethod
-from typing import Optional
+from typing import Optional, Union
 import warnings
 
 import casadi as ca
+import numpy as np
 
 from .base import _Estimator
 from ..dynamic_model.dynamic_model import Model
@@ -339,6 +340,7 @@ class KalmanFilter(_KalmanFilter):
             plot_backend: Optional[str] = None,
             square_root_form: bool = True
     ) -> None:
+        """Constructor method"""
         if not model.is_linear():
             raise ValueError("The supplied model is nonlinear. Please use an estimator targeted at the estimation of "
                              "nonlinear systems.")
@@ -384,6 +386,7 @@ class ExtendedKalmanFilter(_KalmanFilter):
             plot_backend: Optional[str] = None,
             square_root_form: bool = True
     ) -> None:
+        """Constructor method"""
         if model.is_linear():
             warnings.warn("The supplied model is linear. For better efficiency use an observer targeted at the "
                           "estimation of linear systems.")
@@ -406,3 +409,246 @@ class ExtendedKalmanFilter(_KalmanFilter):
 
 
 EKF = ExtendedKalmanFilter
+
+
+class UnscentedKalmanFilter(_KalmanFilter):
+    """
+    Unscented Kalman filter (UKF) class for state estimation (parameter estimation will follow soon)
+
+    :param model:
+    :param id: The identifier of the UKF object. If no identifier is given, a random one will be generated.
+    :param name: The name of the UKF object. By default the UKF object has no name.
+    :param alpha:
+    :param beta:
+    :param kappa:
+    :param plot_backend: Plotting library that is used to visualize estimated data. At the moment only
+        `Matplotlib <https://matplotlib.org/>`_ and `Bokeh <https://bokeh.org/>`_ are supported. By default no plotting
+        library is selected, i.e. no plots can be generated.
+    :param square_root_form: Not used at the moment (will be implemented in the future)
+    """
+    def __init__(
+            self,
+            model: Model,
+            id: Optional[str] = None,
+            name: Optional[str] = None,
+            alpha: Union[int, float] = None,
+            beta: Union[int, float] = None,
+            kappa: Union[int, float] = None,
+            plot_backend: Optional[str] = None,
+            square_root_form: bool = True
+    ) -> None:
+        """Constructor method"""
+        if model.is_linear():
+            warnings.warn("The supplied model is linear. For better efficiency use an observer targeted at the "
+                          "estimation of linear systems.")
+
+        super().__init__(model, id=id, name=name, plot_backend=plot_backend, square_root_form=square_root_form)
+
+        if alpha is None:
+            alpha = .001
+        self._check_parameter_bounds('alpha', alpha)
+        if beta is None:
+            beta = 2.
+        self._check_parameter_bounds('beta', beta)
+        if kappa is None:
+            kappa = 0.
+        self._check_parameter_bounds('kappa', kappa)
+        self._lambda = None
+        self._gamma = None
+
+        self._weights = None
+        self._sqrt = None
+
+    def _update_type(self) -> None:
+        """
+
+        :return:
+        """
+        self._type = "unscented Kalman filter"
+
+    def _check_parameter_bounds(self, param: str, value: Union[int, float]) -> None:
+        """
+
+        :param param:
+        :param value:
+        :return:
+        """
+        if param == 'alpha':
+            if value <= 0. or value > 1.:
+                raise ValueError(f"The parameter alpha needs to lie in the interval (0, 1]. Supplied alpha is {value}.")
+            self._alpha = value
+        elif param == 'beta':
+            self._beta = value
+        elif param == 'kappa':
+            if value < 0:
+                raise ValueError(f"The parameter kappa needs to be greater or equal to 0. Supplied kappa is {value}.")
+            self._kappa = value
+
+    def _setup_parameters(self) -> None:
+        """
+
+        :return:
+        """
+        n_x = self._model.n_x
+
+        self._lambda = self._alpha ** 2 * (n_x + self._kappa) - n_x
+        self._gamma = np.sqrt(n_x + self._lambda)
+
+        weights = np.zeros((2, 2 * n_x + 1))
+        weights[0, 0] = self._lambda / (n_x + self._lambda)
+        weights[1, 0] = self._lambda / (n_x + self._lambda) + 1 - self._alpha ** 2 + self._beta
+        weights[:, 1:] = 1 / (2 * (n_x + self._lambda))
+        self._weights = weights
+
+        a = ca.SX.sym('a', (n_x, n_x))
+        self._sqrt = ca.Function('sqrt', [a], [ca.chol(a)])
+
+    def _setup_predict(self, *args: Optional[ca.Function]) -> None:
+        """
+
+        :param args:
+        :return:
+        """
+        n_x = self._model.n_x
+        n_u = self._model.n_u
+        n_p = self._model.n_p
+
+        x = ca.MX.sym('x', n_x)
+        u = ca.MX.sym('u', n_u)
+        p = ca.MX.sym('p', n_p)
+        up = ca.vertcat(u, p)
+
+        P = ca.MX.sym('P', (n_x, n_x))
+        Q = ca.MX.sym('Q', (n_x, n_x))
+        P_sqrt = self._sqrt(P)
+        X = [x]
+        for k in range(n_x):
+            X.append(x + self._gamma * P_sqrt[:, k])
+        for k in range(n_x):
+            X.append(x - self._gamma * P_sqrt[:, k])
+        X = ca.horzcat(*X)
+
+        self._solution.setup('P', P={
+            'values_or_names': [P.name() + '_' + str(k) for k in range(P.numel())],
+            'description': P.numel() * [''],
+            'labels': P.numel() * [''],
+            'units': P.numel() * [''],
+            'shape': (P.numel(), 0),
+            'data_format': ca.DM
+        })
+
+        sol = self._model(x0=X, p=up)
+        X = sol['xf']
+
+        x_pred = ca.MX(0)
+        for k in range(2 * n_x + 1):
+            x_pred += self._weights[0, k] * X[:, k]
+
+        P_pred = Q
+        for k in range(2 * n_x + 1):
+            P_pred += self._weights[1, k] * (X[:, k] - x_pred) @ (X[:, k] - x_pred).T
+
+        self._predict_function = ca.Function('prediction_step',
+                                             [ca.horzcat(x, P), up, Q],
+                                             [ca.horzcat(x_pred, P_pred, X)],
+                                             ['x0', 'p', 'Q'],
+                                             ['x'])
+
+    def _setup_update(self, *args: Optional[ca.Function]) -> None:
+        """
+
+        :param args:
+        :return:
+        """
+        n_x = self._model.n_x
+        n_y = self._model.n_y
+        n_u = self._model.n_u
+        n_p = self._model.n_p
+
+        x = ca.MX.sym('x', n_x)
+        X = ca.MX.sym('X', n_x, 2 * n_x + 1)
+        y = ca.MX.sym('y', n_y)
+        u = ca.MX.sym('u', n_u)
+        p = ca.MX.sym('p', n_p)
+        up = ca.vertcat(u, p)
+        P = ca.MX.sym('P', (n_x, n_x))
+
+        if n_y == 0:
+            warnings.warn(f"The model has no measurement equations, I am assuming measurements of all states "
+                          f"{self._model.dynamical_state_names} are available.")
+            Y = X
+        else:
+            sol = self._model(x0=X, p=up, which='meas_function')
+            Y = sol['yf']
+
+        y_pred = ca.MX(0)
+        for k in range(2 * n_x + 1):
+            y_pred += self._weights[0, k] * Y[:, k]
+
+        R = ca.MX.sym('R', (n_y, n_y))
+        P_xy = ca.MX(0)
+        P_yy = R
+        for k in range(2 * n_x + 1):
+            P_xy += self._weights[1, k] * (X[:, k] - x) @ (Y[:, k] - y_pred).T
+            P_yy += self._weights[1, k] * (Y[:, k] - y_pred) @ (Y[:, k] - y_pred).T
+
+        # NOTE: See NOTE in KalmanFilter.setup()
+        K = ca.solve(P_yy.T, P_xy.T).T
+
+        x_up = x + K @ (y - y_pred)
+        P_up = P - K @ P_yy @ K.T
+
+        self._update_function = ca.Function('update_step',
+                                            [ca.horzcat(x, P, X), y, up, R],
+                                            [ca.horzcat(x_up, P_up), y_pred],
+                                            ['x0', 'y', 'p', 'R'],
+                                            ['x', 'y_pred'])
+
+    @property
+    def alpha(self) -> float:
+        """
+
+        :return:
+        """
+        return float(self._alpha)
+
+    @alpha.setter
+    def alpha(self, arg: Union[int, float]) -> None:
+        self._check_parameter_bounds('alpha', arg)
+
+    @property
+    def beta(self) -> float:
+        """
+
+        :return:
+        """
+        return float(self._beta)
+
+    @beta.setter
+    def beta(self, arg: Union[int, float]) -> None:
+        self._check_parameter_bounds('beta', arg)
+
+    @property
+    def kappa(self) -> float:
+        """
+
+        :return:
+        """
+        return float(self._kappa)
+
+    @kappa.setter
+    def kappa(self, arg: Union[int, float]) -> None:
+        self._check_parameter_bounds('kappa', arg)
+
+
+UKF = UnscentedKalmanFilter
+
+
+__all__ = [
+    'KalmanFilter',
+    'KF',
+    'ExtendedKalmanFilter',
+    'EKF',
+    'UnscentedKalmanFilter',
+    'UKF'
+]
