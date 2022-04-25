@@ -317,3 +317,47 @@ class _KalmanFilter(_Estimator, metaclass=ABCMeta):
         :return:
         """
         return self._update_function(*args, **kwargs)
+
+
+class KalmanFilter(_KalmanFilter):
+    """
+    Kalman filter (KF) class for state estimation (parameter estimation will follow soon)
+
+    :param model:
+    :param id: The identifier of the KF object. If no identifier is given, a random one will be generated.
+    :param name: The name of the KF object. By default the KF object has no name.
+    :param plot_backend: Plotting library that is used to visualize estimated data. At the moment only
+        `Matplotlib <https://matplotlib.org/>`_ and `Bokeh <https://bokeh.org/>`_ are supported. By default no plotting
+        library is selected, i.e. no plots can be generated.
+    :param square_root_form: Not used at the moment (will be implemented in the future)
+    """
+    def __init__(
+            self,
+            model: Model,
+            id: Optional[str] = None,
+            name: Optional[str] = None,
+            plot_backend: Optional[str] = None,
+            square_root_form: bool = True
+    ) -> None:
+        if not model.is_linear():
+            raise ValueError("The supplied model is nonlinear. Please use an estimator targeted at the estimation of "
+                             "nonlinear systems.")
+
+        super().__init__(model, id=id, name=name, plot_backend=plot_backend, square_root_form=square_root_form)
+
+    def _update_type(self) -> None:
+        """
+
+        :return:
+        """
+        self._type = 'Kalman filter'
+
+    def _setup_parameters(self) -> None:
+        """
+
+        :return:
+        """
+        pass
+
+
+KF = KalmanFilter
