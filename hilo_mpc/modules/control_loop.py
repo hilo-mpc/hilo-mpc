@@ -417,7 +417,7 @@ class SimpleControlLoop:
         :return:
         """
         new_kwargs = kwargs
-        if self._plant.solution.plot_device == 'bokeh':
+        if self._plant.solution.plot_backend == 'bokeh':
             if kwargs.get("output_notebook", False):
                 new_kwargs["figsize"] = kwargs.get("figsize", (300, 300))
             else:

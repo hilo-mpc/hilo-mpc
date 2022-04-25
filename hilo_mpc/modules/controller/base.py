@@ -28,6 +28,11 @@ class Controller(metaclass=ABCMeta):
     """"""
     _type = ''
 
+    def __init__(self, *args, **kwargs):
+        """Constructor method"""
+        super().__init__(*args, **kwargs)
+        self._update_type()
+
     @abstractmethod
     def _update_type(self) -> None:
         """

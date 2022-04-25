@@ -23,7 +23,6 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta, abstractmethod
 from copy import deepcopy
 import platform
 from typing import Optional, Sequence, TypeVar, Union
@@ -48,7 +47,7 @@ NumArray = Union[Sequence[Numeric], np.ndarray]
 ArrayLike = Union[list, tuple, dict, NumArray, ca.DM, Vector]
 
 
-class _Model(Base, metaclass=ABCMeta):
+class _Model(Base):
     """"""
     def __init__(
             self,
@@ -2992,16 +2991,6 @@ class _Model(Base, metaclass=ABCMeta):
         self._meas_function = meas
 
         self.check_consistency()
-
-    @abstractmethod
-    def simulate(self, *args, **kwargs):
-        """
-
-        :param args:
-        :param kwargs:
-        :return:
-        """
-        pass
 
     def substitute(self, *args, **kwargs):
         """

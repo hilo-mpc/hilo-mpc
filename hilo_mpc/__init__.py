@@ -21,8 +21,42 @@
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from .modules import *
-from .util.session import Session
+import hilo_mpc.modules.dynamic_model.dynamic_model as dyn_mod
+import hilo_mpc.modules.controller.mpc as mpc
+import hilo_mpc.modules.controller.lqr as lqr
+import hilo_mpc.modules.controller.pid as pid
+import hilo_mpc.modules.estimator.mhe as mhe
+import hilo_mpc.modules.estimator.kf as kf
+import hilo_mpc.modules.estimator.pf as pf
+import hilo_mpc.modules.control_loop as cl
+import hilo_mpc.modules.optimizer as opti
+import hilo_mpc.util.session as session
+
+
+Model = dyn_mod.Model
+NMPC = mpc.NMPC
+LMPC = mpc.LMPC
+LinearQuadraticRegulator = lqr.LinearQuadraticRegulator
+LQR = LinearQuadraticRegulator
+PID = pid.PID
+MovingHorizonEstimator = mhe.MovingHorizonEstimator
+MHE = MovingHorizonEstimator
+KalmanFilter = kf.KalmanFilter
+KF = KalmanFilter
+ExtendedKalmanFilter = kf.ExtendedKalmanFilter
+EKF = ExtendedKalmanFilter
+UnscentedKalmanFilter = kf.UnscentedKalmanFilter
+UKF = UnscentedKalmanFilter
+ParticleFilter = pf.ParticleFilter
+PF = ParticleFilter
+SimpleControlLoop = cl.SimpleControlLoop
+LinearProgram = opti.LinearProgram
+LP = LinearProgram
+QuadraticProgram = opti.QuadraticProgram
+QP = QuadraticProgram
+NonlinearProgram = opti.NonlinearProgram
+NLP = NonlinearProgram
+Session = session.Session
 
 
 __all__ = [
