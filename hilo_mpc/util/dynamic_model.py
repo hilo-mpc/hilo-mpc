@@ -664,7 +664,7 @@ class MHEQuadraticCost(GenericCost):
 
         self._is_set = True
 
-    def _setup(self, x_scale=None, w_scale=None, p_scale=None):
+    def _setup(self, x_scale=None, w_scale=None, p_scale=None, u_scale=None):
         """
         This scales the references of path following and trajectory tracking.
 

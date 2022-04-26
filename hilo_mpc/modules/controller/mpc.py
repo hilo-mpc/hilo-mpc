@@ -1147,6 +1147,11 @@ class NMPC(Controller, DynamicOptimization):
         self._x_scaling_orig = deepcopy(self._x_scaling)
         self._u_scaling_orig = deepcopy(self._u_scaling)
 
+        self._x_lb_orig = deepcopy(self._x_lb)
+        self._x_ub_orig = deepcopy(self._x_ub)
+        self._u_lb_orig = deepcopy(self._u_lb)
+        self._u_ub_orig = deepcopy(self._u_ub)
+
         for i in range(self.n_of_path_vars):
             theta = self._paths_var_list[i]['theta']
             theta_vel_ub = self._paths_var_list[i]['u_pf_ub']
@@ -1259,7 +1264,7 @@ class NMPC(Controller, DynamicOptimization):
             if self._lag_term_flag:
                 model.set_quadrature_function(self._lag_term)
                 references = self.quad_stage_cost.ref_placeholder
-                u_old = self.quad_stage_cost.input_change_paceholder
+                u_old = self.quad_stage_cost.input_change_placeholder
             else:
                 references = []
                 u_old = []
@@ -1275,7 +1280,7 @@ class NMPC(Controller, DynamicOptimization):
                     else:
                         references = ca.MX.sym('r', 0)
 
-                u_old = self.quad_stage_cost.input_change_paceholder
+                u_old = self.quad_stage_cost.input_change_placeholder
                 self._lag_term_fun = ca.Function('lagrange_term',
                                                  [problem['t'], problem['x'],
                                                   problem['u'], problem['z'], problem['p'],
