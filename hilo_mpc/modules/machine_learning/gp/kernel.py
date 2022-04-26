@@ -26,7 +26,7 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 import copy
 from itertools import product
-from typing import Optional, Sequence, TypeVar, Union
+from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 import warnings
 
 import casadi as ca
@@ -40,7 +40,7 @@ from ....util.util import is_list_like
 IntArray = Union[int, Sequence[int]]
 Numeric = Union[int, float]
 NumArray = Union[Numeric, Sequence[Numeric], np.ndarray]
-Bounds = dict[str, Union[str, (Numeric, Numeric)]]
+Bounds = Dict[str, Union[str, Tuple[Numeric, Numeric]]]
 Cov = TypeVar('Cov', bound='Kernel')
 Array = TypeVar('Array', ca.SX, ca.MX, np.ndarray)
 Param = TypeVar('Param', bound=Parameter)
@@ -140,7 +140,7 @@ class Kernel(metaclass=ABCMeta):
             return K.full()
 
     @property
-    def hyperparameters(self) -> list[Param]:
+    def hyperparameters(self) -> List[Param]:
         """
         List of all hyperparameters in the kernel.
 
@@ -154,7 +154,7 @@ class Kernel(metaclass=ABCMeta):
         return hyperparameters
 
     @property
-    def hyperparameter_names(self) -> list[str]:
+    def hyperparameter_names(self) -> List[str]:
         """
 
         :return:
@@ -380,7 +380,11 @@ class Kernel(metaclass=ABCMeta):
                                 bounds=bounds)
 
     @staticmethod
-    def linear(active_dims: Optional[IntArray] = None, signal_variance: Numeric = 1., bounds: Optional[Bounds] = None) -> Cov:
+    def linear(
+            active_dims: Optional[IntArray] = None,
+            signal_variance: Numeric = 1.,
+            bounds: Optional[Bounds] = None
+    ) -> Cov:
         """
 
         :param active_dims:
@@ -1441,7 +1445,7 @@ class KernelOperator(Kernel, metaclass=ABCMeta):
         self.disambiguate_hyperparameter_names()
 
     @property
-    def hyperparameters(self) -> list[Param]:
+    def hyperparameters(self) -> List[Param]:
         """
         List of all hyperparameters in the kernel.
 
@@ -1454,7 +1458,7 @@ class KernelOperator(Kernel, metaclass=ABCMeta):
             return self.kernel_1.hyperparameters
 
     @property
-    def hyperparameter_names(self) -> list[str]:
+    def hyperparameter_names(self) -> List[str]:
         """
 
         :return:

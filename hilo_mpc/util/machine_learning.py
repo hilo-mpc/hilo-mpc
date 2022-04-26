@@ -369,7 +369,7 @@ class Parameter(Object):
         return self._bounds
 
     @bounds.setter
-    def bounds(self, bounds: Union[str, Numeric, (Numeric, ), (Numeric, Numeric)]) -> None:
+    def bounds(self, bounds: Union[str, Numeric, tuple[Numeric], tuple[Numeric, Numeric]]) -> None:
         self._set_properties(self._log, bounds)
 
     @property
@@ -455,7 +455,7 @@ class PositiveParameter(Parameter):
             prior: Optional[str, list[str]] = None,
             prior_mean: Optional[Numeric, list[Numeric]] = None,
             prior_variance: Optional[Numeric, list[Numeric]] = None,
-            bounds: (float, float) = (0., ca.inf),
+            bounds: tuple[float, float] = (0., ca.inf),
             fixed: bool = False
     ) -> None:
         """Constructor method"""

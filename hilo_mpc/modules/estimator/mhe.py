@@ -30,7 +30,7 @@ import numpy as np
 
 from .base import Estimator
 from ..optimizer import DynamicOptimization
-from ...util.dynamic_model import MHEQuadraticCost, GenericConstraint, continuous2discrete
+from ...util.modeling import MHEQuadraticCost, GenericConstraint, continuous2discrete
 from ...util.util import check_and_wrap_to_list, check_and_wrap_to_DM, check_if_list_of_none, check_if_list_of_string, \
     scale_vector, who_am_i
 

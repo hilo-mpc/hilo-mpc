@@ -48,7 +48,7 @@ class SimpleControlLoop:
     :param controller:
     :param observer:
     """
-    def __init__(self, plant: Model, controller: Union[Control, ML], observer: Optional[Estimate] = None):
+    def __init__(self, plant: Model, controller: Union[Control, ML], observer: Optional[Estimate] = None) -> None:
         """Constructor method"""
         if not plant.is_setup():
             plant.setup()

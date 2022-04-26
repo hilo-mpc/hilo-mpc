@@ -765,14 +765,8 @@ class LinearProgram(Optimizer):
         super().setup(interface=ca.qpsol, **kwargs)
 
 
-LP = LinearProgram
-
-
 class QuadraticProgram(LinearProgram):
     """"""
-
-
-QP = QuadraticProgram
 
 
 class NonlinearProgram(Optimizer):
@@ -847,9 +841,6 @@ class NonlinearProgram(Optimizer):
             super().setup(interface=ca.nlpsol, **kwargs)
         else:
             super().setup(interface=scisol, **kwargs)
-
-
-NLP = NonlinearProgram
 
 
 class DynamicOptimization(Base):
@@ -1737,9 +1728,6 @@ class DynamicOptimization(Base):
 
 __all__ = [
     'LinearProgram',
-    'LP',
     'QuadraticProgram',
-    'QP',
-    'NonlinearProgram',
-    'NLP'
+    'NonlinearProgram'
 ]

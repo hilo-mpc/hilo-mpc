@@ -30,8 +30,12 @@ import hilo_mpc.modules.estimator.kf as kf
 import hilo_mpc.modules.estimator.pf as pf
 import hilo_mpc.modules.machine_learning.nn.layer as layer
 import hilo_mpc.modules.machine_learning.nn.nn as nn
+import hilo_mpc.modules.machine_learning.gp.mean as mean
+import hilo_mpc.modules.machine_learning.gp.kernel as kernel
+import hilo_mpc.modules.machine_learning.gp.gp as gp
 import hilo_mpc.modules.control_loop as cl
 import hilo_mpc.modules.optimizer as opti
+import hilo_mpc.util.plotting as plotting
 import hilo_mpc.util.session as session
 
 
@@ -56,6 +60,28 @@ Dense = layer.Dense
 Dropout = layer.Dropout
 ArtificialNeuralNetwork = nn.ArtificialNeuralNetwork
 ANN = ArtificialNeuralNetwork
+Mean = mean.Mean
+ConstantMean = mean.ConstantMean
+ZeroMean = mean.ZeroMean
+OneMean = mean.OneMean
+PolynomialMean = mean.PolynomialMean
+LinearMean = mean.LinearMean
+Kernel = kernel.Kernel
+ConstantKernel = kernel.ConstantKernel
+SquaredExponentialKernel = kernel.SquaredExponentialKernel
+MaternKernel = kernel.MaternKernel
+ExponentialKernel = kernel.ExponentialKernel
+Matern32Kernel = kernel.Matern32Kernel
+Matern52Kernel = kernel.Matern52Kernel
+RationalQuadraticKernel = kernel.RationalQuadraticKernel
+PiecewisePolynomialKernel = kernel.PiecewisePolynomialKernel
+DotProductKernel = kernel.DotProductKernel
+PolynomialKernel = kernel.PolynomialKernel
+LinearKernel = kernel.LinearKernel
+NeuralNetworkKernel = kernel.NeuralNetworkKernel
+PeriodicKernel = kernel.PeriodicKernel
+GaussianProcess = gp.GaussianProcess
+GP = GaussianProcess
 SimpleControlLoop = cl.SimpleControlLoop
 LinearProgram = opti.LinearProgram
 LP = LinearProgram
@@ -64,6 +90,9 @@ QP = QuadraticProgram
 NonlinearProgram = opti.NonlinearProgram
 NLP = NonlinearProgram
 Session = session.Session
+
+get_plot_backend = plotting.get_plot_backend
+set_plot_backend = plotting.set_plot_backend
 
 
 __all__ = [
@@ -88,6 +117,28 @@ __all__ = [
     'Dropout',
     'ArtificialNeuralNetwork',
     'ANN',
+    'Mean',
+    'ConstantMean',
+    'ZeroMean',
+    'OneMean',
+    'PolynomialMean',
+    'LinearMean',
+    'Kernel',
+    'ConstantKernel',
+    'SquaredExponentialKernel',
+    'MaternKernel',
+    'ExponentialKernel',
+    'Matern32Kernel',
+    'Matern52Kernel',
+    'RationalQuadraticKernel',
+    'PiecewisePolynomialKernel',
+    'DotProductKernel',
+    'PolynomialKernel',
+    'LinearKernel',
+    'NeuralNetworkKernel',
+    'PeriodicKernel',
+    'GaussianProcess',
+    'GP',
     'SimpleControlLoop',
     'LinearProgram',
     'LP',
@@ -95,5 +146,7 @@ __all__ = [
     'QP',
     'NonlinearProgram',
     'NLP',
-    'Session'
+    'Session',
+    'get_plot_backend',
+    'set_plot_backend'
 ]

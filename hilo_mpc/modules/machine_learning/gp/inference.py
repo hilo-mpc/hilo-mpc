@@ -22,7 +22,7 @@
 #
 
 from abc import ABCMeta, abstractmethod
-from typing import Optional, TypeVar, Union
+from typing import Dict, Optional, TypeVar, Union
 import warnings
 
 import casadi as ca
@@ -51,7 +51,7 @@ class Inference(metaclass=ABCMeta):
             'log_marginal_likelihood': ca.SX()
         }
 
-    def __call__(self, *args, **kwargs) -> Optional[dict[str, Symbolic]]:
+    def __call__(self, *args, **kwargs) -> Optional[Dict[str, Symbolic]]:
         """Calling method"""
         if args and kwargs:
             raise TypeError("Call to Inference can only accept positional or keyword arguments, not both")
@@ -95,7 +95,7 @@ class Inference(metaclass=ABCMeta):
         return self._posterior
 
     @property
-    def posterior(self) -> dict[str, Symbolic]:
+    def posterior(self) -> Dict[str, Symbolic]:
         """
 
         :return:

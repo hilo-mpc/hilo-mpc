@@ -754,7 +754,7 @@ class DataGenerator:
         fraction = 1. - 1. / initial_frequency_ratio
         return np.sin(initial_phase - 2. * np.pi * dt * initial_frequency / fraction * np.log(1. - fraction / dt * t))
 
-    def _add_noise(self, index: NumArray, shape: (int, int), **kwargs) -> None:
+    def _add_noise(self, index: NumArray, shape: tuple[int, int], **kwargs) -> None:
         """
 
         :param index:

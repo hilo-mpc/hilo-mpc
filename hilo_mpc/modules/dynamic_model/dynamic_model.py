@@ -34,7 +34,7 @@ import numpy as np
 from ..base import Base, Vector, Equations, RightHandSide, TimeSeries
 from ..machine_learning.base import LearningBase
 from ...util.data import DataSet, DataGenerator
-from ...util.dynamic_model import GenericCost, QuadraticCost, continuous2discrete
+from ...util.modeling import GenericCost, QuadraticCost, continuous2discrete
 from ...util.parsing import parse_dynamic_equations
 from ...util.util import check_if_list_of_string, convert, dump_clean, generate_c_code, is_iterable, is_list_like, \
     is_square, who_am_i, JIT

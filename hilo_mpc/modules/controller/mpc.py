@@ -31,7 +31,7 @@ import numpy as np
 
 from .base import Controller
 from ..optimizer import DynamicOptimization
-from ...util.dynamic_model import GenericCost, QuadraticCost, GenericConstraint, continuous2discrete
+from ...util.modeling import GenericCost, QuadraticCost, GenericConstraint, continuous2discrete
 from ...util.optimizer import IpoptDebugger
 from ...util.util import check_and_wrap_to_list, check_and_wrap_to_DM, scale_vector
 
