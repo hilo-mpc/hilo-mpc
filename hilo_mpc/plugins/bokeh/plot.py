@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
 from math import ceil
-# import pathlib
+import pathlib
 import warnings
 
 import bokeh.palettes as cm
@@ -516,6 +516,9 @@ class BasePlot(metaclass=ABCMeta):
                 plt.output_notebook()
             else:
                 if self.output_file is not None:
+                    path = pathlib.Path(self.output_file).parent.absolute()
+                    if not path.is_dir():
+                        path.mkdir(parents=True, exist_ok=True)
                     plt.output_file(self.output_file)
             plt.show(self.axes, browser=self.browser)
 
