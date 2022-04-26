@@ -752,4 +752,6 @@ def get_wrapper(kind, *args, **kwargs):
     return _PyTorchWrapper(module, **kwargs)
 
 
-__all__ = ['get_wrapper']
+__all__ = [
+    'get_wrapper'
+]

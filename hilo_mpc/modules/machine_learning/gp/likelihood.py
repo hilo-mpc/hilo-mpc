@@ -20,3 +20,83 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
+
+class Likelihood:
+    """"""
+    def __init__(self, name: str) -> None:
+        """Constructor method"""
+        self._name = name
+
+    @property
+    def name(self) -> str:
+        """
+
+        :return:
+        """
+        return self._name
+
+    @staticmethod
+    def gaussian():
+        """
+
+        :return:
+        """
+        return Gaussian()
+
+    @staticmethod
+    def logistic():
+        """
+
+        :return:
+        """
+        return Logistic()
+
+    @staticmethod
+    def laplacian():
+        """
+
+        :return:
+        """
+        return Laplacian()
+
+    @staticmethod
+    def students_t():
+        """
+
+        :return:
+        """
+        return StudentsT()
+
+
+class Gaussian(Likelihood):
+    """"""
+    def __init__(self):
+        """Constructor method"""
+        super().__init__('Gaussian')
+
+
+class Logistic(Likelihood):
+    """"""
+    def __init__(self):
+        """Constructor method"""
+        super().__init__('Logistic')
+
+        raise NotImplementedError("Logistic likelihood not yet implemented")
+
+
+class Laplacian(Likelihood):
+    """"""
+    def __init__(self):
+        """Constructor method"""
+        super().__init__('Laplacian')
+
+        raise NotImplementedError("Laplacian likelihood not yet implemented")
+
+
+class StudentsT(Likelihood):
+    """"""
+    def __init__(self):
+        """Constructor method"""
+        super().__init__('Students_T')
+
+        raise NotImplementedError("Student's t likelihood not yet implemented")

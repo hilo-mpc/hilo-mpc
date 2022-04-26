@@ -27,8 +27,10 @@ import os
 
 _PYTORCH_VERSION = '1.2.0'
 _TENSORFLOW_VERSION = '2.3.0'
+_TENSORBOARD_VERSION = '2.3.0'
 _BOKEH_VERSION = ''
 _MATPLOTLIB_VERSION = ''
+_PANDAS_VERSION = '1.0.0'
 
 
 class Manager:
@@ -71,6 +73,22 @@ class LearningManager(Manager):
         else:
             backend = self._backend
         return backend.setup(kind, *args, **kwargs)
+
+
+class LearningVisualizationManager(Manager):
+    """"""
+    def setup(self, *args, **kwargs):
+        """
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        if isinstance(self._backend, str):
+            backend = _get_learning_visualization_backend(self._backend)
+        else:
+            backend = self._backend
+        return backend.setup(*args, **kwargs)
 
 
 class PlotManager(Manager):
@@ -128,6 +146,24 @@ def _get_learning_backend(backend):
     return module
 
 
+def _get_learning_visualization_backend(backend):
+    """
+
+    :param backend:
+    :return:
+    """
+    if backend == 'tensorboard':
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+        try:
+            import tensorboard
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Backend 'Tensorboard' is not installed")
+        import hilo_mpc.plugins.tensorboard as module
+    else:
+        raise ValueError(f"Backend '{backend}' not recognized")
+    return module
+
+
 def _get_plot_backend(backend):
     """
 
@@ -150,3 +186,19 @@ def _get_plot_backend(backend):
         raise ValueError(f"Backend '{backend}' not recognized")
 
     return module
+
+
+def check_version(library: str) -> None:
+    """
+
+    :param library:
+    :return:
+    """
+    if library == 'pandas':
+        try:
+            import pandas
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Plugin 'pandas' is not installed")
+        if StrictVersion(pandas.__version__) < StrictVersion(_PANDAS_VERSION):
+            raise RuntimeError(f"Plugin 'pandas' is installed with version '{pandas.__version__}', but version "
+                               f"{_PANDAS_VERSION}' or higher is required")

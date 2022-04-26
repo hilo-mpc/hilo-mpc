@@ -52,4 +52,6 @@ def get_wrapper(kind, *args, **kwargs):
     return _SklearnWrapper(module, **kwargs)
 
 
-__all__ = ['get_wrapper']
+__all__ = [
+    'get_wrapper'
+]
