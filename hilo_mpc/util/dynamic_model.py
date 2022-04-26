@@ -671,6 +671,7 @@ class MHEQuadraticCost(GenericCost):
         :param x_scale:
         :param w_scale:
         :param p_scale:
+        :param u_scale:
         :return:
         """
         for fixed_ref in self._fixed_ref_list:
