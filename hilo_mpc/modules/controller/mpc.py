@@ -2087,14 +2087,14 @@ class LMPC(Controller, DynamicOptimization):
             solver = ca.conic("solver", self._solver_name, qp, self._nlp_opts)
         elif self._solver_name == 'muaompc':
             try:
-                from hilo_mpc.extensions import muaompc
+                from ..embedded.muaompc import setup_solver
             except ImportError as err:
                 message = f"{err}."
                 message += "\nTo use nlp_solver='muaompc' first install muaompc."
                 message += " Try:\n    pip install muaompc"
                 raise ImportError(message)
 
-            solver = muaompc.setup_solver(self)
+            solver = setup_solver(self)
         else:
             raise ValueError(
                 f"The solver {self._solver_name} does no exist. The possible solver are {self._solver_name_list_qp}."
