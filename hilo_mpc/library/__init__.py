@@ -20,3 +20,15 @@
 #   You should have received a copy of the GNU Lesser General Public License
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
+
+import hilo_mpc.library.models as models
+
+
+cstr_schaffner_and_zeitz = models.cstr_schaffner_and_zeitz
+cstr_seborg = models.cstr_seborg
+
+
+__all__ = [
+    'cstr_schaffner_and_zeitz',
+    'cstr_seborg'
+]
