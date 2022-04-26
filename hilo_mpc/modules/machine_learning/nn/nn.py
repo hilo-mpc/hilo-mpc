@@ -300,43 +300,6 @@ class ArtificialNeuralNetwork(LearningBase):
             self._function = net_to_casadi_graph({'weights': weights, 'bias': bias}, x, self._layers,
                                                  input_scaling=self._scaler_x, output_scaling=self._scaler_y)
 
-    def copy(self) -> ML:
-        """
-
-        :return:
-        """
-        if self.name is not None:
-            name = 'copy_of_' + self.name
-        else:
-            name = self.name
-
-        kwargs = {}
-        if self._seed is not None:
-            kwargs['seed'] = self._seed
-        kwargs['learning_rat'] = self._learning_rate
-        kwargs['loss'] = self._loss
-        kwargs['optimizer'] = self._optimizer
-        kwargs['metric'] = self._metric
-        kwargs['backend'] = self._backend.backend
-
-        new = ArtificialNeuralNetwork(self._features, self._labels, name=name, **kwargs)
-        new.add_layers(self._layers)
-        new.setup()
-        for data_set in self._data_sets:
-            # TODO: Improve this behavior. ANN.add_data_set(...) should also be able to deal with lists
-            #  (by using list.extend instead of list.append)
-            new.add_data_set(data_set)
-        # TODO: Not sure if the following 4 lines work as intended
-        if self._scaler_x is not None:
-            new.set_input_scaling(self._scaler_x)
-        if self._scaler_y is not None:
-            new.set_output_scaling(self._scaler_y)
-
-        weights, bias = self._net.get_weights_and_bias()
-        new.build_graph(weights=weights, bias=bias)
-
-        return new
-
     def prepare_data_set(
             self,
             train_split: float = 1.,

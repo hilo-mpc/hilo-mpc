@@ -23,8 +23,7 @@
 
 from __future__ import annotations
 
-from abc import ABCMeta, abstractmethod
-from typing import Optional, TypeVar
+from typing import Optional
 import warnings
 
 import casadi as ca
@@ -33,10 +32,7 @@ from ..base import Base, Equations
 from ...plugins.plugins import LearningManager
 
 
-ML = TypeVar('ML', bound='LearningBase')
-
-
-class LearningBase(Base, metaclass=ABCMeta):
+class LearningBase(Base):
     """
     Base class for all machine learning classes
 
@@ -131,14 +127,6 @@ class LearningBase(Base, metaclass=ABCMeta):
         :return:
         """
         return self._n_labels
-
-    @abstractmethod
-    def copy(self) -> ML:
-        """
-
-        :return:
-        """
-        pass
 
     def update(self, *args):
         """
