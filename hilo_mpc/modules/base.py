@@ -1509,15 +1509,6 @@ class RightHandSide(Equations):
 
         return variables, (ode, alg, meas, quad), time_variant
 
-    def copy(self):
-        """
-
-        :return:
-        """
-        new = RightHandSide(discrete=self._discrete, use_sx=self._use_sx)
-        new.set(self)
-        return new
-
     def generate_matrix_notation(self, states, inputs):
         """
 
@@ -2178,17 +2169,16 @@ class Series(Object, metaclass=ABCMeta):
 
         if backend is None:
             backend = get_plot_backend()
-            if backend is None:
-                self._plot_manager = None
-                warnings.warn("Plots are disabled, since no backend was selected.")
+        if backend is None:
+            self._plot_manager = None
+            warnings.warn("Plots are disabled, since no backend was selected.")
+        elif isinstance(backend, str):
+            self._plot_manager = PlotManager(backend)
+        elif isinstance(backend, PlotManager):
+            self._plot_manager = backend
         else:
-            if isinstance(backend, str):
-                self._plot_manager = PlotManager(backend)
-            elif isinstance(backend, PlotManager):
-                self._plot_manager = backend
-            else:
-                self._plot_manager = None
-                warnings.warn("Backend for plots not recognized. Plots are disabled.")
+            self._plot_manager = None
+            warnings.warn("Backend for plots not recognized. Plots are disabled.")
         self._parent = parent
         self._data = {}
         self._reference = {}
@@ -2771,7 +2761,25 @@ class Series(Object, metaclass=ABCMeta):
         :param other:
         :return:
         """
-        raise NotImplementedError("The merge functionality will be implemented in future releases")
+        # TODO: Compare sampling time and grid (-> throw error?)
+        if self.is_empty():
+            if self._data:
+                raise NotImplementedError(f"Merging has not been implemented yet for the case where the "
+                                          f"{self.__class__.__name__} object has already been set up.")
+            else:
+                kwargs = {key: {
+                    'data_format': ca.DM,
+                    'description': value.description,
+                    'labels': value.labels,
+                    'units': value.units,
+                    'shape': (value.shape[0], 0),
+                    'values_or_names': value.names
+                } for key, value in other.items()}
+                self._update_kwargs(other, kwargs)
+                self.setup(*kwargs.keys(), **kwargs)
+        else:
+            raise NotImplementedError(f"Merging has not been implemented yet for the case where the "
+                                      f"{self.__class__.__name__} object has already been populated.")
 
     def plot(self, *args, **kwargs):
         """
