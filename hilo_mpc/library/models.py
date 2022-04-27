@@ -97,7 +97,105 @@ def cstr_seborg():
     return model
 
 
+def ecoli_D1210_conti(model='simple'):
+    """
+    Returns a neo Model object.
+    The model is taken from
+
+    Lee,  J.;  Ramirez,  W.  F.
+    Mathematical  modelling  of  induced  foreign protein  production  by  recombinant  bacteria.
+    Biotechnol.  Bioeng.1992,39, 635-646.
+
+    If model ='simple' the model does not have the two inducer states and the reactions rates are left as parameters
+    If model= 'complex' the model has the two inducer states and the reaction rates are the same as in Lee et al.
+    :return:
+    """
+    # Load plot device
+    from hilo_mpc.util.plotting import PLOT_BACKEND
+
+    if model=='complex':
+        model = Model(plot_backend=PLOT_BACKEND, name='ecoli_D1210_complex')
+        x = model.set_dynamical_states(['X', 'S', 'P', 'I', 'ISF', 'IRF'])
+        u = model.set_inputs(['DS', 'DI'])
+        p = model.set_parameters(['Sf', 'If'])
+        model.set_measurements(['mu', 'Rs', 'Rfp'])
+
+        # Unwrap states
+        X = x[0]
+        S = x[1]
+        P = x[2]
+        I = x[3]
+        ISF = x[4]
+        IRF = x[5]
+
+        # Unwrap inputs
+        u1 = u[0]
+        u2 = u[1]
+
+        # Unwrap parameters
+        Sf = p[0]
+        If = p[1]
+
+        # Reaction rates
+        phi = 0.407 * S / (0.108 + S + (S ** 2) / 14814.0)
+        mu = phi * (ISF + (0.22 * IRF) / (0.22 + I))
+        Rs = 2 * mu
+        Rfp = phi * (0.0005 + I) / (0.022 + I)
+        k1 = 0.09 * I / (0.034 + I)
+        k2 = 0.09 * I / (0.034 + I)
+
+        D = u1 + u2
+
+        dX = mu * X - D * X
+        dS = - Rs * X - D * S + u1 * Sf
+        dP = Rfp * X - D * P
+        dI = - D * I + u2 * If
+        dISF = -k1 * ISF
+        dIRF = k2 * (1 - IRF)
+
+        model.set_dynamical_equations([dX, dS, dP, dI, dISF, dIRF])
+        model.set_measurement_equations([mu, Rs, Rfp])
+        return model
+
+    elif model == 'simple':
+
+        model = Model(plot_backend=PLOT_BACKEND, name='ecoli_D1210_conti_simple')
+        x = model.set_dynamical_states(['X', 'S', 'P', 'I'])
+        u = model.set_inputs(['DS', 'DI'])
+        p = model.set_parameters(['Sf', 'If', 'mu', 'Rs', 'Rfp'])
+
+        # Unwrap states
+        X = x[0]
+        S = x[1]
+        P = x[2]
+        I = x[3]
+
+        # Unwrap inputs
+        DS = u[0]
+        DI = u[1]
+
+        # Unwrap parameters
+        Sf = p[0]
+        If = p[1]
+
+        # Unknown reaction rates
+        mu = p[2]
+        Rs = p[3]
+        Rfp = p[4]
+
+        D_tot = DS + DI
+
+        dX = mu * X - D_tot * X
+        dS = - Rs * X - D_tot * S + DS * Sf
+        dP = Rfp * X - D_tot * P
+        dI = - D_tot * I + DI * If
+        model.set_dynamical_equations([dX, dS, dP, dI])
+
+        return model
+
+
 __all__ = [
     'cstr_schaffner_and_zeitz',
-    'cstr_seborg'
+    'cstr_seborg',
+    'ecoli_D1210_conti'
 ]
