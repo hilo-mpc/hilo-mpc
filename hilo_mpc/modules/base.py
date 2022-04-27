@@ -2732,19 +2732,23 @@ class Series(Object, metaclass=ABCMeta):
 
         for k, arg in enumerate(args):
             if distribution[k] == 'normal':
-                _, std = _process_noise_inputs_normal(arg, **kwargs)
-
                 if not all(first_or_last):
                     if inplace:
                         id_ = self.get_id(arg)
                         index = self._data[id_].index(arg)
-                        noise = std * np.random.randn(*self._data[id_][index, :].shape)
+                        shape = self._data[id_][index, :].shape
+                        _, std = _process_noise_inputs_normal(arg, shape, **kwargs)
+                        noise = std * np.random.randn(*shape)
                         noise_to_add[id_][index, :] = noise
                     else:
-                        noise = std * np.random.randn(*sol[k].shape)
+                        shape = sol[k].shape
+                        _, std = _process_noise_inputs_normal(arg, shape, **kwargs)
+                        noise = std * np.random.randn(*shape)
                         sol[k] += noise
                 else:
-                    noise = std * np.random.randn(*sol[k].shape)
+                    shape = sol[k].shape
+                    _, std = _process_noise_inputs_normal(arg, shape, **kwargs)
+                    noise = std * np.random.randn(*shape)
                     sol[k] += noise
                     if inplace:
                         noise_to_add[arg] = noise
@@ -3755,10 +3759,11 @@ def _clean_external_data(array):
     return array
 
 
-def _process_noise_inputs_normal(arg, **kwargs):
+def _process_noise_inputs_normal(arg, shape, **kwargs):
     """
 
     :param arg:
+    :param shape:
     :param kwargs:
     :return:
     """
@@ -3785,5 +3790,28 @@ def _process_noise_inputs_normal(arg, **kwargs):
             std = 1.
         else:
             std = np.sqrt(var)
+
+    n_dim = len(shape)
+    if n_dim > 2:
+        raise RuntimeError("Tensors are not supported at the moment")
+    if n_dim == 1:
+        raise RuntimeError("Dimension mismatch. Expected shape of length 2, got 1.")
+
+    if std.ndim == 1:
+        if n_dim == 2 and std.size != shape[0] * shape[1]:
+            expected_size = shape[0] * shape[1] if n_dim == 2 else shape[0]
+            raise ValueError(f"Dimension mismatch for supplied standard deviation/variance. Expected array of size "
+                             f"{expected_size}, got {std.size}.")
+        std = np.reshape(std, shape)
+    elif std.ndim == 2:
+        if n_dim == 2 and shape != std.shape:
+            if shape[::-1] != std.shape:
+                raise ValueError(f"Dimension mismatch for supplied standard deviation/variance. Expected "
+                                 f"{shape[0]}x{shape[1]}, got {std.shape[0]}x{std.shape[1]}.")
+            std = np.reshape(std, shape)
+    elif std.ndim > 2:
+        raise ValueError("Tensors are not supported at the moment")
+    else:
+        raise TypeError(f"Expected array-like argument, got {type(std).__name__}.")
 
     return mean, std
