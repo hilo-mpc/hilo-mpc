@@ -187,11 +187,11 @@ class SimpleControlLoop:
         :return:
         """
         solution = self._plant.solution
-        if solution.plot_device == 'latex':
+        if solution.plot_backend == 'latex':
             raise NotImplementedError("Live animations using the backend 'latex' are not supported")
-        elif solution.plot_device == 'bokeh':
+        elif solution.plot_backend == 'bokeh':
             self._live_plot_bokeh(solution, *args, **kwargs)
-        elif solution.plot_device == 'matplotlib':
+        elif solution.plot_backend == 'matplotlib':
             self._live_plot_matplotlib(solution, *args, **kwargs)
         else:
             raise NotImplementedError(f"Plot backend '{solution.plot_device}' not available")
@@ -257,10 +257,10 @@ class SimpleControlLoop:
                     }
                     source[0].data = new_data  # In the current setup first source is always the data
 
-                    reference = solution.get_ref_by_name(names[k])
-                    if reference is not None and not reference.is_empty():
-                        new_data['y0'] = reference.full().flatten()
-                        source[1].data = new_data  # In the current setup second source is always the reference
+                    # reference = solution.get_ref_by_name(names[k])
+                    # if reference is not None and not reference.is_empty():
+                    #     new_data['y0'] = reference.full().flatten()
+                    #     source[1].data = new_data  # In the current setup second source is always the reference
 
                 if _step >= steps:
                     doc.remove_periodic_callback(pc_id)
@@ -320,10 +320,10 @@ class SimpleControlLoop:
                         x = x[:-1]
                     line[0].set_data(x, y)  # In the current setup first line is always the data
 
-                    reference = solution.get_ref_by_name(names[k])
-                    if reference is not None and not reference.is_empty():
-                        ref = reference.full().flatten()
-                        line[1].set_data(x, ref)  # In the current setup second line is always the reference
+                    # reference = solution.get_ref_by_name(names[k])
+                    # if reference is not None and not reference.is_empty():
+                    #     ref = reference.full().flatten()
+                    #     line[1].set_data(x, ref)  # In the current setup second line is always the reference
 
                     axes[k].relim()
                     axes[k].autoscale_view()
@@ -424,7 +424,7 @@ class SimpleControlLoop:
             else:
                 new_kwargs["figsize"] = kwargs.get("figsize", (400, 400))
             new_kwargs["line_width"] = kwargs.get("line_width", 2)
-        elif self._plant.solution.plot_device == 'matplotlib':
+        elif self._plant.solution.plot_backend == 'matplotlib':
             new_kwargs["line_width"] = kwargs.get("line_width", 1)
 
         # NOTE: The following 2 lines will be ignored for backend 'matplotlib'
