@@ -3811,6 +3811,8 @@ def _process_noise_inputs_normal(arg, shape, **kwargs):
             std = np.reshape(std, shape)
     elif std.ndim > 2:
         raise ValueError("Tensors are not supported at the moment")
+    elif isinstance(std, (int, float)):
+        std = np.reshape(std, shape)
     else:
         raise TypeError(f"Expected array-like argument, got {type(std).__name__}.")
 
