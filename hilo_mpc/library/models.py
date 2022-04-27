@@ -99,7 +99,7 @@ def cstr_seborg():
 
 def ecoli_D1210_conti(model='simple'):
     """
-    Returns a neo Model object.
+    Returns a hilo-mpc Model object.
     The model is taken from
 
     Lee,  J.;  Ramirez,  W.  F.
