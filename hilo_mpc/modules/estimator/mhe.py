@@ -60,7 +60,7 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
     =================== =============================
 
     """
-    def __init__(self, model, id=None, name=None, plot_backend='bokeh', time=0) -> None:
+    def __init__(self, model, id=None, name=None, plot_backend=None, time=0) -> None:
         """Constructor method"""
         super().__init__(model, id=id, name=name, plot_backend=plot_backend)
 

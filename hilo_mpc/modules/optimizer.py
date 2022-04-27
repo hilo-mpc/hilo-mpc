@@ -845,7 +845,7 @@ class NonlinearProgram(Optimizer):
 
 class DynamicOptimization(Base):
     """Base class for all MPC and MHE"""
-    def __init__(self, model, id=None, name=None, plot_backend='bokeh', stats=False, use_sx=True):
+    def __init__(self, model, id=None, name=None, plot_backend=None, stats=False, use_sx=True):
         """Constructor method"""
         super().__init__(id=id, name=name)
         if not isinstance(model, Model):

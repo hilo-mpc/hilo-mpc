@@ -38,7 +38,7 @@ from ...util.util import check_and_wrap_to_list, check_and_wrap_to_DM, scale_vec
 
 class NMPC(Controller, DynamicOptimization):
     """Class for Nonlinear Model Predictive Control"""
-    def __init__(self, model, id=None, name=None, plot_backend='bokeh', use_sx=True, stats=False):
+    def __init__(self, model, id=None, name=None, plot_backend=None, use_sx=True, stats=False):
         """Constructor method"""
         # TODO: when discrete_u or discrete_x is given to the opts structure, but NMPC is used, raise an error saying
         #  that MINMPC should be used
@@ -1900,7 +1900,7 @@ class NMPC(Controller, DynamicOptimization):
 
 class LMPC(Controller, DynamicOptimization):
     """"""
-    def __init__(self, model, id=None, name=None, plot_backend='bokeh', use_sx=True):
+    def __init__(self, model, id=None, name=None, plot_backend=None, use_sx=True):
         """Constructor method"""
         super().__init__(model, id=id, name=name, plot_backend=plot_backend)
         if not model.is_linear():
