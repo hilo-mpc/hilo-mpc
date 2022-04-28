@@ -26,9 +26,15 @@ import hilo_mpc.library.models as models
 
 cstr_schaffner_and_zeitz = models.cstr_schaffner_and_zeitz
 cstr_seborg = models.cstr_seborg
+ecoli_D1210_conti = models.ecoli_D1210_conti
+ecoli_D1210_fedbatch = models.ecoli_D1210_fedbatch
+scerevisiae_SEY2102_fedbatch = models.scerevisiae_SEY2102_fedbatch
 
 
 __all__ = [
     'cstr_schaffner_and_zeitz',
-    'cstr_seborg'
+    'cstr_seborg',
+    'ecoli_D1210_conti',
+    'ecoli_D1210_fedbatch',
+    'scerevisiae_SEY2102_fedbatch'
 ]

@@ -54,8 +54,11 @@ class LinearQuadraticRegulator(Controller, Base):
             discrete: bool = True,
             plot_backend: Optional[str] = None
     ) -> None:
+        # TODO: Check for empty models
+        # NOTE: I don't know how much sense the first if-condition makes, since it's already clear from the typing
+        #  information, that we need a Model object.
         if not isinstance(model, Model):
-            raise TypeError('The model must be an object of the Model class.')
+            raise TypeError("The model must be an object of the Model class.")
         if not model.is_setup():
             raise RuntimeError("Model is not set up. Run Model.setup() before passing it to the controller.")
         if discrete and model.continuous:
