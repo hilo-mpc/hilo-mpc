@@ -96,6 +96,26 @@ class TestNMPC(TestCase):
         model.set_initial_conditions(x0=x0)
         scl = SimpleControlLoop(model, nmpc)
         scl.run(steps=n_steps)
+        scl.plot()
+
+    def test_closed_loop_c(self):
+        " Test normal nonlinear MPC for using a pendulum model. This test checks the normal problem setup"
+        x0 = self.x0
+        u0 = self.u0
+        model = self.model
+        nmpc = NMPC(model)
+        nmpc.quad_stage_cost.add_states(names=['v', 'theta'], ref=[0, 0], weights=[10, 5])
+        nmpc.quad_stage_cost.add_inputs(names='F', weights=0.1)
+        nmpc.prediction_horizon = 25
+        nmpc.control_horizon = 25
+        nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10])
+        nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
+        nmpc.setup()
+
+        n_steps = 1
+        model.set_initial_conditions(x0=x0)
+        scl = SimpleControlLoop(model, nmpc)
+        scl.run(steps=n_steps)
         # scl.plot()
 
     def test_optimize_initial_conditions(self):
@@ -440,6 +460,27 @@ class TestNMPC(TestCase):
         ss.run(n_steps)
         # ss.plot()
 
+    def text_check_wellposeness_no_horizon(self):
+        x0 = self.x0
+        u0 = self.u0
+        model = self.model
+        nmpc = NMPC(model)
+        nmpc.quad_stage_cost.add_states(names=['v', 'theta'], ref=[0, 0], weights=[10, 5])
+        nmpc.quad_stage_cost.add_inputs(names='F', weights=0.1)
+        nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10])
+        nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
+        self.assertRaises(ValueError, nmpc.setup)
+
+    def text_check_wellposeness_no_objective(self):
+        x0 = self.x0
+        u0 = self.u0
+        model = self.model
+        nmpc = NMPC(model)
+        nmpc.horizon = 10
+        nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10])
+        nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
+        self.assertRaises(ValueError, nmpc.setup)
+
 
 class TestNMPCConstraints(TestCase):
     def setUp(self):
@@ -719,7 +760,7 @@ class TestNMPCConstraints(TestCase):
 
         _ = nmpc.optimize(x0)
 
-        # nmpc.plot_prediction()
+        nmpc.plot_prediction()
 
 
 class TestTrajectoryPathFollowingMPC(TestCase):
@@ -842,7 +883,6 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.horizon = 10
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
-
         n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
@@ -1122,6 +1162,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.horizon = 10
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
+        print(nmpc)
 
         n_steps = 1
         model.set_initial_conditions(x0=x0)
@@ -1277,7 +1318,6 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.quad_stage_cost.add_states(names=['x', 'y'], weights=[10, 10],
                                         ref=ca.vertcat(ca.sin(theta1), ca.sin(2 * theta2)), path_following=True)
 
-
         nmpc.quad_terminal_cost.add_states(names=['x', 'y'], weights=[10, 10],
                                            ref=ca.vertcat(ca.sin(theta1), ca.sin(2 * theta2)), path_following=True)
         nmpc.horizon = 10
@@ -1305,14 +1345,14 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         # p.xaxis.axis_label = "x [m]"
         # show(p)
 
-        scl = SimpleControlLoop(model,nmpc)
+        scl = SimpleControlLoop(model, nmpc)
         scl.run(steps=n_steps)
         # scl.plot()
-            # p = figure()
-            # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
-            # p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
-            # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
-            # show(p)
+        # p = figure()
+        # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
+        # p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
+        # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
+        # show(p)
 
         # p = figure()
         # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
@@ -1641,6 +1681,106 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         scl.run(steps=n_steps, ref_sc={'x': x_traj, 'y': y_traj}, ref_tc={'x': x_traj, 'y': y_traj})
         # scl.plot()
 
+    def test_tt_v18(self):
+        """
+        test fail trajectory tracking wrong reference type
+        :return:
+        """
+        x0 = self.x0
+        u0 = self.u0
+        model = self.model
+        nmpc = NMPC(model)
+
+        nmpc.quad_stage_cost.add_states(names=['x', 'y'], weights=[10, 10],
+                                        trajectory_tracking=True)
+
+        nmpc.quad_terminal_cost.add_states(names=['x', 'y'], weights=[10, 10],
+                                           trajectory_tracking=True)
+
+        nmpc.horizon = 10
+        nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
+        nmpc.setup(options={'objective_function': 'discrete'})
+
+        n_steps = 1
+        model.set_initial_conditions(x0=x0)
+
+
+        self.assertRaises(TypeError, nmpc.optimize,x0=x0, ref_sc=[1,1], ref_tc=[0,1])
+
+    def test_tt_v19(self):
+        """
+        test fail trajectory tracking no discrete obj_fun
+        :return:
+        """
+        x0 = self.x0
+        u0 = self.u0
+        model = self.model
+        nmpc = NMPC(model)
+
+        nmpc.quad_stage_cost.add_states(names=['x', 'y'], weights=[10, 10],
+                                        trajectory_tracking=True)
+
+        nmpc.quad_terminal_cost.add_states(names=['x', 'y'], weights=[10, 10],
+                                           trajectory_tracking=True)
+
+        nmpc.horizon = 10
+        nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
+        nmpc.setup()
+
+        model.set_initial_conditions(x0=x0)
+
+
+        def path(theta):
+            return np.sin(theta), np.sin(2 * theta)
+
+        x_traj = []
+        y_traj = []
+        t0 = 0
+        for t in range(1000):
+            x_p, y_p = path(t0)
+            x_traj.append(x_p)
+            y_traj.append(y_p)
+            t0 += self.dt
+
+        self.assertRaises(AssertionError, nmpc.optimize,x0=x0,  ref_sc={'x': x_traj, 'y': y_traj}, ref_tc={'x': x_traj, 'y': y_traj})
+
+    def test_tt_v20(self):
+        """
+        test fail trajectory tracking no discrete obj_fun
+        :return:
+        """
+        x0 = self.x0
+        u0 = self.u0
+        model = self.model
+        nmpc = NMPC(model)
+
+        nmpc.quad_stage_cost.add_states(names=['x', 'y'], weights=[10, 10],
+                                        trajectory_tracking=True)
+
+        nmpc.quad_terminal_cost.add_states(names=['x', 'y'], weights=[10, 10],
+                                           trajectory_tracking=True)
+
+        nmpc.horizon = 10
+        nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
+        nmpc.setup()
+
+        model.set_initial_conditions(x0=x0)
+
+
+        def path(theta):
+            return np.sin(theta), np.sin(2 * theta)
+
+        x_traj = []
+        y_traj = []
+        t0 = 0
+        for t in range(5):
+            x_p, y_p = path(t0)
+            x_traj.append(x_p)
+            y_traj.append(y_p)
+            t0 += self.dt
+
+        self.assertRaises(ValueError, nmpc.optimize,x0=x0,  ref_sc={'x': x_traj, 'y': y_traj}, ref_tc={'x': x_traj, 'y': y_traj})
+
     def test_vr_1(self):
         """
         Test change in reference setpoint online
@@ -1846,7 +1986,7 @@ class TestDAE(TestCase):
         nmpc.quad_stage_cost.add_states(names=['v', 'theta'], ref=[0, 0], weights=[10, 5])
         nmpc.quad_stage_cost.add_inputs(names='F', weights=0.1)
         nmpc.horizon = 25
-        nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10])
+        nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10], z_lb=-100,z_ub=100)
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.set_nlp_options({'integration_method': 'rk4'})
         nmpc.setup()
@@ -1921,7 +2061,7 @@ class TestTvp(TestCase):
 
     def test_tvp(self) -> None:
         """
-        Test what happens if the
+        Test what happens if we pass tvp to the set_time_varying parameters method
         :return:
         """
         x0 = self.x0
@@ -1936,7 +2076,7 @@ class TestTvp(TestCase):
         nmpc.set_time_varying_parameters(names=['d_tvp'], values={'d_tvp': np.sin(np.arange(0, 5, self.dt)).tolist()})
         nmpc.setup()
 
-        n_steps = 1
+        n_steps = 2
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1991,6 +2131,24 @@ class TestTvp(TestCase):
         #     title=sol.get_names('x'),
         #     xlabel=None,
         #     legend=False)
+
+    def test_tvp_3(self) -> None:
+        """
+        Test what happens if we pass tvp to the set_time_varying parameters method but they are shorter than the
+        prediction horizon
+        :return:
+        """
+        x0 = self.x0
+        u0 = self.u0
+        model = self.model
+        nmpc = NMPC(model)
+        nmpc.quad_stage_cost.add_states(names=['v', 'theta'], ref=[0, 0], weights=[10, 5])
+        nmpc.quad_stage_cost.add_inputs(names='F', weights=0.1)
+        nmpc.horizon = 25
+        nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10])
+        nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
+        nmpc.set_time_varying_parameters(names=['d_tvp'], values={'d_tvp': np.sin(np.arange(0, 1, self.dt)).tolist()})
+        self.assertRaises(TypeError, nmpc.setup)
 
 
 class TestChangeInputWeight(TestCase):
