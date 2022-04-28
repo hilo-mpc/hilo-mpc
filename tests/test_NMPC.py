@@ -92,14 +92,14 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 10
         model.set_initial_conditions(x0=x0)
         scl = SimpleControlLoop(model, nmpc)
         scl.run(steps=n_steps)
-        scl.plot()
+        # scl.plot()
 
     def test_optimize_initial_conditions(self):
-        " Test normal nonlinear MPC for using a pendulum model. This test checks the normal problem setup"
+        " In this test the initialization of the initial conditions for the MPC is tested."
         x0 = self.x0
         u0 = self.u0
         model = self.model
@@ -111,23 +111,10 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
         model.set_initial_conditions(x0=x0)
-        sol = model.solution
 
-        u = nmpc.optimize(x0, fix_x0=False, x0_lb=[-5, -10, -10, -10], x0_ub=[5, 10, 10, 10])
+        _ = nmpc.optimize(x0, fix_x0=False, x0_lb=[-5, -10, -10, -10], x0_ub=[5, 10, 10, 10])
         x_pred, u_pred, _ = nmpc.return_prediction()
-
-        # sol.plot(
-        #     ('t', 'x'),
-        #     ('t', 'v'),
-        #     ('t', 'theta'),
-        #     ('t', 'omega'),
-        #     subplots=True,
-        #     title=sol.get_names('x'),
-        #     xlabel=None,
-        #     legend=False)
-        # nmpc.plot_mpc_prediction()
 
     def test_multi_run(self):
         """
@@ -138,40 +125,23 @@ class TestNMPC(TestCase):
 
         x0 = self.x0
         u0 = self.u0
-        dt = self.dt
         model = self.model
         nmpc = NMPC(model)
         nmpc.quad_stage_cost.add_states(names='theta', ref=ca.pi, weights=10)
-        nmpc.horizon = 50
+        nmpc.horizon = 10
         nmpc.set_box_constraints(x_ub=[3, 0.5, 10, 10], x_lb=[2, 0, 0, 0])
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
         n_steps = 10
-        res_dict = {x: [] for x in model.dynamical_state_names}
-        res_dict['t'] = []
-        res_dict['u'] = []
-
         # Initial conditions
-        res_dict['x'].append(x0[0])
-        res_dict['v'].append(x0[1])
-        res_dict['theta'].append(x0[2])
-        res_dict['omega'].append(x0[3])
-        res_dict['t'].append(0)
-        res_dict['u'].append(u0)
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
         for step in range(n_steps):
             u = nmpc.optimize(x0, runs=3, pert_factor=0.05)
-            model.simulate(u=u, steps=1)
+            model.simulate(u=u)
             x0 = sol['x:f']
-            res_dict['x'].append(float(x0[0]))
-            res_dict['v'].append(float(x0[1]))
-            res_dict['theta'].append(float(x0[2]))
-            res_dict['omega'].append(float(x0[3]))
-            res_dict['t'].append(step * dt)
-            res_dict['u'].append(float(u))
 
     def test_scaling(self):
         """
@@ -191,7 +161,7 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 10
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -199,7 +169,7 @@ class TestNMPC(TestCase):
             u = nmpc.optimize(x0)
             model.simulate(u=u)
             x0 = sol['x:f']
-        model.solution.plot()
+        # model.solution.plot()
         # sol.plot(
         #     ('t', 'x'),
         #     ('t', 'v'),
@@ -226,7 +196,7 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -257,7 +227,7 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -287,7 +257,7 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -317,7 +287,7 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -351,7 +321,7 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -360,15 +330,15 @@ class TestNMPC(TestCase):
             model.simulate(u=u)
             x0 = sol['x:f']
 
-        sol.plot(
-            ('t', 'x'),
-            ('t', 'v'),
-            ('t', 'theta'),
-            ('t', 'omega'),
-            subplots=True,
-            title=sol.get_names('x'),
-            xlabel=None,
-            legend=False)
+        # sol.plot(
+        #     ('t', 'x'),
+        #     ('t', 'v'),
+        #     ('t', 'theta'),
+        #     ('t', 'omega'),
+        #     subplots=True,
+        #     title=sol.get_names('x'),
+        #     xlabel=None,
+        #     legend=False)
 
     def test_output_constraints(self):
         """
@@ -385,7 +355,7 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -394,15 +364,15 @@ class TestNMPC(TestCase):
             model.simulate(u=u, steps=1)
             x0 = sol['x:f']
 
-        sol.plot(
-            ('t', 'x'),
-            ('t', 'v'),
-            ('t', 'theta'),
-            ('t', 'omega'),
-            subplots=True,
-            title=sol.get_names('x'),
-            xlabel=None,
-            legend=False)
+        # sol.plot(
+        #     ('t', 'x'),
+        #     ('t', 'v'),
+        #     ('t', 'theta'),
+        #     ('t', 'omega'),
+        #     subplots=True,
+        #     title=sol.get_names('x'),
+        #     xlabel=None,
+        #     legend=False)
 
     def test_input_change_cost(self):
         " Test normal nonlinear MPC for using a pendulum model. This test checks the normal problem setup"
@@ -413,12 +383,12 @@ class TestNMPC(TestCase):
         nmpc.quad_stage_cost.add_states(names=['v', 'theta'], ref=[0, 0], weights=[10, 5])
         nmpc.quad_stage_cost.add_inputs(names='F', weights=0.1)
         # nmpc.quad_stage_cost.add_inputs_change(names='F', weights=2)
-        nmpc.horizon = 25
+        nmpc.horizon = 10
         nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10])
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -440,17 +410,15 @@ class TestNMPC(TestCase):
 
     def test_QRP_matrix(self):
 
-        x0 = self.x0
-        u0 = self.u0
         model = self.model
         nmpc = NMPC(model)
         nmpc.quad_stage_cost.Q = np.array([[1, 1], [1, 1]])
         nmpc.quad_stage_cost.R = np.array([[1, 1], [1, 1]])
         nmpc.quad_terminal_cost.P = np.array([[1, 1], [1, 1]])
 
-        print(nmpc.quad_stage_cost.Q)
-        print(nmpc.quad_stage_cost.R)
-        print(nmpc.quad_terminal_cost.P)
+        # print(nmpc.quad_stage_cost.Q)
+        # print(nmpc.quad_stage_cost.R)
+        # print(nmpc.quad_terminal_cost.P)
 
     def test_multipleshooting_idas(self):
         " Test normal nonlinear MPC for using a pendulum model. This test checks the normal problem setup"
@@ -465,12 +433,12 @@ class TestNMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup(options={'integration_method': 'idas'})
 
-        n_steps = 10
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
 
         ss = SimpleControlLoop(model, nmpc)
-        ss.run(100)
-        ss.plot()
+        ss.run(n_steps)
+        # ss.plot()
 
 
 class TestNMPCConstraints(TestCase):
@@ -665,7 +633,7 @@ class TestNMPCConstraints(TestCase):
 
         nmpc.setup()
         nmpc.optimize(x0)
-        nmpc.plot_prediction(format_figure=self.format_figure)
+        # nmpc.plot_prediction(format_figure=self.format_figure)
 
     def test_soft_stage_constraint_cl(self):
         """ Test soft stage constraints with"""
@@ -683,7 +651,7 @@ class TestNMPCConstraints(TestCase):
         nmpc.set_stage_constraints(model.x[4], lb=[0], ub=[5], is_soft=True)
         nmpc.set_scaling(x_scaling=[10, 10, 10, 10, 10], u_scaling=[10., 10])
         nmpc.setup()
-        n_steps = 100
+        n_steps = 1
         sol = model.solution
         for step in range(n_steps):
             u = nmpc.optimize(x0)
@@ -747,13 +715,11 @@ class TestNMPCConstraints(TestCase):
                                    ub=[2, ca.inf])
         nmpc.setup()
 
-        n_steps = 100
         model.set_initial_conditions(x0=x0)
-        sol = model.solution
 
-        u = nmpc.optimize(x0)
+        _ = nmpc.optimize(x0)
 
-        nmpc.plot_prediction()
+        # nmpc.plot_prediction()
 
 
 class TestTrajectoryPathFollowingMPC(TestCase):
@@ -819,7 +785,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -846,14 +812,14 @@ class TestTrajectoryPathFollowingMPC(TestCase):
             model.simulate(u=u)
             x0 = sol['x:f']
 
-        p = figure()
-        p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
-        p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
-        p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
-        p = self.format_figure(p)
-        p.yaxis.axis_label = "y [m]"
-        p.xaxis.axis_label = "x [m]"
-        show(p)
+        # p = figure()
+        # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
+        # p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
+        # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
+        # p = self.format_figure(p)
+        # p.yaxis.axis_label = "y [m]"
+        # p.xaxis.axis_label = "x [m]"
+        # show(p)
 
     def test_pf_v3(self):
         """
@@ -877,7 +843,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -930,7 +896,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -993,7 +959,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1046,7 +1012,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup(options={'objective_function': 'discrete'})
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1071,11 +1037,11 @@ class TestTrajectoryPathFollowingMPC(TestCase):
             # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
             # show(p)
 
-        p = figure()
-        p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
-        p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
-        p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
-        show(p)
+        # p = figure()
+        # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
+        # p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
+        # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
+        # show(p)
 
     def test_pf_v7(self):
         """
@@ -1103,7 +1069,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1157,7 +1123,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1213,7 +1179,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1238,11 +1204,11 @@ class TestTrajectoryPathFollowingMPC(TestCase):
             # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
             # show(p)
 
-        p = figure()
-        p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
-        p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
-        p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
-        show(p)
+        # p = figure()
+        # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
+        # p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
+        # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
+        # show(p)
 
     def test_pf_v10(self):
         """
@@ -1264,7 +1230,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1289,11 +1255,11 @@ class TestTrajectoryPathFollowingMPC(TestCase):
             # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
             # show(p)
 
-        p = figure()
-        p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
-        p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
-        p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
-        show(p)
+        # p = figure()
+        # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
+        # p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
+        # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
+        # show(p)
 
     def test_pf_v11(self):
         """
@@ -1318,7 +1284,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1332,16 +1298,16 @@ class TestTrajectoryPathFollowingMPC(TestCase):
             x_path.append(x_p)
             y_path.append(y_p)
 
-        p = figure()
-        p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
-        p = self.format_figure(p)
-        p.yaxis.axis_label = "y [m]"
-        p.xaxis.axis_label = "x [m]"
-        show(p)
+        # p = figure()
+        # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
+        # p = self.format_figure(p)
+        # p.yaxis.axis_label = "y [m]"
+        # p.xaxis.axis_label = "x [m]"
+        # show(p)
 
         scl = SimpleControlLoop(model,nmpc)
         scl.run(steps=n_steps)
-        scl.plot()
+        # scl.plot()
             # p = figure()
             # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
             # p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
@@ -1376,13 +1342,13 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
         scl = SimpleControlLoop(model, nmpc)
         scl.run(steps=n_steps)
-        scl.plot()
+        # scl.plot()
 
     def test_tt_v12(self):
         """
@@ -1404,7 +1370,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup(options={'objective_function': 'discrete'})
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1463,7 +1429,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup(options={'objective_function': 'discrete'})
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1487,7 +1453,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
             # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
             # show(p)
 
-        model.solution.plot()
+        # model.solution.plot()
         # p = figure()
         # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
         # p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
@@ -1516,7 +1482,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup(options={'objective_function': 'discrete'})
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1552,11 +1518,11 @@ class TestTrajectoryPathFollowingMPC(TestCase):
             # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
             # show(p)
 
-        p = figure()
-        p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
-        p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
-        p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
-        show(p)
+        # p = figure()
+        # p.line(x=np.array(model.solution['x']).squeeze(), y=np.array(model.solution['y']).squeeze())
+        # p.line(x=x_pred[0, :].squeeze(), y=x_pred[2, :].squeeze().squeeze(), line_color='green')
+        # p.line(x=x_path, y=y_path, line_color='red', line_dash='dashed')
+        # show(p)
 
     def test_tt_v15(self):
         """
@@ -1580,7 +1546,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup(options={'objective_function': 'discrete'})
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1629,12 +1595,12 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
 
         scl = SimpleControlLoop(model, nmpc)
         scl.run(steps=n_steps)
-        scl.plot()
+        # scl.plot()
 
     def test_tt_v17(self):
         """
@@ -1656,7 +1622,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup(options={'objective_function': 'discrete'})
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
 
         def path(theta):
@@ -1673,7 +1639,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
 
         scl = SimpleControlLoop(model, nmpc)
         scl.run(steps=n_steps, ref_sc={'x': x_traj, 'y': y_traj}, ref_tc={'x': x_traj, 'y': y_traj})
-        scl.plot()
+        # scl.plot()
 
     def test_vr_1(self):
         """
@@ -1696,18 +1662,17 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
         ss = SimpleControlLoop(model, nmpc)
-        ss.run(100, ref_sc={'x': 1, 'y': 2},
+        ss.run(2, ref_sc={'x': 1, 'y': 2},
                ref_tc={'x': 1, 'y': 2})
 
-        ss.run(100, ref_sc={'x': 2, 'y': 1},
+        ss.run(2, ref_sc={'x': 2, 'y': 1},
                ref_tc={'x': 2, 'y': 1})
 
-        ss.plot()
+        # ss.plot()
 
 
 class TestNMPCOptions(TestCase):
@@ -1850,7 +1815,7 @@ class TestDAE(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0, z0=z0)
         sol = model.solution
 
@@ -1859,15 +1824,15 @@ class TestDAE(TestCase):
             model.simulate(u=u, steps=1)
             x0 = sol['x:f']
 
-        sol.plot(
-            ('t', 'x'),
-            ('t', 'v'),
-            ('t', 'theta'),
-            ('t', 'omega'),
-            subplots=True,
-            title=sol.get_names('x'),
-            xlabel=None,
-            legend=False)
+        # sol.plot(
+        #     ('t', 'x'),
+        #     ('t', 'v'),
+        #     ('t', 'theta'),
+        #     ('t', 'omega'),
+        #     subplots=True,
+        #     title=sol.get_names('x'),
+        #     xlabel=None,
+        #     legend=False)
         # nmpc.plot_mpc_prediction()
 
     def test_closed_loop_rk(self):
@@ -1886,7 +1851,7 @@ class TestDAE(TestCase):
         nmpc.set_nlp_options({'integration_method': 'rk4'})
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0, z0=z0)
         sol = model.solution
 
@@ -1895,15 +1860,15 @@ class TestDAE(TestCase):
             model.simulate(u=u, steps=1)
             x0 = sol['x:f']
 
-        sol.plot(
-            ('t', 'x'),
-            ('t', 'v'),
-            ('t', 'theta'),
-            ('t', 'omega'),
-            subplots=True,
-            title=sol.get_names('x'),
-            xlabel=None,
-            legend=False)
+        # sol.plot(
+        #     ('t', 'x'),
+        #     ('t', 'v'),
+        #     ('t', 'theta'),
+        #     ('t', 'omega'),
+        #     subplots=True,
+        #     title=sol.get_names('x'),
+        #     xlabel=None,
+        #     legend=False)
         # nmpc.plot_mpc_prediction()
 
 
@@ -1971,7 +1936,7 @@ class TestTvp(TestCase):
         nmpc.set_time_varying_parameters(names=['d_tvp'], values={'d_tvp': np.sin(np.arange(0, 5, self.dt)).tolist()})
         nmpc.setup()
 
-        n_steps = 500
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -1980,15 +1945,15 @@ class TestTvp(TestCase):
             model.simulate(u=u, p=[np.sin(self.dt * step), 0.1])
             x0 = sol['x:f']
 
-        sol.plot(
-            ('t', 'x'),
-            ('t', 'v'),
-            ('t', 'theta'),
-            ('t', 'omega'),
-            subplots=True,
-            title=sol.get_names('x'),
-            xlabel=None,
-            legend=False)
+        # sol.plot(
+        #     ('t', 'x'),
+        #     ('t', 'v'),
+        #     ('t', 'theta'),
+        #     ('t', 'omega'),
+        #     subplots=True,
+        #     title=sol.get_names('x'),
+        #     xlabel=None,
+        #     legend=False)
 
     def test_tvp_2(self) -> None:
         """
@@ -2007,7 +1972,7 @@ class TestTvp(TestCase):
         nmpc.set_time_varying_parameters(names=['d_tvp'])
         nmpc.setup()
 
-        n_steps = 500
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2017,15 +1982,15 @@ class TestTvp(TestCase):
             model.simulate(u=u, p=[np.sin(self.dt * step), 0.1])
             x0 = sol['x:f']
 
-        sol.plot(
-            ('t', 'x'),
-            ('t', 'v'),
-            ('t', 'theta'),
-            ('t', 'omega'),
-            subplots=True,
-            title=sol.get_names('x'),
-            xlabel=None,
-            legend=False)
+        # sol.plot(
+        #     ('t', 'x'),
+        #     ('t', 'v'),
+        #     ('t', 'theta'),
+        #     ('t', 'omega'),
+        #     subplots=True,
+        #     title=sol.get_names('x'),
+        #     xlabel=None,
+        #     legend=False)
 
 
 class TestChangeInputWeight(TestCase):
@@ -2104,7 +2069,7 @@ class TestChangeInputWeight(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2155,7 +2120,7 @@ class TestChangeInputWeight(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2205,7 +2170,7 @@ class TestChangeInputWeight(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2256,7 +2221,7 @@ class TestChangeInputWeight(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2416,7 +2381,7 @@ class TestNewIntegration(TestCase):
         nmpc.set_nlp_options({'integration_method': 'collocation'})
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2450,7 +2415,7 @@ class TestNewIntegration(TestCase):
         nmpc.set_nlp_options({'integration_method': 'rk4'})
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2484,7 +2449,7 @@ class TestNewIntegration(TestCase):
         nmpc.set_nlp_options({'integration_method': 'idas'})
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2522,7 +2487,7 @@ class TestNewIntegration(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2531,15 +2496,15 @@ class TestNewIntegration(TestCase):
             model.simulate(u=u, steps=1)
             x0 = sol['x:f']
 
-        sol.plot(
-            ('t', 'x'),
-            ('t', 'v'),
-            ('t', 'theta'),
-            ('t', 'omega'),
-            subplots=True,
-            title=sol.get_names('x'),
-            xlabel=None,
-            legend=False)
+        # sol.plot(
+        #     ('t', 'x'),
+        #     ('t', 'v'),
+        #     ('t', 'theta'),
+        #     ('t', 'omega'),
+        #     subplots=True,
+        #     title=sol.get_names('x'),
+        #     xlabel=None,
+        #     legend=False)
         # nmpc.plot_mpc_prediction()
 
 
@@ -2593,7 +2558,7 @@ class TestTimeVariantSys(TestCase):
         nmpc.initial_time = t0
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0, t0=t0)
         sol = model.solution
 
@@ -2603,7 +2568,7 @@ class TestTimeVariantSys(TestCase):
             x0 = sol['x:f']
 
             # nmpc.plot_mpc_prediction()
-        sol.plot(output_file="results/test.html")
+        # sol.plot(output_file="results/test.html")
 
 
 class TestMinimumTime(TestCase):
@@ -2653,13 +2618,13 @@ class TestMinimumTime(TestCase):
         nmpc.set_box_constraints(u_lb=0, u_ub=1)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
         u = nmpc.optimize(x0)
 
-        nmpc.plot_prediction()
+        # nmpc.plot_prediction()
 
 
 class TestStats(TestCase):
@@ -2721,7 +2686,7 @@ class TestStats(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2797,7 +2762,7 @@ class TestTimeVaryingWeights(TestCase):
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.setup()
 
-        n_steps = 100
+        n_steps = 1
         model.set_initial_conditions(x0=x0)
         sol = model.solution
 
@@ -2806,6 +2771,6 @@ class TestTimeVaryingWeights(TestCase):
             model.simulate(u=u, p=[0, 0])
             x0 = sol['x:f']
         #
-        model.solution.plot()
+        # model.solution.plot()
         #
         # nmpc.solution.to_mat('t', 'x', 'extime', 'niterations', 'solvstatus', file_name='results/test.mat')
