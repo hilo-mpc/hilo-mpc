@@ -49,7 +49,7 @@ class MyTestCase(unittest.TestCase):
         model.set_measurement_equations(x)
         model.set_measurements(['y1'])
         sampling_interval = 0.5
-        n_steps = 100
+        n_steps = 1
 
         # Unwrap states
         X = x[0]
@@ -98,7 +98,7 @@ class MyTestCase(unittest.TestCase):
         model.set_measurement_equations(x)
         model.set_measurements(['y1'])
         sampling_interval = 0.5
-        n_steps = 100
+        n_steps = 2
 
         # Unwrap states
         X = x[0]
@@ -156,7 +156,7 @@ class MyTestCase(unittest.TestCase):
         model.set_measurement_equations(x)
         model.set_measurements(['y1'])
         sampling_interval = 0.5
-        n_steps = 100
+        n_steps = 2
 
         # Unwrap states
         X = x[0]
@@ -213,7 +213,7 @@ class MyTestCase(unittest.TestCase):
         model.set_measurement_equations(x)
         model.set_measurements(['y1', 'y2'])
         sampling_interval = 0.5
-        n_steps = 100
+        n_steps = 2
 
         # Unwrap states
         X = x[0]
@@ -274,7 +274,7 @@ class MyTestCase(unittest.TestCase):
         model.set_measurement_equations(x)
         model.set_measurements(['y1', 'y2'])
         sampling_interval = 0.5
-        n_steps = 100
+        n_steps = 2
 
         # Unwrap states
         X = x[0]
@@ -328,9 +328,9 @@ class MyTestCase(unittest.TestCase):
     @skip("Deprecated")
     def test_bio_MHE(self):
         #TODO add ecoli_D1210_fedbatch_plant to the models
-        from hilo_mpc.library.models import ecoli_D1210_fedbatch_model
+        from hilo_mpc.library.models import ecoli_D1210_fedbatch
 
-        model = ecoli_D1210_fedbatch_model()
+        model = ecoli_D1210_fedbatch()
         model.set_measurement_equations(model.x)
         model.set_measurements([f'y_{i}' for i in model.dynamical_state_names])
 
@@ -354,7 +354,7 @@ class MyTestCase(unittest.TestCase):
         sampling_interval = 0.5
         model.setup()
         model.set_initial_conditions(x0=x0)
-        n_steps = 50
+        n_steps = 2
         # Number of steps
         mhe = MHE(model)
         mhe.horizon = 20
@@ -378,15 +378,15 @@ class MyTestCase(unittest.TestCase):
             if x0_est is not None:
                 print(f"Estimated: {x0_est}, real: {model.solution['x'][:, -2]}")
                 print(f"Estimated: {p0_est}, real: {p0}")
-
-        mhe.solution.plot(
-            ('t', 'X'),
-            ('t', 'Sf'),
-            ('t', 'If'),
-            subplots=True,
-            title=['X0', 'Sf', 'IF'],
-            xlabel=None,
-            legend=False)
+        #
+        # mhe.solution.plot(
+        #     ('t', 'X'),
+        #     ('t', 'Sf'),
+        #     ('t', 'If'),
+        #     subplots=True,
+        #     title=['X0', 'Sf', 'IF'],
+        #     xlabel=None,
+        #     legend=False)
 
     def test_chemical_reaction(self):
         """
@@ -436,7 +436,7 @@ class MyTestCase(unittest.TestCase):
 
         model.set_initial_conditions(x0=x0_real)
 
-        n_steps = 120
+        n_steps = 2
 
         # Setup the MHE
         mhe = MHE(model)
@@ -453,29 +453,29 @@ class MyTestCase(unittest.TestCase):
             mhe.add_measurements(y_meas=model.solution['y'][:, -2])
             x_est, _ = mhe.estimate()
 
-        p_tot = []
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Ca']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Ca']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cb']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cb']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cc']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cc']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        show(gridplot(p_tot, ncols=3))
+        # p_tot = []
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Ca']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Ca']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cb']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cb']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cc']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cc']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # show(gridplot(p_tot, ncols=3))
 
     def test_chemical_reaction_2(self):
         """
@@ -525,7 +525,7 @@ class MyTestCase(unittest.TestCase):
 
         model.set_initial_conditions(x0=x0_real)
 
-        n_steps = 120
+        n_steps = 2
 
         # Setup the MHE
         mhe = MHE(model)
@@ -543,29 +543,29 @@ class MyTestCase(unittest.TestCase):
             mhe.add_measurements(y_meas=model.solution['y'][:, -2])
             x_est, _ = mhe.estimate()
 
-        p_tot = []
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Ca']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Ca']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cb']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cb']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cc']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cc']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        show(gridplot(p_tot, ncols=3))
+        # p_tot = []
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Ca']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Ca']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cb']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cb']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cc']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cc']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # show(gridplot(p_tot, ncols=3))
 
     def test_chemical_reaction_3(self):
         """
@@ -609,7 +609,7 @@ class MyTestCase(unittest.TestCase):
 
         model.set_initial_conditions(x0=x0_real)
 
-        n_steps = 120
+        n_steps = 2
 
         # Setup the MHE
         model_disc.setup(dt=dt)
@@ -628,29 +628,29 @@ class MyTestCase(unittest.TestCase):
             mhe.add_measurements(y_meas=model.solution['y'][:, -2])
             x_est, _ = mhe.estimate()
 
-        p_tot = []
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Ca']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Ca']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cb']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cb']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cc']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cc']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        show(gridplot(p_tot, ncols=3))
+        # p_tot = []
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Ca']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Ca']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cb']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cb']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cc']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cc']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # show(gridplot(p_tot, ncols=3))
 
     def test_chemical_reaction_4_stage_const(self):
         """
@@ -693,7 +693,7 @@ class MyTestCase(unittest.TestCase):
 
         model.set_initial_conditions(x0=x0_real)
 
-        n_steps = 120
+        n_steps = 2
 
         # Setup the MHE
         mhe = MHE(model)
@@ -713,29 +713,29 @@ class MyTestCase(unittest.TestCase):
             mhe.add_measurements(y_meas=model.solution['y'][:, -2])
             x_est, _ = mhe.estimate()
 
-        p_tot = []
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Ca']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Ca']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cb']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cb']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cc']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cc']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        show(gridplot(p_tot, ncols=3))
+        # p_tot = []
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Ca']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Ca']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cb']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cb']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['Cc']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['Cc']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # show(gridplot(p_tot, ncols=3))
 
 class TestTimeVariantSys(unittest.TestCase):
 
@@ -785,7 +785,7 @@ class TestTimeVariantSys(unittest.TestCase):
 
         model.set_initial_conditions(x0=x0_real)
 
-        n_steps = 200
+        n_steps = 2
 
         # Setup the MHE
         mhe = MHE(model)
@@ -802,15 +802,15 @@ class TestTimeVariantSys(unittest.TestCase):
             mhe.add_measurements(y_meas=model.solution['y'][:, -2]+2*(np.random.rand(1)-0.5))
             x_est, _ = mhe.estimate()
 
-        p_tot = []
-        p = figure(background_fill_color="#fafafa")
-        p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['T']).squeeze(),
-                  legend_label='Estimated')
-        p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['T']).squeeze(),
-               legend_label='Real')
-        p_tot.append(p)
-
-        show(gridplot(p_tot, ncols=3))
+        # p_tot = []
+        # p = figure(background_fill_color="#fafafa")
+        # p.scatter(x=np.array(mhe.solution['t']).squeeze(), y=np.array(mhe.solution['T']).squeeze(),
+        #           legend_label='Estimated')
+        # p.line(x=np.array(model.solution['t']).squeeze(), y=np.array(model.solution['T']).squeeze(),
+        #        legend_label='Real')
+        # p_tot.append(p)
+        #
+        # show(gridplot(p_tot, ncols=3))
 
 if __name__ == '__main__':
     unittest.main()
