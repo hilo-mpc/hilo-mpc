@@ -785,7 +785,7 @@ class TestTimeVariantSys(unittest.TestCase):
 
         model.set_initial_conditions(x0=x0_real)
 
-        n_steps = 2
+        n_steps = 40
 
         # Setup the MHE
         mhe = MHE(model)
