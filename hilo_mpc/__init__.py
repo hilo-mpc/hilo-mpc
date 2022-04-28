@@ -82,6 +82,7 @@ NeuralNetworkKernel = kernel.NeuralNetworkKernel
 PeriodicKernel = kernel.PeriodicKernel
 GaussianProcess = gp.GaussianProcess
 GP = GaussianProcess
+GPArray = gp.GPArray
 SimpleControlLoop = cl.SimpleControlLoop
 LinearProgram = opti.LinearProgram
 LP = LinearProgram
@@ -139,6 +140,7 @@ __all__ = [
     'PeriodicKernel',
     'GaussianProcess',
     'GP',
+    'GPArray',
     'SimpleControlLoop',
     'LinearProgram',
     'LP',

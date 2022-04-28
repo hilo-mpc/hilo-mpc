@@ -896,9 +896,6 @@ class GaussianProcess(LearningBase):
         solution.plot(('t', 'error'), ('t', 'post_std'), **plot_kwargs)
 
 
-GP = TypeVar('GP', bound=GaussianProcess)
-
-
 class GPArray:
     """"""
     def __init__(self, n_gps: int) -> None:
@@ -912,16 +909,16 @@ class GPArray:
         """Length method"""
         return self._n_gps
 
-    def __iter__(self) -> Optional[GP]:
+    def __iter__(self) -> Optional[GaussianProcess]:
         """Item iteration method"""
         for k in range(self._n_gps):
             gp = self._gps[k, 0]
             if gp is None:
-                gp = object.__new__(GP)
+                gp = object.__new__(GaussianProcess)
                 self._gps[k, 0] = gp
             yield gp
 
-    def __getitem__(self, item: int) -> Optional[GP]:
+    def __getitem__(self, item: int) -> Optional[GaussianProcess]:
         """Item getter method"""
         return self._gps[item, 0]
 
@@ -940,27 +937,27 @@ class GPArray:
             labels[k] += out
         # NOTE: @-operator doesn't seem to work because we set __array_ufunc__ to None
         equations = Equations(ca.SX, {'matmul': ca.mtimes(other, labels)})
-        return equations.to_function(f'{type(GP).__name__}_matmul', *features)
+        return equations.to_function(f'{type(GaussianProcess).__name__}_matmul', *features)
 
-    def append(self, gp: GP) -> None:
-        """
-
-        :param gp:
-        :return:
-        """
-
-    def pop(self) -> GP:
-        """
-
-        :return:
-        """
-
-    def remove(self, item) -> None:
-        """
-
-        :param item:
-        :return:
-        """
+    # def append(self, gp: GaussianProcess) -> None:
+    #     """
+    #
+    #     :param gp:
+    #     :return:
+    #     """
+    #
+    # def pop(self) -> GaussianProcess:
+    #     """
+    #
+    #     :return:
+    #     """
+    #
+    # def remove(self, item) -> None:
+    #     """
+    #
+    #     :param item:
+    #     :return:
+    #     """
 
 
 __all__ = [
