@@ -673,6 +673,7 @@ class NMPC(Controller, DynamicOptimization):
             if len(z_ub) != self._n_z:
                 raise TypeError(f"The model has {self._n_z} algebraic states. You need to pass the same number of "
                                 f"bounds.")
+            self._z_ub = z_ub
         else:
             self._z_ub = self._model.n_z * [ca.inf]
 
@@ -682,6 +683,7 @@ class NMPC(Controller, DynamicOptimization):
             if len(z_lb) != self._n_z:
                 raise TypeError(f"The model has {self._n_z} algebraic states. You need to pass the same number of "
                                 f"bounds.")
+            self._z_lb = z_lb
         else:
             self._z_lb = self._model.n_z * [-ca.inf]
 
