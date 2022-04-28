@@ -1083,7 +1083,7 @@ class NMPC(Controller, DynamicOptimization):
         """
         self.quad_terminal_cost.add_states(names=states, weights=cost, ref=references)
 
-    def set_terminal_constraints(self, terminal_constraint=None, lb=None, ub=None, is_soft=False, max_violation=ca.inf,
+    def set_terminal_constraints(self, name='terminal_constraint', terminal_constraint=None, lb=None, ub=None, is_soft=False, max_violation=ca.inf,
                                  weight=None):
         """
         Allows to add a (nonlinear) terminal constraint.
@@ -1111,6 +1111,7 @@ class NMPC(Controller, DynamicOptimization):
         self.terminal_constraint.is_soft = is_soft
         self.terminal_constraint.max_violation = max_violation
         self.terminal_constraint.weight = weight
+        self.terminal_constraint.name = name
 
     def setup(self, options=None, solver_options=None) -> None:
 
