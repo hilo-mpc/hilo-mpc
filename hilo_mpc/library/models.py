@@ -23,7 +23,7 @@
 
 from ..modules.dynamic_model.dynamic_model import Model
 from ..util.plotting import get_plot_backend
-
+import casadi as ca
 
 def cstr_schaffner_and_zeitz():
     """
@@ -100,11 +100,11 @@ def cstr_seborg():
 def ecoli_D1210_conti(model='simple'):
     """
     Returns a hilo-mpc Model object.
-    The model is taken from
+    The model is an adaptation to a continuous batch process from the fedbach process proposed in
 
     Lee,  J.;  Ramirez,  W.  F.
     Mathematical  modelling  of  induced  foreign protein  production  by  recombinant  bacteria.
-    Biotechnol.  Bioeng.1992,39, 635-646.
+    Biotechnol.  Bioeng. 1992,39, 635-646.
 
     If model ='simple' the model does not have the two inducer states and the reactions rates are left as parameters
     If model= 'complex' the model has the two inducer states and the reaction rates are the same as in Lee et al.
@@ -193,9 +193,105 @@ def ecoli_D1210_conti(model='simple'):
 
         return model
 
+def ecoli_D1210_fedbatch():
+    """
+    Returns a hilo-mpc Model object of fedbatch bioreactor containing genetically modified Escherichia Coli D1210
+    The model is taken from
+
+    Lee,  J.;  Ramirez,  W.  F.
+    Mathematical  modelling  of  induced  foreign protein  production  by  recombinant  bacteria.
+    Biotechnol.  Bioeng.1992,39, 635-646.
+
+    :return:
+    """
+
+    from hilo_mpc.util.plotting import PLOT_BACKEND
+
+    model = Model(plot_backend=PLOT_BACKEND, name='ecoli_D1210_fedbatch_complex')
+    x = model.set_dynamical_states(['X', 'S', 'P', 'I', 'ISF', 'IRF', 'V'])
+    u = model.set_inputs(['FeedS', 'FeedI'])
+
+    Sf = 100
+    If = 4
+
+    # Unwrap states
+    X = x[0]
+    S = x[1]
+    P = x[2]
+    I = x[3]
+    ISF = x[4]
+    IRF = x[5]
+    V = x[6]
+
+    # Unwrap inputs
+    u1 = u[0]
+    u2 = u[1]
+
+    # Reaction rates
+    phi = 0.407 * S / (0.108 + S + (S ** 2) / 14814.0)
+    mu = phi * (ISF + (0.22 * IRF) / (0.22 + I))
+    Rs = 2 * mu
+    Rfp = phi * (0.0005 + I) / (0.022 + I)
+    k1 = 0.09 * I / (0.034 + I)
+    k2 = 0.09 * I / (0.034 + I)
+
+    D = (u1 + u2) / V
+
+    dX = mu * X - D * X
+    dS = - Rs * X - D * S + u1 * Sf / V
+    dP = Rfp * X - D * P
+    dI = - D * I + u2 * If / V
+    dISF = -k1 * ISF
+    dIRF = k2 * (1 - IRF)
+    dV = u1 + u2
+
+    model.set_dynamical_equations([dX, dS, dP, dI, dISF, dIRF, dV])
+
+    return model
+
+
+def scerevisae_SEY2102_fedbatch():
+    """
+    Returns a hilo-mpc Model object of fedbatch bioreactor containing Saccharomyces Cerevisiae SEY2102. The model is taken
+    from
+    Park, Seujeung, and W. Fred Ramirez.
+    "Dynamics of foreign protein secretion from Saccharomyces cerevisiae."
+    Biotechnology and bioengineering 33.3 (1989): 272-281.
+    :return:
+    """
+    from hilo_mpc.util.plotting import PLOT_BACKEND
+    model = Model(plot_backend=PLOT_BACKEND, name='scerevisae_SEY2102_fedbatch')
+    x = model.set_dynamical_states(['bio', 's', 'pt', 'pm', 'v'])
+    F = model.set_inputs('F')
+    # s0 = model.set_parameters('s0')
+    s0 = 20  # g/l
+    bio = x[0]
+    s = x[1]
+    pt = x[2]
+    pm = x[3]
+    V = x[4]
+
+    mu = (21.87 * s) / ((s + 0.4) * (s + 62.5))
+    fp = (s * ca.exp(-5 * s)) / (s + 0.1)
+    phi = 4.75 * mu / (0.12 + mu)
+
+    D = F / V
+
+    dbio = mu * bio - D * bio
+    ds = -7.3 * mu * bio - D * (s - s0)
+    dpt = fp * bio - D * pt
+    dpm = phi * (pt - pm) - D * pm
+    dv = F
+
+    model.set_dynamical_equations([dbio, ds, dpt, dpm, dv])
+    model.set_measurements(['bio', 's', 'pt', 'pm', 'v'])
+    model.set_measurement_equations(model.x)
+    return model
 
 __all__ = [
     'cstr_schaffner_and_zeitz',
     'cstr_seborg',
-    'ecoli_D1210_conti'
+    'ecoli_D1210_conti',
+    'ecoli_D1210_fedbatch',
+    'scerevisae_SEY2102_fedbatch'
 ]
