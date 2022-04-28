@@ -1231,11 +1231,12 @@ class NMPC(Controller, DynamicOptimization):
 
             # Check time varying parameters
             # tvp_ind = []
+            #TODO this should be moved in the optimiziation method
             if len(self._time_varying_parameters) != 0:
                 p_names = model.parameter_names
                 for tvp in self._time_varying_parameters:
-                    assert tvp in p_names, "The time-varying parameter {p} is not in the model parameter. " \
-                                           "The model parameters are {p_name}.".format(p=tvp, p_name=p_names)
+                    assert tvp in p_names, f"The time-varying parameter {tvp} is not in the model parameter. " \
+                                           f"The model parameters are {p_names}."
 
             if self.terminal_constraint.is_set:
                 if self.terminal_constraint.is_soft:
@@ -1520,7 +1521,7 @@ class NMPC(Controller, DynamicOptimization):
                     self._discrete_variables_bool.extend([False])
                 offset += self.stage_constraint.size
             else:
-                e_soft_stage = ca.MX.sym('e _soft_stage', 0)
+                e_soft_stage = ca.MX.sym('e_soft_stage', 0)
 
             if self.terminal_constraint.is_soft:
                 e_soft_term = v[offset:offset + self.terminal_constraint.size]
