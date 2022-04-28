@@ -984,17 +984,19 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
         # Algebraic constraints
         if z_ub is not None:
             z_ub = check_and_wrap_to_list(z_ub)
-            if len(z_ub) != self._n_z:
+            if len(z_ub) != self._model.n_z :
                 raise TypeError(f"The model has {self._n_z} algebraic states. "
                                 f"You need to pass the same number of bounds.")
+            self._z_ub = z_ub
         else:
             self._z_ub = self._model.n_z * [ca.inf]
 
         if z_lb is not None:
             z_lb = check_and_wrap_to_list(z_lb)
-            if len(z_lb) != self._n_z:
+            if len(z_lb) != self._model.n_z :
                 raise TypeError(f"The model has {self._n_z} algebraic states. "
                                 f"You need to pass the same number of bounds.")
+            self._z_lb = z_lb
         else:
             self._z_lb = self._model.n_z * [-ca.inf]
 
