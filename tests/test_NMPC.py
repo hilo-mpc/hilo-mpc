@@ -734,7 +734,7 @@ class TestNMPCConstraints(TestCase):
 
         _ = nmpc.optimize(x0)
 
-        nmpc.plot_prediction()
+        # nmpc.plot_prediction()
 
 
 class TestTrajectoryPathFollowingMPC(TestCase):
