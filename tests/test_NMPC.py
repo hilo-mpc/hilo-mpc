@@ -71,7 +71,7 @@ class TestNMPC(TestCase):
         model.set_initial_conditions(x0=x0)
         scl = SimpleControlLoop(model, nmpc)
         scl.run(steps=n_steps)
-        scl.plot()
+        # scl.plot()
 
     def test_closed_loop_c(self):
         " Test normal nonlinear MPC for using a pendulum model. This test checks the normal problem setup"
