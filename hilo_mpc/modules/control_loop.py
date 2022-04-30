@@ -31,11 +31,9 @@ from .controller.base import Controller
 from .machine_learning.base import LearningBase
 from .estimator.base import Estimator
 
-
 Control = TypeVar('Control', bound=Controller)
 ML = TypeVar('ML', bound=LearningBase)
 Estimate = TypeVar('Estimate', bound=Estimator)
-
 
 _step = 0
 
@@ -48,12 +46,13 @@ class SimpleControlLoop:
     :param controller:
     :param observer:
     """
+
     def __init__(self, plant: Model, controller: Union[Control, ML], observer: Optional[Estimate] = None) -> None:
         """Constructor method"""
         if not plant.is_setup():
             plant.setup()
         self._plant = plant
-
+        self._counter = 0
         self._ind_map_controller = {'x': [], 'u': [], 'y': [], 'z': []}
         if not controller.is_setup():
             controller.setup()
@@ -63,11 +62,15 @@ class SimpleControlLoop:
         self._controller_is_ann = hasattr(self._controller, 'predict')
         if not self._controller_is_ann:
             self._controller_is_mpc = self._controller.type in ['NMPC', 'LMPC']
+            self._controller_is_ocp = self._controller.type == 'OCP'
             if not self._controller_is_mpc:
                 if self._controller.type == 'PID':
                     self._controller_is_pid = True
 
-        if self._controller_is_mpc:
+        if self._controller_is_ocp:
+            self._u_sequence = None
+
+        if self._controller_is_mpc or self._controller_is_ocp:
             # TODO do the same for the estimator
             name_set = set(self._plant.dynamical_state_names)
             self._ind_map_controller['x'] = [i for i, e in enumerate(self._controller._model_orig.dynamical_state_names)
@@ -228,6 +231,7 @@ class SimpleControlLoop:
             :param doc:
             :return:
             """
+
             def callback():
                 """
 
@@ -343,7 +347,7 @@ class SimpleControlLoop:
         :return:
         """
         # Controller step
-        if self._controller_is_mpc:
+        if self._controller_is_mpc or self._controller_is_ocp:
             # states of model could be different from the states of the plant.
             state_names = self._controller._model_orig.dynamical_state_names
             ind_states = [self._plant.dynamical_state_names.index(name) for name in state_names]
@@ -355,7 +359,16 @@ class SimpleControlLoop:
             else:
                 cp = p
 
-            u = self._controller.optimize(x0[ind_states], cp=cp, **kwargs)
+            if self._controller_is_mpc:
+                u = self._controller.optimize(x0[ind_states], cp=cp, **kwargs)
+            else:
+                if self._counter == 0:
+                    _ = self._controller.optimize(x0[ind_states], cp=cp, **kwargs)
+                    self._u_sequence = self._controller.solution['u']
+                    u = self._u_sequence[:, 0]
+                else:
+                    u = self._u_sequence[:,self._counter]
+
         elif self._controller_is_ann:
             u = self._controller.predict(x0)
         elif self._controller_is_pid:
@@ -382,6 +395,7 @@ class SimpleControlLoop:
                 # TODO: Further processing
                 # It's a learning-based 'observer'
                 self._observer.predict()
+        self._counter += 1
 
     def run(self, steps, p=None, live_animation=False, browser=None, **kwargs):
         """
@@ -395,6 +409,13 @@ class SimpleControlLoop:
         :param browser:
         :return:
         """
+
+        if self._controller_is_ocp:
+            if not self._controller.prediction_horizon >= steps:
+                raise ValueError("To solve an OCP problem  the prediction horizon must be larger than the number of steps."
+                                 f"The horizon length is {self._controller.prediction_horizon} while the "
+                                 f"steps are {steps}.")
+
         if _step != 0:
             self._reset_step()
 
