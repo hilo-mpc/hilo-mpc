@@ -21,9 +21,11 @@
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import casadi as ca
+
 from ..modules.dynamic_model.dynamic_model import Model
 from ..util.plotting import get_plot_backend
-import casadi as ca
+
 
 def cstr_schaffner_and_zeitz():
     """
@@ -108,17 +110,18 @@ def ecoli_D1210_conti(model='simple'):
 
     If model ='simple' the model does not have the two inducer states and the reactions rates are left as parameters
     If model= 'complex' the model has the two inducer states and the reaction rates are the same as in Lee et al.
+
     :return:
     """
-    # Load plot device
-    from hilo_mpc.util.plotting import PLOT_BACKEND
+    # Load plot backend
+    plot_backend = get_plot_backend()
 
-    if model=='complex':
-        model = Model(plot_backend=PLOT_BACKEND, name='ecoli_D1210_complex')
-        x = model.set_dynamical_states(['X', 'S', 'P', 'I', 'ISF', 'IRF'])
-        u = model.set_inputs(['DS', 'DI'])
-        p = model.set_parameters(['Sf', 'If'])
-        model.set_measurements(['mu', 'Rs', 'Rfp'])
+    if model == 'complex':
+        model = Model(plot_backend=plot_backend, name='ecoli_D1210_complex')
+        x = model.set_dynamical_states('X', 'S', 'P', 'I', 'ISF', 'IRF')
+        u = model.set_inputs('DS', 'DI')
+        p = model.set_parameters('Sf', 'If')
+        model.set_measurements('mu', 'Rs', 'Rfp')
 
         # Unwrap states
         X = x[0]
@@ -155,14 +158,13 @@ def ecoli_D1210_conti(model='simple'):
 
         model.set_dynamical_equations([dX, dS, dP, dI, dISF, dIRF])
         model.set_measurement_equations([mu, Rs, Rfp])
+
         return model
-
     elif model == 'simple':
-
-        model = Model(plot_backend=PLOT_BACKEND, name='ecoli_D1210_conti_simple')
-        x = model.set_dynamical_states(['X', 'S', 'P', 'I'])
-        u = model.set_inputs(['DS', 'DI'])
-        p = model.set_parameters(['Sf', 'If', 'mu', 'Rs', 'Rfp'])
+        model = Model(plot_backend=plot_backend, name='ecoli_D1210_conti_simple')
+        x = model.set_dynamical_states('X', 'S', 'P', 'I')
+        u = model.set_inputs('DS', 'DI')
+        p = model.set_parameters('Sf', 'If', 'mu', 'Rs', 'Rfp')
 
         # Unwrap states
         X = x[0]
@@ -193,6 +195,7 @@ def ecoli_D1210_conti(model='simple'):
 
         return model
 
+
 def ecoli_D1210_fedbatch():
     """
     Returns a hilo-mpc Model object of fedbatch bioreactor containing genetically modified Escherichia Coli D1210
@@ -204,12 +207,12 @@ def ecoli_D1210_fedbatch():
 
     :return:
     """
+    # Load plot backend
+    plot_backend = get_plot_backend()
 
-    from hilo_mpc.util.plotting import PLOT_BACKEND
-
-    model = Model(plot_backend=PLOT_BACKEND, name='ecoli_D1210_fedbatch_complex')
-    x = model.set_dynamical_states(['X', 'S', 'P', 'I', 'ISF', 'IRF', 'V'])
-    u = model.set_inputs(['FeedS', 'FeedI'])
+    model = Model(plot_backend=plot_backend, name='ecoli_D1210_fedbatch_complex')
+    x = model.set_dynamical_states('X', 'S', 'P', 'I', 'ISF', 'IRF', 'V')
+    u = model.set_inputs('FeedS', 'FeedI')
 
     Sf = 100
     If = 4
@@ -250,18 +253,21 @@ def ecoli_D1210_fedbatch():
     return model
 
 
-def scerevisae_SEY2102_fedbatch():
+def scerevisiae_SEY2102_fedbatch():
     """
-    Returns a hilo-mpc Model object of fedbatch bioreactor containing Saccharomyces Cerevisiae SEY2102. The model is taken
-    from
+    Returns a hilo-mpc Model object of fedbatch bioreactor containing Saccharomyces Cerevisiae SEY2102. The model is
+    taken from
     Park, Seujeung, and W. Fred Ramirez.
     "Dynamics of foreign protein secretion from Saccharomyces cerevisiae."
     Biotechnology and bioengineering 33.3 (1989): 272-281.
+
     :return:
     """
-    from hilo_mpc.util.plotting import PLOT_BACKEND
-    model = Model(plot_backend=PLOT_BACKEND, name='scerevisae_SEY2102_fedbatch')
-    x = model.set_dynamical_states(['bio', 's', 'pt', 'pm', 'v'])
+    # Load plot backend
+    plot_backend = get_plot_backend()
+
+    model = Model(plot_backend=plot_backend, name='scerevisae_SEY2102_fedbatch')
+    x = model.set_dynamical_states('bio', 's', 'pt', 'pm', 'v')
     F = model.set_inputs('F')
     # s0 = model.set_parameters('s0')
     s0 = 20  # g/l
@@ -284,14 +290,16 @@ def scerevisae_SEY2102_fedbatch():
     dv = F
 
     model.set_dynamical_equations([dbio, ds, dpt, dpm, dv])
-    model.set_measurements(['bio', 's', 'pt', 'pm', 'v'])
+    model.set_measurements('bio', 's', 'pt', 'pm', 'v')
     model.set_measurement_equations(model.x)
+
     return model
+
 
 __all__ = [
     'cstr_schaffner_and_zeitz',
     'cstr_seborg',
     'ecoli_D1210_conti',
     'ecoli_D1210_fedbatch',
-    'scerevisae_SEY2102_fedbatch'
+    'scerevisiae_SEY2102_fedbatch'
 ]

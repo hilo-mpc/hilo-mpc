@@ -21,20 +21,14 @@
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import hilo_mpc.library.models as models
+from .mpc import NMPC
 
 
-cstr_schaffner_and_zeitz = models.cstr_schaffner_and_zeitz
-cstr_seborg = models.cstr_seborg
-ecoli_D1210_conti = models.ecoli_D1210_conti
-ecoli_D1210_fedbatch = models.ecoli_D1210_fedbatch
-scerevisiae_SEY2102_fedbatch = models.scerevisiae_SEY2102_fedbatch
+class OptimalControlProblem(NMPC):
+    """"""
+    def _update_type(self) -> None:
+        """
 
-
-__all__ = [
-    'cstr_schaffner_and_zeitz',
-    'cstr_seborg',
-    'ecoli_D1210_conti',
-    'ecoli_D1210_fedbatch',
-    'scerevisiae_SEY2102_fedbatch'
-]
+        :return:
+        """
+        self._type = 'OCP'

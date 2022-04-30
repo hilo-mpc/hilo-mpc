@@ -1,30 +1,5 @@
-#
-#   This file is part of HILO-MPC
-#
-#   HILO-MPC is toolbox for easy, flexible and fast development of machine-learning supported
-#   optimal control and estimation problems
-#
-#   Copyright (c) 2021 Johannes Pohlodek, Bruno Morabito, Rolf Findeisen
-#                      All rights reserved
-#
-#   HILO-MPC is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU Lesser General Public License as
-#   published by the Free Software Foundation, either version 3
-#   of the License, or (at your option) any later version.
-#
-#   HILO-MPC is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU Lesser General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with HILO-MPC.  If not, see <http://www.gnu.org/licenses/>.
-import pathlib
 from unittest import TestCase, skip
-from bokeh.io import output_file, show
-from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource
-from bokeh.layouts import gridplot
+
 import casadi as ca
 import numpy as np
 
@@ -96,7 +71,7 @@ class TestNMPC(TestCase):
         model.set_initial_conditions(x0=x0)
         scl = SimpleControlLoop(model, nmpc)
         scl.run(steps=n_steps)
-        scl.plot()
+        # scl.plot()
 
     def test_closed_loop_c(self):
         " Test normal nonlinear MPC for using a pendulum model. This test checks the normal problem setup"
@@ -142,7 +117,6 @@ class TestNMPC(TestCase):
         guesses for the optimizer
         PASSED - still is not bullet proof because initial guess could be outside constraints or oen can have problems with the ODE solver
         """
-
         x0 = self.x0
         u0 = self.u0
         model = self.model
@@ -760,7 +734,7 @@ class TestNMPCConstraints(TestCase):
 
         _ = nmpc.optimize(x0)
 
-        nmpc.plot_prediction()
+        # nmpc.plot_prediction()
 
 
 class TestTrajectoryPathFollowingMPC(TestCase):

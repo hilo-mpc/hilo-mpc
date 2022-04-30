@@ -751,8 +751,8 @@ class GaussianProcess(LearningBase):
         elif mean is None and var is None:
             return None
 
-        predictive_quantiles = [stats.norm.ppf(q / 100) * np.sqrt(var + self.noise_variance.value) + mean for q in
-                                quantiles]
+        predictive_quantiles = [stats.norm.ppf(q / 100) * np.sqrt(var + float(self.noise_variance.value)) + mean for q
+                                in quantiles]
 
         return predictive_quantiles[0], predictive_quantiles[1]
 
@@ -770,9 +770,9 @@ class GaussianProcess(LearningBase):
 
         post_mean, _ = self.predict(X_query, noise_free=True)
 
-        if backend is None:
-            backend = 'bokeh'
         solution = _GPSeries(backend=backend)
+        if backend is None:
+            backend = solution.plot_backend
 
         names = ['x', 'y']
         vector = {
@@ -835,6 +835,92 @@ class GaussianProcess(LearningBase):
 
         solution.plot(*plots, x_data=ext_data_x, y_data=ext_data_y, **plot_kwargs)
 
+    def plot_1d(
+            self,
+            quantiles: Optional[tuple[Numeric, Numeric]] = None,
+            resolution: Optional[int] = 200,
+            backend: Optional[str] = None,
+            **kwargs
+    ) -> None:
+        """
+
+        :param quantiles:
+        :param resolution:
+        :param backend:
+        :param kwargs:
+        :return:
+        """
+        X_train = self._X_train.values
+        y_train = self._y_train.values
+        n_x = X_train.shape[0]
+
+        if n_x > 1:
+            raise RuntimeError("The method plot_1d is only supported for Gaussian processes with one feature.")
+
+        x_min = X_train.min()
+        x_max = X_train.max()
+        x_min, x_max = x_min - 0.25 * (x_max - x_min), x_max + 0.25 * (x_max - x_min)
+        X = np.linspace([float(x_min)], [float(x_max)], resolution, axis=1)
+
+        y, var = self.predict(X, noise_free=True)
+        lb, ub = self.predict_quantiles(quantiles=quantiles, mean=y, var=var)
+
+        solution = _GPSeries(backend=backend)
+        if backend is None:
+            backend = solution.plot_backend
+
+        names = ['x', 'y']
+        vector = {
+            'x': {
+                'values_or_names': self._features,
+                'description': [''],
+                'labels': self._features,
+                'units': [''],
+                'shape': (1, 0),
+                'data_format': ca.DM
+            },
+            'y': {
+                'values_or_names': ['mean'],
+                'description': [''],
+                'labels': self._labels,
+                'units': [''],
+                'shape': (1, 0),
+                'data_format': ca.DM
+            }
+        }
+        solution.setup(*names, **vector)
+
+        solution.set('x', X)
+        solution.set('y', y)
+
+        ext_data_x = [{'data': X_train, 'subplot': 0, 'label': 'data'}]
+        ext_data_y = [{'data': y_train, 'subplot': 0, 'label': 'data', 'kind': 'scatter'}]
+
+        plot_kwargs = kwargs.copy()
+        if backend == 'bokeh':
+            if kwargs.get("output_notebook", False):
+                plot_kwargs["figsize"] = kwargs.get("figsize", (300, 300))
+            else:
+                plot_kwargs["figsize"] = kwargs.get("figsize", (500, 500))
+
+            plot_kwargs["line_width"] = kwargs.get("line_width", 2)
+            plot_kwargs["major_label_text_font_size"] = kwargs.get("major_label_text_font_size", "12pt")
+            plot_kwargs["axis_label_text_font_size"] = kwargs.get("axis_label_text_font_size", "12pt")
+        plot_kwargs['color'] = kwargs.get('color', ['#3465a4', 'k'])
+        plot_kwargs['marker'] = kwargs.get('marker', 'o')
+        if backend == 'bokeh':
+            plot_kwargs['marker_size'] = kwargs.get('marker_size', 15)
+        elif backend == 'matplotlib':
+            plot_kwargs['marker_size'] = kwargs.get('marker_size', 60)
+        plot_kwargs['fill_between'] = [
+            {'x': self._features[0], 'lb': lb, 'ub': ub, 'label': 'confidence', 'line_color': '#204a87',
+             'line_width': .5, 'fill_color': '#729fcf', 'fill_alpha': .2}
+        ]
+        plot_kwargs['title'] = kwargs.get('title', "GP regression")
+        plot_kwargs['legend'] = kwargs.get('legend', True)
+
+        solution.plot((self._features[0], 'mean'), x_data=ext_data_x, y_data=ext_data_y, **plot_kwargs)
+
     def plot_prediction_error(
             self,
             X_query: Array,
@@ -857,9 +943,9 @@ class GaussianProcess(LearningBase):
         post_std = np.sqrt(post_var)
         n_samples = X_query.shape[1]
 
-        if backend is None:
-            backend = 'bokeh'
         solution = TimeSeries(backend=backend)
+        if backend is None:
+            backend = solution.plot_backend
 
         names = ['t', 'x']
         vector = {

@@ -57,7 +57,7 @@ setup(
     python_requires='>=3.7',
     project_urls={
         'Bug Tracker': 'https://github.com/hilo_mpc/hilo_mpc/issues',
-        'Documentation': '',
+        'Documentation': 'https://www.ccps.tu-darmstadt.de/research_ccps/hilo_mpc/',
         'Source Code': 'https://github.com/hilo_mpc/hilo_mpc'
     }
 )

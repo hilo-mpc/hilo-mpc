@@ -3090,8 +3090,11 @@ class Series(Object, metaclass=ABCMeta):
                                 n_xx = x.size
                                 if n_up != n_xx:
                                     # NOTE: u should not have more entries than t
-                                    ykf = yk[0, -1]
-                                    yk = ca.horzcat(yk, ykf * ca.DM.ones(1, n_xx - n_up))
+                                    if n_up > 0:
+                                        ykf = yk[0, -1]
+                                        yk = ca.horzcat(yk, ykf * ca.DM.ones(1, n_xx - n_up))
+                                    else:
+                                        yk = ca.horzcat(yk, ca.DM.nan(1, n_xx))
                                 if not kind_supplied:
                                     kind_k.append('step')
                             else:

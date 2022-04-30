@@ -1,40 +1,10 @@
-#
-#   This file is part of HILO-MPC
-#
-#   HILO-MPC is toolbox for easy, flexible and fast development of machine-learning supported
-#   optimal control and estimation problems
-#
-#   Copyright (c) 2021 Johannes Pohlodek, Bruno Morabito, Rolf Findeisen
-#                      All rights reserved
-#
-#   HILO-MPC is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU Lesser General Public License as
-#   published by the Free Software Foundation, either version 3
-#   of the License, or (at your option) any later version.
-#
-#   HILO-MPC is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU Lesser General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with HILO-MPC.  If not, see <http://www.gnu.org/licenses/>.
-
-import pathlib
 import unittest
 from unittest import skip
 
 import casadi as ca
 import numpy as np
-import pandas as pd
-import time
 
 from hilo_mpc import Model, MHE
-
-from bokeh.io import output_file, show
-from bokeh.plotting import figure
-from bokeh.layouts import gridplot
-import numpy as np
 
 
 class MyTestCase(unittest.TestCase):
@@ -328,7 +298,7 @@ class MyTestCase(unittest.TestCase):
     @skip("Deprecated")
     def test_bio_MHE(self):
         #TODO add ecoli_D1210_fedbatch_plant to the models
-        from hilo_mpc.library.models import ecoli_D1210_fedbatch
+        from hilo_mpc.library import ecoli_D1210_fedbatch
 
         model = ecoli_D1210_fedbatch()
         model.set_measurement_equations(model.x)
@@ -393,15 +363,6 @@ class MyTestCase(unittest.TestCase):
         Test rk4 method
         :return:
         """
-        import time
-
-        from hilo_mpc import Model, MHE
-
-        from bokeh.io import output_file, show
-        from bokeh.plotting import figure
-        from bokeh.layouts import gridplot
-        import numpy as np
-
         # Create model
         model = Model(plot_backend='bokeh')
         x = model.set_dynamical_states(['Ca', 'Cb', 'Cc'], units=['mol/l', 'mol/l', 'mol/l'],
@@ -482,15 +443,6 @@ class MyTestCase(unittest.TestCase):
         Test multiple shooting
         :return:
         """
-        import time
-
-        from hilo_mpc import Model, MHE
-
-        from bokeh.io import output_file, show
-        from bokeh.plotting import figure
-        from bokeh.layouts import gridplot
-        import numpy as np
-
         # Create model
         model = Model(plot_backend='bokeh')
         x = model.set_dynamical_states(['Ca', 'Cb', 'Cc'], units=['mol/l', 'mol/l', 'mol/l'],
@@ -572,8 +524,6 @@ class MyTestCase(unittest.TestCase):
         Test discrete system
         :return:
         """
-
-
         # Create model
         model = Model(plot_backend='bokeh')
         x = model.set_dynamical_states(['Ca', 'Cb', 'Cc'], units=['mol/l', 'mol/l', 'mol/l'],
@@ -657,8 +607,6 @@ class MyTestCase(unittest.TestCase):
         Test nonlinear stage constraints
         :return:
         """
-
-
         # Create model
         model = Model(plot_backend='bokeh')
         x = model.set_dynamical_states(['Ca', 'Cb', 'Cc'], units=['mol/l', 'mol/l', 'mol/l'],
@@ -737,6 +685,7 @@ class MyTestCase(unittest.TestCase):
         #
         # show(gridplot(p_tot, ncols=3))
 
+
 class TestTimeVariantSys(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -770,7 +719,6 @@ class TestTimeVariantSys(unittest.TestCase):
         self.model = model
         self.dt = dt
         self.x0 = x0
-
 
     def test_heat_exchange(self):
         model = self.model
@@ -811,6 +759,3 @@ class TestTimeVariantSys(unittest.TestCase):
         # p_tot.append(p)
         #
         # show(gridplot(p_tot, ncols=3))
-
-if __name__ == '__main__':
-    unittest.main()
