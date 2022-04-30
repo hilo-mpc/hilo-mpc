@@ -24,7 +24,7 @@
 from .mpc import NMPC
 
 
-class OCP(NMPC):
+class OptimalControlProblem(NMPC):
     """"""
     def _update_type(self) -> None:
         """

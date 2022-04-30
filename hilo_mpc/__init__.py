@@ -23,6 +23,7 @@
 
 import hilo_mpc.modules.dynamic_model.dynamic_model as dyn_mod
 import hilo_mpc.modules.controller.mpc as mpc
+import hilo_mpc.modules.controller.ocp as ocp
 import hilo_mpc.modules.controller.lqr as lqr
 import hilo_mpc.modules.controller.pid as pid
 import hilo_mpc.modules.estimator.mhe as mhe
@@ -42,6 +43,8 @@ import hilo_mpc.util.session as session
 Model = dyn_mod.Model
 NMPC = mpc.NMPC
 LMPC = mpc.LMPC
+OptimalControlProblem = ocp.OptimalControlProblem
+OCP = OptimalControlProblem
 LinearQuadraticRegulator = lqr.LinearQuadraticRegulator
 LQR = LinearQuadraticRegulator
 PID = pid.PID
@@ -100,6 +103,8 @@ __all__ = [
     'Model',
     'NMPC',
     'LMPC',
+    'OptimalControlProblem',
+    'OCP',
     'LinearQuadraticRegulator',
     'LQR',
     'PID',
