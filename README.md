@@ -9,10 +9,10 @@ HILO-MPC
 [![Github release](https://img.shields.io/github/release/hilo-mpc/hilo-mpc.svg)](https://GitHub.com/hilo-mpc/hilo-mpc/releases/)
 
 HILO-MPC is a toolbox for **easy, flexible and fast development of machine-learning-supported optimal control and 
-estimation problems**. It can be used for model predictive control, moving horizon estimation, Kalman filters and has 
-interfaces to embedded MPC software. 
+estimation problems**. It can be used for model predictive control, moving horizon estimation, Kalman filters, 
+solving optimal control problems  and has interfaces to embedded MPC software. 
 
-HILO-MPC can leverage [Tensorflow](https://www.tensorflow.org/) and [PyTorch](https://pytorch.org/)
+HILO-MPC can interface directly to [Tensorflow](https://www.tensorflow.org/) and [PyTorch](https://pytorch.org/)
 to create machine learning models, and the [CasADi](https://web.casadi.org/) framework to efficiently
 build control and estimation problems. The machine learning models can be used (almost) everywhere in the setup
 of these problems. 
@@ -51,7 +51,7 @@ pip install hilo-mpc
 -->
 Documentation
 -------------
-The link to the documentation will appear soon.
+The documentation will be published soon.
 
 Citing HILO-MPC
 ---------------
