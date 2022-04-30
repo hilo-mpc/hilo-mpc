@@ -127,8 +127,8 @@ class LinearQuadraticRegulator(Controller, Base):
         if not Q.is_square():
             Q = ca.diag(Q)
         if Q.shape != (self._n_x, self._n_x):
-            raise ValueError(f"Dimension mismatch. Supplied dimension is {Q.shape}, but required dimension "
-                             f"is {(self._n_x, self._n_x)}")
+            raise ValueError(f"Dimension mismatch. Supplied dimension is {Q.shape[0]}x{Q.shape[1]}, but required "
+                             f"dimension is {self._n_x}x{self._n_x}")
         if not is_real(Q):
             raise ValueError("LQR matrix Q needs to be real-valued")
         if not is_symmetric(Q):
@@ -153,8 +153,8 @@ class LinearQuadraticRegulator(Controller, Base):
         if not R.is_square():
             R = ca.diag(R)
         if R.shape != (self._n_u, self._n_u):
-            raise ValueError(f"Dimension mismatch. Supplied dimension is {R.shape}, but required dimension is "
-                             f"{(self._n_u, self._n_u)}")
+            raise ValueError(f"Dimension mismatch. Supplied dimension is {R.shape[0]}x{R.shape[1]}, but required "
+                             f"dimension is {self._n_u}x{self._n_u}")
         if not is_real(R):
             raise ValueError("LQR matrix R needs to be real-valued")
         if not is_symmetric(R):
