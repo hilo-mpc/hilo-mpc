@@ -30,8 +30,8 @@
      inkscape:snap-bbox-midpoints="true"
      inkscape:snap-object-midpoints="false"
      inkscape:zoom="1.2810466"
-     inkscape:cx="289.60696"
-     inkscape:cy="173.29581"
+     inkscape:cx="360.64262"
+     inkscape:cy="212.32639"
      inkscape:window-width="1827"
      inkscape:window-height="1177"
      inkscape:window-x="-8"
@@ -313,7 +313,7 @@
          style="stroke-width:0.264583"
          x="86.926559"
          y="196.01152"
-         id="tspan28793">continuous ime</tspan><tspan
+         id="tspan28793">continuous-time</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:0.264583"
          x="86.926559"
@@ -353,7 +353,7 @@
            id="tspan25240"
            style="stroke-width:0.264583"
            x="17.629826"
-           y="88.764343">feed-forward NN</tspan><tspan
+           y="88.764343">feedforward NN</tspan><tspan
            sodipodi:role="line"
            style="stroke-width:0.264583"
            x="17.629826"
@@ -477,23 +477,33 @@
        xml:space="preserve"
        style="font-size:6.35003px;line-height:1.25;font-family:Calibri;-inkscape-font-specification:'Calibri, Normal';letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
        x="157.8812"
-       y="88.742348"
+       y="85.038177"
        id="text26507-0"><tspan
          sodipodi:role="line"
          style="stroke-width:0.264583"
          x="157.8812"
-         y="88.742348"
-         id="tspan28007">Nonlinear MPC</tspan><tspan
+         y="85.038177"
+         id="tspan28007">nonlinear MPC</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:0.264583"
          x="157.8812"
-         y="96.679886"
-         id="tspan28193">Linear MPC</tspan><tspan
+         y="92.975716"
+         id="tspan28193">linear MPC</tspan><tspan
          sodipodi:role="line"
          style="stroke-width:0.264583"
          x="157.8812"
-         y="104.61742"
-         id="tspan28011">PID</tspan></text>
+         y="100.91325"
+         id="tspan28011">optimal control</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.264583"
+         x="157.8812"
+         y="108.85079"
+         id="tspan1193">LQR, PID</tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:0.264583"
+         x="157.8812"
+         y="116.78833"
+         id="tspan2139" /></text>
     <path
        sodipodi:type="star"
        style="fill:#000000;fill-opacity:1;stroke:#1a1a1a;stroke-width:1.37953;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
@@ -508,7 +518,7 @@
        sodipodi:arg2="1.0471976"
        inkscape:rounded="0"
        inkscape:randomized="0"
-       transform="matrix(0.14449912,0,0,0.14449912,133.44353,124.65807)"
+       transform="matrix(0.14449912,0,0,0.14449912,133.44353,121.48305)"
        inkscape:transform-center-x="-0.44048808"
        d="m 157.91518,-261.63657 -18.29032,10.55992 v -21.11984 z" />
     <path
@@ -525,7 +535,7 @@
        sodipodi:arg2="1.0471976"
        inkscape:rounded="0"
        inkscape:randomized="0"
-       transform="matrix(0.14449912,0,0,0.14449912,133.44353,132.39838)"
+       transform="matrix(0.14449912,0,0,0.14449912,133.44353,129.22336)"
        inkscape:transform-center-x="-0.44048808"
        d="m 157.91518,-261.63657 -18.29032,10.55992 v -21.11984 z" />
     <path
@@ -542,7 +552,24 @@
        sodipodi:arg2="1.0471976"
        inkscape:rounded="0"
        inkscape:randomized="0"
-       transform="matrix(0.14449912,0,0,0.14449912,133.44353,140.43078)"
+       transform="matrix(0.14449912,0,0,0.14449912,133.44353,137.25576)"
+       inkscape:transform-center-x="-0.44048808"
+       d="m 157.91518,-261.63657 -18.29032,10.55992 v -21.11984 z" />
+    <path
+       sodipodi:type="star"
+       style="fill:#000000;fill-opacity:1;stroke:#1a1a1a;stroke-width:1.37953;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
+       id="path32037-8"
+       inkscape:flatsided="true"
+       sodipodi:sides="3"
+       sodipodi:cx="145.72163"
+       sodipodi:cy="-261.63657"
+       sodipodi:r1="12.193545"
+       sodipodi:r2="6.0967727"
+       sodipodi:arg1="0"
+       sodipodi:arg2="1.0471976"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       transform="matrix(0.14449912,0,0,0.14449912,133.46131,144.66266)"
        inkscape:transform-center-x="-0.44048808"
        d="m 157.91518,-261.63657 -18.29032,10.55992 v -21.11984 z" />
     <path
