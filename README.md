@@ -41,14 +41,14 @@ All the nonlinear MPCs support soft constraints, time-variant systems, time-vary
 minimum-time problems. They work for continuous-time and discrete-time models, in DAE or ODE form. The Linear MPC works 
 only with discrete-time models. 
 
-<!--Installation
+Installation
 -------------
 You can use pip to install HILO-MPC as follows 
 
 ``
 pip install hilo-mpc
 ``
--->
+
 Documentation
 -------------
 The documentation will be published soon.
