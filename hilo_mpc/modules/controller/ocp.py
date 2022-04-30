@@ -32,3 +32,8 @@ class OptimalControlProblem(NMPC):
         :return:
         """
         self._type = 'OCP'
+
+
+__all__ = [
+    'OptimalControlProblem'
+]
