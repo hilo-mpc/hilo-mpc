@@ -9,9 +9,7 @@ HILO-MPC
 [![Github release](https://img.shields.io/github/release/hilo-mpc/hilo-mpc.svg)](https://GitHub.com/hilo-mpc/hilo-mpc/releases/)
 
 HILO-MPC is a toolbox for **easy, flexible and fast realization of machine-learning-supported optimal control, and 
-estimation problems** developed mainly at the [Control and cyber-physical systems laboratory, TU Darmstadt](https://www.ccps.tu-darmstadt.de), and the [Laboratory for Systems Theory and Control, Otto von Guericke University](http://ifatwww.et.uni-magdeburg.de/syst/). It can be used for model predictive control, moving horizon estimation, Kalman filters, solving optimal control problems and has interfaces to embedded model predictive control tools. 
-
-
+estimation problems** developed mainly at the [Control and cyber-physical systems laboratory, TU Darmstadt](https://www.ccps.tu-darmstadt.de), and the [Laboratory for Systems Theory and Control, Otto von Guericke University](http://ifatwww.et.uni-magdeburg.de/syst/). It can be used for model predictive control, moving horizon estimation, Kalman filters, solving optimal control problems and has interfaces to embedded model predictive control tools.
 
 HILO-MPC can interface directly to [Tensorflow](https://www.tensorflow.org/) and [PyTorch](https://pytorch.org/)
 to create machine learning models and the [CasADi](https://web.casadi.org/) framework to efficiently
@@ -25,12 +23,12 @@ Currently the following machine learning models are supported:
 - Feedforward neural networks
 - Gaussian processes
  
-The following machine learning models are currently under development
+The following machine learning models are currently under development:
  
 - Bayesian neural network
 - Recurrent neural network
 
-At the moment the following MPC and optimal control problems can be solved. 
+At the moment the following MPC and optimal control problems can be solved:
 
 - Reference tracking nonlinear MPC
 - Trajectory tracking nonlinear MPC
@@ -42,8 +40,8 @@ At the moment the following MPC and optimal control problems can be solved.
 All the nonlinear MPCs support soft constraints, time-variant systems, time-varying parameters and can be used to solve 
 minimum-time problems. They work for continuous-time and discrete-time models, in DAE or ODE form. Linear MPC is currently limited towards discrete-time models. 
 
-A rich set of examples is available, spanning 
-- NMPC for bioreactors using hybride first principle and learned models
+A rich set of examples is available, spanning:
+- NMPC for bioreactors using hybrid first principle and learned models
 - Trajectory tracking and path following model predictive control with learning and obstacle avoidance
 - Output feedback MPC of a continuous stirred tank reactor with a Gaussian process prediction model
 - Learning NMPC control using a neural network
@@ -60,19 +58,21 @@ pip install hilo-mpc
 
 Documentation
 -------------
-We will publish the documentation soon. For the time being we refer to the provided Jupiter notebooks with examples, and 
+We will publish the documentation soon. For the time being we refer to the provided 
+[Jupiter notebooks with examples](https://github.com/hilo_mpc/examples), and 
 * J. Pohlodek, B. Morabito, C. Schlauch, P. Zometa, R. Findeisen. **[Flexible development and evaluation of 
 machine-learning-supported optimal control and estimation methods via HILO-MPC](https://arxiv.org/abs/2203.13671)**. 
 arXiv. 2022.
 
 Citing HILO-MPC
 ---------------
-If you use HILO-MPC for your research, you should cite the following publication:
+If you use HILO-MPC for your research, please cite the following publication:
 
 * J. Pohlodek, B. Morabito, C. Schlauch, P. Zometa, R. Findeisen. **[Flexible development and evaluation of 
 machine-learning-supported optimal control and estimation methods via HILO-MPC](https://arxiv.org/abs/2203.13671)**. 
 arXiv. 2022.
 
+```
 @misc{pohlodek2022hilompc,
     title = {Flexible development and evaluation of machine-learning-supported optimal control and estimation methods via {HILO-MPC}},
     author = {Pohlodek, Johannes and Morabito, Bruno and Schlauch, Christian and Zometa, Pablo and Findeisen, Rolf},
