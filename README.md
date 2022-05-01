@@ -52,9 +52,9 @@ Installation
 -------------
 You can use pip to install HILO-MPC as follows 
 
-``
+```shell
 pip install hilo-mpc
-``
+```
 
 Documentation
 -------------
