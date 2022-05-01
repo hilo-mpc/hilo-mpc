@@ -8,13 +8,13 @@ HILO-MPC
 [![Github license](https://img.shields.io/github/license/hilo-mpc/hilo-mpc.svg)](https://github.com/hilo-mpc/hilo-mpc/blob/master/LICENSE)
 [![Github release](https://img.shields.io/github/release/hilo-mpc/hilo-mpc.svg)](https://GitHub.com/hilo-mpc/hilo-mpc/releases/)
 
-HILO-MPC is a toolbox for **easy, flexible and fast development of machine-learning-supported optimal control and 
-estimation problems** developed at the [Control and cyber-physical systems laboratory, TU Darmstadt](https://www.ccps.tu-darmstadt.de) and the [Laboratory for Systems Theory and Control, Otto von Guericke University](http://ifatwww.et.uni-magdeburg.de/syst/). It can be used for model predictive control, moving horizon estimation, Kalman filters, solving optimal control problems and has interfaces to embedded model predictive control tools. 
+HILO-MPC is a toolbox for **easy, flexible and fast realization of machine-learning-supported optimal control, and 
+estimation problems** developed mainly at the [Control and cyber-physical systems laboratory, TU Darmstadt](https://www.ccps.tu-darmstadt.de), and the [Laboratory for Systems Theory and Control, Otto von Guericke University](http://ifatwww.et.uni-magdeburg.de/syst/). It can be used for model predictive control, moving horizon estimation, Kalman filters, solving optimal control problems and has interfaces to embedded model predictive control tools. 
 
 
 
 HILO-MPC can interface directly to [Tensorflow](https://www.tensorflow.org/) and [PyTorch](https://pytorch.org/)
-to create machine learning models, and the [CasADi](https://web.casadi.org/) framework to efficiently
+to create machine learning models and the [CasADi](https://web.casadi.org/) framework to efficiently
 build control and estimation problems. The machine learning models can be used (almost) everywhere in the setup
 of these problems. 
 
