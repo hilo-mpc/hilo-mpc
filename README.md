@@ -9,7 +9,7 @@ HILO-MPC
 [![Github release](https://img.shields.io/github/release/hilo-mpc/hilo-mpc.svg)](https://GitHub.com/hilo-mpc/hilo-mpc/releases/)
 
 HILO-MPC is a toolbox for **easy, flexible and fast development of machine-learning-supported optimal control and 
-estimation problems** developed at the [Control and cyber-physical systems laboratory, TU Darmstadt](https://www.ccps.tu-darmstadt.de) and the [Laboratory for Systems Theory and Control, Otto von Guericke University](https://control.ovgu.de). It can be used for model predictive control, moving horizon estimation, Kalman filters, solving optimal control problems and has interfaces to embedded model predictive control tools. 
+estimation problems** developed at the [Control and cyber-physical systems laboratory, TU Darmstadt](https://www.ccps.tu-darmstadt.de) and the [Laboratory for Systems Theory and Control, Otto von Guericke University](http://ifatwww.et.uni-magdeburg.de/syst/). It can be used for model predictive control, moving horizon estimation, Kalman filters, solving optimal control problems and has interfaces to embedded model predictive control tools. 
 
 
 
