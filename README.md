@@ -60,7 +60,10 @@ pip install hilo-mpc
 
 Documentation
 -------------
-The documentation will be published soon.
+We will publish the documentation soon. For the time being we refer to the provided Jupiter notebooks with examples, and 
+* J. Pohlodek, B. Morabito, C. Schlauch, P. Zometa, R. Findeisen. **[Flexible development and evaluation of 
+machine-learning-supported optimal control and estimation methods via HILO-MPC](https://arxiv.org/abs/2203.13671)**. 
+arXiv. 2022.
 
 Citing HILO-MPC
 ---------------
