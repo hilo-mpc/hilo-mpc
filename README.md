@@ -64,7 +64,7 @@ The documentation will be published soon.
 
 Citing HILO-MPC
 ---------------
-If you use HILO-MPC for your research, please cite the following publication:
+If you use HILO-MPC for your research, you should cite the following publication:
 
 * J. Pohlodek, B. Morabito, C. Schlauch, P. Zometa, R. Findeisen. **[Flexible development and evaluation of 
 machine-learning-supported optimal control and estimation methods via HILO-MPC](https://arxiv.org/abs/2203.13671)**. 
