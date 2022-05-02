@@ -1328,11 +1328,15 @@ class DynamicOptimization(Base):
             else:
                 self._nlp_opts = {}
 
-        if self._nlp_opts.get('ipopt.print_level') is None:
-            self._nlp_opts['ipopt.print_level'] = 0
+        if self._nlp_options_is_set and self._nlp_options['print_level'] == 1:
+            if self._nlp_opts.get('ipopt.print_level') is None:
+                self._nlp_opts['ipopt.suppress_all_output'] = 'yes'
 
-        if self._nlp_opts.get('print_time') is None:
-            self._nlp_opts['print_time'] = 0
+            if self._nlp_opts.get('print_time') is None:
+                self._nlp_opts['print_time'] = False
+        else:
+            self._nlp_opts['ipopt.suppress_all_output'] = 'yes'
+            self._nlp_opts['print_time'] = False
 
         self._solver_options_is_set = True
 

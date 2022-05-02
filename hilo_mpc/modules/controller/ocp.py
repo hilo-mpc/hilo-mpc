@@ -26,10 +26,9 @@ from .mpc import NMPC
 
 class OptimalControlProblem(NMPC):
     """"""
-    def __init__(self, model, id=None, name=None, plot_backend=None, use_sx=True, stats=False):
-        """Constructor method"""
-        super().__init__(model, id=id, name=name, plot_backend=plot_backend, stats=stats, use_sx=use_sx)
-
+    def __str__(self):
+        """String representation method"""
+        pass
 
     def _update_type(self) -> None:
         """

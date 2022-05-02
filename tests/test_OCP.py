@@ -1,11 +1,17 @@
 import unittest
-from hilo_mpc import OptimalControlProblem as OCP
-from hilo_mpc import SimpleControlLoop, Model
+
 import casadi as ca
+
+from hilo_mpc import SimpleControlLoop, Model, OCP
 
 
 class MyTestCase(unittest.TestCase):
+    """"""
     def setUp(self) -> None:
+        """
+
+        :return:
+        """
         model = Model(plot_backend='bokeh')
         # Constants
         M = 5.
@@ -15,15 +21,15 @@ class MyTestCase(unittest.TestCase):
         g = 9.81
 
         # States and algebraic variables
-        x = model.set_dynamical_states(['x', 'v', 'theta', 'omega'])
-        model.set_measurements(['yx', 'yv', 'ytheta', 'tomega'])
+        x = model.set_dynamical_states('x', 'v', 'theta', 'omega')
+        model.set_measurements('yx', 'yv', 'ytheta', 'tomega')
         model.set_measurement_equations([x[0], x[1], x[2], x[3]])
         # y = model.set_algebraic_variables(['y'])
         v = x[1]
         theta = x[2]
         omega = x[3]
         # Inputs
-        F = model.set_inputs(['F1','F2'])
+        F = model.set_inputs('F1', 'F2')
 
         # ODE
         dx = v
@@ -47,13 +53,17 @@ class MyTestCase(unittest.TestCase):
         self.u0 = u0
 
     def test_ocp(self):
-        " Test normal nonlinear MPC for using a pendulum model. This test checks the normal problem setup"
+        """
+        Test normal nonlinear MPC for using a pendulum model. This test checks the normal problem setup
+
+        :return:
+        """
         x0 = self.x0
         u0 = self.u0
         model = self.model
         ocp = OCP(model)
         ocp.quad_stage_cost.add_states(names=['v', 'theta'], ref=[0, 0], weights=[10, 5])
-        ocp.quad_stage_cost.add_inputs(names=['F1','F2'], weights=[0.1, 0.1])
+        ocp.quad_stage_cost.add_inputs(names=['F1', 'F2'], weights=[0.1, 0.1])
         ocp.horizon = 25
         ocp.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10])
         ocp.set_initial_guess(x_guess=x0, u_guess=u0)
@@ -63,7 +73,7 @@ class MyTestCase(unittest.TestCase):
         model.set_initial_conditions(x0=x0)
         scl = SimpleControlLoop(model, ocp)
         scl.run(steps=n_steps)
-        scl.plot()
+        # scl.plot()
 
 
 if __name__ == '__main__':
