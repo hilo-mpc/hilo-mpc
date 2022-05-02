@@ -580,7 +580,10 @@ class MultiPlot(BasePlot):
                     self._step_kwargs[kw] = val
             if kw in _STEP_KWARGS:
                 if 'step' in supplied_kinds:
-                    self._step_kwargs[kw] = val
+                    if kw == 'step_mode':
+                        self._step_kwargs['mode'] = val
+                    else:
+                        self._step_kwargs[kw] = val
             if kw in _SCATTER_KWARGS:
                 if 'scatter' in supplied_kinds:
                     if kw == 'marker_size':

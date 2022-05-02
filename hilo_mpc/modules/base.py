@@ -3004,6 +3004,7 @@ class Series(Object, metaclass=ABCMeta):
                             marker_size[subplot] = [ms]
 
         duplicate_y_counter = 0
+        step_mode = None
         for sub, arg in enumerate(args):
             x = arg[0]
             y = arg[1:]
@@ -3213,6 +3214,11 @@ class Series(Object, metaclass=ABCMeta):
                 legend[sub] = True
             if not kind_supplied and kind[sub] is None:
                 kind[sub] = kind_k
+            if 'step' in kind_k and step_mode is None:
+                if self._plot_manager.backend == 'bokeh':
+                    step_mode = 'after'
+                elif self._plot_manager.backend == 'matplotlib':
+                    step_mode = 'post'
             if not marker_supplied and marker[sub] is None:
                 marker[sub] = marker_k
             if not marker_size_supplied and marker_size[sub] is None:
@@ -3222,6 +3228,8 @@ class Series(Object, metaclass=ABCMeta):
             # TODO: Something with collections.Counter (see https://stackoverflow.com/a/9623147)
             # raise NotImplementedError
             pass
+        if step_mode is not None:
+            kwargs['step_mode'] = step_mode
         if (is_list_like(marker) and any(m is not None for m in marker)) or isinstance(marker, str):
             kwargs['marker'] = marker
         if (is_list_like(marker_size) and any(ms is not None for ms in marker_size)) or isinstance(marker_size, int):

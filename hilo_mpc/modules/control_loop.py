@@ -240,7 +240,7 @@ class SimpleControlLoop:
                 global _step
 
                 x0 = solution.get_by_id('x:f')
-                self._run(x0, p=p)
+                self._run(x0, _step, p=p)
                 _step += 1
 
                 # BEST PRACTICE --- update .data in one step with a new dict
@@ -293,6 +293,7 @@ class SimpleControlLoop:
         :return:
         """
         steps = args[0]
+        iterations = args[0]
         p = kwargs.get('p')
         # TODO: Check, if we can use solution.get_by_name('t:0') here
         x_range = [float(solution.get_by_name('t')[0]), steps * solution.dt]
@@ -314,7 +315,7 @@ class SimpleControlLoop:
 
             if steps > 0:
                 x0 = solution.get_by_id('x:f')
-                self._run(x0, p=p)
+                self._run(x0, iterations - steps, p=p)
 
                 for k, line in enumerate(lines):
                     x = solution.get_by_name('t').full().flatten()
