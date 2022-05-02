@@ -178,11 +178,11 @@ class TestLQRMatrixSetters(TestCase):
             self.lqr.R = np.array([[1, 0], [1, 0]])
         self.assertTrue(str(context.exception) == "LQR matrix R needs to be symmetric")
 
-    def test_r_not_positive_semidefinite(self) -> None:
+    def test_r_not_positive_definite(self) -> None:
         """
 
         :return:
         """
         with self.assertRaises(ValueError) as context:
             self.lqr.R = -np.eye(2)
-        self.assertTrue(str(context.exception) == "LQR matrix R needs to be positive semidefinite")
+        self.assertTrue(str(context.exception) == "LQR matrix R needs to be positive definite")
