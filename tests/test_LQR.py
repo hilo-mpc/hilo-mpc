@@ -88,7 +88,7 @@ class TestLQRMatrixSetters(TestCase):
         model = Model(plot_backend='bokeh', discrete=True)
         model.set_dynamical_states('x', 'y', 'z')
         model.set_inputs('u', 'w')
-        model.set_dynamical_equations('x + dt*(2*y + u)', 'y - dt*x', 'z + dt*w')
+        model.set_dynamical_equations(['x + dt*(2*y + u)', 'y - dt*x', 'z + dt*w'])
         model.setup(dt=1.)
 
         lqr = LQR(model, plot_backend='bokeh')
