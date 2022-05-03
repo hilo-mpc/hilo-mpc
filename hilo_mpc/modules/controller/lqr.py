@@ -77,8 +77,6 @@ class LinearQuadraticRegulator(Controller, Base):
             self._create_id()
 
         self._model = model.copy(setup=True)
-        self._A = None
-        self._B = None
         self._Q = None
         self._R = None
         self._N = None
@@ -96,22 +94,6 @@ class LinearQuadraticRegulator(Controller, Base):
         :return:
         """
         self._type = 'LQR'
-
-    @property
-    def A(self) -> Optional[ca.DM]:
-        """
-
-        :return:
-        """
-        return self._A
-
-    @property
-    def B(self) -> Optional[ca.DM]:
-        """
-
-        :return:
-        """
-        return self._B
 
     @property
     def Q(self) -> Optional[ca.DM]:

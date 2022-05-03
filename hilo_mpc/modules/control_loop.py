@@ -369,7 +369,6 @@ class SimpleControlLoop:
                     _ = self._controller.optimize(x0[ind_states], cp=cp, **kwargs)
                     self._u_sequence = self._controller.solution['u']
                 u = self._u_sequence[:, iteration]
-
         elif self._controller_is_ann:
             u = self._controller.predict(x0)
         elif self._controller_is_pid:
