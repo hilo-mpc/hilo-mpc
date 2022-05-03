@@ -282,7 +282,7 @@ class LinearQuadraticRegulator(Controller, Base):
         else:
             # TODO: Once reference/trajectory tracking and path following are supported we could revert back to allowing
             #  this (and consecutively initializing the states with 0)
-            raise ValueError("No initial state information was supplied to the LQR!")
+            raise ValueError("No state information was supplied to the LQR!")
 
         p = kwargs.get('p')
         if p is not None:
