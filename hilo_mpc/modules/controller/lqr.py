@@ -266,6 +266,7 @@ class LinearQuadraticRegulator(Controller, Base):
         :param kwargs:
         :return:
         """
+        # TODO: Rename to optimize, so that the syntax is close to the LMPC class
         if self._function is None:
             raise RuntimeError("LQR is not set up. Run LQR.setup(...) before calling the LQR.")
         if self._Q is None:
@@ -279,7 +280,9 @@ class LinearQuadraticRegulator(Controller, Base):
         if x is not None:
             x = convert(x, ca.DM, axis=1)
         else:
-            x = ca.DM.zeros(1, self._n_x)
+            # TODO: Once reference/trajectory tracking and path following are supported we could revert back to allowing
+            #  this (and consecutively initializing the states with 0)
+            raise ValueError("No initial state information was supplied to the LQR!")
 
         p = kwargs.get('p')
         if p is not None:
