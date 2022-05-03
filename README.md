@@ -1,5 +1,5 @@
 HILO-MPC 
-=========
+========
 
 [![python](https://img.shields.io/badge/Python-3.7%20%7C%203.8%20%7C%203.9-informational)](https://www.python.org/downloads/)
 [![tests](https://github.com/hilo-mpc/hilo-mpc/workflows/Tests/badge.svg)](https://github.com/hilo-mpc/hilo-mpc/actions?query=workflow%3ATests)
@@ -46,15 +46,29 @@ A rich set of [examples](https://github.com/hilo_mpc/examples) is available, spa
 - Output feedback MPC of a continuous stirred tank reactor with a Gaussian process prediction model
 - Learning NMPC control using a neural network
 - Simple LQR, PID 
-- Moving horizon estimation, extended Kalman filter, uncented Kalman filter, and particle filter for a continuous stirred tank reactor
+- Moving horizon estimation, extended Kalman filter, unscented Kalman filter, and particle filter for a continuous stirred tank reactor
 
 Installation
--------------
+------------
 You can use pip to install HILO-MPC as follows 
 
 ```shell
 pip install hilo-mpc
 ```
+
+Additional Packages
+-------------------
+If you want to make use of the complete functionality of the toolbox, you may want to install one of the following 
+packages
+
+| Package                                          | Version          | Usage                        |
+|--------------------------------------------------|------------------|------------------------------|
+| [TensorFlow](https://www.tensorflow.org)         | \>=2.3.0, <2.8.0 | Training of neural networks  |
+| [PyTorch](https://pytorch.org)                   | \>=1.2.0         | Training of neural networks  |
+| [scikit-learn](https://scikit-learn.org/stable/) |                  | Normalizing of training data |
+| [Bokeh](https://bokeh.org)                       |                  | Plotting                     |
+| [Matplotlib](https://matplotlib.org)             |                  | Plotting                     |
+| [pandas](https://pandas.pydata.org)              | \>=1.0.0         | Data storage                 |
 
 Documentation
 -------------
