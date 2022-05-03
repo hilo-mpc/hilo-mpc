@@ -88,7 +88,7 @@ class TestLQRMatrixSetters(TestCase):
         model = Model(plot_backend='bokeh', discrete=True)
         model.set_dynamical_states('x', 'y', 'z')
         model.set_inputs('u', 'w')
-        model.set_dynamical_equations('x + dt*(2*y + u)', 'y - dt*x', 'z + dt*w')
+        model.set_dynamical_equations(['x + dt*(2*y + u)', 'y - dt*x', 'z + dt*w'])
         model.setup(dt=1.)
 
         lqr = LQR(model, plot_backend='bokeh')
@@ -178,11 +178,11 @@ class TestLQRMatrixSetters(TestCase):
             self.lqr.R = np.array([[1, 0], [1, 0]])
         self.assertTrue(str(context.exception) == "LQR matrix R needs to be symmetric")
 
-    def test_r_not_positive_semidefinite(self) -> None:
+    def test_r_not_positive_definite(self) -> None:
         """
 
         :return:
         """
         with self.assertRaises(ValueError) as context:
             self.lqr.R = -np.eye(2)
-        self.assertTrue(str(context.exception) == "LQR matrix R needs to be positive semidefinite")
+        self.assertTrue(str(context.exception) == "LQR matrix R needs to be positive definite")
