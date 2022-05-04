@@ -41,4 +41,3 @@ class OptimalControlProblem(NMPC):
 __all__ = [
     'OptimalControlProblem'
 ]
-

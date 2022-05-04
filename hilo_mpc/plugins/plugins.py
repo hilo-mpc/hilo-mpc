@@ -26,10 +26,11 @@ import os
 
 
 _PYTORCH_VERSION = '1.2.0'
-_TENSORFLOW_VERSION = '2.3.0'
+_TENSORFLOW_VERSION = ('2.3.0', '2.8.0')
+_SCIKIT_LEARN_VERSION = '0.19.2'
 _TENSORBOARD_VERSION = '2.3.0'
-_BOKEH_VERSION = ''
-_MATPLOTLIB_VERSION = ''
+_BOKEH_VERSION = '2.3.0'
+_MATPLOTLIB_VERSION = '3.0.0'
 _PANDAS_VERSION = '1.0.0'
 
 
@@ -131,15 +132,20 @@ def _get_learning_backend(backend):
             import tensorflow
         except ModuleNotFoundError:
             raise ModuleNotFoundError("Backend 'TensorFlow' is not installed")
-        if StrictVersion(tensorflow.__version__) < StrictVersion(_TENSORFLOW_VERSION):
+        if StrictVersion(tensorflow.__version__) < StrictVersion(_TENSORFLOW_VERSION[0]) or \
+                StrictVersion(tensorflow.__version__) >= StrictVersion(_TENSORFLOW_VERSION[1]):
             raise RuntimeError(f"Backend 'TensorFlow' is installed with version '{tensorflow.__version__}', but version"
-                               f" '{_TENSORFLOW_VERSION}' or higher is required")
+                               f" needs to be higher or equal to '{_TENSORFLOW_VERSION[0]}' and lower than "
+                               f"'{_TENSORFLOW_VERSION[1]}'")
         import hilo_mpc.plugins.tensorflow as module
     elif backend in ['sklearn', 'scikit-learn']:
         try:
             import sklearn
         except ModuleNotFoundError:
-            raise ModuleNotFoundError("Backend 'Scikit-learn' is not installed")
+            raise ModuleNotFoundError("Backend 'scikit-learn' is not installed")
+        if StrictVersion(sklearn.__version__) < StrictVersion(_SCIKIT_LEARN_VERSION):
+            raise RuntimeError(f"Backend 'scikit-learn' is installed with version '{sklearn.__version__}', but version"
+                               f" '{_SCIKIT_LEARN_VERSION}' or higher is required")
         import hilo_mpc.plugins.sklearn as module
     else:
         raise ValueError(f"Backend '{backend}' not recognized")
@@ -172,15 +178,21 @@ def _get_plot_backend(backend):
     """
     if backend == 'matplotlib':
         try:
-            import matplotlib.pyplot as plt
+            import matplotlib
         except ModuleNotFoundError:
-            raise ModuleNotFoundError("Backend 'matplotlib' is not installed")
+            raise ModuleNotFoundError("Backend 'Matplotlib' is not installed")
+        if StrictVersion(matplotlib._get_version()) < StrictVersion(_MATPLOTLIB_VERSION):
+            raise RuntimeError(f"Backend 'Matplotlib' is installed with version '{matplotlib._get_version()}', but "
+                               f"version '{_MATPLOTLIB_VERSION}' or higher is required")
         import hilo_mpc.plugins.matplotlib as module
     elif backend == 'bokeh':
         try:
-            import bokeh.plotting as plt
+            import bokeh
         except ModuleNotFoundError:
-            raise ModuleNotFoundError("Backend 'bokeh' is not installed")
+            raise ModuleNotFoundError("Backend 'Bokeh' is not installed")
+        if StrictVersion(bokeh.__version__) < StrictVersion(_BOKEH_VERSION):
+            raise RuntimeError(f"Backend 'Bokeh' is installed with version '{bokeh.__version__}', but version "
+                               f"'{_BOKEH_VERSION}' or higher is required")
         import hilo_mpc.plugins.bokeh as module
     else:
         raise ValueError(f"Backend '{backend}' not recognized")
