@@ -25,6 +25,7 @@ class TestOneFeatureOneLabel(TestCase):
         self.y = np.sin(3 * self.x) + .1 * randn(.9, (20, 1))
         self.x_s = np.linspace(-3, 3, 61).reshape(1, -1)
         self.kernel = None
+        self.solver = None
 
     def tearDown(self) -> None:
         """
@@ -97,7 +98,7 @@ class TestOneFeatureOneLabel(TestCase):
 
         :return:
         """
-        gp = GP(['x'], ['y'], kernel=self.kernel, noise_variance=np.exp(-2))
+        gp = GP(['x'], ['y'], kernel=self.kernel, noise_variance=np.exp(-2), solver=self.solver)
         gp.set_training_data(self.x.T, self.y.T)
         gp.setup()
         with self.assertWarns(UserWarning) as context:
@@ -200,6 +201,7 @@ class TestOneFeatureOneLabelPP0(TestOneFeatureOneLabel):
         # TODO: Find out what's happening here. We get a super small noise variance.
         super().setUp()
         self.kernel = Kernel.piecewise_polynomial(0)
+        self.solver = 'Powell'
         self.degree = 0
 
 
@@ -212,6 +214,7 @@ class TestOneFeatureOneLabelPP1(TestOneFeatureOneLabel):
         """
         super().setUp()
         self.kernel = Kernel.piecewise_polynomial(1)
+        self.solver = 'BFGS'
         self.degree = 1
 
 
@@ -270,6 +273,7 @@ class TestOneFeatureOneLabelNN(TestOneFeatureOneLabel):
         """
         super().setUp()
         self.kernel = Kernel.neural_network()
+        self.solver = 'CG'
 
 
 class TestOneFeatureOneLabelPeriodic(TestOneFeatureOneLabel):

@@ -206,18 +206,7 @@ class GaussianProcess(LearningBase):
 
         if solver is None:
             if unconstrained_op:
-                if hasattr(self.kernel, 'acronym') and self.kernel.acronym == 'PP' and self.kernel.degree == 0:
-                    # NOTE: Single kernel that is PP with degree 0
-                    solver = 'Powell'
-                else:
-                    # TODO: Maybe move 'NN' and 'Periodic' to the single kernel case above
-                    kernel_names = [k.split('.')[0] for k in self.kernel.hyperparameter_names]
-                    if 'NN' in kernel_names:
-                        solver = 'CG'
-                    elif 'Periodic' in kernel_names:
-                        solver = 'ipopt'
-                    else:
-                        solver = 'BFGS'
+                solver = 'Newton-CG'
             else:
                 # TODO: Test GP for constrained hyperparameters
                 solver = 'L-BFGS-B'
