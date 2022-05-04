@@ -344,6 +344,7 @@ def convert(obj, _type, **kwargs):
     # TODO: Convoluted. Simplify if possible.
     # TODO: Add support for dict?
     # TODO: Is there a nice way to convert SX to MX and vice versa?
+    # TODO: Return success flag and error message for processing outside of convert
     fx = TYPES[_type]
     if obj is None:
         return convert(fx(), _type, **kwargs)
@@ -366,13 +367,22 @@ def convert(obj, _type, **kwargs):
             else:
                 if obj.size == 1:
                     return np.tile(obj, shape)
+                elif obj.ndim == 1:
+                    if len(shape) == 2 and shape[0] == shape[1] and shape[0] in obj.shape:
+                        obj = np.diag(obj)
                 elif 1 in obj.shape:
                     if max(obj.shape) != max(shape):
                         raise IndexError("Dimension mismatch. Cannot reduce or increase size of the shape.")
                     if obj.shape == shape[::-1]:
                         return obj.T
+                    elif obj.ndim == 2:
+                        if len(shape) == 2 and shape[0] == shape[1] and shape[0] in obj.shape:
+                            obj = np.diag(obj.flatten())
                     else:
                         raise Exception("Don't know how I got here. Please inform the maintainer.")
+        elif _type is np.ndarray and obj.shape != shape:
+            # TODO: Catch exceptions to generate meaningful error messages
+            obj = np.reshape(obj, shape)
         return obj
     elif isinstance(obj, (list, tuple, np.ndarray, ca.DM)):
         # TODO: Add support for axis argument
@@ -516,6 +526,17 @@ def is_array_like(obj):
     """
     # TODO: Typing hints
     return is_list_like(obj) and hasattr(obj, 'dtype')
+
+
+def is_diagonal(obj):
+    """
+
+    :param obj:
+    :return:
+    """
+    diag = np.zeros(obj.shape)
+    np.fill_diagonal(diag, obj.diagonal())
+    return np.all(obj == diag)
 
 
 def is_integer(n):
