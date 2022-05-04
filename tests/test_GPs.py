@@ -189,6 +189,7 @@ class TestOneFeatureOneLabelRQ(TestOneFeatureOneLabel):
         """
         super().setUp()
         self.kernel = Kernel.rational_quadratic()
+        self.solver = 'BFGS'
 
 
 class TestOneFeatureOneLabelPP0(TestOneFeatureOneLabel):
