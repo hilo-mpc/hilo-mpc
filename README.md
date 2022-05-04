@@ -65,7 +65,7 @@ packages
 |--------------------------------------------------|------------------|------------------------------------------------|
 | [TensorFlow](https://www.tensorflow.org)         | \>=2.3.0, <2.8.0 | Training of neural networks                    |
 | [PyTorch](https://pytorch.org)                   | \>=1.2.0         | Training of neural networks                    |
-| [scikit-learn](https://scikit-learn.org/stable/) |                  | Normalizing of training data                   |
+| [scikit-learn](https://scikit-learn.org/stable/) | \>=0.19.2        | Normalizing of training data                   |
 | [Bokeh](https://bokeh.org)                       |                  | Plotting                                       |
 | [Matplotlib](https://matplotlib.org)             |                  | Plotting                                       |
 | [pandas](https://pandas.pydata.org)              | \>=1.0.0         | Providing data for training of neural networks |
