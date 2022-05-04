@@ -16,7 +16,7 @@ to create machine learning models and the [CasADi](https://web.casadi.org/) fram
 build control and estimation problems. The machine learning models can be used (almost) everywhere in the setup
 of these problems. 
 
-![plot](docs/source/images/overview.svg)
+![plot](docs/docsource/images/overview.svg)
 
 Currently the following machine learning models are supported:
 
