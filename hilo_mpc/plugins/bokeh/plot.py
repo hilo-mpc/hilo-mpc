@@ -22,6 +22,7 @@
 #
 
 # TODO: Typing hints
+# NOTE: Adapted from pandas plotting functionality
 
 from __future__ import annotations
 

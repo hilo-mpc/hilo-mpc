@@ -21,6 +21,8 @@
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
 
+# NOTE: Adapted from pandas plotting functionality
+
 from .plot import *
 from ...util.util import is_list_like
 
