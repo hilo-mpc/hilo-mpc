@@ -8,7 +8,7 @@ HILO-MPC
 [![Github license](https://img.shields.io/github/license/hilo-mpc/hilo-mpc.svg)](https://github.com/hilo-mpc/hilo-mpc/blob/master/LICENSE)
 [![Github release](https://img.shields.io/github/release/hilo-mpc/hilo-mpc.svg)](https://GitHub.com/hilo-mpc/hilo-mpc/releases/)
 
-HILO-MPC is a python toolbox for **easy, flexible and fast realization of machine-learning-supported optimal control, and 
+HILO-MPC is a Python toolbox for **easy, flexible and fast realization of machine-learning-supported optimal control, and 
 estimation problems** developed mainly at the [Control and Cyber-Physical Systems Laboratory, TU Darmstadt](https://www.ccps.tu-darmstadt.de), and the [Laboratory for Systems Theory and Control, Otto von Guericke University](http://ifatwww.et.uni-magdeburg.de/syst/). It can be used for model predictive control, moving horizon estimation, Kalman filters, solving optimal control problems and has interfaces to embedded model predictive control tools.
 
 HILO-MPC can interface directly to [TensorFlow](https://www.tensorflow.org/) and [PyTorch](https://pytorch.org/)
