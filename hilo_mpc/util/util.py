@@ -612,7 +612,10 @@ def is_real(x):
     :param x:
     :return:
     """
-    return np.isreal(x).all()
+    if not is_list_like(x):
+        return np.isreal(x)
+    else:
+        return np.isreal(x).all()
 
 
 def is_square(array):
