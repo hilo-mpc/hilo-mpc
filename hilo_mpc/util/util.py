@@ -380,7 +380,7 @@ def convert(obj, _type, **kwargs):
                             obj = np.diag(obj.flatten())
                     else:
                         raise Exception("Don't know how I got here. Please inform the maintainer.")
-        elif _type is np.ndarray and obj.shape != shape:
+        elif _type is np.ndarray and 'shape' in kwargs and obj.shape != shape:
             # TODO: Catch exceptions to generate meaningful error messages
             obj = np.reshape(obj, shape)
         return obj
