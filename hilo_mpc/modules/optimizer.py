@@ -1156,6 +1156,7 @@ class DynamicOptimization(Base):
                                             lb <= fun <= ub
         This must take the entire optimization vector z and the indices of states and inputs as
                                             fun(v, x_ind, u_ind)
+
         :param fun: python function
         :param lb: lower bound
         :param ub: upper bound
@@ -1344,8 +1345,7 @@ class DynamicOptimization(Base):
         """
         Set the solver for the MPC. Possible options are
         For nonlinear programming problems (e.g. nonlinear MPC)
-        - 'ipopt', 'bonmin', 'knitro', 'snopt', 'worhp', 'scpgen', 'sqpmethod', 'blocksqp',
-                                     'AmplInterface'
+        - 'ipopt', 'bonmin', 'knitro', 'snopt', 'worhp', 'scpgen', 'sqpmethod', 'blocksqp', 'AmplInterface'
         for quadratic programmin problems (e.g. linear MPC)
         - 'qpoases', 'cplex', 'gurobi', 'oopq', 'sqic', 'nlp
         For more info refer to the CasADi documentation https://web.casadi.org/docs/.

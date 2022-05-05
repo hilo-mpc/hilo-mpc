@@ -858,7 +858,7 @@ class ExponentialKernel(MaternKernel):
 
 class Matern32Kernel(MaternKernel):
     """
-    Matérn covariance function where :math:`{\nu}` = 3/2
+    Matérn covariance function where :math:`{\\nu}` = 3/2
 
     :param active_dims:
     :type active_dims:
@@ -888,7 +888,7 @@ class Matern32Kernel(MaternKernel):
 
 class Matern52Kernel(MaternKernel):
     """
-    Matérn covariance function where :math:`{\nu}` = 5/2
+    Matérn covariance function where :math:`{\\nu}` = 5/2
 
     :param active_dims:
     :type active_dims:
