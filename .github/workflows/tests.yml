@@ -34,7 +34,12 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test with unittest
       run: |
-        coverage run -m unittest discover tests
+        if [ ${{ matrix.python-version }} == "3.9" ]
+        then
+          coverage run -m unittest discover tests
+        else
+          python -m unittest discover tests
+        fi
     - name: Upload coverage to Codecov
       if: matrix.python-version == 3.9
       uses: codecov/codecov-action@v2
