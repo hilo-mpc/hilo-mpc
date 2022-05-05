@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+import numpy as np
+
 from hilo_mpc import Model, KF
 
 
@@ -31,6 +33,41 @@ class TestKalmanFilterInitialization(TestCase):
         self.assertTrue(str(context.exception) == "Model is not set up. Run Model.setup() before passing it to the "
                                                   "Kalman filter.")
 
+    def test_kalman_filter_initial_dimensions(self) -> None:
+        """
+
+        :return:
+        """
+        model = Model(plot_backend='bokeh')
+        model.set_dynamical_states('x')
+        model.set_dynamical_equations('2*x')
+        model.setup(dt=1.)
+
+        kf = KF(model, plot_backend='bokeh')
+
+        self.assertTrue(kf.n_x == 0)
+        self.assertTrue(kf.n_y == 0)
+        self.assertTrue(kf.n_z == 0)
+        self.assertTrue(kf.n_u == 0)
+        self.assertTrue(kf.n_p == 0)
+        self.assertTrue(kf.n_p_est == 0)
+
+    def test_kalman_filter_initial_matrices(self) -> None:
+        """
+
+        :return:
+        """
+        model = Model(plot_backend='bokeh')
+        model.set_dynamical_states('x')
+        model.set_dynamical_equations('2*x')
+        model.setup(dt=1.)
+
+        kf = KF(model, plot_backend='bokeh')
+
+        self.assertIsNone(kf.P)
+        self.assertIsNone(kf.Q)
+        self.assertIsNone(kf.R)
+
 
 class TestKalmanFilterSetup(TestCase):
     """"""
@@ -49,3 +86,96 @@ class TestKalmanFilterSetup(TestCase):
         self.assertTrue(len(context.warnings) == 1)
         self.assertTrue(str(context.warning) == "The model has no measurement equations, I am assuming measurements of "
                                                 "all states ['x'] are available.")
+
+    def test_kalman_filter_is_set_up(self) -> None:
+        """
+
+        :return:
+        """
+        model = Model(plot_backend='bokeh')
+        model.set_dynamical_states('x')
+        model.set_dynamical_equations('2*x')
+        model.set_measurement_equations('x')
+        model.setup(dt=1.)
+        kf = KF(model, plot_backend='bokeh')
+        kf.setup()
+        self.assertTrue(kf.is_setup())
+
+    def test_kalman_filter_dimensions(self) -> None:
+        """
+
+        :return:
+        """
+        model = Model(plot_backend='bokeh')
+        equations = """
+                dx_1/dt = -k_1*x_1(t) + u(k)
+                dx_2/dt = k_1*x_1(t) - k_2*x_2(t)
+                y(k) = x_2(t)
+                """
+        model.set_equations(equations=equations)
+        model.discretize('erk', order=1, inplace=True)
+        model.setup(dt=1.)
+
+        kf = KF(model, plot_backend='bokeh')
+        kf.setup()
+
+        self.assertTrue(kf.n_x == 2)
+        self.assertTrue(kf.n_y == 1)
+        self.assertTrue(kf.n_z == 0)
+        self.assertTrue(kf.n_u == 1)
+        self.assertTrue(kf.n_p == 2)
+        self.assertTrue(kf.n_p_est == 0)
+
+
+class TestKalmanFilterMatrixSetters(TestCase):
+    """"""
+    def setUp(self) -> None:
+        """
+
+        :return:
+        """
+        model = Model(plot_backend='bokeh')
+        equations = """
+        dx_1/dt = -k_1*x_1(t) + u(k)
+        dx_2/dt = k_1*x_1(t) - k_2*x_2(t)
+        y(k) = x_2(t)
+        """
+        model.set_equations(equations=equations)
+        model.discretize('erk', order=1, inplace=True)
+        model.setup(dt=1.)
+
+        kf = KF(model, plot_backend='bokeh')
+        kf.setup()
+
+        self.kf = kf
+
+    def test_kalman_filter_initial_matrices(self) -> None:
+        """
+
+        :return:
+        """
+        kf = self.kf
+
+        self.assertIsNone(kf.P)
+        np.testing.assert_equal(kf.Q, np.zeros((2, 2)))
+        np.testing.assert_equal(kf.R, np.zeros((1, 1)))
+
+    def test_kalman_filter_process_noise_setter_dimension_mismatch(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            self.kf.Q = [0., 0., 0.]
+        self.assertTrue(str(context.exception) == "Dimension mismatch. Supplied dimension is 3x3, but required "
+                                                  "dimension is 2x2")
+
+    def test_kalman_filter_process_noise_setter(self) -> None:
+        """
+
+        :return:
+        """
+        kf = self.kf
+
+        kf.Q = [.01, .01]
+        np.testing.assert_equal(kf.Q, .01 * np.eye(2))
