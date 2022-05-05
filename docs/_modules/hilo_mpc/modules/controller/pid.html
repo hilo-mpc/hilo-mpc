@@ -1,0 +1,613 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hilo_mpc.modules.controller.pid &mdash; HILO-MPC 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="../../../../about.html"/>
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="HILO-MPC 1.0 documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> HILO-MPC
+          
+
+          
+            
+            <img src="../../../../_static/hilo_logo_short_2.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption" role="heading"><span class="caption-text">Quick start:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../citation.html">Citing HILO-MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/controllers.html">Control module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/machinelearnings.html">Machine learning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/modellings.html">Modelling module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/estimators.html">Observer module</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/controllers.html">Controllers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/learning.html">Machine Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modelling.html">Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/estimators.html">Observers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">HILO-MPC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>hilo_mpc.modules.controller.pid</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for hilo_mpc.modules.controller.pid</h1><div class="highlight"><pre>
+<span></span><span class="c1">#   </span>
+<span class="c1">#   This file is part of HILO-MPC</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported</span>
+<span class="c1">#   optimal control and estimation problems</span>
+<span class="c1">#</span>
+<span class="c1">#   Copyright (c) 2021 Johannes Pohlodek, Bruno Morabito, Rolf Findeisen</span>
+<span class="c1">#                      All rights reserved</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is free software: you can redistribute it and/or modify</span>
+<span class="c1">#   it under the terms of the GNU Lesser General Public License as</span>
+<span class="c1">#   published by the Free Software Foundation, either version 3</span>
+<span class="c1">#   of the License, or (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is distributed in the hope that it will be useful,</span>
+<span class="c1">#   but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="c1">#   GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1">#   You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1">#   along with HILO-MPC. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">casadi</span> <span class="k">as</span> <span class="nn">ca</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">Controller</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">Base</span><span class="p">,</span> <span class="n">TimeSeries</span>
+<span class="kn">from</span> <span class="nn">...util.util</span> <span class="kn">import</span> <span class="n">convert</span><span class="p">,</span> <span class="n">is_diagonal</span>
+
+
+<span class="n">Numeric</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+<span class="n">Array</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Numeric</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="PID"><a class="viewcode-back" href="../../../../api/controllers.html#hilo_mpc.PID">[docs]</a><span class="k">class</span> <span class="nc">PID</span><span class="p">(</span><span class="n">Controller</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for PID controller</span>
+
+<span class="sd">    :param n_set_points:</span>
+<span class="sd">    :type n_set_points: int</span>
+<span class="sd">    :param id:</span>
+<span class="sd">    :type id: str, optional</span>
+<span class="sd">    :param name:</span>
+<span class="sd">    :type name: str, optional</span>
+<span class="sd">    :param k_p:</span>
+<span class="sd">    :type k_p:</span>
+<span class="sd">    :param t_i:</span>
+<span class="sd">    :type t_i:</span>
+<span class="sd">    :param t_d:</span>
+<span class="sd">    :type t_d:</span>
+<span class="sd">    :param proportional_on_process_value:</span>
+<span class="sd">    :type proportional_on_process_value: bool</span>
+<span class="sd">    :param derivative_on_process_value:</span>
+<span class="sd">    :type derivative_on_process_value: bool</span>
+<span class="sd">    :param plot_backend:</span>
+<span class="sd">    :type plot_backend: str, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">n_set_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nb">id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">k_p</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Array</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">t_i</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Array</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">t_d</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Array</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">proportional_on_process_value</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">derivative_on_process_value</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">plot_backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Constructor method&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_id</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span> <span class="o">=</span> <span class="n">n_set_points</span>
+        <span class="k">if</span> <span class="n">k_p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">k_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span> <span class="o">*</span> <span class="p">[</span><span class="mf">1.</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_tuning_parameter</span><span class="p">(</span><span class="s1">&#39;k_p&#39;</span><span class="p">,</span> <span class="n">k_p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">t_i</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">t_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span> <span class="o">*</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_tuning_parameter</span><span class="p">(</span><span class="s1">&#39;t_i&#39;</span><span class="p">,</span> <span class="n">t_i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">t_d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">t_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span> <span class="o">*</span> <span class="p">[</span><span class="mf">0.</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_tuning_parameter</span><span class="p">(</span><span class="s1">&#39;t_d&#39;</span><span class="p">,</span> <span class="n">t_d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_proportional_on_process_value</span> <span class="o">=</span> <span class="n">proportional_on_process_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_derivative_on_process_value</span> <span class="o">=</span> <span class="n">derivative_on_process_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_p_band</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_anti_windup</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_point</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">plot_backend</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="s1">&#39;PID&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_set_tuning_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">which</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Array</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param which:</span>
+<span class="sd">        :param value:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: Dimensions</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_diagonal</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The number of set points is greater than 1, but the supplied matrix for &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">dict</span><span class="p">({</span><span class="s1">&#39;k_p&#39;</span><span class="p">:</span> <span class="s1">&#39;K_P&#39;</span><span class="p">,</span> <span class="s1">&#39;t_i&#39;</span><span class="p">:</span> <span class="s1">&#39;T_I&#39;</span><span class="p">,</span> <span class="s1">&#39;t_d&#39;</span><span class="p">:</span> <span class="s1">&#39;T_D&#39;</span><span class="p">})[</span><span class="n">which</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not a diagonal matrix. &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;Coupled multi-variable control is not supported at the moment.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">which</span> <span class="o">==</span> <span class="s1">&#39;k_p&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_k_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">which</span> <span class="o">==</span> <span class="s1">&#39;t_i&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_t_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">which</span> <span class="o">==</span> <span class="s1">&#39;t_d&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_t_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_append_process_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process_value</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param process_value:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="n">process_value_vector</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">process_value_vector</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;x:f&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">process_value_vector</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_value_vector</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="n">process_value_vector</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">process_value_vector</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">_append_set_point</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="n">set_point_vector</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;p:f&#39;</span><span class="p">)</span>
+            <span class="n">set_point_vector</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">params</span><span class="p">[:</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">set_point_vector</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">set_point_vector</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="n">set_point_vector</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_point</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">set_point_vector</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_initialize_controller_output</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">proportional_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k_p</span><span class="p">)</span>
+
+    <span class="nd">@proportional_gain</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">proportional_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k_p</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_tuning_parameter</span><span class="p">(</span><span class="s1">&#39;k_p&#39;</span><span class="p">,</span> <span class="n">k_p</span><span class="p">)</span>
+
+    <span class="n">k_p</span> <span class="o">=</span> <span class="n">proportional_gain</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">integral_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t_i</span><span class="p">)</span>
+
+    <span class="nd">@integral_time</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">integral_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_i</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_tuning_parameter</span><span class="p">(</span><span class="s1">&#39;t_i&#39;</span><span class="p">,</span> <span class="n">t_i</span><span class="p">)</span>
+
+    <span class="n">t_i</span> <span class="o">=</span> <span class="n">integral_time</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">integral_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k_p</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_i</span><span class="p">)</span>
+
+    <span class="n">k_i</span> <span class="o">=</span> <span class="n">integral_gain</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">derivative_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t_d</span><span class="p">)</span>
+
+    <span class="nd">@derivative_time</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">derivative_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_d</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_tuning_parameter</span><span class="p">(</span><span class="s1">&#39;t_d&#39;</span><span class="p">,</span> <span class="n">t_d</span><span class="p">)</span>
+
+    <span class="n">t_d</span> <span class="o">=</span> <span class="n">derivative_time</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">derivative_gain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_k_p</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_d</span><span class="p">)</span>
+
+    <span class="n">k_d</span> <span class="o">=</span> <span class="n">derivative_gain</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">set_point</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_point</span>
+
+    <span class="nd">@set_point</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">set_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">set_point</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">set_point</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">set_point</span><span class="p">,</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">set_point</span><span class="o">.</span><span class="n">size1</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">set_point</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">repmat</span><span class="p">(</span><span class="n">set_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">set_point</span><span class="o">.</span><span class="n">size1</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch. Supplied dimension for the set point is &quot;</span>
+                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">set_point</span><span class="o">.</span><span class="n">size1</span><span class="p">()</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">set_point</span><span class="o">.</span><span class="n">size2</span><span class="p">()</span><span class="si">}</span><span class="s2">, but required dimension is &quot;</span>
+                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="si">}</span><span class="s2">x1.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_point</span> <span class="o">=</span> <span class="n">set_point</span>
+
+    <span class="n">s_p</span> <span class="o">=</span> <span class="n">set_point</span>
+
+<div class="viewcode-block" id="PID.setup"><a class="viewcode-back" href="../../../../api/controllers.html#hilo_mpc.PID.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dt&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="mf">1.</span>
+
+        <span class="n">process_value</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;pv&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">set_point</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;sp&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">set_point</span> <span class="o">-</span> <span class="n">process_value</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">)</span>
+        <span class="n">delta_output</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="c1"># TODO: Dimensions</span>
+        <span class="n">k_p</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;k_p&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">)</span>
+        <span class="n">t_i</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;t_i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">)</span>
+        <span class="n">t_d</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;t_d&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">)</span>
+
+        <span class="n">k_p_matrix</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">k_p</span><span class="p">)</span>
+        <span class="n">t_i_matrix_inv</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">t_i</span><span class="p">)</span>
+        <span class="n">t_d_matrix</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">t_d</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p_band</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;The use of the proportional band has not been implemented yet.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_proportional_on_process_value</span><span class="p">:</span>
+                <span class="n">delta_output</span> <span class="o">-=</span> <span class="n">process_value</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">process_value</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">delta_output</span> <span class="o">+=</span> <span class="n">error</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">error</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">delta_output</span> <span class="o">+=</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">t_i_matrix_inv</span> <span class="o">@</span> <span class="n">error</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># TODO: Add anti-windup</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_derivative_on_process_value</span><span class="p">:</span>
+            <span class="n">delta_output</span> <span class="o">-=</span> <span class="p">(</span><span class="n">t_d_matrix</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="n">process_value</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">process_value</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">process_value</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">delta_output</span> <span class="o">+=</span> <span class="p">(</span><span class="n">t_d_matrix</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="n">error</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">error</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">error</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+
+        <span class="c1"># TODO: Add anti-windup</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">set_point</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">k_p</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">t_d</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_function</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span>
+            <span class="s1">&#39;function&#39;</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">process_value</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)],</span>
+            <span class="p">[</span><span class="n">error</span><span class="p">,</span> <span class="n">output</span> <span class="o">+</span> <span class="n">k_p_matrix</span> <span class="o">@</span> <span class="n">delta_output</span><span class="p">],</span>
+            <span class="p">[</span><span class="s1">&#39;x0&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;yf&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_consistency</span><span class="p">()</span>
+
+        <span class="n">n_pv</span> <span class="o">=</span> <span class="n">process_value</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+        <span class="n">n_y</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+        <span class="n">n_sp</span> <span class="o">=</span> <span class="n">set_point</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+        <span class="n">n_k_p</span> <span class="o">=</span> <span class="n">k_p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+        <span class="n">n_t_i</span> <span class="o">=</span> <span class="n">t_i</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+        <span class="n">n_t_d</span> <span class="o">=</span> <span class="n">t_d</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+        <span class="n">n_p</span> <span class="o">=</span> <span class="n">n_sp</span> <span class="o">+</span> <span class="n">n_k_p</span> <span class="o">+</span> <span class="n">n_t_i</span> <span class="o">+</span> <span class="n">n_t_d</span>  <span class="c1"># same as parameters.numel()</span>
+
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">]</span>  <span class="c1"># &#39;y&#39;</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;dt&#39;</span><span class="p">:</span> <span class="n">dt</span><span class="p">,</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">pv</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="k">for</span> <span class="n">pv</span> <span class="ow">in</span> <span class="n">process_value</span><span class="o">.</span><span class="n">elements</span><span class="p">()],</span>
+                <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">n_pv</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">n_pv</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;process value&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">n_pv</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_pv</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;u&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="k">for</span> <span class="n">out</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">elements</span><span class="p">()],</span>
+                <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">n_y</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">n_y</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;controller output&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">n_y</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_y</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">elements</span><span class="p">()],</span>
+                <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">n_p</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">n_sp</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;set point&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">n_k_p</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;K_P&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">n_t_i</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;T_I&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">n_t_d</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;T_D&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">n_p</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_p</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">vector</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PID.call"><a class="viewcode-back" href="../../../../api/controllers.html#hilo_mpc.PID.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param args:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">type_</span> <span class="o">=</span> <span class="s1">&#39;P&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_i</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">:</span>
+                <span class="n">type_</span> <span class="o">+=</span> <span class="s1">&#39;I&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_d</span> <span class="o">!=</span> <span class="mf">0.</span><span class="p">:</span>
+                <span class="n">type_</span> <span class="o">+=</span> <span class="s1">&#39;D&#39;</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">type_</span><span class="si">}</span><span class="s2"> controller is not set up. Run PID.setup() before calling the </span><span class="si">{</span><span class="n">type_</span><span class="si">}</span><span class="s2"> &quot;</span>
+                               <span class="sa">f</span><span class="s2">&quot;controller&quot;</span><span class="p">)</span>
+
+        <span class="n">pv</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pv&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pv</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">pv</span><span class="p">,</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pv</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append_process_value</span><span class="p">(</span><span class="n">pv</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append_set_point</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_controller_output</span><span class="p">()</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_function_args</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;yf&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;yf&#39;</span><span class="p">]</span></div></div>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;PID&#39;</span>
+<span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Johannes Pohlodek, Bruno Morabito.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> and ❤️  using a custom <a href="https://github.com/LinxiFan/Sphinx-theme">theme</a> based on <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../../_static/clipboard.min.js"></script>
+      <script type="text/javascript" src="../../../../_static/copybutton.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

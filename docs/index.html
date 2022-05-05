@@ -5,8 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>HILO-MPC Documentation &mdash; HILO-MPC 1.0 documentation</title>
@@ -37,10 +36,13 @@
   
 
   
+        <link rel="author" title="About these documents"
+              href="about.html"/>
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="HILO-MPC 1.0 documentation" href="#"/> 
+    <link rel="top" title="HILO-MPC 1.0 documentation" href="#"/>
+        <link rel="next" title="Installation" href="installation.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -62,6 +64,9 @@
             <a href="#" class="icon icon-home"> HILO-MPC
           
 
+          
+            
+            <img src="_static/hilo_logo_short_2.png" class="logo" />
           
           </a>
 
@@ -86,14 +91,28 @@
           
             
             
-                <!-- Local TOC -->
-                <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">HILO-MPC Documentation</a><ul>
+                <p class="caption" role="heading"><span class="caption-text">Quick start:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing HILO-MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 </ul>
-</li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/controllers.html">Control module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/machinelearnings.html">Machine learning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/modellings.html">Modelling module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/estimators.html">Observer module</a></li>
 </ul>
-</div>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/controllers.html">Controllers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/learning.html">Machine Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modelling.html">Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/estimators.html">Observers</a></li>
+</ul>
+
             
           
         </div>
@@ -155,7 +174,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="hilo-mpc-documentation">
+  <div class="section" id="hilo-mpc-documentation">
 <h1>HILO-MPC Documentation<a class="headerlink" href="#hilo-mpc-documentation" title="Permalink to this headline">¶</a></h1>
 <p>HILO-MPC is a toolbox for <strong>easy, flexible and fast development of machine-learning-supported optimal control and
 estimation problems</strong>.</p>
@@ -202,7 +221,7 @@ estimation problems.</p>
 <li><p>Control</p>
 <ol class="arabic simple">
 <li><p>Mixed-integer linear model predictive control (work in progress)</p></li>
-<li><p>Tube model predictive control (work in progress)</p></li>
+<li><p>Tube-based model predictive control (work in progress)</p></li>
 <li><p>Multi-mode model predictive control</p></li>
 </ol>
 </li>
@@ -225,27 +244,99 @@ estimation problems.</p>
 </li>
 </ol>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Quick start:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citation.html">Citing HILO-MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+</ul>
 </div>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/controllers.html">Control module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/controllers.html#nonlinear-model-predictive-control">Nonlinear Model Predictive Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules/controllers.html#prediction-and-control-horizon">Prediction and control horizon</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/controllers.html#objective-function">Objective function</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/controllers.html#discrete-vs-continuous-objective-function">Discrete vs continuous objective function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="modules/controllers.html#time-varying-parameters">Time-varying parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/controllers.html#trajectory-tracking-problem">Trajectory tracking problem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/controllers.html#available-reference-function">Available reference function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="modules/controllers.html#only-values-of-the-references-are-available">Only values of the references are available</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="modules/controllers.html#path-following-problem">Path following problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/controllers.html#advanced-constraints">Advanced constraints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/controllers.html#debugging-the-nmpc">Debugging the NMPC</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="modules/controllers.html#ipopt-debugger-beta">IPOPT debugger (beta)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/machinelearnings.html">Machine learning module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/machinelearnings.html#artificial-neural-networks">Artificial Neural Networks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/machinelearnings.html#gaussian-process-regression">Gaussian Process Regression</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/modellings.html">Modelling module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/modellings.html#model-setup">Model Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/modellings.html#running-simulations">Running Simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/modellings.html#model-solution">Model Solution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/modellings.html#model-discretization">Model Discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/modellings.html#model-linearization">Model Linearization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/estimators.html">Observer module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/estimators.html#moving-horizon-estimator">Moving Horizon Estimator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules/estimators.html#non-uniform-sampling-intervals">Non-uniform sampling intervals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules/estimators.html#multi-rate-measurements">Multi-rate measurements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="modules/estimators.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/estimators.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/estimators.html#unscented-kalman-filter">Unscented Kalman Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/estimators.html#particle-filter">Particle Filter</a></li>
+</ul>
+</li>
+</ul>
 </div>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/controllers.html">Controllers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/learning.html">Machine Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modelling.html">Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/estimators.html">Observers</a></li>
+</ul>
 </div>
-</section>
-<section id="indices-and-tables">
+</div>
+<div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
-</section>
+</div>
 
 
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
   
 
   <hr/>

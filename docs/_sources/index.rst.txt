@@ -49,7 +49,7 @@ On the pipeline we have:
 1. Control
 
    1. Mixed-integer linear model predictive control (work in progress)
-   2. Tube model predictive control (work in progress)
+   2. Tube-based model predictive control (work in progress)
    3. Multi-mode model predictive control
 
 2. Machine Learning
@@ -71,7 +71,7 @@ On the pipeline we have:
    :maxdepth: 1
    :caption: Quick start:
 
-   installation/installation
+   installation
    license
    citation
    about
@@ -80,36 +80,25 @@ On the pipeline we have:
    :maxdepth: 1
    :caption: Examples:
 
-   .. examples/nmpc_hybrid_bio
-   .. examples/mhe_chemical_reaction
-   .. examples/mpc_formula1
-   .. examples/mpc_pendulum
-   .. examples/path_following_mpc
-   .. examples/greenhouse
-
-   .. examples/CSTR_Example
-   .. examples/gp_mpc_linear_mass_spring_damper
-   .. examples/learn_mpc
-
 
 .. toctree::
    :maxdepth: 5
    :caption: Modules:
 
-   .. modules/controllers
-   .. modules/machinelearnings
-   .. modules/modellings
-   .. modules/observers
+   modules/controllers
+   modules/machinelearnings
+   modules/modellings
+   modules/estimators
 
 
 .. toctree::
    :maxdepth: 5
    :caption: API:
 
-   .. api/controllers
-   .. api/learning
-   .. api/modelling
-   .. api/observers
+   api/controllers
+   api/learning
+   api/modelling
+   api/estimators
 
 
 Indices and tables

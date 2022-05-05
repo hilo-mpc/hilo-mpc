@@ -1,0 +1,1284 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hilo_mpc.modules.machine_learning.gp.gp &mdash; HILO-MPC 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../../../../_static/copybutton.css" type="text/css" />
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="../../../../../about.html"/>
+        <link rel="index" title="Index"
+              href="../../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../../search.html"/>
+    <link rel="top" title="HILO-MPC 1.0 documentation" href="../../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../../index.html"/> 
+
+  
+  <script src="../../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> HILO-MPC
+          
+
+          
+            
+            <img src="../../../../../_static/hilo_logo_short_2.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption" role="heading"><span class="caption-text">Quick start:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../citation.html">Citing HILO-MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../about.html">About</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modules/controllers.html">Control module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modules/machinelearnings.html">Machine learning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modules/modellings.html">Modelling module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modules/estimators.html">Observer module</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/controllers.html">Controllers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/learning.html">Machine Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modelling.html">Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/estimators.html">Observers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">HILO-MPC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>hilo_mpc.modules.machine_learning.gp.gp</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for hilo_mpc.modules.machine_learning.gp.gp</h1><div class="highlight"><pre>
+<span></span><span class="c1">#   </span>
+<span class="c1">#   This file is part of HILO-MPC</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported</span>
+<span class="c1">#   optimal control and estimation problems</span>
+<span class="c1">#</span>
+<span class="c1">#   Copyright (c) 2021 Johannes Pohlodek, Bruno Morabito, Rolf Findeisen</span>
+<span class="c1">#                      All rights reserved</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is free software: you can redistribute it and/or modify</span>
+<span class="c1">#   it under the terms of the GNU Lesser General Public License as</span>
+<span class="c1">#   published by the Free Software Foundation, either version 3</span>
+<span class="c1">#   of the License, or (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is distributed in the hope that it will be useful,</span>
+<span class="c1">#   but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="c1">#   GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1">#   You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1">#   along with HILO-MPC. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">casadi</span> <span class="k">as</span> <span class="nn">ca</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
+<span class="kn">from</span> <span class="nn">.inference</span> <span class="kn">import</span> <span class="n">Inference</span>
+<span class="kn">from</span> <span class="nn">.likelihood</span> <span class="kn">import</span> <span class="n">Likelihood</span>
+<span class="kn">from</span> <span class="nn">.mean</span> <span class="kn">import</span> <span class="n">Mean</span>
+<span class="kn">from</span> <span class="nn">.kernel</span> <span class="kn">import</span> <span class="n">Kernel</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">LearningBase</span>
+<span class="kn">from</span> <span class="nn">...base</span> <span class="kn">import</span> <span class="n">Series</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">Equations</span>
+<span class="kn">from</span> <span class="nn">...optimizer</span> <span class="kn">import</span> <span class="n">NonlinearProgram</span>
+<span class="kn">from</span> <span class="nn">....util.machine_learning</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Hyperparameter</span><span class="p">,</span> <span class="n">register_hyperparameters</span>
+<span class="kn">from</span> <span class="nn">....util.util</span> <span class="kn">import</span> <span class="n">convert</span><span class="p">,</span> <span class="n">is_list_like</span>
+
+
+<span class="n">Numeric</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+<span class="n">Values</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+<span class="n">Bound</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Numeric</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">]]</span>
+<span class="n">Bounds</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">]]]</span>
+<span class="n">Array</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Array&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="p">,</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="p">,</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="p">)</span>
+<span class="n">Param</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Param&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
+<span class="n">Inf</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Inference</span><span class="p">)</span>
+<span class="n">Lik</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Lik&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Likelihood</span><span class="p">)</span>
+<span class="n">Mu</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Mu&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Mean</span><span class="p">)</span>
+<span class="n">Cov</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;Cov&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Kernel</span><span class="p">)</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Data</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
+    <span class="n">SX</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="p">()</span>
+    <span class="n">MX</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">_GPSeries</span><span class="p">(</span><span class="n">Series</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_abscissa</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_update_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="GaussianProcess"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess">[docs]</a><span class="k">class</span> <span class="nc">GaussianProcess</span><span class="p">(</span><span class="n">LearningBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gaussian Process Regression</span>
+
+<span class="sd">    :Note: The Gaussian process regressor currently does not use the Cholesky factorization for training and</span>
+<span class="sd">        prediction. This will be implemented at a later time.</span>
+
+<span class="sd">    :param features: names of the features</span>
+<span class="sd">    :type features: list of strings</span>
+<span class="sd">    :param labels: names of the labels</span>
+<span class="sd">    :type labels: list of strings</span>
+<span class="sd">    :param inference:</span>
+<span class="sd">    :type inference:</span>
+<span class="sd">    :param likelihood:</span>
+<span class="sd">    :type likelihood:</span>
+<span class="sd">    :param kernel: Specifying the covariance function of the GP. The kernel hyperparameters are optimized during</span>
+<span class="sd">        training, defaults to :class:`hilo_mpc.core.learning.kernels.SquaredExponential`.</span>
+<span class="sd">    :type kernel: kernel</span>
+<span class="sd">    :param noise_variance:</span>
+<span class="sd">    :type noise_variance:</span>
+<span class="sd">    :param hyperprior:</span>
+<span class="sd">    :type hyperprior:</span>
+<span class="sd">    :param id:</span>
+<span class="sd">    :type id: str, optional</span>
+<span class="sd">    :param name: name of the GP</span>
+<span class="sd">    :type name: str, optional</span>
+<span class="sd">    :param solver:</span>
+<span class="sd">    :type solver: str, optional</span>
+<span class="sd">    :param solver_options: Options to the solver, e.g. ipopt.</span>
+<span class="sd">    :type solver_options: dict</span>
+<span class="sd">    :param kwargs:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+            <span class="n">labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+            <span class="n">inference</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Inf</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">likelihood</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Lik</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">mean</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mu</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Cov</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">noise_variance</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
+            <span class="n">hyperprior</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Maybe we should be able to access other hyperpriors from here as well</span>
+            <span class="nb">id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">solver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">solver_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO: Switch to mapping?</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Constructor method&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">features</span><span class="p">):</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">features</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">labels</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Training a GP on multiple labels is not supported. Please use &#39;MultiOutputGP&#39; to train &quot;</span>
+                             <span class="s2">&quot;GPs on multiple labels.&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">likelihood</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">likelihood</span> <span class="o">=</span> <span class="n">Likelihood</span><span class="o">.</span><span class="n">gaussian</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">likelihood</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">likelihood</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
+                <span class="n">likelihood</span> <span class="o">=</span> <span class="n">Likelihood</span><span class="o">.</span><span class="n">gaussian</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;logistic&#39;</span><span class="p">:</span>
+                <span class="n">likelihood</span> <span class="o">=</span> <span class="n">Likelihood</span><span class="o">.</span><span class="n">logistic</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;laplacian&#39;</span><span class="p">:</span>
+                <span class="n">likelihood</span> <span class="o">=</span> <span class="n">Likelihood</span><span class="o">.</span><span class="n">laplacian</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;students_t&#39;</span><span class="p">:</span>
+                <span class="n">likelihood</span> <span class="o">=</span> <span class="n">Likelihood</span><span class="o">.</span><span class="n">students_t</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Likelihood &#39;</span><span class="si">{</span><span class="n">likelihood</span><span class="si">}</span><span class="s2">&#39; not recognized&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span> <span class="o">=</span> <span class="n">likelihood</span>
+
+        <span class="k">if</span> <span class="n">inference</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="o">.</span><span class="n">exact</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inference</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">inference</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;exact&#39;</span><span class="p">:</span>
+                <span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="o">.</span><span class="n">exact</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;laplace&#39;</span><span class="p">:</span>
+                <span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="o">.</span><span class="n">laplace</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;expectation_propagation&#39;</span><span class="p">:</span>
+                <span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="o">.</span><span class="n">expectation_propagation</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;variational_bayes&#39;</span><span class="p">:</span>
+                <span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="o">.</span><span class="n">variational_bayes</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;kullback_leibler&#39;</span><span class="p">:</span>
+                <span class="n">inference</span> <span class="o">=</span> <span class="n">Inference</span><span class="o">.</span><span class="n">kullback_leibler</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Inference &#39;</span><span class="si">{</span><span class="n">inference</span><span class="si">}</span><span class="s2">&#39; not recognized&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inference</span> <span class="o">=</span> <span class="n">inference</span>
+
+        <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="n">Mean</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span>
+
+        <span class="k">if</span> <span class="n">kernel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kernel</span> <span class="o">=</span> <span class="n">Kernel</span><span class="o">.</span><span class="n">squared_exponential</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span>
+
+        <span class="n">hyper_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">hyperprior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;prior&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hyperprior</span>
+        <span class="n">hyperprior_parameters</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hyperprior_parameters&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hyperprior_parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;prior_parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hyperprior_parameters</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;bounds&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">variance_bounds</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;noise_variance&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">variance_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">variance_bounds</span> <span class="o">==</span> <span class="s1">&#39;fixed&#39;</span><span class="p">:</span>
+                    <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;fixed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;bounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_variance</span> <span class="o">=</span> <span class="n">Hyperparameter</span><span class="p">(</span><span class="s1">&#39;GP.noise_variance&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">noise_variance</span><span class="p">,</span> <span class="o">**</span><span class="n">hyper_kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hyp_is_log</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;GP.noise_variance&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hyp_is_log</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hyp_is_log</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">})</span>
+
+        <span class="n">register_hyperparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="n">parameter</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span><span class="p">])</span>
+
+        <span class="c1"># bounds = self.noise_variance.log_bounds</span>
+        <span class="c1"># unbounded_noise = bounds[0] == -ca.inf and bounds[1] == ca.inf</span>
+        <span class="c1"># unconstrained_op = all([not self.kernel.is_bounded(), unbounded_noise])</span>
+        <span class="n">unconstrained_op</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">solver</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">unconstrained_op</span><span class="p">:</span>
+                <span class="n">solver</span> <span class="o">=</span> <span class="s1">&#39;Newton-CG&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># TODO: Test GP for constrained hyperparameters</span>
+                <span class="n">solver</span> <span class="o">=</span> <span class="s1">&#39;L-BFGS-B&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">=</span> <span class="n">solver</span>
+
+        <span class="k">if</span> <span class="n">solver</span> <span class="o">==</span> <span class="s1">&#39;ipopt&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">solver_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">solver_options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;print_time&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;ipopt.suppress_all_output&#39;</span><span class="p">:</span> <span class="s1">&#39;yes&#39;</span><span class="p">}</span>
+            <span class="c1"># solver_options.update({&#39;ipopt.hessian_approximation&#39;: &#39;limited-memory&#39;})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">solver_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">solver_options</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_options</span> <span class="o">=</span> <span class="n">solver_options</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_train</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_train</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
+
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;epsilon&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">epsilon</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epsilon</span> <span class="o">=</span> <span class="mf">1e-8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_where_is_what</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_marginal_likelihood</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_optimization_stats</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;String representation method&quot;&quot;&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Gaussian process with </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">attribute</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;_&#39;</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">_initialize_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;always&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span> <span class="o">=</span> <span class="n">NonlinearProgram</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver</span><span class="p">,</span> <span class="n">solver_options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">warning</span> <span class="ow">in</span> <span class="n">w</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">warning</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">warning</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Plots are disabled, since no backend was selected.&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">warning</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">warning</span><span class="o">.</span><span class="n">category</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_gp_args</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bound</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param value:</span>
+<span class="sd">        :param bounds:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_or_p</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_where_is_what</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">is_slice</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">slice</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">shape</span><span class="p">:</span>
+                    <span class="n">n_val</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">n_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">n_dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">n_val</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">n_dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">:</span>
+                                <span class="n">n_val</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Dimension mismatch. Expected 1 dimension, got 2.&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch. Expected 1 dimension, got </span><span class="si">{</span><span class="n">n_dim</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n_val</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">is_slice</span> <span class="ow">and</span> <span class="n">n_val</span> <span class="o">!=</span> <span class="n">index</span><span class="o">.</span><span class="n">stop</span> <span class="o">-</span> <span class="n">index</span><span class="o">.</span><span class="n">start</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_slice</span> <span class="ow">and</span> <span class="n">n_val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                    <span class="ow">not</span> <span class="n">is_slice</span> <span class="ow">and</span> <span class="n">n_val</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># TODO: Raise error here?</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Dimension of hyperparameter </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> changed. Run the setup() method again&quot;</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyp_is_log</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="s1">&#39;variance&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="n">x_or_p</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="n">x_or_p</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="n">x_or_p</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">bounds</span> <span class="o">==</span> <span class="s1">&#39;fixed&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">n_val</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between values and bounds. Supplied values have a &quot;</span>
+                                         <span class="sa">f</span><span class="s2">&quot;dimension bigger than 1.&quot;</span><span class="p">)</span>
+                    <span class="n">lb</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="n">ub</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                    <span class="n">lb</span> <span class="o">=</span> <span class="n">bounds</span>
+                    <span class="n">ub</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">inf</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">lb</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">ub</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">inf</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">lb</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">ub</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">lb</span> <span class="o">&gt;</span> <span class="n">ub</span><span class="p">:</span>
+                        <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="n">ub</span><span class="p">,</span> <span class="n">lb</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bounds of unsupported type&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">lb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="s1">&#39;lbx&#39;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">lb</span>
+                <span class="k">if</span> <span class="n">ub</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="s1">&#39;ubx&#39;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">ub</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">X_train</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The tuple contains the training data matrix as ndarray of shape (dimensions_input, number_observations) and</span>
+<span class="sd">        its respective CasADi SX and MX symbols of same dimensions that are used to define the CasADi functions during</span>
+<span class="sd">        fitting and prediction. It can be changed by just assigned an ndarray and its setter method will automatically</span>
+<span class="sd">        adjust the symbols.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_train</span>
+
+    <span class="nd">@X_train</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">X_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_features</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch. Supplied dimension for the features is </span><span class="si">{</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, but &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;required dimension is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_features</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">X_train_SX</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">X_train_MX</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_train</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">SX</span><span class="o">=</span><span class="n">X_train_SX</span><span class="p">,</span> <span class="n">MX</span><span class="o">=</span><span class="n">X_train_MX</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y_train</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The tuple contains the training target matrix as ndarray of shape (dimensions_input, number_observations)</span>
+<span class="sd">        and its respective CasADi SX and MX symbols of same dimensions that are used to define the CasADi functions</span>
+<span class="sd">        during fitting and prediction. It can be changed by just assigned an ndarray and its setter method will</span>
+<span class="sd">        automatically adjust the symbols.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_train</span>
+
+    <span class="nd">@y_train</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">y_train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_labels</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch. Supplied dimension for the labels is </span><span class="si">{</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, but required &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;dimension is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_labels</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">y_train_SX</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">y_train_MX</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y_train</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">SX</span><span class="o">=</span><span class="n">y_train_SX</span><span class="p">,</span> <span class="n">MX</span><span class="o">=</span><span class="n">y_train_MX</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GaussianProcess.set_training_data"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.set_training_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_training_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Sets the training matrix and its target vector</span>
+
+<span class="sd">        :param X:</span>
+<span class="sd">        :param y:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Gaussian process was already executed. Use the fit_model() method again to optimize with &quot;</span>
+                          <span class="s2">&quot;respect to the newly set training data.&quot;</span><span class="p">)</span>
+
+        <span class="n">new_X_shape</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">new_y_shape</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">new_X_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">new_y_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of observations in training matrix and target vector do not match!&quot;</span><span class="p">)</span>
+        <span class="n">old_X_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_train</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">old_y_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_train</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_train</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">old_X_shape</span> <span class="o">==</span> <span class="n">new_X_shape</span> <span class="ow">and</span> <span class="n">old_y_shape</span> <span class="o">==</span> <span class="n">new_y_shape</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">new_X_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">n</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_features</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">][:</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">][</span><span class="n">n</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Dimensions of training data set changed. Please run setup() method again.&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hyperparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Param</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Includes all hyperparameters of the kernel as well as the sigma_noise hyperparameter</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_variance</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">hyperparameters</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">hyperparameters</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hyperparameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_variance</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">hyperparameter_names</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="o">.</span><span class="n">hyperparameter_names</span>
+
+<div class="viewcode-block" id="GaussianProcess.get_hyperparameter_by_name"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.get_hyperparameter_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_hyperparameter_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Param</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">parameter</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span> <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.update"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param args:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_gp_args</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.update_hyperparameters"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.update_hyperparameters">[docs]</a>    <span class="k">def</span> <span class="nf">update_hyperparameters</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">names</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Values</span><span class="p">]],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Bounds</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates hyperparameter values and boundaries</span>
+
+<span class="sd">        If names of hyperparameters are found in the given dictionaries, their respective value and/or boundaries will</span>
+<span class="sd">        be updated to the value and/or boundaries defined in the dictionary.</span>
+
+<span class="sd">        :Note: Instead of boundary values the string &#39;fixed&#39; can be passed which flags the hyperparameter, keeping him</span>
+<span class="sd">            constant during any optimization routine. This flag will be automatically set back if a list of two floats</span>
+<span class="sd">            is passed.</span>
+
+<span class="sd">        :param names:</span>
+<span class="sd">        :param values:</span>
+<span class="sd">        :param bounds:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_hyperparameter_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_where_is_what</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="s1">&#39;ndim&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">values</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At the moment only flat NumPy arrays are supported for updating the &quot;</span>
+                                     <span class="s2">&quot;hyperparameter values.&quot;</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;variance&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">*=</span> <span class="mi">2</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">parameter</span><span class="o">.</span><span class="n">fixed</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyp_is_log</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                            <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">parameter</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">bound</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">parameter</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bound</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.initialize"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+            <span class="n">labels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+            <span class="n">inference</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Inf</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">likelihood</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Lik</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">mean</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mu</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Cov</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">noise_variance</span><span class="p">:</span> <span class="n">Numeric</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
+            <span class="n">hyperprior</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Maybe we should be able to access other hyperpriors from here as well</span>
+            <span class="nb">id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">solver</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">solver_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TODO: Switch to mapping?</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param features:</span>
+<span class="sd">        :param labels:</span>
+<span class="sd">        :param inference:</span>
+<span class="sd">        :param likelihood:</span>
+<span class="sd">        :param mean:</span>
+<span class="sd">        :param kernel:</span>
+<span class="sd">        :param noise_variance:</span>
+<span class="sd">        :param hyperprior:</span>
+<span class="sd">        :param id:</span>
+<span class="sd">        :param name:</span>
+<span class="sd">        :param solver:</span>
+<span class="sd">        :param solver_options:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># NOTE: Maybe we could abuse the __call__-method and check in there whether the class was already instantiated</span>
+        <span class="c1">#  (https://stackoverflow.com/questions/40457599/how-to-check-if-an-object-has-been-initialized-in-python/40459563,</span>
+        <span class="c1">#  https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python).</span>
+        <span class="c1">#  If the object was already instantiated, we execute the normal __call__-method.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">inference</span><span class="o">=</span><span class="n">inference</span><span class="p">,</span> <span class="n">likelihood</span><span class="o">=</span><span class="n">likelihood</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+                      <span class="n">noise_variance</span><span class="o">=</span><span class="n">noise_variance</span><span class="p">,</span> <span class="n">hyperprior</span><span class="o">=</span><span class="n">hyperprior</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span>
+                      <span class="n">solver_options</span><span class="o">=</span><span class="n">solver_options</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.setup"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X_sym</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_train</span><span class="o">.</span><span class="n">SX</span>
+        <span class="k">if</span> <span class="n">X_sym</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The training data has not been set. Please run the method set_training_data() to &quot;</span>
+                               <span class="s2">&quot;proceed.&quot;</span><span class="p">)</span>
+
+        <span class="n">y_sym</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_train</span><span class="o">.</span><span class="n">SX</span>
+        <span class="k">if</span> <span class="n">y_sym</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="c1"># NOTE: We shouldn&#39;t get here</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The training data has not been set. Please run the method set_training_data() to &quot;</span>
+                               <span class="s2">&quot;proceed.&quot;</span><span class="p">)</span>
+
+        <span class="n">n</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">X_sym</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="n">posterior</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">X_sym</span><span class="p">,</span> <span class="n">y_sym</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_variance</span><span class="o">.</span><span class="n">SX</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">)</span>
+        <span class="n">log_marginal_likelihood</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">[</span><span class="s1">&#39;log_marginal_likelihood&#39;</span><span class="p">]</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">[</span><span class="s1">&#39;var&#39;</span><span class="p">]</span>
+
+        <span class="n">hyperparameters_to_optimize</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameter</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">parameter</span><span class="o">.</span><span class="n">fixed</span><span class="p">]</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">w0</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># lbw = []</span>
+        <span class="c1"># ubw = []</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">hyperparameters_to_optimize</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">SX</span>
+
+            <span class="n">hyperprior</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">prior</span>
+            <span class="k">if</span> <span class="n">hyperprior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">log_marginal_likelihood</span> <span class="o">+=</span> <span class="n">hyperprior</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">w</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+            <span class="n">n_p</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyp_is_log</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="s1">&#39;variance&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+                    <span class="n">w0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">log</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">w0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+                <span class="c1"># lbw.append(n_p * [parameter.log_bounds[0]])</span>
+                <span class="c1"># ubw.append(n_p * [parameter.log_bounds[1]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">w0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="c1"># lbw.append(n_p * [parameter.bounds[0]])</span>
+                <span class="c1"># ubw.append(n_p * [parameter.bounds[1]])</span>
+            <span class="k">if</span> <span class="n">n_p</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_where_is_what</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;x0&#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_where_is_what</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;x0&#39;</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">+</span> <span class="n">n_p</span><span class="p">))</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="n">n_p</span>
+
+        <span class="n">hyperparameters_fixed</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameter</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span> <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">fixed</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">D</span>
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">hyperparameters_fixed</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">SX</span><span class="p">)</span>
+            <span class="n">n_p</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hyp_is_log</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="s1">&#39;variance&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+                    <span class="n">p0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">log</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">p0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n_p</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_where_is_what</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_where_is_what</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span> <span class="o">+</span> <span class="n">n_p</span><span class="p">))</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="n">n_p</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="o">*</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">w0</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="o">*</span><span class="n">w0</span><span class="p">)</span>
+        <span class="c1"># lbw = ca.vertcat(*lbw)</span>
+        <span class="c1"># ubw = ca.vertcat(*ubw)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">X_sym</span><span class="o">.</span><span class="n">T</span><span class="p">[:],</span> <span class="n">y_sym</span><span class="o">.</span><span class="n">T</span><span class="p">[:],</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span>
+        <span class="c1"># TODO: Check if this is actually the same as what is done for the SX variables</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">X_train</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_train</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">p0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_solver</span><span class="p">()</span>
+
+        <span class="c1"># for some reason this doesn&#39;t result in free variables</span>
+        <span class="c1"># self._gp_solver.set_decision_variables(w, lower_bound=lbw, upper_bound=ubw)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span><span class="o">.</span><span class="n">set_decision_variables</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span><span class="o">.</span><span class="n">set_objective</span><span class="p">(</span><span class="o">-</span><span class="n">log_marginal_likelihood</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_marginal_likelihood</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="s1">&#39;log_marginal_likelihood&#39;</span><span class="p">,</span>
+                                                    <span class="p">[</span><span class="n">w</span><span class="p">,</span> <span class="n">p</span><span class="p">],</span>
+                                                    <span class="p">[</span><span class="n">log_marginal_likelihood</span><span class="p">],</span>
+                                                    <span class="p">[</span><span class="s1">&#39;x0&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">],</span>
+                                                    <span class="p">[</span><span class="s1">&#39;log_marg_lik&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_function</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span>
+            <span class="s1">&#39;prediction&#39;</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">p</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">mean</span><span class="p">,</span> <span class="n">var</span><span class="p">],</span>
+            <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;x0&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span><span class="o">.</span><span class="n">set_initial_guess</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span><span class="o">.</span><span class="n">set_parameter_values</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="n">w0</span><span class="p">,</span>
+            <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="n">p0</span><span class="p">,</span>
+            <span class="c1"># &#39;lbx&#39;: lbw,</span>
+            <span class="c1"># &#39;ubx&#39;: ubw</span>
+        <span class="p">})</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.is_setup"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.is_setup">[docs]</a>    <span class="k">def</span> <span class="nf">is_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.log_marginal_likelihood"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.log_marginal_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">log_marginal_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_marginal_likelihood</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="s1">&#39;x0&#39;</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">])[</span><span class="s1">&#39;log_marg_lik&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.fit_model"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.fit_model">[docs]</a>    <span class="k">def</span> <span class="nf">fit_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Optimizes the hyperparameters by minimizing the negative log marginal likelihood.</span>
+
+<span class="sd">        The model fit is the training phase in the GP regression. Given the design data (training observations and</span>
+<span class="sd">        their targets) and suitable start values and bounds for the hyperparameters, the hyperparameters will be</span>
+<span class="sd">        adapted by minimizing the negative log marginal likelihood.</span>
+
+<span class="sd">        :Note: Instead of boundary values the string &#39;fixed&#39; can be passed which flags the hyperparameter, keeping it</span>
+<span class="sd">            constant during the optimization routine.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The GP has not been set up yet. Please run the setup() method before fitting.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+        <span class="n">solution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span><span class="o">.</span><span class="n">solution</span>
+
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyperparameters</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">parameter</span><span class="o">.</span><span class="n">fixed</span><span class="p">]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;x:f&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">full</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_hyperparameters</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_optimization_stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gp_solver</span><span class="o">.</span><span class="n">stats</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimization_stats</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">==</span> <span class="s1">&#39;ipopt&#39;</span><span class="p">:</span>
+                <span class="n">return_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimization_stats</span><span class="p">[</span><span class="s1">&#39;return_status&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">return_status</span> <span class="o">==</span> <span class="s1">&#39;Infeasible_Problem_Detected&#39;</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Infeasible problem detected&#39;</span>
+                <span class="k">elif</span> <span class="n">return_status</span> <span class="o">==</span> <span class="s1">&#39;Restoration_Failed&#39;</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Restoration failed&#39;</span>
+                <span class="k">elif</span> <span class="n">return_status</span> <span class="o">==</span> <span class="s1">&#39;Maximum_Iterations_Exceeded&#39;</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Maximum iterations exceeded&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized return status: </span><span class="si">{</span><span class="n">return_status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimization_stats</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fitting of GP didn&#39;t terminate successfully</span><span class="se">\n</span><span class="s2">Solver message: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;Try to use a different solver&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.predict"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_query</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">noise_free</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">Array</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param X_query:</span>
+<span class="sd">        :param noise_free:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The GP has not been set up yet. Please run the setup() method before predicting.&quot;</span><span class="p">)</span>
+
+        <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_query</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="s1">&#39;x0&#39;</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_gp_args</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">])</span>
+        <span class="n">mean</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="n">prediction</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span> <span class="n">prediction</span><span class="p">[</span><span class="s1">&#39;variance&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">noise_free</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_variance</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X_query</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">full</span><span class="p">()</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">full</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">var</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.predict_quantiles"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.predict_quantiles">[docs]</a>    <span class="k">def</span> <span class="nf">predict_quantiles</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">quantiles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">X_query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">mean</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">var</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param quantiles:</span>
+<span class="sd">        :param X_query:</span>
+<span class="sd">        :param mean:</span>
+<span class="sd">        :param var:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">quantiles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">quantiles</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">97.5</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">X_query</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mean</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_query</span><span class="p">,</span> <span class="n">noise_free</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">var</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">predictive_quantiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">q</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noise_variance</span><span class="o">.</span><span class="n">value</span><span class="p">))</span> <span class="o">+</span> <span class="n">mean</span> <span class="k">for</span> <span class="n">q</span>
+                                <span class="ow">in</span> <span class="n">quantiles</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">predictive_quantiles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">predictive_quantiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.plot"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_query</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param X_query:</span>
+<span class="sd">        :param backend:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_train</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">y_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_train</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">n_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_features</span>
+
+        <span class="n">post_mean</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_query</span><span class="p">,</span> <span class="n">noise_free</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">solution</span> <span class="o">=</span> <span class="n">_GPSeries</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">backend</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">plot_backend</span>
+
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">,</span>
+                <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">n_x</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">,</span>
+                <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">n_x</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_x</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;post. mean at test points&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">,</span>
+                <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="n">solution</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">vector</span><span class="p">)</span>
+
+        <span class="n">solution</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">X_query</span><span class="p">)</span>
+        <span class="n">solution</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">post_mean</span><span class="p">)</span>
+
+        <span class="n">plots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_labels</span> <span class="o">*</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">feature</span><span class="p">,</span> <span class="s1">&#39;post. mean at test points&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">)</span>
+
+        <span class="n">ext_data_x</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ext_data_y</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_labels</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_x</span><span class="p">):</span>
+                <span class="n">ext_data_x</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="s1">&#39;subplot&#39;</span><span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">n_x</span> <span class="o">+</span> <span class="n">j</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;training points&#39;</span><span class="p">})</span>
+                <span class="n">ext_data_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span>
+                        <span class="s1">&#39;subplot&#39;</span><span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">n_x</span> <span class="o">+</span> <span class="n">j</span><span class="p">,</span>
+                        <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;training points&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="s1">&#39;scatter&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;marker_size&#39;</span><span class="p">:</span> <span class="mi">20</span> <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;bokeh&#39;</span> <span class="k">else</span> <span class="mi">60</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+
+        <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;bokeh&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;output_notebook&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;figsize&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;figsize&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">))</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;major_label_text_font_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;major_label_text_font_size&quot;</span><span class="p">,</span> <span class="s2">&quot;12pt&quot;</span><span class="p">)</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;axis_label_text_font_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;axis_label_text_font_size&quot;</span><span class="p">,</span> <span class="s2">&quot;12pt&quot;</span><span class="p">)</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;bokeh&#39;</span><span class="p">:</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;marker_size&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;matplotlib&#39;</span><span class="p">:</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;marker_size&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="n">n_x</span> <span class="o">*</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">))</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;legend&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;scatter&#39;</span>
+
+        <span class="n">solution</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">plots</span><span class="p">,</span> <span class="n">x_data</span><span class="o">=</span><span class="n">ext_data_x</span><span class="p">,</span> <span class="n">y_data</span><span class="o">=</span><span class="n">ext_data_y</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.plot_1d"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.plot_1d">[docs]</a>    <span class="k">def</span> <span class="nf">plot_1d</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">quantiles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Numeric</span><span class="p">,</span> <span class="n">Numeric</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+            <span class="n">backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param quantiles:</span>
+<span class="sd">        :param resolution:</span>
+<span class="sd">        :param backend:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_train</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">y_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y_train</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">n_x</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">n_x</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;The method plot_1d is only supported for Gaussian processes with one feature.&quot;</span><span class="p">)</span>
+
+        <span class="n">x_min</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">x_max</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">x_min</span> <span class="o">-</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="p">(</span><span class="n">x_max</span> <span class="o">-</span> <span class="n">x_min</span><span class="p">),</span> <span class="n">x_max</span> <span class="o">+</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="p">(</span><span class="n">x_max</span> <span class="o">-</span> <span class="n">x_min</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">x_min</span><span class="p">)],</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x_max</span><span class="p">)],</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">y</span><span class="p">,</span> <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">noise_free</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">lb</span><span class="p">,</span> <span class="n">ub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_quantiles</span><span class="p">(</span><span class="n">quantiles</span><span class="o">=</span><span class="n">quantiles</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
+
+        <span class="n">solution</span> <span class="o">=</span> <span class="n">_GPSeries</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">backend</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">plot_backend</span>
+
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">,</span>
+                <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">,</span>
+                <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">,</span>
+                <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="n">solution</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">vector</span><span class="p">)</span>
+
+        <span class="n">solution</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+        <span class="n">solution</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">ext_data_x</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span> <span class="s1">&#39;subplot&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;data&#39;</span><span class="p">}]</span>
+        <span class="n">ext_data_y</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span> <span class="s1">&#39;subplot&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="s1">&#39;scatter&#39;</span><span class="p">}]</span>
+
+        <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;bokeh&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;output_notebook&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;figsize&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">300</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;figsize&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">))</span>
+
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;line_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;line_width&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;major_label_text_font_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;major_label_text_font_size&quot;</span><span class="p">,</span> <span class="s2">&quot;12pt&quot;</span><span class="p">)</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s2">&quot;axis_label_text_font_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;axis_label_text_font_size&quot;</span><span class="p">,</span> <span class="s2">&quot;12pt&quot;</span><span class="p">)</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;color&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;#3465a4&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">])</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;bokeh&#39;</span><span class="p">:</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;marker_size&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;matplotlib&#39;</span><span class="p">:</span>
+            <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;marker_size&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;fill_between&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;lb&#39;</span><span class="p">:</span> <span class="n">lb</span><span class="p">,</span> <span class="s1">&#39;ub&#39;</span><span class="p">:</span> <span class="n">ub</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;confidence&#39;</span><span class="p">,</span> <span class="s1">&#39;line_color&#39;</span><span class="p">:</span> <span class="s1">&#39;#204a87&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;line_width&#39;</span><span class="p">:</span> <span class="mf">.5</span><span class="p">,</span> <span class="s1">&#39;fill_color&#39;</span><span class="p">:</span> <span class="s1">&#39;#729fcf&#39;</span><span class="p">,</span> <span class="s1">&#39;fill_alpha&#39;</span><span class="p">:</span> <span class="mf">.2</span><span class="p">}</span>
+        <span class="p">]</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s2">&quot;GP regression&quot;</span><span class="p">)</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;legend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;legend&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">solution</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;mean&#39;</span><span class="p">),</span> <span class="n">x_data</span><span class="o">=</span><span class="n">ext_data_x</span><span class="p">,</span> <span class="n">y_data</span><span class="o">=</span><span class="n">ext_data_y</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GaussianProcess.plot_prediction_error"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.GaussianProcess.plot_prediction_error">[docs]</a>    <span class="k">def</span> <span class="nf">plot_prediction_error</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">X_query</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+            <span class="n">y_query</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+            <span class="n">noise_free</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param X_query:</span>
+<span class="sd">        :param y_query:</span>
+<span class="sd">        :param noise_free:</span>
+<span class="sd">        :param backend:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">post_mean</span><span class="p">,</span> <span class="n">post_var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_query</span><span class="p">,</span> <span class="n">noise_free</span><span class="o">=</span><span class="n">noise_free</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">post_mean</span> <span class="o">-</span> <span class="n">y_query</span><span class="p">)</span>
+        <span class="n">post_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">post_var</span><span class="p">)</span>
+        <span class="n">n_samples</span> <span class="o">=</span> <span class="n">X_query</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">solution</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">backend</span> <span class="o">=</span> <span class="n">solution</span><span class="o">.</span><span class="n">plot_backend</span>
+
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">]</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;post_std&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="n">solution</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">vector</span><span class="p">)</span>
+
+        <span class="n">solution</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">([</span><span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="n">n_samples</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">solution</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">post_std</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">plot_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;prediction error&#39;</span><span class="p">,</span> <span class="s1">&#39;prediction function standard deviation&#39;</span><span class="p">)</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;xlabel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;ylabel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;scatter&#39;</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;o&#39;</span>
+        <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;marker_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span> <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;bokeh&#39;</span> <span class="k">else</span> <span class="mi">20</span>
+
+        <span class="n">solution</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;post_std&#39;</span><span class="p">),</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">GPArray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_gps</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Constructor method&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_gps</span> <span class="o">=</span> <span class="n">n_gps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_gps</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+    <span class="n">__array_ufunc__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># https://stackoverflow.com/questions/38229953/array-and-rmul-operator-in-python-numpy</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Length method&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_gps</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GaussianProcess</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Item iteration method&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_gps</span><span class="p">):</span>
+            <span class="n">gp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">gp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">gp</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">GaussianProcess</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_gps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span>
+            <span class="k">yield</span> <span class="n">gp</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">GaussianProcess</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Item getter method&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps</span><span class="p">[</span><span class="n">item</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__rmatmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GPArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Multiplication method (from the right side)&quot;&quot;&quot;</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="p">)</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_gps</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_gps</span><span class="p">):</span>
+            <span class="n">gp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gps</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">query</span> <span class="o">=</span> <span class="p">[</span><span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">gp</span><span class="o">.</span><span class="n">features</span><span class="p">]</span>
+            <span class="n">out</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="o">*</span><span class="n">query</span><span class="p">))</span>
+
+            <span class="n">features</span> <span class="o">+=</span> <span class="n">query</span>
+            <span class="n">labels</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">out</span>
+        <span class="c1"># NOTE: @-operator doesn&#39;t seem to work because we set __array_ufunc__ to None</span>
+        <span class="n">equations</span> <span class="o">=</span> <span class="n">Equations</span><span class="p">(</span><span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;matmul&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">mtimes</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">labels</span><span class="p">)})</span>
+        <span class="k">return</span> <span class="n">equations</span><span class="o">.</span><span class="n">to_function</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">GaussianProcess</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">_matmul&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">features</span><span class="p">)</span>
+
+    <span class="c1"># def append(self, gp: GaussianProcess) -&gt; None:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param gp:</span>
+    <span class="c1">#     :return:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1"># def pop(self) -&gt; GaussianProcess:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :return:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1"># def remove(self, item) -&gt; None:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param item:</span>
+    <span class="c1">#     :return:</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;GaussianProcess&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;GPArray&#39;</span>
+<span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Johannes Pohlodek, Bruno Morabito.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> and ❤️  using a custom <a href="https://github.com/LinxiFan/Sphinx-theme">theme</a> based on <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../../../_static/clipboard.min.js"></script>
+      <script type="text/javascript" src="../../../../../_static/copybutton.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,695 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hilo_mpc.modules.estimator.pf &mdash; HILO-MPC 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="../../../../about.html"/>
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="HILO-MPC 1.0 documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> HILO-MPC
+          
+
+          
+            
+            <img src="../../../../_static/hilo_logo_short_2.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption" role="heading"><span class="caption-text">Quick start:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../citation.html">Citing HILO-MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/controllers.html">Control module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/machinelearnings.html">Machine learning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/modellings.html">Modelling module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/estimators.html">Observer module</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/controllers.html">Controllers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/learning.html">Machine Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modelling.html">Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/estimators.html">Observers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">HILO-MPC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>hilo_mpc.modules.estimator.pf</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for hilo_mpc.modules.estimator.pf</h1><div class="highlight"><pre>
+<span></span><span class="c1">#   </span>
+<span class="c1">#   This file is part of HILO-MPC</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported</span>
+<span class="c1">#   optimal control and estimation problems</span>
+<span class="c1">#</span>
+<span class="c1">#   Copyright (c) 2021 Johannes Pohlodek, Bruno Morabito, Rolf Findeisen</span>
+<span class="c1">#                      All rights reserved</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is free software: you can redistribute it and/or modify</span>
+<span class="c1">#   it under the terms of the GNU Lesser General Public License as</span>
+<span class="c1">#   published by the Free Software Foundation, either version 3</span>
+<span class="c1">#   of the License, or (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is distributed in the hope that it will be useful,</span>
+<span class="c1">#   but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="c1">#   GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1">#   You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1">#   along with HILO-MPC. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">casadi</span> <span class="k">as</span> <span class="nn">ca</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">_Estimator</span>
+<span class="kn">from</span> <span class="nn">..dynamic_model.dynamic_model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">...util.util</span> <span class="kn">import</span> <span class="n">convert</span>
+
+
+<div class="viewcode-block" id="ParticleFilter"><a class="viewcode-back" href="../../../../api/estimators.html#hilo_mpc.ParticleFilter">[docs]</a><span class="k">class</span> <span class="nc">ParticleFilter</span><span class="p">(</span><span class="n">_Estimator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Particle filter (PF) class for state estimation</span>
+
+<span class="sd">    :param model:</span>
+<span class="sd">    :param id: The identifier of the PF object. If no identifier is given, a random one will be generated.</span>
+<span class="sd">    :param name: The name of the PF object. By default the PF object has no name.</span>
+<span class="sd">    :param plot_backend: Plotting library that is used to visualize estimated data. At the moment only</span>
+<span class="sd">        `Matplotlib &lt;https://matplotlib.org/&gt;`_ and `Bokeh &lt;https://bokeh.org/&gt;`_ are supported. By default no plotting</span>
+<span class="sd">        library is selected, i.e. no plots can be generated.</span>
+<span class="sd">    :param variant:</span>
+<span class="sd">    :param roughening:</span>
+<span class="sd">    :param prior_editing:</span>
+<span class="sd">    :param kwargs:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+            <span class="nb">id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">plot_backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">variant</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">roughening</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">prior_editing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor method&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">is_linear</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The supplied model is linear. For better efficiency use an observer targeted at the &quot;</span>
+                          <span class="s2">&quot;estimation of linear systems.&quot;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">plot_backend</span><span class="o">=</span><span class="n">plot_backend</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant</span> <span class="o">=</span> <span class="n">variant</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roughening</span> <span class="o">=</span> <span class="n">roughening</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prior_editing</span> <span class="o">=</span> <span class="n">prior_editing</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roughening</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prior_editing</span><span class="p">:</span>
+            <span class="n">K</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;K&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">K</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">K</span> <span class="o">=</span> <span class="mf">.2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_roughening_tuning_param</span> <span class="o">=</span> <span class="n">K</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_normpdf</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span> <span class="o">=</span> <span class="mi">15</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pdf</span> <span class="o">=</span> <span class="n">lhsnorm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_update_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="s1">&#39;particle filter&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_setup_normpdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;mu&#39;</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;sigma&#39;</span><span class="p">)</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">ca</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normpdf</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="s1">&#39;normpdf&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_propagate_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param n_samples:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_x</span>
+        <span class="n">n_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_y</span>
+        <span class="n">n_u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_u</span>
+        <span class="n">n_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_p</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">n_x</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">n_u</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="n">n_p</span><span class="p">)</span>
+        <span class="n">up</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">numel</span><span class="p">())],</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">X</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">X</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">X</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">numel</span><span class="p">(),</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+        <span class="p">})</span>
+
+        <span class="n">sol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">up</span><span class="p">)</span>
+        <span class="n">X_prop</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[</span><span class="s1">&#39;xf&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">n_y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has no measurement equations, I am assuming measurements of all states &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">dynamical_state_names</span><span class="si">}</span><span class="s2"> are available.&quot;</span><span class="p">)</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">X_prop</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[</span><span class="s1">&#39;yf&#39;</span><span class="p">]</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">n_x</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">n_y</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: At the moment only additive noise is supported</span>
+        <span class="n">X_prop</span> <span class="o">+=</span> <span class="n">w</span>
+        <span class="n">Y</span> <span class="o">+=</span> <span class="n">v</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_predict_function</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="s1">&#39;propagation_step&#39;</span><span class="p">,</span>
+                                             <span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">up</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="p">],</span>
+                                             <span class="p">[</span><span class="n">X_prop</span><span class="p">,</span> <span class="n">Y</span><span class="p">],</span>
+                                             <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">],</span>
+                                             <span class="p">[</span><span class="s1">&#39;X_prop&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">n_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_y</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">n_y</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="n">n_y</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">n_y</span><span class="p">,</span> <span class="n">n_y</span><span class="p">))</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normpdf</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ca</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">R</span><span class="p">))</span>  <span class="c1"># Since R is usually a diagonal matrix, we can use ca.sqrt() here. We need</span>
+        <span class="c1"># to change this, if we have non-diagonal matrices, i.e. covariance entries.</span>
+        <span class="n">q</span> <span class="o">/=</span> <span class="n">ca</span><span class="o">.</span><span class="n">sum2</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_function</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="s1">&#39;likelihood&#39;</span><span class="p">,</span>
+                                            <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">R</span><span class="p">],</span>
+                                            <span class="p">[</span><span class="n">q</span><span class="p">],</span>
+                                            <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">],</span>
+                                            <span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_initial_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">P0</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;P:f&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;x:0&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">full</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">P0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">):</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span>
+                <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch. Expected dimension 2x</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="si">}</span><span class="s2">, got &quot;</span>
+                                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">X</span><span class="p">[:])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">probability_density_function</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdf</span>
+
+    <span class="nd">@probability_density_function</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">probability_density_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdf</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param pdf:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">pdf</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Probability density function of the </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2"> needs to be callable.&quot;</span><span class="p">)</span>
+        <span class="n">annotations</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="vm">__annotations__</span>
+        <span class="n">run_function</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">annotations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="s1">&#39;return&#39;</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
+                <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;covariance&quot;</span><span class="p">,</span> <span class="s2">&quot;sample size&quot;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">type_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">annotations</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+                    <span class="k">if</span> <span class="n">type_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">types</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">no</span> <span class="o">=</span> <span class="s2">&quot;1st&quot;</span>
+                        <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">no</span> <span class="o">=</span> <span class="s2">&quot;2nd&quot;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">no</span> <span class="o">=</span> <span class="s2">&quot;3rd&quot;</span>
+                        <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The </span><span class="si">{</span><span class="n">no</span><span class="si">}</span><span class="s2"> argument to the probability density function (pdf) needs to be &quot;</span>
+                                            <span class="sa">f</span><span class="s2">&quot;the &#39;</span><span class="si">{</span><span class="n">args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; with type </span><span class="si">{</span><span class="n">types</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The return value of the probability density function (pdf) needs to be a&quot;</span>
+                                            <span class="sa">f</span><span class="s2">&quot; &#39;random sample&#39; with type </span><span class="si">{</span><span class="n">types</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="n">run_function</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">run_function</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">pdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch. Expected dimension </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="si">}</span><span class="s2">, got &quot;</span>
+                                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The following exception was raised</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                   <span class="sa">f</span><span class="s2">&quot;   </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: &#39;</span><span class="si">{</span><span class="n">err</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;.</span><span class="se">\n</span><span class="s2">Please make sure that the &quot;</span>
+                                   <span class="sa">f</span><span class="s2">&quot;supplied probability density function (pdf) has the following arguments</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                   <span class="sa">f</span><span class="s2">&quot;   mu - mean of the pdf (type: numpy.ndarray),</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                   <span class="sa">f</span><span class="s2">&quot;   sigma - covariance of the mean (type: numpy.ndarray),</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                   <span class="sa">f</span><span class="s2">&quot;   n - sample size (type: int),</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                   <span class="sa">f</span><span class="s2">&quot;and the following return value</span><span class="se">\n</span><span class="s2">&quot;</span>
+                                   <span class="sa">f</span><span class="s2">&quot;   X - random sample (type: numpy.ndarray).&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pdf</span> <span class="o">=</span> <span class="n">pdf</span>
+
+    <span class="n">pdf</span> <span class="o">=</span> <span class="n">probability_density_function</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">variant</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant</span>
+
+    <span class="nd">@variant</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">variant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variant</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant</span> <span class="o">=</span> <span class="n">variant</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sample_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span>
+
+    <span class="nd">@sample_size</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sample_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span> <span class="o">=</span> <span class="n">sample_size</span>
+
+    <span class="n">n_samples</span> <span class="o">=</span> <span class="n">sample_size</span>
+
+<div class="viewcode-block" id="ParticleFilter.setup"><a class="viewcode-back" href="../../../../api/estimators.html#hilo_mpc.ParticleFilter.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">solution</span><span class="p">)</span>
+
+        <span class="n">n_s</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n_samples&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_s</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span> <span class="o">=</span> <span class="n">n_s</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_propagate_particles</span><span class="p">(</span><span class="n">n_s</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_likelihood</span><span class="p">(</span><span class="n">n_s</span><span class="p">)</span>
+
+        <span class="n">n_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_x</span>
+        <span class="n">n_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_y</span>
+        <span class="n">n_u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_u</span>
+        <span class="n">n_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_p</span>
+        <span class="n">n_P</span> <span class="o">=</span> <span class="n">n_x</span> <span class="o">*</span> <span class="n">n_x</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;values_or_names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;P_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_P</span><span class="p">)],</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">n_P</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">n_P</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;units&#39;</span><span class="p">:</span> <span class="n">n_P</span> <span class="o">*</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_P</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span>
+        <span class="p">})</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="n">n_x</span><span class="p">,</span> <span class="n">n_s</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">n_y</span><span class="p">)</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">n_u</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="n">n_p</span><span class="p">)</span>
+        <span class="n">up</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">n_x</span><span class="p">,</span> <span class="n">n_s</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">n_y</span><span class="p">,</span> <span class="n">n_s</span><span class="p">)</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">n_x</span><span class="p">,</span> <span class="n">n_x</span><span class="p">))</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">n_y</span><span class="p">,</span> <span class="n">n_y</span><span class="p">))</span>
+
+        <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_function</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">up</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">X_prop</span> <span class="o">=</span> <span class="n">prediction</span><span class="p">[</span><span class="s1">&#39;X_prop&#39;</span><span class="p">]</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">prediction</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
+        <span class="n">update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_function</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">R</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_function</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span>
+                                     <span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">up</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">R</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="n">X_prop</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">update</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]],</span>
+                                     <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="s1">&#39;X_prop&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span> <span class="o">=</span> <span class="n">n_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_y</span> <span class="o">=</span> <span class="n">n_y</span>
+        <span class="c1"># self._n_z = n_z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_u</span> <span class="o">=</span> <span class="n">n_u</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_p</span> <span class="o">=</span> <span class="n">n_p</span>
+        <span class="c1"># self._n_p_est = n_p_est</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_noise_covariance</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_measurement_noise_covariance</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.estimate"><a class="viewcode-back" href="../../../../api/estimators.html#hilo_mpc.ParticleFilter.estimate">[docs]</a>    <span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param args:</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: Adjust according to Model.simulate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_setup</span><span class="p">()</span>
+
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;skip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_inputs</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">tf</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;t0&#39;</span><span class="p">)</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;steps&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initial_sample</span><span class="p">()</span>
+        <span class="n">args</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="s1">&#39;X:f&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">steps</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Particle filter is not yet implemented with steps &gt; 1.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurement_noise_covariance</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_noise_covariance</span><span class="o">.</span><span class="n">full</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">)</span>
+            <span class="c1"># v = self._pdf(np.zeros(self._n_y), self._measurement_noise_covariance.full(), self._sample_size)</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">)</span>  <span class="c1"># Only possible since R is usually a</span>
+            <span class="c1"># diagonal matrix (see self._evaluate_likelihood)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span><span class="p">:</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">T</span>
+                <span class="c1"># v = v.T</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">w</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">R</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
+
+            <span class="c1"># Prior editing</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prior_editing</span><span class="p">:</span>
+                <span class="n">mag</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Y</span>
+                <span class="n">need_roughening</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+                <span class="n">n_r</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ca</span><span class="o">.</span><span class="n">sum2</span><span class="p">(</span><span class="n">need_roughening</span><span class="p">))</span>
+                <span class="k">while</span> <span class="n">n_r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># TODO: Check out prior editing in more detail. Should we only use the X that are indexed by</span>
+                    <span class="c1">#  need_roughening for the calculation of dx? Do we roughen already roughened X, or do we just</span>
+                    <span class="c1">#  replace the ones that were improved by the roughening and keep the other ones at their original</span>
+                    <span class="c1">#  value?</span>
+                    <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roughening_tuning_param</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span> <span class="o">*</span>
+                                   <span class="n">n_r</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">),</span> <span class="n">n_r</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span><span class="p">:</span>
+                        <span class="n">dx</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">T</span>
+                    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">need_roughening</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">][:,</span> <span class="n">mask</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dx</span>
+
+                    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+
+                    <span class="n">Y</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">]</span>
+                    <span class="n">mag</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">Y</span>
+                    <span class="n">need_roughening</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+                    <span class="n">n_r</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ca</span><span class="o">.</span><span class="n">sum2</span><span class="p">(</span><span class="n">need_roughening</span><span class="p">))</span>
+
+            <span class="n">X</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;X_prop&#39;</span><span class="p">]</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span>
+
+            <span class="c1"># Resample (Survival of the fittest)</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">full</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]</span>
+
+            <span class="c1"># Roughening</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roughening</span><span class="p">:</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdf</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roughening_tuning_param</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span> <span class="o">*</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose_pdf</span><span class="p">:</span>
+                    <span class="n">dx</span> <span class="o">=</span> <span class="n">dx</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">X</span> <span class="o">+=</span> <span class="n">dx</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">sum2</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">sum2</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solution</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="n">tf</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">[:],</span> <span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">[:],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">lhsnorm</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param mu:</span>
+<span class="sd">    :param sigma:</span>
+<span class="sd">    :param n:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Migrate to somewhere in util</span>
+    <span class="n">n_m</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">z</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="n">idz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_m</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">idz</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">/=</span> <span class="n">n</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_m</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="n">mu</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">x</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;ParticleFilter&#39;</span>
+<span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Johannes Pohlodek, Bruno Morabito.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> and ❤️  using a custom <a href="https://github.com/LinxiFan/Sphinx-theme">theme</a> based on <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../../_static/clipboard.min.js"></script>
+      <script type="text/javascript" src="../../../../_static/copybutton.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Observer module &mdash; HILO-MPC 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="../about.html"/>
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="HILO-MPC 1.0 documentation" href="../index.html"/>
+        <link rel="next" title="Controllers" href="../api/controllers.html"/>
+        <link rel="prev" title="Modelling module" href="modellings.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> HILO-MPC
+          
+
+          
+            
+            <img src="../_static/hilo_logo_short_2.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption" role="heading"><span class="caption-text">Quick start:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citing HILO-MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="controllers.html">Control module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="machinelearnings.html">Machine learning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modellings.html">Modelling module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Observer module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#moving-horizon-estimator">Moving Horizon Estimator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#non-uniform-sampling-intervals">Non-uniform sampling intervals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-rate-measurements">Multi-rate measurements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unscented-kalman-filter">Unscented Kalman Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#particle-filter">Particle Filter</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/controllers.html">Controllers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/learning.html">Machine Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modelling.html">Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/estimators.html">Observers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HILO-MPC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Observer module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/estimators.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="observer-module">
+<span id="id1"></span><h1>Observer module<a class="headerlink" href="#observer-module" title="Permalink to this headline">¶</a></h1>
+<p>The HILO-MPC Observer module contains several state (and parameter) observers.
+Observer are used to infer states and parameters from measurements. For a more detailed
+description of the methods refer to <a class="reference internal" href="../api/estimators.html#observer-autodoc"><span class="std std-ref">the API</span></a>.</p>
+<p>The Observer module contains the following classes:</p>
+<ul class="simple">
+<li><p>Moving Horizon Estimator (MHE)</p></li>
+<li><p>Kalman Filter (KF)</p></li>
+<li><p>Extended Kalman Filter (EKF)</p></li>
+<li><p>Unscented Kalman Filter (UKF)</p></li>
+<li><p>Particle Filter (PF)</p></li>
+</ul>
+<div class="section" id="moving-horizon-estimator">
+<h2>Moving Horizon Estimator<a class="headerlink" href="#moving-horizon-estimator" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="non-uniform-sampling-intervals">
+<h3>Non-uniform sampling intervals<a class="headerlink" href="#non-uniform-sampling-intervals" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="multi-rate-measurements">
+<h3>Multi-rate measurements<a class="headerlink" href="#multi-rate-measurements" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="kalman-filter">
+<h2>Kalman Filter<a class="headerlink" href="#kalman-filter" title="Permalink to this headline">¶</a></h2>
+<p>The class <a class="reference internal" href="../api/estimators.html#hilo_mpc.KalmanFilter" title="hilo_mpc.KalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">KalmanFilter</span></code></a> (alias <a class="reference internal" href="../api/estimators.html#hilo_mpc.KF" title="hilo_mpc.KF"><code class="xref py py-class docutils literal notranslate"><span class="pre">KF</span></code></a>) implements the Kalman filter developed by Rudolf E. Kálmán. To set up the Kalman filter you need an already set up <a class="reference internal" href="../api/modelling.html#hilo_mpc.Model" title="hilo_mpc.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> instance. Additionally you might want to supply a plot backend (via the <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_backend</span></code> keyword argument) in order to visualize the estimation results later on. At the moment only <a class="reference external" href="https://matplotlib.org/">Matplotlib</a> and <a class="reference external" href="https://bokeh.org/">Bokeh</a> are supported for plotting. The Kalman filter can be initialized as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hilo_mpc</span> <span class="kn">import</span> <span class="n">KF</span>
+
+
+<span class="c1"># Initialize Kalman filter</span>
+<span class="n">kf</span> <span class="o">=</span> <span class="n">KF</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">plot_backend</span><span class="o">=</span><span class="s1">&#39;bokeh&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Required information, like e.g. the model dynamics or the sampling time, will be automatically extracted from the <a class="reference internal" href="../api/modelling.html#hilo_mpc.Model" title="hilo_mpc.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> instance.</p>
+</div>
+<div class="section" id="extended-kalman-filter">
+<h2>Extended Kalman Filter<a class="headerlink" href="#extended-kalman-filter" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="unscented-kalman-filter">
+<h2>Unscented Kalman Filter<a class="headerlink" href="#unscented-kalman-filter" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="particle-filter">
+<h2>Particle Filter<a class="headerlink" href="#particle-filter" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api/controllers.html" class="btn btn-neutral float-right" title="Controllers" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="modellings.html" class="btn btn-neutral" title="Modelling module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Johannes Pohlodek, Bruno Morabito.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> and ❤️  using a custom <a href="https://github.com/LinxiFan/Sphinx-theme">theme</a> based on <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/clipboard.min.js"></script>
+      <script type="text/javascript" src="../_static/copybutton.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

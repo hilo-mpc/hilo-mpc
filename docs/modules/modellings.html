@@ -1,0 +1,313 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Modelling module &mdash; HILO-MPC 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="../about.html"/>
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="HILO-MPC 1.0 documentation" href="../index.html"/>
+        <link rel="next" title="Observer module" href="estimators.html"/>
+        <link rel="prev" title="Machine learning module" href="machinelearnings.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> HILO-MPC
+          
+
+          
+            
+            <img src="../_static/hilo_logo_short_2.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption" role="heading"><span class="caption-text">Quick start:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citing HILO-MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="controllers.html">Control module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="machinelearnings.html">Machine learning module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Modelling module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-setup">Model Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-simulations">Running Simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-solution">Model Solution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-discretization">Model Discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-linearization">Model Linearization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="estimators.html">Observer module</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/controllers.html">Controllers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/learning.html">Machine Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modelling.html">Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/estimators.html">Observers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HILO-MPC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Modelling module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/modellings.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="modelling-module">
+<span id="id1"></span><h1>Modelling module<a class="headerlink" href="#modelling-module" title="Permalink to this headline">¶</a></h1>
+<p>The main component of the HILO-MPC Modelling module is the <a class="reference internal" href="../api/modelling.html#hilo_mpc.Model" title="hilo_mpc.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> class. For a more detailed
+description of the methods refer to <a class="reference internal" href="../api/modelling.html#modelling-autodoc"><span class="std std-ref">the API</span></a>.</p>
+<p>Models are used to describe the dynamics of systems. The HILO-MPC <a class="reference internal" href="../api/modelling.html#hilo_mpc.Model" title="hilo_mpc.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> class supports the following system properties:</p>
+<ul class="simple">
+<li><p><strong>linear/nonlinear</strong> system dynamics</p></li>
+<li><p><strong>continuous/discrete</strong> time dynamics</p></li>
+<li><p><strong>time-invariant/time-variant</strong> systems</p></li>
+</ul>
+<p>In addition to ordinary differential equations (ODEs), systems with continuous time dynamics can also be modelled using differential algebraic equations (DAEs). Systems with discrete time dynamics can be designed analogously. Optionally, measurement equations mapping the states of a model to some measurable quantity of the system can be supplied as well.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="estimators.html#observer-module"><span class="std std-ref">Observers</span></a> usually require measurement equations to be present. If no measurement equations were supplied during model setup the observers will assume that all states can be measured.</p>
+</div>
+<p>A general <strong>time-invariant</strong> <strong>continuous</strong>-time <strong>nonlinear</strong> system can be described by the following DAEs</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\dot{x}(t)&amp;=f(x(t),z(t),u(t_k),p),\\
+0&amp;=g(x(t),z(t),u(t_k),p),\\
+y&amp;=h(x(t),z(t),u(t_k),p),\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(x\in\mathbb{R}^{n_x}\)</span> is the state vector, <span class="math notranslate nohighlight">\(z\in\mathbb{R}^{n_z}\)</span> the vector of algebraic variables, <span class="math notranslate nohighlight">\(u\in\mathbb{R}^{n_u}\)</span> is the input vector and <span class="math notranslate nohighlight">\(p\in\mathbb{R}^{n_p}\)</span> is a vector of parameters. Since the system is time-invariant only the states <span class="math notranslate nohighlight">\(x\)</span>, algebraic variables <span class="math notranslate nohighlight">\(z\)</span> and the input <span class="math notranslate nohighlight">\(u\)</span> depend on the time <span class="math notranslate nohighlight">\(t\)</span>. Due to practical reasons the input <span class="math notranslate nohighlight">\(u\)</span> is assumed to be piecewise constant (hence the index <span class="math notranslate nohighlight">\(k\)</span>). The function <span class="math notranslate nohighlight">\(f\colon\mathbb{R}^{n_x+n_z+n_u+n_p}\mapsto\mathbb{R}^{n_x}\)</span> represents the ODEs of the model and the function <span class="math notranslate nohighlight">\(g\colon\mathbb{R}^{n_x+n_z+n_u+n_p}\mapsto\mathbb{R}^{n_z}\)</span> depicts the algebraic equations forming a semi-explicit DAE system overall.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The HILO-MPC <a class="reference internal" href="../api/modelling.html#hilo_mpc.Model" title="hilo_mpc.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> class only supports semi-explicit DAE systems of index 1. The index of 1 indicates that the DAE system can be transformed into a pure ODE system by differentiating the algebraic equations once.</p>
+</div>
+<p>The function <span class="math notranslate nohighlight">\(h\colon\mathbb{R}^{n_x+n_z+n_u+n_p}\mapsto\mathbb{R}^{n_y}\)</span> describes the measurement equations mapping the states and algebraic variables to some measurable quantities.</p>
+<p>In the <strong>time-variant</strong> case the functions <span class="math notranslate nohighlight">\(f\)</span>, <span class="math notranslate nohighlight">\(g\)</span> and <span class="math notranslate nohighlight">\(h\)</span> additionally depend explicitly on the time as well</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\dot{x}(t)&amp;=f(x(t),z(t),u(t_k),p,t),\\
+0&amp;=g(x(t),z(t),u(t_k),p,t),\\
+y&amp;=h(x(t),z(t),u(t_k),p,t).\end{split}\]</div>
+<p>A general <strong>time-invariant</strong> <strong>discrete</strong>-time <strong>nonlinear</strong> system can be described by the following set of equations</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}x_{k+1}&amp;=\tilde{f}(x_k,z_k,u_k,p),\\
+0&amp;=\tilde{g}(x_k,z_k,u_k,p),\\
+y_k&amp;=h(x_k,z_k,u_k,p),\end{split}\]</div>
+<div class="section" id="model-setup">
+<h2>Model Setup<a class="headerlink" href="#model-setup" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="running-simulations">
+<h2>Running Simulations<a class="headerlink" href="#running-simulations" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="model-solution">
+<h2>Model Solution<a class="headerlink" href="#model-solution" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="model-discretization">
+<h2>Model Discretization<a class="headerlink" href="#model-discretization" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="model-linearization">
+<h2>Model Linearization<a class="headerlink" href="#model-linearization" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="estimators.html" class="btn btn-neutral float-right" title="Observer module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="machinelearnings.html" class="btn btn-neutral" title="Machine learning module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Johannes Pohlodek, Bruno Morabito.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> and ❤️  using a custom <a href="https://github.com/LinxiFan/Sphinx-theme">theme</a> based on <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/clipboard.min.js"></script>
+      <script type="text/javascript" src="../_static/copybutton.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script type="text/javascript" src="../None"></script>
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

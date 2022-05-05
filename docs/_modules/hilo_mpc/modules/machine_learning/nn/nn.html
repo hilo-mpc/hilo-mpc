@@ -1,0 +1,813 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hilo_mpc.modules.machine_learning.nn.nn &mdash; HILO-MPC 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../../../../_static/copybutton.css" type="text/css" />
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="../../../../../about.html"/>
+        <link rel="index" title="Index"
+              href="../../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../../search.html"/>
+    <link rel="top" title="HILO-MPC 1.0 documentation" href="../../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../../index.html"/> 
+
+  
+  <script src="../../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> HILO-MPC
+          
+
+          
+            
+            <img src="../../../../../_static/hilo_logo_short_2.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption" role="heading"><span class="caption-text">Quick start:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../citation.html">Citing HILO-MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../about.html">About</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modules/controllers.html">Control module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modules/machinelearnings.html">Machine learning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modules/modellings.html">Modelling module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modules/estimators.html">Observer module</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/controllers.html">Controllers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/learning.html">Machine Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modelling.html">Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/estimators.html">Observers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">HILO-MPC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>hilo_mpc.modules.machine_learning.nn.nn</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for hilo_mpc.modules.machine_learning.nn.nn</h1><div class="highlight"><pre>
+<span></span><span class="c1">#   </span>
+<span class="c1">#   This file is part of HILO-MPC</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported</span>
+<span class="c1">#   optimal control and estimation problems</span>
+<span class="c1">#</span>
+<span class="c1">#   Copyright (c) 2021 Johannes Pohlodek, Bruno Morabito, Rolf Findeisen</span>
+<span class="c1">#                      All rights reserved</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is free software: you can redistribute it and/or modify</span>
+<span class="c1">#   it under the terms of the GNU Lesser General Public License as</span>
+<span class="c1">#   published by the Free Software Foundation, either version 3</span>
+<span class="c1">#   of the License, or (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1">#   HILO-MPC is distributed in the hope that it will be useful,</span>
+<span class="c1">#   but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1">#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="c1">#   GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1">#   You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1">#   along with HILO-MPC. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">casadi</span> <span class="k">as</span> <span class="nn">ca</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">LearningBase</span>
+<span class="kn">from</span> <span class="nn">....plugins.plugins</span> <span class="kn">import</span> <span class="n">LearningManager</span><span class="p">,</span> <span class="n">LearningVisualizationManager</span><span class="p">,</span> <span class="n">check_version</span>
+<span class="kn">from</span> <span class="nn">....util.data</span> <span class="kn">import</span> <span class="n">DataSet</span>
+<span class="kn">from</span> <span class="nn">....util.machine_learning</span> <span class="kn">import</span> <span class="n">net_to_casadi_graph</span>
+<span class="kn">from</span> <span class="nn">....util.util</span> <span class="kn">import</span> <span class="n">is_list_like</span>
+
+
+<span class="n">ML</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;ML&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">LearningBase</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork">[docs]</a><span class="k">class</span> <span class="nc">ArtificialNeuralNetwork</span><span class="p">(</span><span class="n">LearningBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Artificial neural network class&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor method&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dropouts</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hidden</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seed&#39;</span><span class="p">)</span>
+
+        <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;learning_rate&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">learning_rate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">.001</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="s1">&#39;mse&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loss</span> <span class="o">=</span> <span class="n">loss</span>
+
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;optimizer&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="s1">&#39;adam&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+
+        <span class="n">metric</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span> <span class="o">=</span> <span class="n">metric</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_sets</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">train_backend</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;backend&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">train_backend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">train_backend</span> <span class="o">=</span> <span class="s1">&#39;pytorch&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_backend</span><span class="p">(</span><span class="n">train_backend</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_sets</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_x</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_y</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_train_data</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_data</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_data</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pandas_version_checked</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_set_scaling</span><span class="p">(</span><span class="n">scaler</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">],</span> <span class="n">backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param scaler:</span>
+<span class="sd">        :param backend:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: Can we use something other than Any for typing the returned value?</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">scaler</span> <span class="o">=</span> <span class="n">LearningManager</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">scaler</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Scaling was selected, but no scaler backend was supplied. Please select a scaler backend&quot;</span>
+                              <span class="s2">&quot; or supply your own scaler object. No scaling applied.&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">scaler</span><span class="p">):</span>
+            <span class="n">scaler</span> <span class="o">=</span> <span class="n">scaler</span><span class="p">()</span>
+        <span class="n">has_fit</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="s1">&#39;fit&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span><span class="n">scaler</span><span class="o">.</span><span class="n">fit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_fit</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Supplied scaler is missing the method &#39;fit&#39;&quot;</span><span class="p">)</span>  <span class="c1"># TODO: Return a little more info</span>
+        <span class="n">has_transform</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="s1">&#39;transform&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_transform</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Supplied scaler is missing the method &#39;transform&#39;&quot;</span><span class="p">)</span>  <span class="c1"># TODO: Return a little more info</span>
+
+        <span class="k">return</span> <span class="n">scaler</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_check_scaler</span><span class="p">(</span><span class="n">scaler</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param scaler:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: See self._set_scaling (regarding Any)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="s1">&#39;mean_&#39;</span><span class="p">):</span>
+            <span class="c1"># TODO: Return a little more info</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Supplied scaler is missing the attribute &#39;mean_&#39;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="s1">&#39;scale_&#39;</span><span class="p">):</span>
+            <span class="c1"># TODO: Return a little more info</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Supplied scaler is missing the attribute &#39;scale_&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_data_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_sets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param data_sets:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data_sets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_sets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_sets</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">data_sets</span><span class="p">):</span>
+            <span class="n">data_sets</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_sets</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">data_set</span> <span class="ow">in</span> <span class="n">data_sets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_set</span><span class="p">,</span> <span class="n">DataSet</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_set</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Feature </span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2"> does not exist in the supplied data set&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_set</span><span class="o">.</span><span class="n">labels</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Label </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> does not exist in the supplied data set&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># NOTE: Right now only pandas dataframes are supported</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pandas_version_checked</span><span class="p">:</span>
+                    <span class="n">check_version</span><span class="p">(</span><span class="s1">&#39;pandas&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_pandas_version_checked</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_set</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Feature </span><span class="si">{</span><span class="n">feature</span><span class="si">}</span><span class="s2"> does not exist in the supplied data set&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_set</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Label </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> does not exist in the supplied data set&quot;</span><span class="p">)</span>
+
+    <span class="nd">@LearningBase</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="o">=</span> <span class="n">arg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_sets</span><span class="p">()</span>
+
+    <span class="nd">@LearningBase</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span> <span class="o">=</span> <span class="n">arg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_labels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_sets</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span>
+
+    <span class="nd">@seed</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">learning_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_learning_rate</span>
+
+    <span class="nd">@learning_rate</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">learning_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lr</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_learning_rate</span> <span class="o">=</span> <span class="n">lr</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loss</span>
+
+    <span class="nd">@loss</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loss</span> <span class="o">=</span> <span class="n">loss</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span>
+
+    <span class="nd">@optimizer</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opti</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="o">=</span> <span class="n">opti</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">metric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span>
+
+    <span class="nd">@metric</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span> <span class="o">=</span> <span class="n">metric</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">layer</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;dropout&#39;</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_features</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">nodes</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;dropout&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n_labels</span><span class="p">,)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">backend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">backend</span>
+
+    <span class="nd">@backend</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">backend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.add_layers"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.add_layers">[docs]</a>    <span class="k">def</span> <span class="nf">add_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param layers:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_layers</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.add_data_set"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.add_data_set">[docs]</a>    <span class="k">def</span> <span class="nf">add_data_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_set</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param data_set:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_sets</span><span class="p">(</span><span class="n">data_set</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_set</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.build_graph"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.build_graph">[docs]</a>    <span class="k">def</span> <span class="nf">build_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param weights:</span>
+<span class="sd">        :param bias:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_features</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bias</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">build_graph</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">,</span> <span class="n">input_scaling</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scaler_x</span><span class="p">,</span>
+                                                   <span class="n">output_scaling</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scaler_y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_function</span> <span class="o">=</span> <span class="n">net_to_casadi_graph</span><span class="p">({</span><span class="s1">&#39;weights&#39;</span><span class="p">:</span> <span class="n">weights</span><span class="p">,</span> <span class="s1">&#39;bias&#39;</span><span class="p">:</span> <span class="n">bias</span><span class="p">},</span> <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">,</span>
+                                                 <span class="n">input_scaling</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scaler_x</span><span class="p">,</span> <span class="n">output_scaling</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scaler_y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.prepare_data_set"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.prepare_data_set">[docs]</a>    <span class="k">def</span> <span class="nf">prepare_data_set</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">train_split</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span>
+            <span class="n">validation_split</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+            <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">scaler</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">scaler_backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param train_split:</span>
+<span class="sd">        :param validation_split:</span>
+<span class="sd">        :param scale_data:</span>
+<span class="sd">        :param scaler:</span>
+<span class="sd">        :param scaler_backend:</span>
+<span class="sd">        :param shuffle:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_sets</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">DataSet</span><span class="p">):</span>
+            <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">raw_data</span>
+            <span class="c1"># TODO: Make this the default in the future, so we don&#39;t have to transpose (therefore transpose for pandas</span>
+            <span class="c1">#  objects)</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="n">x_data</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="n">y_data</span><span class="o">.</span><span class="n">T</span>
+            <span class="c1"># NOTE: I don&#39;t think at the moment that a length check is necessary here</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># NOTE: pandas is assumed here for now</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_data</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_data</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch. Features have </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries and labels have &quot;</span>
+                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">y_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> entries.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scale_data</span> <span class="ow">or</span> <span class="n">scaler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">scaler_backend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">scaler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">scaler</span> <span class="o">=</span> <span class="s1">&#39;StandardScaler&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_scaling</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">scaler_backend</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_x</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_scaler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scaler_x</span><span class="p">)</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_x</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">x_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_y</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_scaler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scaler_y</span><span class="p">)</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_y</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">y_data</span><span class="p">)</span>
+
+        <span class="c1"># TODO: Add support for data split directly in DataSet class</span>
+        <span class="n">data_set_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">data_set_size</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">shuffle</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="c1"># NOTE: For odd number of data sets this can lead to different sizes although same split percentage was supplied</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">validate</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">train_split</span> <span class="o">*</span> <span class="n">data_set_size</span><span class="p">),</span>
+                                                   <span class="nb">int</span><span class="p">((</span><span class="n">train_split</span> <span class="o">+</span> <span class="n">validation_split</span><span class="p">)</span> <span class="o">*</span> <span class="n">data_set_size</span><span class="p">)])</span>
+
+        <span class="n">x_train</span> <span class="o">=</span> <span class="n">x_data</span><span class="p">[</span><span class="n">train</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">y_train</span> <span class="o">=</span> <span class="n">y_data</span><span class="p">[</span><span class="n">train</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_train_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+        <span class="n">x_validate</span> <span class="o">=</span> <span class="n">x_data</span><span class="p">[</span><span class="n">validate</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">y_validate</span> <span class="o">=</span> <span class="n">y_data</span><span class="p">[</span><span class="n">validate</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_validate</span><span class="p">,</span> <span class="n">y_validate</span><span class="p">)</span>
+
+        <span class="n">x_test</span> <span class="o">=</span> <span class="n">x_data</span><span class="p">[</span><span class="n">test</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">y_test</span> <span class="o">=</span> <span class="n">y_data</span><span class="p">[</span><span class="n">test</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_test_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.set_input_scaling"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.set_input_scaling">[docs]</a>    <span class="k">def</span> <span class="nf">set_input_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaler</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">],</span> <span class="n">backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param scaler:</span>
+<span class="sd">        :param backend:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_scaling</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.set_output_scaling"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.set_output_scaling">[docs]</a>    <span class="k">def</span> <span class="nf">set_output_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaler</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param scaler:</span>
+<span class="sd">        :param backend:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scaler_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_scaling</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.set_scaling"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.set_scaling">[docs]</a>    <span class="k">def</span> <span class="nf">set_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaler</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">],</span> <span class="n">backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param scaler:</span>
+<span class="sd">        :param backend:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">backend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scaler</span> <span class="o">=</span> <span class="n">LearningManager</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">scaler</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_input_scaling</span><span class="p">(</span><span class="n">scaler</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_output_scaling</span><span class="p">(</span><span class="n">scaler</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.setup"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loss</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loss</span> <span class="o">=</span> <span class="n">loss</span>
+
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;optimizer&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+
+        <span class="n">metric</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span> <span class="o">=</span> <span class="n">metric</span>
+
+        <span class="n">show_tensorboard</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;show_tensorboard&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">show_tensorboard</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">show_tensorboard</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">save_tensorboard</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;save_tensorboard&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">save_tensorboard</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">save_tensorboard</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">show_tensorboard</span><span class="p">:</span>
+                <span class="n">save_tensorboard</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">save_tensorboard</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;save_tensorboard&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">save_tensorboard</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">save_tensorboard</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">tensorboard_log_dir</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tensorboard_log_dir&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_tensorboard</span><span class="p">:</span>
+            <span class="n">tensorboard</span> <span class="o">=</span> <span class="n">LearningVisualizationManager</span><span class="p">(</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">log_dir</span><span class="o">=</span><span class="n">tensorboard_log_dir</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tensorboard</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">show_tensorboard</span><span class="p">:</span>
+            <span class="n">browser</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;browser&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">browser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">browser</span> <span class="o">=</span> <span class="s1">&#39;chrome&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">browser</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">device</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;device&#39;</span><span class="p">)</span>
+
+        <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">]</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;seed&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span><span class="p">,</span>
+            <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_learning_rate</span><span class="p">,</span>
+            <span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span>
+            <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span>
+            <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">metric</span><span class="p">,</span>
+            <span class="s1">&#39;tensorboard&#39;</span><span class="p">:</span> <span class="n">tensorboard</span><span class="p">,</span>
+            <span class="s1">&#39;browser&#39;</span><span class="p">:</span> <span class="n">browser</span><span class="p">,</span>
+            <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="n">device</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="s1">&#39;MLP&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">properties</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.is_setup"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.is_setup">[docs]</a>    <span class="k">def</span> <span class="nf">is_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_net</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.train"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">validation_split</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+            <span class="n">test_split</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+            <span class="n">scale_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">scaler</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">scaler_backend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">patience</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param batch_size:</span>
+<span class="sd">        :param epochs:</span>
+<span class="sd">        :param verbose:</span>
+<span class="sd">        :param validation_split:</span>
+<span class="sd">        :param test_split:</span>
+<span class="sd">        :param scale_data:</span>
+<span class="sd">        :param scaler:</span>
+<span class="sd">        :param scaler_backend:</span>
+<span class="sd">        :param shuffle:</span>
+<span class="sd">        :param patience:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_sets</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No data set to train on was supplied. Please add a data set by using the &#39;add_data_set&#39;&quot;</span>
+                               <span class="s2">&quot; method.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">validation_split</span> <span class="o">&gt;</span> <span class="mf">1.</span> <span class="ow">or</span> <span class="n">validation_split</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Validation split has to be between 0 and 1&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">test_split</span> <span class="o">&gt;</span> <span class="mf">1.</span> <span class="ow">or</span> <span class="n">test_split</span> <span class="o">&lt;</span> <span class="mf">0.</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Test split has to be between 0 and 1&quot;</span><span class="p">)</span>
+        <span class="n">train_split</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">validation_split</span> <span class="o">-</span> <span class="n">test_split</span>
+        <span class="k">if</span> <span class="n">train_split</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Train split is not big enough. Reduce validation split or test split.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">prepare_data_set</span><span class="p">(</span><span class="n">train_split</span><span class="o">=</span><span class="n">train_split</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="n">validation_split</span><span class="p">,</span> <span class="n">scale_data</span><span class="o">=</span><span class="n">scale_data</span><span class="p">,</span>
+                              <span class="n">scaler</span><span class="o">=</span><span class="n">scaler</span><span class="p">,</span> <span class="n">scaler_backend</span><span class="o">=</span><span class="n">scaler_backend</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_train_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">patience</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_data</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Evaluate on test data&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_graph</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.is_trained"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.is_trained">[docs]</a>    <span class="k">def</span> <span class="nf">is_trained</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">is_setup</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.predict"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_query</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param X_query:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: We could also add a predict method to the wrapper and just link here, but this would not work with</span>
+        <span class="c1">#  CasADi variables like this</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_function</span><span class="p">(</span><span class="n">X_query</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.show_tensorboard"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.show_tensorboard">[docs]</a>    <span class="k">def</span> <span class="nf">show_tensorboard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param browser:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">browser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">browser</span> <span class="o">=</span> <span class="s1">&#39;chrome&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">show_tensorboard</span><span class="p">(</span><span class="n">browser</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The artificial neural network has not been trained yet. Aborting...&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArtificialNeuralNetwork.close_tensorboard"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ArtificialNeuralNetwork.close_tensorboard">[docs]</a>    <span class="k">def</span> <span class="nf">close_tensorboard</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_net</span><span class="o">.</span><span class="n">close_tensorboard</span><span class="p">()</span></div></div>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;ArtificialNeuralNetwork&#39;</span>
+<span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Johannes Pohlodek, Bruno Morabito.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> and ❤️  using a custom <a href="https://github.com/LinxiFan/Sphinx-theme">theme</a> based on <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../../../_static/clipboard.min.js"></script>
+      <script type="text/javascript" src="../../../../../_static/copybutton.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

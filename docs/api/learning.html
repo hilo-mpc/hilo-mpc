@@ -1,0 +1,1982 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Machine Learning &mdash; HILO-MPC 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="../about.html"/>
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="HILO-MPC 1.0 documentation" href="../index.html"/>
+        <link rel="next" title="Modelling" href="modelling.html"/>
+        <link rel="prev" title="Controllers" href="controllers.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> HILO-MPC
+          
+
+          
+            
+            <img src="../_static/hilo_logo_short_2.png" class="logo" />
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption" role="heading"><span class="caption-text">Quick start:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citation.html">Citing HILO-MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/controllers.html">Control module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/machinelearnings.html">Machine learning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/modellings.html">Modelling module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/estimators.html">Observer module</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="controllers.html">Controllers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Machine Learning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelling.html">Modelling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimators.html">Observers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">HILO-MPC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Machine Learning</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/learning.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-hilo_mpc">
+<span id="machine-learning"></span><h1>Machine Learning<a class="headerlink" href="#module-hilo_mpc" title="Permalink to this headline">¶</a></h1>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hilo_mpc.ANN">
+<span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">ANN</span></span><a class="headerlink" href="#hilo_mpc.ANN" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#hilo_mpc.ArtificialNeuralNetwork" title="hilo_mpc.modules.machine_learning.nn.nn.ArtificialNeuralNetwork"><code class="xref py py-class docutils literal notranslate"><span class="pre">hilo_mpc.modules.machine_learning.nn.nn.ArtificialNeuralNetwork</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">ArtificialNeuralNetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Artificial neural network class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.add_data_set">
+<span class="sig-name descname"><span class="pre">add_data_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.add_data_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.add_data_set" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_set</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.add_layers">
+<span class="sig-name descname"><span class="pre">add_layers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.add_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.add_layers" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layers</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.build_graph">
+<span class="sig-name descname"><span class="pre">build_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.build_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.build_graph" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>weights</strong> – </p></li>
+<li><p><strong>bias</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.close_tensorboard">
+<span class="sig-name descname"><span class="pre">close_tensorboard</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.close_tensorboard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.close_tensorboard" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.is_setup">
+<span class="sig-name descname"><span class="pre">is_setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.is_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.is_setup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.is_trained">
+<span class="sig-name descname"><span class="pre">is_trained</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.is_trained"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.is_trained" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_query</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.predict" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X_query</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.prepare_data_set">
+<span class="sig-name descname"><span class="pre">prepare_data_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.prepare_data_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.prepare_data_set" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_split</strong> – </p></li>
+<li><p><strong>validation_split</strong> – </p></li>
+<li><p><strong>scale_data</strong> – </p></li>
+<li><p><strong>scaler</strong> – </p></li>
+<li><p><strong>scaler_backend</strong> – </p></li>
+<li><p><strong>shuffle</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.set_input_scaling">
+<span class="sig-name descname"><span class="pre">set_input_scaling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.set_input_scaling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.set_input_scaling" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scaler</strong> – </p></li>
+<li><p><strong>backend</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.set_output_scaling">
+<span class="sig-name descname"><span class="pre">set_output_scaling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.set_output_scaling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.set_output_scaling" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scaler</strong> – </p></li>
+<li><p><strong>backend</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.set_scaling">
+<span class="sig-name descname"><span class="pre">set_scaling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.set_scaling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.set_scaling" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scaler</strong> – </p></li>
+<li><p><strong>backend</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.setup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.show_tensorboard">
+<span class="sig-name descname"><span class="pre">show_tensorboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">browser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.show_tensorboard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.show_tensorboard" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>browser</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/nn.html#ArtificialNeuralNetwork.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.train" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch_size</strong> – </p></li>
+<li><p><strong>epochs</strong> – </p></li>
+<li><p><strong>verbose</strong> – </p></li>
+<li><p><strong>validation_split</strong> – </p></li>
+<li><p><strong>test_split</strong> – </p></li>
+<li><p><strong>scale_data</strong> – </p></li>
+<li><p><strong>scaler</strong> – </p></li>
+<li><p><strong>scaler_backend</strong> – </p></li>
+<li><p><strong>shuffle</strong> – </p></li>
+<li><p><strong>patience</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.backend">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">backend</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.backend" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.depth">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">depth</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.depth" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">features</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.features" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.labels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.labels" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.learning_rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">learning_rate</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.learning_rate" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.loss">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loss</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.loss" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.metric">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metric</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.metric" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.optimizer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">optimizer</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.seed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">seed</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.seed" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.ArtificialNeuralNetwork.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#hilo_mpc.ArtificialNeuralNetwork.shape" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.ConstantKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">ConstantKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#ConstantKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ConstantKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant covariance function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bias</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ConstantKernel.get_covariance_function">
+<span class="sig-name descname"><span class="pre">get_covariance_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_bar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#ConstantKernel.get_covariance_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ConstantKernel.get_covariance_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Covariance function of constant as follows:</dt><dd><p>bias^2</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>x_bar</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.ConstantMean">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">ConstantMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperprior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#ConstantMean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ConstantMean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant mean function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bias</strong> – </p></li>
+<li><p><strong>hyperprior</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.ConstantMean.get_mean_function">
+<span class="sig-name descname"><span class="pre">get_mean_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#ConstantMean.get_mean_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ConstantMean.get_mean_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.Dense">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">Dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/layer.html#Dense"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Dense" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dense layer</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Dense.nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nodes</span></span><a class="headerlink" href="#hilo_mpc.Dense.nodes" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.DotProductKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">DotProductKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#DotProductKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.DotProductKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base for all dot product kernels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>offset</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.Dropout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">Dropout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/layer.html#Dropout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Dropout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dropout layer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>rate</strong> (<em>float</em>) – Dropout rate</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Dropout.set_initializer">
+<span class="sig-name descname"><span class="pre">set_initializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initializer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/layer.html#Dropout.set_initializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Dropout.set_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initializer</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Dropout.rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate</span></span><a class="headerlink" href="#hilo_mpc.Dropout.rate" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.ExponentialKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">ExponentialKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#ExponentialKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ExponentialKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exponential covariance function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hilo_mpc.GP">
+<span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">GP</span></span><a class="headerlink" href="#hilo_mpc.GP" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#hilo_mpc.GaussianProcess" title="hilo_mpc.modules.machine_learning.gp.gp.GaussianProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">hilo_mpc.modules.machine_learning.gp.gp.GaussianProcess</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">GaussianProcess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperprior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gaussian Process Regression</p>
+<dl class="field-list simple">
+<dt class="field-odd">Note</dt>
+<dd class="field-odd"><p>The Gaussian process regressor currently does not use the Cholesky factorization for training and
+prediction. This will be implemented at a later time.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>features</strong> (<em>list of strings</em>) – names of the features</p></li>
+<li><p><strong>labels</strong> (<em>list of strings</em>) – names of the labels</p></li>
+<li><p><strong>inference</strong> – </p></li>
+<li><p><strong>likelihood</strong> – </p></li>
+<li><p><strong>kernel</strong> (<em>kernel</em>) – Specifying the covariance function of the GP. The kernel hyperparameters are optimized during
+training, defaults to <code class="xref py py-class docutils literal notranslate"><span class="pre">hilo_mpc.core.learning.kernels.SquaredExponential</span></code>.</p></li>
+<li><p><strong>noise_variance</strong> – </p></li>
+<li><p><strong>hyperprior</strong> – </p></li>
+<li><p><strong>id</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – name of the GP</p></li>
+<li><p><strong>solver</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>solver_options</strong> (<em>dict</em>) – Options to the solver, e.g. ipopt.</p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.fit_model">
+<span class="sig-name descname"><span class="pre">fit_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.fit_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.fit_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimizes the hyperparameters by minimizing the negative log marginal likelihood.</p>
+<p>The model fit is the training phase in the GP regression. Given the design data (training observations and
+their targets) and suitable start values and bounds for the hyperparameters, the hyperparameters will be
+adapted by minimizing the negative log marginal likelihood.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Note</dt>
+<dd class="field-odd"><p>Instead of boundary values the string ‘fixed’ can be passed which flags the hyperparameter, keeping it
+constant during the optimization routine.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.get_hyperparameter_by_name">
+<span class="sig-name descname"><span class="pre">get_hyperparameter_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.get_hyperparameter_by_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.get_hyperparameter_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperprior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> – </p></li>
+<li><p><strong>labels</strong> – </p></li>
+<li><p><strong>inference</strong> – </p></li>
+<li><p><strong>likelihood</strong> – </p></li>
+<li><p><strong>mean</strong> – </p></li>
+<li><p><strong>kernel</strong> – </p></li>
+<li><p><strong>noise_variance</strong> – </p></li>
+<li><p><strong>hyperprior</strong> – </p></li>
+<li><p><strong>id</strong> – </p></li>
+<li><p><strong>name</strong> – </p></li>
+<li><p><strong>solver</strong> – </p></li>
+<li><p><strong>solver_options</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.is_setup">
+<span class="sig-name descname"><span class="pre">is_setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.is_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.is_setup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.log_marginal_likelihood">
+<span class="sig-name descname"><span class="pre">log_marginal_likelihood</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.log_marginal_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.log_marginal_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.plot" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_query</strong> – </p></li>
+<li><p><strong>backend</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.plot_1d">
+<span class="sig-name descname"><span class="pre">plot_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.plot_1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.plot_1d" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quantiles</strong> – </p></li>
+<li><p><strong>resolution</strong> – </p></li>
+<li><p><strong>backend</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.plot_prediction_error">
+<span class="sig-name descname"><span class="pre">plot_prediction_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_free</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.plot_prediction_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.plot_prediction_error" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_query</strong> – </p></li>
+<li><p><strong>y_query</strong> – </p></li>
+<li><p><strong>noise_free</strong> – </p></li>
+<li><p><strong>backend</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_free</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.predict" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_query</strong> – </p></li>
+<li><p><strong>noise_free</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.predict_quantiles">
+<span class="sig-name descname"><span class="pre">predict_quantiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.predict_quantiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.predict_quantiles" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quantiles</strong> – </p></li>
+<li><p><strong>X_query</strong> – </p></li>
+<li><p><strong>mean</strong> – </p></li>
+<li><p><strong>var</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.set_training_data">
+<span class="sig-name descname"><span class="pre">set_training_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.set_training_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.set_training_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the training matrix and its target vector</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – </p></li>
+<li><p><strong>y</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.setup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.update" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>args</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.update_hyperparameters">
+<span class="sig-name descname"><span class="pre">update_hyperparameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/gp.html#GaussianProcess.update_hyperparameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.GaussianProcess.update_hyperparameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates hyperparameter values and boundaries</p>
+<p>If names of hyperparameters are found in the given dictionaries, their respective value and/or boundaries will
+be updated to the value and/or boundaries defined in the dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Note</dt>
+<dd class="field-odd"><p>Instead of boundary values the string ‘fixed’ can be passed which flags the hyperparameter, keeping him
+constant during any optimization routine. This flag will be automatically set back if a list of two floats
+is passed.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>names</strong> – </p></li>
+<li><p><strong>values</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.X_train">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">X_train</span></span><a class="headerlink" href="#hilo_mpc.GaussianProcess.X_train" title="Permalink to this definition">¶</a></dt>
+<dd><p>The tuple contains the training data matrix as ndarray of shape (dimensions_input, number_observations) and
+its respective CasADi SX and MX symbols of same dimensions that are used to define the CasADi functions during
+fitting and prediction. It can be changed by just assigned an ndarray and its setter method will automatically
+adjust the symbols.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.hyperparameter_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameter_names</span></span><a class="headerlink" href="#hilo_mpc.GaussianProcess.hyperparameter_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.hyperparameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameters</span></span><a class="headerlink" href="#hilo_mpc.GaussianProcess.hyperparameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Includes all hyperparameters of the kernel as well as the sigma_noise hyperparameter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.GaussianProcess.y_train">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_train</span></span><a class="headerlink" href="#hilo_mpc.GaussianProcess.y_train" title="Permalink to this definition">¶</a></dt>
+<dd><p>The tuple contains the training target matrix as ndarray of shape (dimensions_input, number_observations)
+and its respective CasADi SX and MX symbols of same dimensions that are used to define the CasADi functions
+during fitting and prediction. It can be changed by just assigned an ndarray and its setter method will
+automatically adjust the symbols.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">Kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kernel base class</p>
+<p>This base class implements the basic methods that are used for all basic kernels, e.g. dot product kernels and
+radial basis function kernels like the squared exponential. It also implements the methods for the composition of
+kernels with the addition, multiplication and exponentiation operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Note</dt>
+<dd class="field-odd"><p>The Kernel classes return a CasADi function for the respective inputs when called. Each basic Kernel class
+implements its own scalar covariance function. This base class implements the call method where the respective
+scalar covariance functions are generalized to the form of covariance matrices which will be returned as CasADi
+SX function. The SX symbol was chosen in accordance with the CasADi docs which recommend that low-level
+expressions are faster computed for SX symbols.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>active_dims</strong> (<em>int</em><em>, </em><em>list of int</em><em>, </em><em>optional</em>) – </p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.constant">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.constant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.constant" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bias</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.exponential">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exponential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.exponential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.exponential" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.get_covariance_function">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_covariance_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_bar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.get_covariance_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.get_covariance_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>x_bar</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.get_covariance_matrix">
+<span class="sig-name descname"><span class="pre">get_covariance_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covariance_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_bar</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.get_covariance_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.get_covariance_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>covariance_function</strong> – </p></li>
+<li><p><strong>X</strong> – </p></li>
+<li><p><strong>X_bar</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.is_bounded">
+<span class="sig-name descname"><span class="pre">is_bounded</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.is_bounded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.is_bounded" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.linear">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.linear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.linear" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.matern_32">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matern_32</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.matern_32"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.matern_32" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.matern_52">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">matern_52</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.matern_52"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.matern_52" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.neural_network">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">neural_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.neural_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.neural_network" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>weight_variance</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.periodic">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">periodic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.periodic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.periodic" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>period</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.piecewise_polynomial">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">piecewise_polynomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.piecewise_polynomial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.piecewise_polynomial" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>degree</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.polynomial">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">polynomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.polynomial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.polynomial" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>degree</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>offset</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.rational_quadratic">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rational_quadratic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.rational_quadratic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.rational_quadratic" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>alpha</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.squared_exponential">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">squared_exponential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.squared_exponential"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.squared_exponential" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Kernel.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Kernel.update" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>args</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.hyperparameter_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameter_names</span></span><a class="headerlink" href="#hilo_mpc.Kernel.hyperparameter_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Kernel.hyperparameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameters</span></span><a class="headerlink" href="#hilo_mpc.Kernel.hyperparameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all hyperparameters in the kernel.</p>
+<p>This attribute can be easily used to access specific attributes of all hyperparameters in generator expressions
+or list comprehensions.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.Layer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">Layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/layer.html#Layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base layer</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Layer.dense">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dense</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/layer.html#Layer.dense"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Layer.dense" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> – </p></li>
+<li><p><strong>activation</strong> – </p></li>
+<li><p><strong>initializer</strong> – </p></li>
+<li><p><strong>dropout</strong> – </p></li>
+<li><p><strong>where</strong> – </p></li>
+<li><p><strong>parent</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Layer.dropout">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dropout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/layer.html#Layer.dropout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Layer.dropout" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rate</strong> – </p></li>
+<li><p><strong>parent</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Layer.set_initializer">
+<span class="sig-name descname"><span class="pre">set_initializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initializer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/nn/layer.html#Layer.set_initializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Layer.set_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initializer</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Layer.activation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">activation</span></span><a class="headerlink" href="#hilo_mpc.Layer.activation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Layer.initializer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initializer</span></span><a class="headerlink" href="#hilo_mpc.Layer.initializer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Layer.parent">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#hilo_mpc.Layer.parent" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Layer.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#hilo_mpc.Layer.type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.LinearKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">LinearKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#LinearKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LinearKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear covariance function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.LinearMean">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">LinearMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperprior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#LinearMean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LinearMean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear mean function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>coefficient</strong> – </p></li>
+<li><p><strong>hyperprior</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.Matern32Kernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">Matern32Kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Matern32Kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Matern32Kernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matérn covariance function where <span class="math notranslate nohighlight">\({\nu}\)</span> = 3/2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.Matern52Kernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">Matern52Kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#Matern52Kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Matern52Kernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matérn covariance function where <span class="math notranslate nohighlight">\({\nu}\)</span> = 5/2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.MaternKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">MaternKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#MaternKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MaternKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base for Matérn class of covariance functions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.MaternKernel.get_covariance_function">
+<span class="sig-name descname"><span class="pre">get_covariance_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_bar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#MaternKernel.get_covariance_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MaternKernel.get_covariance_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>x_bar</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.Mean">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">Mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#Mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean function base class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>active_dims</strong> – </p>
+</dd>
+<dt class="field-even">Type</dt>
+<dd class="field-even"><p>active_dims: int, list of int, optional</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.constant">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">constant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperprior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#Mean.constant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Mean.constant" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bias</strong> – </p></li>
+<li><p><strong>hyperprior</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.get_mean_function">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_mean_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#Mean.get_mean_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Mean.get_mean_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.is_bounded">
+<span class="sig-name descname"><span class="pre">is_bounded</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#Mean.is_bounded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Mean.is_bounded" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.linear">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperprior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#Mean.linear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Mean.linear" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>coefficient</strong> – </p></li>
+<li><p><strong>hyperprior</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.one">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">one</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#Mean.one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Mean.one" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.polynomial">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">polynomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperprior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#Mean.polynomial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Mean.polynomial" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>degree</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>coefficient</strong> – </p></li>
+<li><p><strong>offset</strong> – </p></li>
+<li><p><strong>hyperprior</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#Mean.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Mean.update" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>args</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.zero">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zero</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#Mean.zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Mean.zero" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.hyperparameter_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameter_names</span></span><a class="headerlink" href="#hilo_mpc.Mean.hyperparameter_names" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.Mean.hyperparameters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyperparameters</span></span><a class="headerlink" href="#hilo_mpc.Mean.hyperparameters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.NeuralNetworkKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">NeuralNetworkKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#NeuralNetworkKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NeuralNetworkKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Neural network covariance function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>weight_variance</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.NeuralNetworkKernel.get_covariance_function">
+<span class="sig-name descname"><span class="pre">get_covariance_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_bar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#NeuralNetworkKernel.get_covariance_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NeuralNetworkKernel.get_covariance_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>x_bar</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.OneMean">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">OneMean</span></span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#OneMean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.OneMean" title="Permalink to this definition">¶</a></dt>
+<dd><p>One mean function</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.PeriodicKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">PeriodicKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#PeriodicKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PeriodicKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Periodic covariance function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>period</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.PeriodicKernel.get_covariance_function">
+<span class="sig-name descname"><span class="pre">get_covariance_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_bar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#PeriodicKernel.get_covariance_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PeriodicKernel.get_covariance_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Covariance function of exponential sine as follows:</p>
+<div class="math notranslate nohighlight">
+\[\sigma^2 \cdot \exp\left(-1/2 \cdot \frac{\sin(x-x_{bar})^T}{p} M \frac{\sin(x-x_{bar})}{p}\right)\]</div>
+<p>where <span class="math notranslate nohighlight">\(M\)</span> is the parameterized matrix of length scales</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>x_bar</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.PiecewisePolynomialKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">PiecewisePolynomialKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#PiecewisePolynomialKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PiecewisePolynomialKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Piecewise polynomial covariance function with compact support</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>degree</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.PiecewisePolynomialKernel.get_covariance_function">
+<span class="sig-name descname"><span class="pre">get_covariance_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_bar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#PiecewisePolynomialKernel.get_covariance_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PiecewisePolynomialKernel.get_covariance_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>x_bar</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.PiecewisePolynomialKernel.degree">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">degree</span></span><a class="headerlink" href="#hilo_mpc.PiecewisePolynomialKernel.degree" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.PolynomialKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">PolynomialKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#PolynomialKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PolynomialKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Polynomial covariance function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>degree</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>offset</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.PolynomialKernel.get_covariance_function">
+<span class="sig-name descname"><span class="pre">get_covariance_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_bar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#PolynomialKernel.get_covariance_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PolynomialKernel.get_covariance_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Covariance function of polynomial as follows:</dt><dd><p>(sigma_bias^2 + sigma_signal^2 * (x dot x_bar))^p</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>x_bar</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.PolynomialKernel.degree">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">degree</span></span><a class="headerlink" href="#hilo_mpc.PolynomialKernel.degree" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.PolynomialMean">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">PolynomialMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperprior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#PolynomialMean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PolynomialMean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Polynomial mean function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>degree</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>coefficient</strong> – </p></li>
+<li><p><strong>offset</strong> – </p></li>
+<li><p><strong>hyperprior</strong> – </p></li>
+<li><p><strong>kwargs</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.PolynomialMean.get_mean_function">
+<span class="sig-name descname"><span class="pre">get_mean_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#PolynomialMean.get_mean_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PolynomialMean.get_mean_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.PolynomialMean.get_parameterized_coefficients">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_parameterized_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension_input_space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficient</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#PolynomialMean.get_parameterized_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PolynomialMean.get_parameterized_coefficients" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimension_input_space</strong> – </p></li>
+<li><p><strong>coefficient</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hilo_mpc.PolynomialMean.degree">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">degree</span></span><a class="headerlink" href="#hilo_mpc.PolynomialMean.degree" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.RationalQuadraticKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">RationalQuadraticKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#RationalQuadraticKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.RationalQuadraticKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rational quadratic covariance function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>alpha</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.RationalQuadraticKernel.get_covariance_function">
+<span class="sig-name descname"><span class="pre">get_covariance_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_bar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_dims</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#RationalQuadraticKernel.get_covariance_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.RationalQuadraticKernel.get_covariance_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Covariance function of rational quadratic as follows:</p>
+<div class="math notranslate nohighlight">
+\[\sigma \cdot [1+1/(2\cdot\alpha)\cdot(x-x_{bar})^T M (x-x_{bar})]^{-\alpha}\]</div>
+<p>where <span class="math notranslate nohighlight">\(M\)</span> is the parameterized matrix of length scales</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>x_bar</strong> – </p></li>
+<li><p><strong>active_dims</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.SquaredExponentialKernel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">SquaredExponentialKernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active_dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/kernel.html#SquaredExponentialKernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.SquaredExponentialKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Squared exponential covariance function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>active_dims</strong> – </p></li>
+<li><p><strong>signal_variance</strong> – </p></li>
+<li><p><strong>length_scales</strong> – </p></li>
+<li><p><strong>ard</strong> – </p></li>
+<li><p><strong>bounds</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hilo_mpc.ZeroMean">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">ZeroMean</span></span><a class="reference internal" href="../_modules/hilo_mpc/modules/machine_learning/gp/mean.html#ZeroMean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ZeroMean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zero mean function</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="modelling.html" class="btn btn-neutral float-right" title="Modelling" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="controllers.html" class="btn btn-neutral" title="Controllers" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Johannes Pohlodek, Bruno Morabito.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> and ❤️  using a custom <a href="https://github.com/LinxiFan/Sphinx-theme">theme</a> based on <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/documentation_options.js"></script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/clipboard.min.js"></script>
+      <script type="text/javascript" src="../_static/copybutton.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script type="text/javascript" src="../None"></script>
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

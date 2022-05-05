@@ -1,0 +1,8 @@
+.. _modelling_autodoc:
+
+===================================
+Modelling
+===================================
+
+.. autoclass:: hilo_mpc.Model
+   :members: time, sampling_time, dynamical_states, set_dynamical_states, dynamical_state_names, dynamical_state_units, dynamical_state_description, n_x, measurements, set_measurements, measurement_names, measurement_units, measurement_description, n_y, algebraic_states, set_algebraic_states, algebraic_state_names, algebraic_state_units, algebraic_state_description, n_z, inputs, set_inputs, input_names, input_units, input_description, n_u, parameters, set_parameters, parameter_names, parameter_units, parameter_description, n_p, dynamical_equations, set_dynamical_equations, measurement_equations, set_measurement_equations, algebraic_equations, set_algebraic_equations, set_equations, state_matrix, input_matrix, output_matrix, feedthrough_matrix, discrete, continuous, solver, options, add_dynamical_states, add_measurements, add_algebraic_states, add_inputs, add_parameters, add_dynamical_equations, add_algebraic_equations, add_measurement_equations, add_equations, add_options, check_consistency, check_solver, copy, discretize, is_linear, is_linearized, is_time_variant, linearize, remove_dynamical_states, remove_measurements, remove_algebraic_states, remove_inputs, remove_parameters, remove_dynamical_equations, remove_algebraic_equations, remove_measurement_equations, remove_equations, remove_options, reset, setup, simulate, substitute, substitute_from, scale, initial_time, initial_dynamical_states, initial_algebraic_states, set_initial_conditions, set_initial_parameter_values, solution, reset_solution
