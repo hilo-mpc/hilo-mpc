@@ -2212,7 +2212,8 @@ class Series(Object, metaclass=ABCMeta):
 
     def __delitem__(self, key):
         """Item deletion method"""
-        self.remove(key)
+        index = slice(0, None)
+        self.remove(key, index)
 
     def __iter__(self):
         """Item iteration method"""
