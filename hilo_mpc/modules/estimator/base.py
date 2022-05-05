@@ -79,6 +79,9 @@ class _Estimator(Estimator, Base, metaclass=ABCMeta):
         if self._id is None:
             self._create_id()
 
+        if not model.is_setup():
+            raise RuntimeError(f"Model is not set up. Run Model.setup() before passing it to the {self.type}.")
+
         self._model = model.copy(setup=True)
         self._error_covariance = None
         self._process_noise_covariance = None
