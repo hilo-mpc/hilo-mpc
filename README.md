@@ -72,11 +72,8 @@ packages
 
 Documentation
 -------------
-We will publish the documentation soon. For the time being we refer to the provided 
-[Jupyter notebooks with examples](https://github.com/hilo_mpc/examples/tree/main/jupyter_notebooks), and 
-* J. Pohlodek, B. Morabito, C. Schlauch, P. Zometa, R. Findeisen. **[Flexible development and evaluation of 
-machine-learning-supported optimal control and estimation methods via HILO-MPC](https://arxiv.org/abs/2203.13671)**. 
-arXiv. 2022.
+A preliminary documentation can be found [here](https://hilo-mpc.github.io/hilo-mpc/). Note that this documentation is
+not complete and will be updated over time.
 
 Citing HILO-MPC
 ---------------
