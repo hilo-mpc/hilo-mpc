@@ -3,7 +3,7 @@ HILO-MPC
 
 [![python](https://img.shields.io/badge/Python-3.7%20%7C%203.8%20%7C%203.9-informational)](https://www.python.org/downloads/)
 [![tests](https://github.com/hilo-mpc/hilo-mpc/workflows/Tests/badge.svg)](https://github.com/hilo-mpc/hilo-mpc/actions?query=workflow%3ATests)
-<!--[![codecov](https://codecov.io/gh/hilo-mpc/hilo-mpc/branch/master/graph/badge.svg?token=27JHVC1LR9)](https://codecov.io/gh/hilo-mpc/hilo-mpc)-->
+<!--[![codecov](https://codecov.io/gh/hilo-mpc/hilo-mpc/branch/master/graph/badge.svg?token=7U83P1M0H4)](https://codecov.io/gh/hilo-mpc/hilo-mpc)-->
 [![doi](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2203.13671-informational)](https://doi.org/10.48550/arXiv.2203.13671)
 [![Github license](https://img.shields.io/github/license/hilo-mpc/hilo-mpc.svg)](https://github.com/hilo-mpc/hilo-mpc/blob/master/LICENSE)
 [![Github release](https://img.shields.io/github/release/hilo-mpc/hilo-mpc.svg)](https://GitHub.com/hilo-mpc/hilo-mpc/releases/)
