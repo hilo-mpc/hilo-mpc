@@ -40,7 +40,7 @@ At the moment the following MPC and optimal control problems can be solved:
 All the nonlinear MPCs support soft constraints, time-variant systems, time-varying parameters and can be used to solve 
 minimum-time problems. They work for continuous-time and discrete-time models, in DAE or ODE form. Linear MPC is currently limited towards discrete-time models. 
 
-A rich set of [examples](https://github.com/hilo_mpc/examples) is available, spanning:
+A rich set of [examples](https://github.com/hilo-mpc/examples) is available, spanning:
 - NMPC for bioreactors using hybrid first principle and learned models
 - Trajectory tracking and path following model predictive control with learning and obstacle avoidance
 - Output feedback MPC of a continuous stirred tank reactor with a Gaussian process prediction model
