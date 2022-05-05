@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>HILO-MPC Documentation &mdash; HILO-MPC 1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="HILO-MPC 1.0 documentation" href="#"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> HILO-MPC
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">HILO-MPC Documentation</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">HILO-MPC</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>HILO-MPC Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="hilo-mpc-documentation">
+<h1>HILO-MPC Documentation<a class="headerlink" href="#hilo-mpc-documentation" title="Permalink to this headline">¶</a></h1>
+<p>HILO-MPC is a toolbox for <strong>easy, flexible and fast development of machine-learning-supported optimal control and
+estimation problems</strong>.</p>
+<p>This tool can leverage <a class="reference external" href="https://www.tensorflow.org/">Tensorflow</a> and <a class="reference external" href="https://pytorch.org/">PyTorch</a> to create
+machine learning models, and the <a class="reference external" href="https://web.casadi.org/">CasADi</a> framework to efficiently build control and
+estimation problems.</p>
+<img alt="_images/overview.svg" src="_images/overview.svg" /><p>At the moment HILO-MPC supports:</p>
+<ol class="arabic simple">
+<li><p>Control</p>
+<ol class="arabic simple">
+<li><p>Nonlinear and linear model predictive control</p></li>
+<li><p>Model predictive control for path following</p></li>
+<li><p>Model predictive control for trajectory tracking</p></li>
+<li><p>PID controller and linear quadratic regulator</p></li>
+</ol>
+</li>
+<li><p>Machine Learning</p>
+<ol class="arabic simple">
+<li><p>Artificial neural networks</p></li>
+<li><p>Gaussian processes</p></li>
+</ol>
+</li>
+<li><p>Estimation</p>
+<ol class="arabic simple">
+<li><p>Moving horizon estimation</p></li>
+<li><p>Kalman filter (including nonlinear extensions)</p></li>
+<li><p>Particle filter</p></li>
+</ol>
+</li>
+<li><p>Modeling</p>
+<ol class="arabic simple">
+<li><p>Ordinary differential equations</p></li>
+<li><p>Differential algebraic equations</p></li>
+</ol>
+</li>
+<li><p>Embedded</p>
+<ol class="arabic simple">
+<li><p><span class="math notranslate nohighlight">\(\mu\text{AO-MPC}\)</span> (code generation software for linear model predictive control)</p></li>
+</ol>
+</li>
+</ol>
+<p>On the pipeline we have:</p>
+<ol class="arabic simple">
+<li><p>Control</p>
+<ol class="arabic simple">
+<li><p>Mixed-integer linear model predictive control (work in progress)</p></li>
+<li><p>Tube model predictive control (work in progress)</p></li>
+<li><p>Multi-mode model predictive control</p></li>
+</ol>
+</li>
+<li><p>Machine Learning</p>
+<ol class="arabic simple">
+<li><p>Recurrent neural networks</p></li>
+<li><p>Physics-informed training of neural networks</p></li>
+<li><p>Reinforcement learning</p></li>
+</ol>
+</li>
+<li><p>Estimation</p>
+<ol class="arabic simple">
+<li><p>Multi-rate moving horizon estimation</p></li>
+</ol>
+</li>
+<li><p>Embedded</p>
+<ol class="arabic simple">
+<li><p>SAM (solver for Al’brekht’s method)</p></li>
+</ol>
+</li>
+</ol>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Johannes Pohlodek, Bruno Morabito.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> and ❤️  using a custom <a href="https://github.com/LinxiFan/Sphinx-theme">theme</a> based on <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/documentation_options.js"></script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/clipboard.min.js"></script>
+      <script type="text/javascript" src="_static/copybutton.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script type="text/javascript" src="None"></script>
+      <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
