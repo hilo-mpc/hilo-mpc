@@ -146,19 +146,18 @@ class _KalmanFilter(_Estimator, metaclass=ABCMeta):
         n_p = self._model.n_p
 
         x = ca.MX.sym('x', n_x)
-        y = ca.MX.sym('y', n_y)
         u = ca.MX.sym('u', n_u)
         p = ca.MX.sym('p', n_p)
         up = ca.vertcat(u, p)
         P = ca.MX.sym('P', (n_x, n_x))
 
         if n_y == 0:
-            warnings.warn(f"The model has no measurement equations, I am assuming measurements of all states "
-                          f"{self._model.dynamical_state_names} are available.")
             y_pred = x
+            n_y = n_x
         else:
             sol = self._model(x0=x, p=up, which='meas_function')
             y_pred = sol['yf']
+        y = ca.MX.sym('y', n_y)
 
         if self._is_linearized:
             # NOTE: For now we ignore time-variant systems (i.e., [] instead of t)
@@ -219,6 +218,12 @@ class _KalmanFilter(_Estimator, metaclass=ABCMeta):
         else:
             model = self._model.copy(setup=False)
             self._is_linearized = False
+
+        n_y = model.n_y
+        if n_y == 0:
+            warnings.warn(f"The model has no measurement equations, I am assuming measurements of all states "
+                          f"{self._model.dynamical_state_names} are available.")
+            model.set_measurement_equations(model.dynamical_states)
 
         if self.type != 'unscented Kalman filter':
             arg_in = [model.p, model.dt, model.t]
