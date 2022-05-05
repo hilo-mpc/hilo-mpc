@@ -66,7 +66,7 @@ rst_epilog = f'.. |project_name| replace:: {project}'
 # a list of builtin themes.
 html_theme = 'stanford_theme'
 html_theme_path = [sphinx_theme.get_html_theme_path('stanford-theme')]
-html_logo = "../logo/hilo_logo_short_2.png"
+html_logo = "images/hilo_logo_short_2.png"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
