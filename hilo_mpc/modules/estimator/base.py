@@ -106,8 +106,8 @@ class _Estimator(Estimator, Base, metaclass=ABCMeta):
         if not Q.is_square():
             Q = ca.diag(Q)
         if Q.shape != (self._n_x, self._n_x):
-            raise IndexError(f"Dimension mismatch. Supplied dimension is {Q.shape}, but required dimension "
-                             f"is {(self._n_x, self._n_x)}")
+            raise ValueError(f"Dimension mismatch. Supplied dimension is {Q.shape[0]}x{Q.shape[1]}, but required "
+                             f"dimension is {self._n_x}x{self._n_x}")
         self._process_noise_covariance = Q
 
     def _set_measurement_noise(self, var):
@@ -120,8 +120,8 @@ class _Estimator(Estimator, Base, metaclass=ABCMeta):
         if not R.is_square():
             R = ca.diag(R)
         if R.shape != (self._n_y, self._n_y):
-            raise IndexError(f"Dimension mismatch. Supplied dimension is {R.shape}, but required dimension "
-                             f"is {(self._n_y, self._n_y)}")
+            raise ValueError(f"Dimension mismatch. Supplied dimension is {R.shape[0]}x{R.shape[1]}, but required "
+                             f"dimension is {self._n_y}x{self._n_y}")
         self._measurement_noise_covariance = R
 
     def _set_error_covariance(self, P0):
@@ -137,8 +137,8 @@ class _Estimator(Estimator, Base, metaclass=ABCMeta):
             if not P0.is_square():
                 P0 = ca.diag(P0)
             if P0.shape != (self._n_x, self._n_x):
-                raise IndexError(f"Dimension mismatch. Supplied dimension is {P0.shape}, but required dimension is "
-                                 f"{(self._n_x, self._n_x)}")
+                raise ValueError(f"Dimension mismatch. Supplied dimension is {P0.shape[0]}x{P0.shape[1]}, but required"
+                                 f" dimension is {self._n_x}x{self._n_x}")
         self._solution.set('P', P0[:])
 
     def _check_setup(self):
