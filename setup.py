@@ -26,7 +26,7 @@ setup(
     maintainer='HILO-MPC Developers',
     maintainer_email='',
     url='https://www.ccps.tu-darmstadt.de/research_ccps/hilo_mpc/',
-    download_url='https://github.com/hilo_mpc/hilo_mpc/releases',
+    download_url='https://github.com/hilo-mpc/hilo-mpc/releases',
     packages=find_packages(),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -56,8 +56,8 @@ setup(
     ],
     python_requires='>=3.7',
     project_urls={
-        'Bug Tracker': 'https://github.com/hilo_mpc/hilo_mpc/issues',
-        'Documentation': 'https://www.ccps.tu-darmstadt.de/research_ccps/hilo_mpc/',
-        'Source Code': 'https://github.com/hilo_mpc/hilo_mpc'
+        'Bug Tracker': 'https://github.com/hilo-mpc/hilo-mpc/issues',
+        'Documentation': 'https://hilo-mpc.github.io/hilo-mpc/',
+        'Source Code': 'https://github.com/hilo-mpc/hilo-mpc'
     }
 )
