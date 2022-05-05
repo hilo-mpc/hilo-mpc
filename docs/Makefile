@@ -22,3 +22,8 @@ help:
 github:
 	@make html
 	@cp -a build/html/. ../docs
+
+clean-github:
+	@make clean
+	@find . -type f \( -name '*.html' -or -name '*.inv' -or -name '*.js' \) -delete
+	@find . -type d -name '_*' -exec rm -rf {} +
