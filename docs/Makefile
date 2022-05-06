@@ -23,6 +23,10 @@ github:
 	@make html
 	@cp -a build/html/. ../docs
 
+githubwin:
+	@make html
+	@Xcopy build\html\. ..\docs /Y
+
 clean-github:
 	@make clean
 	@find . -type f \( -name '*.html' -or -name '*.inv' -or -name '*.js' \) -delete
