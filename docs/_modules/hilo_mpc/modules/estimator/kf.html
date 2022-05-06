@@ -323,19 +323,18 @@
         <span class="n">n_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_p</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">n_x</span><span class="p">)</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">n_y</span><span class="p">)</span>
         <span class="n">u</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="n">n_u</span><span class="p">)</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="n">n_p</span><span class="p">)</span>
         <span class="n">up</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
         <span class="n">P</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">n_x</span><span class="p">,</span> <span class="n">n_x</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">n_y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has no measurement equations, I am assuming measurements of all states &quot;</span>
-                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">dynamical_state_names</span><span class="si">}</span><span class="s2"> are available.&quot;</span><span class="p">)</span>
             <span class="n">y_pred</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="n">n_y</span> <span class="o">=</span> <span class="n">n_x</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">up</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;meas_function&#39;</span><span class="p">)</span>
             <span class="n">y_pred</span> <span class="o">=</span> <span class="n">sol</span><span class="p">[</span><span class="s1">&#39;yf&#39;</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">MX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">n_y</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_linearized</span><span class="p">:</span>
             <span class="c1"># NOTE: For now we ignore time-variant systems (i.e., [] instead of t)</span>
@@ -396,6 +395,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">setup</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_is_linearized</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">n_y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">n_y</span>
+        <span class="k">if</span> <span class="n">n_y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has no measurement equations, I am assuming measurements of all states &quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">dynamical_state_names</span><span class="si">}</span><span class="s2"> are available.&quot;</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">set_measurement_equations</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dynamical_states</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s1">&#39;unscented Kalman filter&#39;</span><span class="p">:</span>
             <span class="n">arg_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">t</span><span class="p">]</span>
