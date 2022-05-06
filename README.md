@@ -2,6 +2,7 @@ HILO-MPC
 ========
 
 [![python](https://img.shields.io/badge/Python-3.7%20%7C%203.8%20%7C%203.9-informational)](https://www.python.org/downloads/)
+[![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://hilo-mpc.github.io/hilo-mpc/)
 [![tests](https://github.com/hilo-mpc/hilo-mpc/workflows/Tests/badge.svg)](https://github.com/hilo-mpc/hilo-mpc/actions?query=workflow%3ATests)
 <!--[![codecov](https://codecov.io/gh/hilo-mpc/hilo-mpc/branch/master/graph/badge.svg?token=7U83P1M0H4)](https://codecov.io/gh/hilo-mpc/hilo-mpc)-->
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/hilo-mpc/hilo-mpc.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hilo-mpc/hilo-mpc/context:python)
