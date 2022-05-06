@@ -27,3 +27,4 @@ clean-github:
 	@make clean
 	@find . -type f \( -name '*.html' -or -name '*.inv' -or -name '*.js' \) -delete
 	@find . -type d -name '_*' -exec rm -rf {} +
+	@find . -maxdepth 1 -type d \( -name modules -or -name api \) -exec rm -rf {} +
