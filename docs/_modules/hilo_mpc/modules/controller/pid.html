@@ -98,6 +98,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../citation.html">Citing HILO-MPC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/nmpc_hybrid_bio.html">Learning Supported MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mhe_chemical_reaction.html">Moving Horizon Estimator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mpc_formula1.html">Formula 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mpc_pendulum.html">Inverted pendulum - DAE System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/path_following_mpc.html">Path following vs Trajectory Tracking MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/CSTR_Example.html">CSTR Reactor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/learn_mpc.html">Learning an MPC controller with a NN</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/controllers.html">Control module</a></li>
@@ -288,7 +298,7 @@
         <span class="n">value</span> <span class="o">=</span> <span class="n">convert</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_diagonal</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The number of set points is greater than 1, but the supplied matrix for &quot;</span>
-                             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">dict</span><span class="p">({</span><span class="s1">&#39;k_p&#39;</span><span class="p">:</span> <span class="s1">&#39;K_P&#39;</span><span class="p">,</span> <span class="s1">&#39;t_i&#39;</span><span class="p">:</span> <span class="s1">&#39;T_I&#39;</span><span class="p">,</span> <span class="s1">&#39;t_d&#39;</span><span class="p">:</span> <span class="s1">&#39;T_D&#39;</span><span class="p">})[</span><span class="n">which</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not a diagonal matrix. &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;{dict({&#39;k_p&#39;: &#39;K_P&#39;, &#39;t_i&#39;: &#39;T_I&#39;, &#39;t_d&#39;: &#39;T_D&#39;})[which]} is not a diagonal matrix. &quot;</span>
                              <span class="sa">f</span><span class="s2">&quot;Coupled multi-variable control is not supported at the moment.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">which</span> <span class="o">==</span> <span class="s1">&#39;k_p&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_k_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -412,8 +422,8 @@
                 <span class="n">set_point</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">repmat</span><span class="p">(</span><span class="n">set_point</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">set_point</span><span class="o">.</span><span class="n">size1</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch. Supplied dimension for the set point is &quot;</span>
-                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">set_point</span><span class="o">.</span><span class="n">size1</span><span class="p">()</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">set_point</span><span class="o">.</span><span class="n">size2</span><span class="p">()</span><span class="si">}</span><span class="s2">, but required dimension is &quot;</span>
-                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_set_points</span><span class="si">}</span><span class="s2">x1.&quot;</span><span class="p">)</span>
+                                 <span class="sa">f</span><span class="s2">&quot;{set_point.size1()}x{set_point.size2()}, but required dimension is &quot;</span>
+                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{self._n_set_points}</span><span class="s2">x1.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_point</span> <span class="o">=</span> <span class="n">set_point</span>
 
     <span class="n">s_p</span> <span class="o">=</span> <span class="n">set_point</span>
@@ -522,7 +532,7 @@
                 <span class="n">type_</span> <span class="o">+=</span> <span class="s1">&#39;I&#39;</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_d</span> <span class="o">!=</span> <span class="mf">0.</span><span class="p">:</span>
                 <span class="n">type_</span> <span class="o">+=</span> <span class="s1">&#39;D&#39;</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">type_</span><span class="si">}</span><span class="s2"> controller is not set up. Run PID.setup() before calling the </span><span class="si">{</span><span class="n">type_</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{type_}</span><span class="s2"> controller is not set up. Run PID.setup() before calling the </span><span class="si">{type_}</span><span class="s2"> &quot;</span>
                                <span class="sa">f</span><span class="s2">&quot;controller&quot;</span><span class="p">)</span>
 
         <span class="n">pv</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pv&#39;</span><span class="p">)</span>

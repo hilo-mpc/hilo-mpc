@@ -98,6 +98,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../citation.html">Citing HILO-MPC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/nmpc_hybrid_bio.html">Learning Supported MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mhe_chemical_reaction.html">Moving Horizon Estimator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mpc_formula1.html">Formula 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mpc_pendulum.html">Inverted pendulum - DAE System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/path_following_mpc.html">Path following vs Trajectory Tracking MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/CSTR_Example.html">CSTR Reactor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/learn_mpc.html">Learning an MPC controller with a NN</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/controllers.html">Control module</a></li>
@@ -372,13 +382,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_function</span><span class="o">.</span><span class="n">has_free</span><span class="p">():</span>
                 <span class="n">free_vars</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_predict_function</span><span class="o">.</span><span class="n">get_free</span><span class="p">())</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Instance </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has the following free variables/parameters: </span><span class="si">{</span><span class="n">free_vars</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Instance </span><span class="si">{self.__class__.__name__}</span><span class="s2"> has the following free variables/parameters: </span><span class="si">{free_vars}</span><span class="s2">&quot;</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_function</span><span class="o">.</span><span class="n">has_free</span><span class="p">():</span>
                 <span class="n">free_vars</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_update_function</span><span class="o">.</span><span class="n">get_free</span><span class="p">())</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Instance </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has the following free variables/parameters: </span><span class="si">{</span><span class="n">free_vars</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Instance </span><span class="si">{self.__class__.__name__}</span><span class="s2"> has the following free variables/parameters: </span><span class="si">{free_vars}</span><span class="s2">&quot;</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -399,7 +409,7 @@
         <span class="n">n_y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">n_y</span>
         <span class="k">if</span> <span class="n">n_y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has no measurement equations, I am assuming measurements of all states &quot;</span>
-                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">dynamical_state_names</span><span class="si">}</span><span class="s2"> are available.&quot;</span><span class="p">)</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{self._model.dynamical_state_names}</span><span class="s2"> are available.&quot;</span><span class="p">)</span>
             <span class="n">model</span><span class="o">.</span><span class="n">set_measurement_equations</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dynamical_states</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s1">&#39;unscented Kalman filter&#39;</span><span class="p">:</span>
@@ -621,7 +631,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">plot_backend</span><span class="o">=</span><span class="n">plot_backend</span><span class="p">,</span> <span class="n">square_root_form</span><span class="o">=</span><span class="n">square_root_form</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">alpha</span> <span class="o">=</span> <span class="mf">.001</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="o">.</span><span class="mi">001</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_parameter_bounds</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">beta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">beta</span> <span class="o">=</span> <span class="mf">2.</span>
@@ -651,13 +661,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mf">0.</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mf">1.</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The parameter alpha needs to lie in the interval (0, 1]. Supplied alpha is </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The parameter alpha needs to lie in the interval (0, 1]. Supplied alpha is </span><span class="si">{value}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;beta&#39;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_beta</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">elif</span> <span class="n">param</span> <span class="o">==</span> <span class="s1">&#39;kappa&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The parameter kappa needs to be greater or equal to 0. Supplied kappa is </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The parameter kappa needs to be greater or equal to 0. Supplied kappa is </span><span class="si">{value}</span><span class="s2">.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_kappa</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="k">def</span> <span class="nf">_setup_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -751,7 +761,7 @@
 
         <span class="k">if</span> <span class="n">n_y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has no measurement equations, I am assuming measurements of all states &quot;</span>
-                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">dynamical_state_names</span><span class="si">}</span><span class="s2"> are available.&quot;</span><span class="p">)</span>
+                          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{self._model.dynamical_state_names}</span><span class="s2"> are available.&quot;</span><span class="p">)</span>
             <span class="n">Y</span> <span class="o">=</span> <span class="n">X</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">up</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;meas_function&#39;</span><span class="p">)</span>

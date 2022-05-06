@@ -98,6 +98,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../citation.html">Citing HILO-MPC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../about.html">About</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/nmpc_hybrid_bio.html">Learning Supported MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mhe_chemical_reaction.html">Moving Horizon Estimator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mpc_formula1.html">Formula 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mpc_pendulum.html">Inverted pendulum - DAE System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/path_following_mpc.html">Path following vs Trajectory Tracking MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/CSTR_Example.html">CSTR Reactor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/learn_mpc.html">Learning an MPC controller with a NN</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/controllers.html">Control module</a></li>
@@ -280,8 +290,8 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;String representation method&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nlp_setup_done</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Howdy! You need to setup </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> before printing. &#39;</span>
-                             <span class="sa">f</span><span class="s1">&#39;Run </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.setup().&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Howdy! You need to setup </span><span class="si">{self.__class__.__name__}</span><span class="s1"> before printing. &#39;</span>
+                             <span class="sa">f</span><span class="s1">&#39;Run </span><span class="si">{self.__class__.__name__}</span><span class="s1">.setup().&#39;</span><span class="p">)</span>
 
         <span class="kn">from</span> <span class="nn">prettytable</span> <span class="kn">import</span> <span class="n">PrettyTable</span>
         <span class="kn">import</span> <span class="nn">textwrap</span>
@@ -299,14 +309,14 @@
         <span class="n">args</span> <span class="o">=</span> <span class="s2">&quot;=================================================================</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;             Nonlinear Model Predictive Control                 </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;id=&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;id=&#39;</span><span class="si">{self._id}</span><span class="s2">&#39;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, name=&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;, name=&#39;</span><span class="si">{self.name}</span><span class="s2">&#39;&quot;</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;-----------------------------------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Prediction horizon: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_horizon</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Control horizon: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">control_horizon</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Model name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Sampling interval: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sampling_interval</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Prediction horizon: </span><span class="si">{self.prediction_horizon}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Control horizon: </span><span class="si">{self.control_horizon}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Model name: </span><span class="si">{self._model.name}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Sampling interval: </span><span class="si">{self.sampling_interval}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">n_of_paths</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_terminal_cost</span><span class="o">.</span><span class="n">n_of_paths</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Path following problem</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">n_of_trajectories</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_terminal_cost</span><span class="o">.</span><span class="n">n_of_trajectories</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -316,10 +326,10 @@
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;Objective function&quot;</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-----------------------------------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;Lagrange (stage) cost:</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">+=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_lag_term</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">subsequent_indent</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">...&#39;</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{self._lag_term}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">subsequent_indent</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">...&#39;</span><span class="p">)</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;Mayor (terminal) cost:</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">+=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_may_term</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">subsequent_indent</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">...&#39;</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{self._may_term}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">subsequent_indent</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">...&#39;</span><span class="p">)</span>
 
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-----------------------------------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;Box constraints&quot;</span>
@@ -363,9 +373,9 @@
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-----------------------------------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;Numerical solution and optimization stats&quot;</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-----------------------------------------------------------------</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Integration: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_nlp_options</span><span class="p">[</span><span class="s1">&#39;integration_method&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> method. </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;NLP solver: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_name</span><span class="si">}</span><span class="s2">. </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Number of optimization variables: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_v</span><span class="si">}</span><span class="s2">. </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Integration: </span><span class="si">{self._nlp_options[&#39;integration_method&#39;]}</span><span class="s2"> method. </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;NLP solver: </span><span class="si">{self._solver_name}</span><span class="s2">. </span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Number of optimization variables: </span><span class="si">{self._n_v}</span><span class="s2">. </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">args</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=================================================================</span><span class="se">\n</span><span class="s2">&quot;</span>
 
         <span class="k">return</span> <span class="n">args</span>
@@ -455,8 +465,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_horizon</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;When passing time-varying parameters, you need to pass a number of values at least &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;as long as the prediction horizon. The parameter </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2"> values but the MPC &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;has a prediction horizon length of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_horizon</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;as long as the prediction horizon. The parameter </span><span class="si">{key}</span><span class="s2"> has {len(value)} values but the MPC &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;has a prediction horizon length of </span><span class="si">{self._prediction_horizon}</span><span class="s2">.&quot;</span>
                     <span class="p">)</span>
 
                 <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_varying_parameters_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -497,8 +507,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_horizon</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;When passing time-varying parameters, you need to pass a number of values at least &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;as long as the prediction horizon. The parameter </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2"> values but the MPC &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;has a prediction horizon length of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_horizon</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;as long as the prediction horizon. The parameter </span><span class="si">{key}</span><span class="s2"> has {len(value)} values but the MPC &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;has a prediction horizon length of </span><span class="si">{self._prediction_horizon}</span><span class="s2">.&quot;</span>
                     <span class="p">)</span>
 
                 <span class="n">value</span> <span class="o">=</span> <span class="n">tvp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -519,8 +529,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_horizon</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;When passing time-varying parameters, you need to pass a number of values at least &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;as long as the prediction horizon. The parameter </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2"> values but the MPC &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;has a prediction horizon length of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_horizon</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;as long as the prediction horizon. The parameter </span><span class="si">{key}</span><span class="s2"> has {len(value)} values but the MPC &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;has a prediction horizon length of </span><span class="si">{self._prediction_horizon}</span><span class="s2">.&quot;</span>
                     <span class="p">)</span>
 
                 <span class="n">value</span> <span class="o">=</span> <span class="n">tvp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -531,7 +541,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_get_tvp_parameters_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_varying_parameters_values</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Mate, I know there are </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_tvp</span><span class="si">}</span><span class="s2"> time varying parameters but you did not pass me any.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Mate, I know there are </span><span class="si">{self._n_tvp}</span><span class="s2"> time varying parameters but you did not pass me any.&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;Please provide me with the values of the parameters, either to the optimize() method or to the &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;set_time_varying_parameters() method.&quot;</span>
             <span class="p">)</span>
@@ -554,9 +564,9 @@
                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ref_sc</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">name_open_varying_trajectories</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;I cannot find the variable </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in the variables with varying trajectory or the &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;I cannot find the variable </span><span class="si">{key}</span><span class="s2"> in the variables with varying trajectory or the &quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;trajectory has already been provided as a function. The trajectories without reference &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;are </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">name_open_varying_trajectories</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;are {&#39;, &#39;.join(self.quad_stage_cost.name_open_varying_trajectories)}&quot;</span>
                         <span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">traj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">_trajectories_list</span><span class="p">:</span>
@@ -574,8 +584,8 @@
                                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                                     <span class="sa">f</span><span class="s2">&quot;The length of the varying reference must be one or longer than than the &quot;</span>
                                     <span class="sa">f</span><span class="s2">&quot;simulation time plus the prediction horizon. Please supply data points. The &quot;</span>
-                                    <span class="sa">f</span><span class="s2">&quot;trajectory is long </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">traj_i</span><span class="p">)</span><span class="si">}</span><span class="s2"> but I am predicting at least up to the &quot;</span>
-                                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_horizon</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2"> step.&quot;</span>
+                                    <span class="sa">f</span><span class="s2">&quot;trajectory is long {len(traj_i)} but I am predicting at least up to the &quot;</span>
+                                    <span class="sa">f</span><span class="s2">&quot;{self.n_iterations + self.prediction_horizon + 1} step.&quot;</span>
                                 <span class="p">)</span>
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nlp_options</span><span class="p">[</span><span class="s1">&#39;objective_function&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;discrete&#39;</span><span class="p">:</span>
                                 <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
@@ -590,7 +600,7 @@
                 <span class="k">for</span> <span class="n">traj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">_trajectories_list</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">traj</span><span class="p">[</span><span class="s1">&#39;ref&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Mate, it looks like the variable(s) </span><span class="si">{</span><span class="n">traj</span><span class="p">[</span><span class="s1">&#39;names&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> must follow a reference, but&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Mate, it looks like the variable(s) </span><span class="si">{traj[&#39;names&#39;]}</span><span class="s2"> must follow a reference, but&quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;you did not pass any. Please pass a reference as a function in the stage cost &quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;or as values in the setup of the MPC.&quot;</span>
                         <span class="p">)</span>
@@ -604,9 +614,9 @@
                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">ref_tc</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_terminal_cost</span><span class="o">.</span><span class="n">name_open_varying_trajectories</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;I cannot find the variable </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in the variables with varying trajectory or the &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;I cannot find the variable </span><span class="si">{key}</span><span class="s2"> in the variables with varying trajectory or the &quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;trajectory has already been provided as a function. The trajectories without reference &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;are </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quad_terminal_cost</span><span class="o">.</span><span class="n">name_open_varying_trajectories</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;are {&#39;, &#39;.join(self.quad_terminal_cost.name_open_varying_trajectories)}&quot;</span>
                         <span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">traj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_terminal_cost</span><span class="o">.</span><span class="n">_trajectories_list</span><span class="p">:</span>
@@ -623,8 +633,8 @@
                                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                                     <span class="sa">f</span><span class="s2">&quot;The length of the verying reference must be one or longer than than the &quot;</span>
                                     <span class="sa">f</span><span class="s2">&quot;simulation time plus the prediction horizon. Please supply datapoints. The &quot;</span>
-                                    <span class="sa">f</span><span class="s2">&quot;trajectory is long </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">traj_i</span><span class="p">)</span><span class="si">}</span><span class="s2"> but I am predicting at least up to the &quot;</span>
-                                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_horizon</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2"> step.&quot;</span>
+                                    <span class="sa">f</span><span class="s2">&quot;trajectory is long {len(traj_i)} but I am predicting at least up to the &quot;</span>
+                                    <span class="sa">f</span><span class="s2">&quot;{self.n_iterations + self.prediction_horizon + 1} step.&quot;</span>
                                 <span class="p">)</span>
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nlp_options</span><span class="p">[</span><span class="s1">&#39;objective_function&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;discrete&#39;</span><span class="p">:</span>
                                 <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
@@ -639,7 +649,7 @@
                 <span class="k">for</span> <span class="n">traj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_terminal_cost</span><span class="o">.</span><span class="n">_trajectories_list</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">traj</span><span class="p">[</span><span class="s1">&#39;ref&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Mate, it looks like the variable(s) </span><span class="si">{</span><span class="n">traj</span><span class="p">[</span><span class="s1">&#39;names&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> must follow a reference, but&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Mate, it looks like the variable(s) </span><span class="si">{traj[&#39;names&#39;]}</span><span class="s2"> must follow a reference, but&quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;you did not pass any. Please pass a reference as a function in the terminal &quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;cost or as values in the setup of the MPC.&quot;</span>
                         <span class="p">)</span>
@@ -698,11 +708,11 @@
         <span class="n">u_ref</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">DM</span><span class="o">.</span><span class="n">nan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_orig</span><span class="o">.</span><span class="n">n_u</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_horizon</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">_has_trajectory_following</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_orig</span><span class="o">.</span><span class="n">dynamical_state_names</span><span class="p">):</span>
-                <span class="k">if</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_sr&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">x_ref</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_sr&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">_sr&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">x_ref</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">_sr&#39;</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_orig</span><span class="o">.</span><span class="n">input_names</span><span class="p">):</span>
-                <span class="k">if</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_sr&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">u_ref</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_sr&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">_sr&#39;</span> <span class="ow">in</span> <span class="n">param</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">u_ref</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1">_sr&#39;</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">traj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">_trajectories_list</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">traj</span><span class="p">[</span><span class="s1">&#39;traj_fun&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">traj</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;states&#39;</span><span class="p">:</span>
@@ -810,7 +820,7 @@
             <span class="n">x_ub</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">x_ub</span><span class="p">)</span>
             <span class="n">x_ub</span> <span class="o">=</span> <span class="n">check_and_wrap_to_list</span><span class="p">(</span><span class="n">x_ub</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_lb</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="si">}</span><span class="s2"> states. You need to pass the same number of bounds.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{self._n_x}</span><span class="s2"> states. You need to pass the same number of bounds.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_x_ub</span> <span class="o">=</span> <span class="n">x_ub</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_x_ub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_x</span> <span class="o">*</span> <span class="p">[</span><span class="n">ca</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
@@ -819,7 +829,7 @@
             <span class="n">x_lb</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">x_lb</span><span class="p">)</span>
             <span class="n">x_lb</span> <span class="o">=</span> <span class="n">check_and_wrap_to_list</span><span class="p">(</span><span class="n">x_lb</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_lb</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="si">}</span><span class="s2"> states. You need to pass the same number of bounds.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{self._n_x}</span><span class="s2"> states. You need to pass the same number of bounds.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_x_lb</span> <span class="o">=</span> <span class="n">x_lb</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_x_lb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_x</span> <span class="o">*</span> <span class="p">[</span><span class="o">-</span><span class="n">ca</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
@@ -829,7 +839,7 @@
             <span class="n">u_ub</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">u_ub</span><span class="p">)</span>
             <span class="n">u_ub</span> <span class="o">=</span> <span class="n">check_and_wrap_to_list</span><span class="p">(</span><span class="n">u_ub</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">u_ub</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_u</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_u</span><span class="si">}</span><span class="s2"> inputs. You need to pass the same number of bounds.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{self._n_u}</span><span class="s2"> inputs. You need to pass the same number of bounds.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_u_ub</span> <span class="o">=</span> <span class="n">u_ub</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_u_ub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_u</span> <span class="o">*</span> <span class="p">[</span><span class="n">ca</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
@@ -838,7 +848,7 @@
             <span class="n">u_lb</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">u_lb</span><span class="p">)</span>
             <span class="n">u_lb</span> <span class="o">=</span> <span class="n">check_and_wrap_to_list</span><span class="p">(</span><span class="n">u_lb</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">u_lb</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_u</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_u</span><span class="si">}</span><span class="s2"> inputs. You need to pass the same number of bounds.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{self._n_u}</span><span class="s2"> inputs. You need to pass the same number of bounds.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_u_lb</span> <span class="o">=</span> <span class="n">u_lb</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_u_lb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_u</span> <span class="o">*</span> <span class="p">[</span><span class="o">-</span><span class="n">ca</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
@@ -848,7 +858,7 @@
             <span class="n">z_ub</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">z_ub</span><span class="p">)</span>
             <span class="n">z_ub</span> <span class="o">=</span> <span class="n">check_and_wrap_to_list</span><span class="p">(</span><span class="n">z_ub</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">z_ub</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_z</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_z</span><span class="si">}</span><span class="s2"> algebraic states. You need to pass the same number of &quot;</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{self._n_z}</span><span class="s2"> algebraic states. You need to pass the same number of &quot;</span>
                                 <span class="sa">f</span><span class="s2">&quot;bounds.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_z_ub</span> <span class="o">=</span> <span class="n">z_ub</span>
         <span class="k">else</span><span class="p">:</span>
@@ -858,7 +868,7 @@
             <span class="n">z_lb</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">z_lb</span><span class="p">)</span>
             <span class="n">z_lb</span> <span class="o">=</span> <span class="n">check_and_wrap_to_list</span><span class="p">(</span><span class="n">z_lb</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">z_lb</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_z</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_z</span><span class="si">}</span><span class="s2"> algebraic states. You need to pass the same number of &quot;</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{self._n_z}</span><span class="s2"> algebraic states. You need to pass the same number of &quot;</span>
                                 <span class="sa">f</span><span class="s2">&quot;bounds.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_z_lb</span> <span class="o">=</span> <span class="n">z_lb</span>
         <span class="k">else</span><span class="p">:</span>
@@ -937,8 +947,8 @@
 
             <span class="k">if</span> <span class="n">cp</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cp</span><span class="o">.</span><span class="n">size1</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_p</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_tvp</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_p</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_tvp</span><span class="si">}</span><span class="s2"> constant parameter(s): &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">parameter_names</span><span class="si">}</span><span class="s2">. You must pass me the value of these before running the &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;The model has {self._model.n_p - self._n_tvp} constant parameter(s): &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{self._model.parameter_names}</span><span class="s2">. You must pass me the value of these before running the &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;optimization to the &#39;cp&#39; parameter.&quot;</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -954,7 +964,7 @@
 
         <span class="k">if</span> <span class="n">x0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;We have an issue mate, the x0 you supplied has dimension </span><span class="si">{</span><span class="n">x0</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> but the model has </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_x</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;We have an issue mate, the x0 you supplied has dimension </span><span class="si">{x0.shape[0]}</span><span class="s2"> but the model has </span><span class="si">{self._n_x}</span><span class="s2"> &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;states.&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">fix_x0</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -1412,8 +1422,8 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_varying_parameters</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">p_names</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameter_names</span>
                 <span class="k">for</span> <span class="n">tvp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_varying_parameters</span><span class="p">:</span>
-                    <span class="k">assert</span> <span class="n">tvp</span> <span class="ow">in</span> <span class="n">p_names</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;The time-varying parameter </span><span class="si">{</span><span class="n">tvp</span><span class="si">}</span><span class="s2"> is not in the model parameter. &quot;</span> \
-                                           <span class="sa">f</span><span class="s2">&quot;The model parameters are </span><span class="si">{</span><span class="n">p_names</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="k">assert</span> <span class="n">tvp</span> <span class="ow">in</span> <span class="n">p_names</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;The time-varying parameter </span><span class="si">{tvp}</span><span class="s2"> is not in the model parameter. &quot;</span> \
+                                           <span class="sa">f</span><span class="s2">&quot;The model parameters are </span><span class="si">{p_names}</span><span class="s2">.&quot;</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">is_set</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">is_soft</span><span class="p">:</span>
@@ -1596,7 +1606,7 @@
                 <span class="n">int_dynamics_fun</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s1">&#39;integrator_ms&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nlp_options</span><span class="p">[</span><span class="s1">&#39;integration_method&#39;</span><span class="p">],</span> <span class="n">dae</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Integration </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_nlp_options</span><span class="p">[</span><span class="s1">&#39;integration_method&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> not defined.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Integration </span><span class="si">{self._nlp_options[&#39;integration_method&#39;]}</span><span class="s2"> not defined.&quot;</span><span class="p">)</span>
 
             <span class="c1"># Total number of optimization variable</span>
             <span class="n">n_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_horizon</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">n_u</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_horizon</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">n_x</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">n_z</span><span class="p">)</span>
@@ -1944,7 +1954,7 @@
                 <span class="n">solver</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">qpsol</span><span class="p">(</span><span class="s1">&#39;solver&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_name</span><span class="p">,</span> <span class="n">nlp_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nlp_opts</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;The solver </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_name</span><span class="si">}</span><span class="s2"> does no exist. The possible solver are </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_name_list</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;The solver </span><span class="si">{self._solver_name}</span><span class="s2"> does no exist. The possible solver are </span><span class="si">{self._solver_name_list}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">=</span> <span class="n">solver</span></div>
 
@@ -2005,7 +2015,7 @@
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">_paths_list</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">path_var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">_paths_var_list</span><span class="p">):</span>
                 <span class="n">theta</span> <span class="o">=</span> <span class="n">path_var</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">]</span>
-                <span class="n">path_i</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="n">path_i</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;thetapf</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">path_i</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="n">path_i</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;thetapf</span><span class="si">{i}</span><span class="s1">&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">references</span></div>
 
@@ -2161,8 +2171,8 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_horizon</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                         <span class="s2">&quot;When passing time-varying parameters, you need to pass a number of values at least &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;as long as the prediction horizon. The parameter </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2"> values but the MPC &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;has a prediction horizon length of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_prediction_horizon</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;as long as the prediction horizon. The parameter </span><span class="si">{key}</span><span class="s2"> has {len(value)} values but the MPC &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;has a prediction horizon length of </span><span class="si">{self._prediction_horizon}</span><span class="s2">.&quot;</span>
                     <span class="p">)</span>
 
                 <span class="n">value</span> <span class="o">=</span> <span class="n">tvp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
@@ -2172,7 +2182,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_get_tvp_parameters_values</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Mate, I know there are </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_tvp</span><span class="si">}</span><span class="s2"> time varying parameters but you did not pass me any.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Mate, I know there are </span><span class="si">{self._n_tvp}</span><span class="s2"> time varying parameters but you did not pass me any.&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;Please provide me with the values of the parameters, either to the optimize() method or to the &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;set_time_varying_parameters() method.&quot;</span>
             <span class="p">)</span>
@@ -2270,7 +2280,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="kn">from</span> <span class="nn">..embedded.muaompc</span> <span class="kn">import</span> <span class="n">setup_solver</span>
             <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{err}</span><span class="s2">.&quot;</span>
                 <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">To use nlp_solver=&#39;muaompc&#39; first install muaompc.&quot;</span>
                 <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot; Try:</span><span class="se">\n</span><span class="s2">    pip install muaompc&quot;</span>
                 <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
@@ -2278,7 +2288,7 @@
             <span class="n">solver</span> <span class="o">=</span> <span class="n">setup_solver</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The solver </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_name</span><span class="si">}</span><span class="s2"> does no exist. The possible solver are </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_name_list_qp</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;The solver </span><span class="si">{self._solver_name}</span><span class="s2"> does no exist. The possible solver are </span><span class="si">{self._solver_name_list_qp}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">=</span> <span class="n">solver</span>
 
@@ -2310,8 +2320,8 @@
 
             <span class="k">if</span> <span class="n">cp</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cp</span><span class="o">.</span><span class="n">size1</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_p</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_tvp</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;The model has </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">n_p</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_tvp</span><span class="si">}</span><span class="s2"> constant parameter(s): &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">parameter_names</span><span class="si">}</span><span class="s2">. You must pass me the value of these before running the &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;The model has {self._model.n_p - self._n_tvp} constant parameter(s): &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{self._model.parameter_names}</span><span class="s2">. You must pass me the value of these before running the &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;optimization to the &#39;cp&#39; parameter.&quot;</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

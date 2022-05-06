@@ -98,6 +98,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../citation.html">Citing HILO-MPC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../about.html">About</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/nmpc_hybrid_bio.html">Learning Supported MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/mhe_chemical_reaction.html">Moving Horizon Estimator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/mpc_formula1.html">Formula 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/mpc_pendulum.html">Inverted pendulum - DAE System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/path_following_mpc.html">Path following vs Trajectory Tracking MPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/CSTR_Example.html">CSTR Reactor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/learn_mpc.html">Learning an MPC controller with a NN</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Modules:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../modules/controllers.html">Control module</a></li>
@@ -261,7 +271,7 @@
         <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Mean with </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">for</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">attribute</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;_&#39;</span><span class="p">:</span>
-                <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> </span><span class="si">{</span><span class="n">attribute</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> </span><span class="si">{attribute}</span><span class="s2">: </span><span class="si">{value}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">message</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Array</span><span class="p">:</span>
@@ -452,7 +462,7 @@
                     <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;fixed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;bounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bias_bounds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="n">Hyperparameter</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acronym</span><span class="si">}</span><span class="s1">.bias&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">bias</span><span class="p">,</span> <span class="o">**</span><span class="n">hyper_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="n">Hyperparameter</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{self.acronym}</span><span class="s1">.bias&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">bias</span><span class="p">,</span> <span class="o">**</span><span class="n">hyper_kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ConstantMean.get_mean_function"><a class="viewcode-back" href="../../../../../api/learning.html#hilo_mpc.ConstantMean.get_mean_function">[docs]</a>    <span class="k">def</span> <span class="nf">get_mean_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="p">,</span> <span class="n">active_dims</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -541,15 +551,15 @@
 
         <span class="k">if</span> <span class="n">active_dims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">coefficient</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">active_dims</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coefficient</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between &#39;active_dims&#39; (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">active_dims</span><span class="p">)</span><span class="si">}</span><span class="s2">) and the number of &quot;</span>
-                                 <span class="sa">f</span><span class="s2">&quot;coefficients (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">coefficient</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between &#39;active_dims&#39; ({len(active_dims)}) and the number of &quot;</span>
+                                 <span class="sa">f</span><span class="s2">&quot;coefficients ({len(coefficient)})&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">hyperprior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hyperprior</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hyperprior</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                     <span class="n">hyperprior</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;coefficient&#39;</span><span class="p">:</span> <span class="n">hyperprior</span><span class="p">,</span> <span class="s1">&#39;offset&#39;</span><span class="p">:</span> <span class="n">hyperprior</span><span class="p">}</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong type &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">hyperprior</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; for keyword argument &#39;hyperprior&#39;&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong type &#39;{type(hyperprior).__name__}&#39; for keyword argument &#39;hyperprior&#39;&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">hyperprior</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;coefficient&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;offset&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
 
@@ -567,7 +577,7 @@
                 <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;fixed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;bounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">coefficient_bounds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">coefficient</span> <span class="o">=</span> <span class="n">Hyperparameter</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acronym</span><span class="si">}</span><span class="s1">.coefficient&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">coefficient</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coefficient</span> <span class="o">=</span> <span class="n">Hyperparameter</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{self.acronym}</span><span class="s1">.coefficient&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">coefficient</span><span class="p">,</span>
                                           <span class="o">**</span><span class="n">hyper_kwargs</span><span class="p">)</span>
 
         <span class="n">hyper_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -580,7 +590,7 @@
                 <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;fixed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">hyper_kwargs</span><span class="p">[</span><span class="s1">&#39;bounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offset_bounds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">Hyperparameter</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">acronym</span><span class="si">}</span><span class="s1">.offset&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="o">**</span><span class="n">hyper_kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">Hyperparameter</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{self.acronym}</span><span class="s1">.offset&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="o">**</span><span class="n">hyper_kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_p</span> <span class="o">=</span> <span class="n">degree</span>
 

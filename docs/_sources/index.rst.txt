@@ -80,6 +80,13 @@ On the pipeline we have:
    :maxdepth: 1
    :caption: Examples:
 
+   examples/nmpc_hybrid_bio
+   examples/mhe_chemical_reaction
+   examples/mpc_formula1
+   examples/mpc_pendulum
+   examples/path_following_mpc
+   examples/CSTR_Example
+   examples/learn_mpc
 
 .. toctree::
    :maxdepth: 5
