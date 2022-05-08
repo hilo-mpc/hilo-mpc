@@ -179,3 +179,113 @@ class TestKalmanFilterMatrixSetters(TestCase):
 
         kf.Q = [.01, .01]
         np.testing.assert_equal(kf.Q, .01 * np.eye(2))
+
+    def test_kalman_filter_measurement_noise_setter_dimension_mismatch(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            self.kf.R = [0., 0.]
+        self.assertTrue(str(context.exception) == "Dimension mismatch. Supplied dimension is 2x2, but required "
+                                                  "dimension is 1x1")
+
+    def test_kalman_filter_measurement_noise_setter(self) -> None:
+        """
+
+        :return:
+        """
+        kf = self.kf
+
+        kf.R = .064
+        np.testing.assert_equal(kf.R, .064 * np.eye(1))
+
+    def test_kalman_filter_error_covariance_setter_dimension_mismatch(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            self.kf.set_initial_guess([.8, 0.], P0=[1., 1., 1.])
+        self.assertTrue(str(context.exception) == "Dimension mismatch. Supplied dimension is 3x3, but required "
+                                                  "dimension is 2x2")
+
+    def test_kalman_filter_error_covariance_setter_default(self) -> None:
+        """
+
+        :return:
+        """
+        kf = self.kf
+
+        kf.set_initial_guess([.8, 0.])
+        # FIXME: Fix bug in error_covariance property
+        # np.testing.assert_equal(kf.P, np.eye(2))
+
+    def test_kalman_filter_error_covariance_setter(self) -> None:
+        """
+
+        :return:
+        """
+        kf = self.kf
+
+        kf.set_initial_guess([.8, 0.], P0=[1., 1.])
+        # FIXME: Fix bug in error_covariance property
+        # np.testing.assert_equal(kf.P, np.eye(2))
+
+
+class TestKalmanFilterEstimation(TestCase):
+    """"""
+    def setUp(self) -> None:
+        """
+
+        :return:
+        """
+        model = Model(plot_backend='bokeh')
+        equations = """
+                dx_1/dt = -k_1*x_1(t) + u(k)
+                dx_2/dt = k_1*x_1(t) - k_2*x_2(t)
+                y(k) = x_2(t)
+                """
+        model.set_equations(equations=equations)
+        model.discretize('erk', order=1, inplace=True)
+        model.setup(dt=1.)
+
+        kf = KF(model, plot_backend='bokeh')
+
+        self.kf = kf
+
+    def test_kalman_filter_not_set_up(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(RuntimeError) as context:
+            self.kf.estimate()
+        self.assertTrue(str(context.exception) == "Kalman filter is not set up. Run KalmanFilter.setup() before running"
+                                                  " simulations.")
+
+    def test_kalman_filter_no_initial_guess_supplied(self) -> None:
+        """
+
+        :return:
+        """
+        kf = self.kf
+
+        kf.setup()
+        with self.assertRaises(RuntimeError) as context:
+            kf.estimate()
+        self.assertTrue(str(context.exception) == "No initial guess for the states found. Please set initial guess "
+                                                  "before running the Kalman filter!")
+
+    def test_kalman_filter_no_measurement_data_supplied(self) -> None:
+        """
+
+        :return:
+        """
+        kf = self.kf
+
+        kf.setup()
+        kf.set_initial_guess([.8, 0.])
+        with self.assertRaises(RuntimeError) as context:
+            kf.estimate()
+        self.assertTrue(str(context.exception) == "No measurement data supplied.")
