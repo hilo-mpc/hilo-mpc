@@ -252,6 +252,7 @@ class TestKalmanFilterEstimation(TestCase):
 
         kf = KF(model, plot_backend='bokeh')
 
+        self.model = model
         self.kf = kf
 
     def test_kalman_filter_not_set_up(self) -> None:
@@ -289,3 +290,105 @@ class TestKalmanFilterEstimation(TestCase):
         with self.assertRaises(RuntimeError) as context:
             kf.estimate()
         self.assertTrue(str(context.exception) == "No measurement data supplied.")
+
+    def test_kalman_filter_one_step(self) -> None:
+        """
+
+        :return:
+        """
+        model = self.model
+        kf = self.kf
+
+        kf.setup()
+        model.set_initial_conditions([.8, 0.])
+        model.set_initial_parameter_values([.5, .4])
+        kf.R = .064
+        kf.Q = [.01, .01]
+        kf.set_initial_guess([.8, 0.])
+        kf.set_initial_parameter_values([.5, .4])
+
+        model.simulate(u=.8)
+        kf.estimate(y=.3894626, u=.8)
+        np.testing.assert_allclose(kf.solution.get_by_id('x:f'), np.array([[1.19614861], [.39044856]]))
+
+    def test_kalman_filter_one_step_p(self) -> None:
+        """
+
+        :return:
+        """
+        model = self.model
+        kf = self.kf
+
+        kf.setup()
+        model.set_initial_conditions([.8, 0.])
+        model.set_initial_parameter_values([.5, .4])
+        kf.R = .064
+        kf.Q = [.01, .01]
+        kf.set_initial_guess([.8, 0.])
+
+        model.simulate(u=.8)
+        kf.estimate(y=.3894626, u=.8, p=[.5, .4])
+        np.testing.assert_allclose(kf.solution.get_by_id('x:f'), np.array([[1.19614861], [.39044856]]))
+
+    # def test_kalman_filter_multi_step_dimension_mismatch_in_y(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     kf = self.kf
+    #
+    #     kf.setup()
+    #     kf.set_initial_guess([.8, 0.])
+    #     # FIXME: Convert IndexError to ValueError
+    #     with self.assertRaises(IndexError) as context:
+    #         kf.estimate(y=[.3894626, .3894626], steps=3)
+    #     self.assertTrue(str(context.exception) == "Dimension mismatch for variable y. Supplied dimension is 2, but "
+    #                                               "required dimension is 3.")
+
+    # def test_kalman_filter_multi_step_dimension_mismatch_in_u(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #
+    # def test_kalman_filter_multi_step_dimension_mismatch_in_p(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #
+    # def test_kalman_filter_multi_step(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #
+    # def test_kalman_filter_multi_step_p(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #
+    # def test_kalman_filter_multi_step_repmat(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #
+    # def test_kalman_filter_final_time(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #
+    # def test_kalman_filter_predict_only(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #
+    # def test_kalman_filter_update_only(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
