@@ -112,10 +112,10 @@ class TestKalmanFilterSetup(TestCase):
         """
         model = Model(plot_backend='bokeh')
         equations = """
-                dx_1/dt = -k_1*x_1(t) + u(k)
-                dx_2/dt = k_1*x_1(t) - k_2*x_2(t)
-                y(k) = x_2(t)
-                """
+        dx_1/dt = -k_1*x_1(t) + u(k)
+        dx_2/dt = k_1*x_1(t) - k_2*x_2(t)
+        y(k) = x_2(t)
+        """
         model.set_equations(equations=equations)
         model.discretize('erk', order=1, inplace=True)
         model.setup(dt=1.)
