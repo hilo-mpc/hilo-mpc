@@ -184,7 +184,7 @@ class GaussianProcess(LearningBase):
         if hyperprior_parameters is not None:
             hyper_kwargs['prior_parameters'] = hyperprior_parameters
         bounds = kwargs.get('bounds')
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             variance_bounds = bounds.get('noise_variance')
             if variance_bounds is not None:
                 if variance_bounds == 'fixed':
@@ -207,7 +207,7 @@ class GaussianProcess(LearningBase):
         if solver is None:
             if unconstrained_op:
                 solver = 'Newton-CG'
-            else:
+            else:  # pragma: no cover
                 # TODO: Test GP for constrained hyperparameters
                 solver = 'L-BFGS-B'
         self._solver = solver
@@ -306,7 +306,7 @@ class GaussianProcess(LearningBase):
                 else:
                     self._gp_args[x_or_p][index] = value
 
-            if bounds is not None:
+            if bounds is not None:  # pragma: no cover
                 if bounds == 'fixed':
                     if n_val > 1:
                         raise ValueError(f"Dimension mismatch between values and bounds. Supplied values have a "
@@ -473,7 +473,7 @@ class GaussianProcess(LearningBase):
                         if self._hyp_is_log[name]:
                             value = np.exp(value)
                     parameter.value = value
-            if bounds is not None:
+            if bounds is not None:  # pragma: no cover
                 bound = bounds[index]
                 if bound is not None:
                     parameter.bounds = bound
@@ -680,7 +680,7 @@ class GaussianProcess(LearningBase):
         values = solution.get_by_id('x:f').full().flatten()
         self.update_hyperparameters(names, values=values)
         self._optimization_stats = self._gp_solver.stats()
-        if not self._optimization_stats['success']:
+        if not self._optimization_stats['success']:  # pragma: no cover
             if self._solver == 'ipopt':
                 return_status = self._optimization_stats['return_status']
                 if return_status == 'Infeasible_Problem_Detected':

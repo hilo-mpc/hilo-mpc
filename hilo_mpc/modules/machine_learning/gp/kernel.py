@@ -204,7 +204,7 @@ class Kernel(metaclass=ABCMeta):
 
         return covariance_matrix
 
-    def is_bounded(self) -> bool:
+    def is_bounded(self) -> bool:  # pragma: no cover
         """
 
         :return:
@@ -453,7 +453,7 @@ class ConstantKernel(Kernel):
         super().__init__()
 
         hyper_kwargs = {}
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             bias_bounds = bounds.get('bias')
             if bias_bounds is not None:
                 if bias_bounds == 'fixed':
@@ -514,7 +514,7 @@ class StationaryKernel(Kernel, metaclass=ABCMeta):
         super().__init__(active_dims=active_dims)
 
         hyper_kwargs = {}
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             length_scale_bounds = bounds.get('length_scales')
             if length_scale_bounds is not None:
                 if length_scale_bounds == 'fixed':
@@ -596,15 +596,15 @@ class GammaExponentialKernel(StationaryKernel):
         """Constructor method"""
         super().__init__(active_dims=active_dims, length_scales=length_scales, ard=ard, bounds=bounds)
 
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             variance_bounds = bounds.get('signal_variance')
             gamma_bounds = bounds.get('gamma')
             alpha_bounds = bounds.get('alpha')
-        else:
+        else:  # pragma: no cover
             variance_bounds, gamma_bounds, alpha_bounds = None, None, None
 
         hyper_kwargs = {}
-        if variance_bounds is not None:
+        if variance_bounds is not None:  # pragma: no cover
             if variance_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -616,7 +616,7 @@ class GammaExponentialKernel(StationaryKernel):
             raise ValueError("Value of the hyperparameter 'gamma' is set to 2. Use the squared exponential kernel "
                              "instead.")
         gamma /= 2 - gamma
-        if gamma_bounds is not None:
+        if gamma_bounds is not None:  # pragma: no cover
             if gamma_bounds == 'fixed':
                 if gamma <= 0. or gamma > 2.:
                     raise ValueError("Value of the hyperparameter 'gamma' needs to be between 0 and 2")
@@ -638,7 +638,7 @@ class GammaExponentialKernel(StationaryKernel):
 
         if alpha is not None:
             hyper_kwargs = {}
-            if alpha_bounds is not None:
+            if alpha_bounds is not None:  # pragma: no cover
                 if alpha_bounds == 'fixed':
                     hyper_kwargs['fixed'] = True
                 else:
@@ -765,13 +765,13 @@ class MaternKernel(StationaryKernel):
         """Constructor method"""
         super().__init__(active_dims=active_dims, length_scales=length_scales, ard=ard, bounds=bounds)
 
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             variance_bounds = bounds.get('signal_variance')
-        else:
+        else:  # pragma: no cover
             variance_bounds = None
 
         hyper_kwargs = {}
-        if variance_bounds is not None:
+        if variance_bounds is not None:  # pragma: no cover
             if variance_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -947,14 +947,14 @@ class RationalQuadraticKernel(StationaryKernel):
         """Constructor method"""
         super().__init__(active_dims=active_dims, length_scales=length_scales, ard=ard, bounds=bounds)
 
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             variance_bounds = bounds.get('signal_variance')
             alpha_bounds = bounds.get('alpha')
-        else:
+        else:  # pragma: no cover
             variance_bounds, alpha_bounds = None, None
 
         hyper_kwargs = {}
-        if variance_bounds is not None:
+        if variance_bounds is not None:  # pragma: no cover
             if variance_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -962,7 +962,7 @@ class RationalQuadraticKernel(StationaryKernel):
         self.signal_variance = Hyperparameter(f'{self.acronym}.signal_variance', value=signal_variance, **hyper_kwargs)
 
         hyper_kwargs = {}
-        if alpha_bounds is not None:
+        if alpha_bounds is not None:  # pragma: no cover
             if alpha_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -1037,13 +1037,13 @@ class PiecewisePolynomialKernel(StationaryKernel):
 
         super().__init__(active_dims=active_dims, length_scales=length_scales, ard=ard, bounds=bounds)
 
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             variance_bounds = bounds.get('signal_variance')
-        else:
+        else:  # pragma: no cover
             variance_bounds = None
 
         hyper_kwargs = {}
-        if variance_bounds is not None:
+        if variance_bounds is not None:  # pragma: no cover
             if variance_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -1134,14 +1134,14 @@ class DotProductKernel(Kernel, metaclass=ABCMeta):
         """Constructor method"""
         super().__init__(active_dims=active_dims)
 
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             variance_bounds = bounds.get('signal_variance')
             offset_bounds = bounds.get('offset')
-        else:
+        else:  # pragma: no cover
             variance_bounds, offset_bounds = None, None
 
         hyper_kwargs = {}
-        if variance_bounds is not None:
+        if variance_bounds is not None:  # pragma: no cover
             if variance_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -1149,7 +1149,7 @@ class DotProductKernel(Kernel, metaclass=ABCMeta):
         self.signal_variance = Hyperparameter(f'{self.acronym}.signal_variance', value=signal_variance, **hyper_kwargs)
 
         hyper_kwargs = {}
-        if offset_bounds is not None:
+        if offset_bounds is not None:  # pragma: no cover
             if offset_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -1284,14 +1284,14 @@ class NeuralNetworkKernel(Kernel):
         """Constructor method"""
         super().__init__(active_dims=active_dims)
 
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             signal_variance_bounds = bounds.get('signal_variance')
             weight_variance_bounds = bounds.get('weight_variance')
-        else:
+        else:  # pragma: no cover
             signal_variance_bounds, weight_variance_bounds = None, None
 
         hyper_kwargs = {}
-        if signal_variance_bounds is not None:
+        if signal_variance_bounds is not None:  # pragma: no cover
             if signal_variance_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -1299,7 +1299,7 @@ class NeuralNetworkKernel(Kernel):
         self.signal_variance = Hyperparameter(f'{self.acronym}.signal_variance', value=signal_variance, **hyper_kwargs)
 
         hyper_kwargs = {}
-        if weight_variance_bounds is not None:
+        if weight_variance_bounds is not None:  # pragma: no cover
             if weight_variance_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -1360,15 +1360,15 @@ class PeriodicKernel(Kernel):
         """Constructor method"""
         super().__init__(active_dims=active_dims)
 
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             signal_variance_bounds = bounds.get('signal_variance')
             length_scales_bounds = bounds.get('length_scales')
             period_bounds = bounds.get('period')
-        else:
+        else:  # pragma: no cover
             signal_variance_bounds, length_scales_bounds, period_bounds = None, None, None
 
         hyper_kwargs = {}
-        if signal_variance_bounds is not None:
+        if signal_variance_bounds is not None:  # pragma: no cover
             if signal_variance_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -1376,7 +1376,7 @@ class PeriodicKernel(Kernel):
         self.signal_variance = Hyperparameter(f'{self.acronym}.signal_variance', value=signal_variance, **hyper_kwargs)
 
         hyper_kwargs = {}
-        if length_scales_bounds is not None:
+        if length_scales_bounds is not None:  # pragma: no cover
             if length_scales_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -1384,7 +1384,7 @@ class PeriodicKernel(Kernel):
         self.length_scales = Hyperparameter(f'{self.acronym}.length_scales', value=length_scales, **hyper_kwargs)
 
         hyper_kwargs = {}
-        if period_bounds is not None:
+        if period_bounds is not None:  # pragma: no cover
             if period_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:

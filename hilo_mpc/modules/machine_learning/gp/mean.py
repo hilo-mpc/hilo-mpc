@@ -148,7 +148,7 @@ class Mean(metaclass=ABCMeta):
         """
         pass
 
-    def is_bounded(self) -> bool:
+    def is_bounded(self) -> bool:  # pragma: no cover
         """
 
         :return:
@@ -268,7 +268,7 @@ class ConstantMean(Mean):
         if hyperprior_parameters is not None:
             hyper_kwargs['prior_parameters'] = hyperprior_parameters
         bounds = kwargs.get('bounds')
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             bias_bounds = bounds.get('bias')
             if bias_bounds is not None:
                 if bias_bounds == 'fixed':
@@ -356,10 +356,10 @@ class PolynomialMean(Mean):
         super().__init__(active_dims=active_dims)
 
         bounds = kwargs.get('bounds')
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             coefficient_bounds = bounds.get('coefficient')
             offset_bounds = bounds.get('offset')
-        else:
+        else:  # pragma: no cover
             coefficient_bounds, offset_bounds = None, None
 
         if active_dims is not None and is_list_like(coefficient):
@@ -385,7 +385,7 @@ class PolynomialMean(Mean):
             hyper_kwargs['prior'] = hyperprior.get('coefficient')
         if 'coefficient' in hyperprior_parameters:
             hyper_kwargs['prior_parameters'] = hyperprior_parameters.get('coefficient')
-        if coefficient_bounds is not None:
+        if coefficient_bounds is not None:  # pragma: no cover
             if coefficient_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:
@@ -398,7 +398,7 @@ class PolynomialMean(Mean):
             hyper_kwargs['prior'] = hyperprior.get('offset')
         if 'offset' in hyperprior_parameters:
             hyper_kwargs['prior_parameters'] = hyperprior_parameters.get('offset')
-        if offset_bounds is not None:
+        if offset_bounds is not None:  # pragma: no cover
             if offset_bounds == 'fixed':
                 hyper_kwargs['fixed'] = True
             else:

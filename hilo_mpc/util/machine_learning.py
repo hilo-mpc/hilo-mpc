@@ -243,7 +243,7 @@ class Parameter(Object):
         message += f"fixed={self.fixed})"
         return message
 
-    def _values_in_bounds(self) -> bool:
+    def _values_in_bounds(self) -> bool:  # pragma: no cover
         """
 
         :return:
@@ -315,7 +315,7 @@ class Parameter(Object):
             if not bounds_supplied:
                 bounds = None
 
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             if bounds == 'fixed':
                 self._fixed = True
                 self._bounds = (0, ca.inf)
@@ -359,7 +359,7 @@ class Parameter(Object):
         self._prior = self._check_prior(name)
 
     @property
-    def bounds(self) -> (Numeric, Numeric):
+    def bounds(self) -> (Numeric, Numeric):  # pragma: no cover
         """
         First item represents the lower bound, the second item the upper bound. No lower/upper bound is defined by
         an inf object.
@@ -369,11 +369,11 @@ class Parameter(Object):
         return self._bounds
 
     @bounds.setter
-    def bounds(self, bounds: Union[str, Numeric, tuple[Numeric], tuple[Numeric, Numeric]]) -> None:
+    def bounds(self, bounds: Union[str, Numeric, tuple[Numeric], tuple[Numeric, Numeric]]) -> None:  # pragma: no cover
         self._set_properties(self._log, bounds)
 
     @property
-    def lower_bound(self) -> Numeric:
+    def lower_bound(self) -> Numeric:  # pragma: no cover
         """
         Lower bound of the hyperparameter value
 
@@ -382,11 +382,11 @@ class Parameter(Object):
         return self.bounds[0]
 
     @lower_bound.setter
-    def lower_bound(self, lower_bound: Numeric) -> None:
+    def lower_bound(self, lower_bound: Numeric) -> None:  # pragma: no cover
         self.bounds = (lower_bound, self.upper_bound)
 
     @property
-    def upper_bound(self) -> Numeric:
+    def upper_bound(self) -> Numeric:  # pragma: no cover
         """
         Upper bound of the hyperparameter value
 
@@ -395,7 +395,7 @@ class Parameter(Object):
         return self.bounds[1]
 
     @upper_bound.setter
-    def upper_bound(self, upper_bound: Numeric) -> None:
+    def upper_bound(self, upper_bound: Numeric) -> None:  # pragma: no cover
         self.bounds = (self.lower_bound, upper_bound)
 
     @property
@@ -407,7 +407,7 @@ class Parameter(Object):
         return self._SX
 
     @property
-    def MX(self) -> ca.MX:
+    def MX(self) -> ca.MX:  # pragma: no cover
         """
 
         :return:
@@ -459,7 +459,7 @@ class PositiveParameter(Parameter):
             fixed: bool = False
     ) -> None:
         """Constructor method"""
-        if bounds[0] < 0. or bounds[1] < 0.:
+        if bounds[0] < 0. or bounds[1] < 0.:  # pragma: no cover
             raise ValueError("Bounds need to be positive")
         super().__init__(name, value=value, prior=prior, prior_mean=prior_mean, prior_variance=prior_variance,
                          bounds=bounds, fixed=fixed)
@@ -481,7 +481,7 @@ class PositiveParameter(Parameter):
         if value is not None:
             self._log = ca.log(value)
 
-        if bounds is not None:
+        if bounds is not None:  # pragma: no cover
             self._log_bounds = (ca.log(self._bounds[0]), ca.log(self._bounds[1]))
 
     @property
@@ -493,7 +493,7 @@ class PositiveParameter(Parameter):
         return self._log
 
     @property
-    def log_bounds(self) -> (Numeric, Numeric):
+    def log_bounds(self) -> (Numeric, Numeric):  # pragma: no cover
         """
 
         :return:
