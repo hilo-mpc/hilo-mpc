@@ -14,6 +14,412 @@ from hilo_mpc import GP, Mean, Kernel
 # TODO: GPs with constrained hyperparameters
 # TODO: GPs with different inference methods
 # TODO: GPs with different likelihoods
+class GaussianProcessInitialization(TestCase):
+    """"""
+    def test_gaussian_process_features_and_labels_no_list(self) -> None:
+        """
+
+        :return:
+        """
+        gp = GP('x', 'y')
+        self.assertIsInstance(gp.features, list)
+        self.assertIsInstance(gp.labels, list)
+
+    def test_gaussian_process_more_than_one_label(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            GP(['x'], ['y', 'z'])
+        # FIXME: Rename 'MultiOutputGP' to 'GPArray'
+        self.assertTrue(str(context.exception) == "Training a GP on multiple labels is not supported. Please use "
+                                                  "'MultiOutputGP' to train GPs on multiple labels.")
+
+    def test_gaussian_process_check_features_and_labels(self) -> None:
+        """
+
+        :return:
+        """
+        gp = GP(['x', 'y'], 'z')
+
+        self.assertTrue(gp.n_features == 2)
+        self.assertTrue(gp.n_labels == 1)
+        self.assertTrue(gp.features == ['x', 'y'])
+        self.assertTrue(gp.labels == ['z'])
+
+    def test_gaussian_process_initial_training_data(self) -> None:
+        """
+
+        :return:
+        """
+        gp = GP(['x', 'y'], 'z')
+
+        X_train = gp.X_train
+        y_train = gp.y_train
+
+        self.assertTrue(X_train.values.size == 0)
+        self.assertTrue(X_train.SX.is_empty())
+        self.assertTrue(X_train.MX.is_empty())
+        self.assertTrue(y_train.values.size == 0)
+        self.assertTrue(y_train.SX.is_empty())
+        self.assertTrue(y_train.MX.is_empty())
+
+    def test_gaussian_process_likelihood_string_gaussian(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.likelihood import Gaussian
+
+        gp = GP(['x', 'y'], ['z'], likelihood='Gaussian')
+        self.assertIsInstance(gp.likelihood, Gaussian)
+        self.assertTrue(gp.likelihood.name == 'Gaussian')
+
+    def test_gaussian_process_likelihood_string_logistic(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.likelihood import Logistic
+
+        # FIXME: Once the logistic likelihood is implemented, we can remove the with statement
+        with self.assertRaises(NotImplementedError):
+            gp = GP(['x', 'y'], ['z'], likelihood='Logistic')
+            self.assertIsInstance(gp.likelihood, Logistic)
+            self.assertTrue(gp.likelihood.name == 'Logistic')
+
+    def test_gaussian_process_likelihood_string_laplacian(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.likelihood import Laplacian
+
+        # FIXME: Once the Laplacian likelihood is implemented, we can remove the with statement
+        with self.assertRaises(NotImplementedError):
+            gp = GP(['x', 'y'], ['z'], likelihood='Laplacian')
+            self.assertIsInstance(gp.likelihood, Laplacian)
+            self.assertTrue(gp.likelihood.name, 'Laplacian')
+
+    def test_gaussian_process_likelihood_string_students_t(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.likelihood import StudentsT
+
+        # FIXME: Once the student's t likelihood is implemented, we can remove the with statement
+        with self.assertRaises(NotImplementedError):
+            gp = GP(['x', 'y'], ['z'], likelihood='Students t')
+            self.assertIsInstance(gp.likelihood, StudentsT)
+            self.assertTrue(gp.likelihood.name == 'Students_T')
+
+    def test_gaussian_process_likelihood_string_not_recognized(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            GP(['x', 'y'], ['z'], likelihood='Gumbel')
+        self.assertTrue(str(context.exception) == "Likelihood 'Gumbel' not recognized")
+
+    def test_gaussian_process_inference_string_exact(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.inference import ExactInference
+
+        gp = GP(['x', 'y'], ['z'], inference='exact')
+        self.assertIsInstance(gp.inference, ExactInference)
+
+    def test_gaussian_process_inference_string_laplace(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.inference import Laplace
+
+        # FIXME: Once the Laplace inference is implemented, we can remove the with statement
+        with self.assertRaises(TypeError):
+            gp = GP(['x', 'y'], ['z'], inference='Laplace')
+            self.assertIsInstance(gp.inference, Laplace)
+
+    def test_gaussian_process_inference_string_expectation_propagation(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.inference import ExpectationPropagation
+
+        # FIXME: Once the expectation propagation inference is implemented, we can remove the with statement
+        with self.assertRaises(TypeError):
+            gp = GP(['x', 'y'], ['z'], inference='Expectation propagation')
+            self.assertIsInstance(gp.inference, ExpectationPropagation)
+
+    def test_gaussian_process_inference_string_variational_bayes(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.inference import VariationalBayes
+
+        # FIXME: Once the variational Bayes inference is implemented, we can remove the with statement
+        with self.assertRaises(TypeError):
+            gp = GP(['x', 'y'], ['z'], inference='Variational Bayes')
+            self.assertIsInstance(gp.inference, VariationalBayes)
+
+    def test_gaussian_process_inference_string_kullback_leibler(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.inference import KullbackLeibler
+
+        # FIXME: Once the Kullback Leibler inference is implemented, we can remove the with statement
+        with self.assertRaises(TypeError):
+            gp = GP(['x', 'y'], ['z'], inference='Kullback Leibler')
+            self.assertIsInstance(gp.inference, KullbackLeibler)
+
+    def test_gaussian_process_inference_string_not_recognized(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            GP(['x', 'y'], ['z'], inference='Sampling')
+        self.assertTrue(str(context.exception) == "Inference 'Sampling' not recognized")
+
+    # def test_gaussian_process_noise_variance_hyperprior_laplace(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     # FIXME: Fix behavior when supplying hyperpriors this way (both for PositiveParameter and Parameter class)
+    #     gp = GP(['x', 'y'], ['z'], hyperprior='Laplace', hyperprior_parameters={'mean': 0., 'variance': 1.})
+    #     # TODO: Finish once bugs are fixed
+
+    def test_gaussian_process_default_options(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc.modules.machine_learning.gp.inference import ExactInference
+        from hilo_mpc.modules.machine_learning.gp.likelihood import Gaussian
+        from hilo_mpc.modules.machine_learning.gp.mean import ZeroMean
+        from hilo_mpc.modules.machine_learning.gp.kernel import SquaredExponentialKernel
+
+        gp = GP(['x', 'y'], 'z')
+
+        self.assertIsInstance(gp.inference, ExactInference)
+        self.assertIsInstance(gp.likelihood, Gaussian)
+        self.assertIsInstance(gp.mean, ZeroMean)
+        self.assertIsInstance(gp.kernel, SquaredExponentialKernel)
+
+        self.assertTrue(len(gp.hyperparameters) == 3)
+        self.assertTrue(len(gp.hyperparameter_names) == 3)
+
+        self.assertIn(gp.noise_variance, gp.hyperparameters)
+        self.assertIn(gp.noise_variance.name, gp.hyperparameter_names)
+        self.assertTrue(gp.noise_variance.name == 'GP.noise_variance')
+        self.assertFalse(gp.noise_variance.fixed)
+        self.assertIsNone(gp.noise_variance.prior)
+        np.testing.assert_allclose(gp.noise_variance.value, np.ones((1, 1)))
+        np.testing.assert_allclose(gp.noise_variance.log, np.zeros((1, 1)))
+
+
+class TestGaussianProcessTrainingData(TestCase):
+    """"""
+    def setUp(self) -> None:
+        """
+
+        :return:
+        """
+        self.gp = GP(['x', 'y'], 'z', solver='ipopt')
+        self.X_train = np.array([[0., .5, 1. / np.sqrt(2.), np.sqrt(3.) / 2., 1., 0.],
+                                 [1., np.sqrt(3.) / 2., 1. / np.sqrt(2.), .5, 0., -1.]])
+        self.y_train = np.array([[0., np.pi / 6., np.pi / 4., np.pi / 3., np.pi / 2., np.pi]])
+
+    def test_gaussian_process_wrong_dimension_in_x(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            self.gp.X_train = np.array([[1., 2., 3., 4., 5.]])
+        self.assertTrue(str(context.exception) == "Dimension mismatch. Supplied dimension for the features is 1, but "
+                                                  "required dimension is 2.")
+
+    def test_gaussian_process_wrong_dimension_in_y(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            self.gp.y_train = np.array([[2., 3., 4., 5., 6.], [2., 3., 4., 5., 6.]])
+        self.assertTrue(str(context.exception) == "Dimension mismatch. Supplied dimension for the labels is 2, but "
+                                                  "required dimension is 1.")
+
+    def test_gaussian_process_wrong_dimension_in_observations(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            self.gp.set_training_data(np.array([[1., 2., 3., 4., 5.], [6., 7., 8., 9., 0.]]),
+                                      np.array([[.1, .2, .3, .4]]))
+        self.assertTrue(str(context.exception) == "Number of observations in training matrix and target vector do not "
+                                                  "match!")
+
+    def test_gaussian_process_fit_again_warning(self) -> None:
+        """
+
+        :return:
+        """
+        gp = self.gp
+        X_train = self.X_train
+        y_train = self.y_train
+
+        gp.set_training_data(X_train, y_train)
+        gp.setup()
+        gp.fit_model()
+
+        with self.assertWarns(UserWarning) as context:
+            gp.set_training_data(X_train, y_train)
+        self.assertTrue(len(context.warnings) == 1)
+        self.assertTrue(str(context.warning) == "Gaussian process was already executed. Use the fit_model() method "
+                                                "again to optimize with respect to the newly set training data.")
+
+    def test_gaussian_process_set_up_again_warning(self) -> None:
+        """
+
+        :return:
+        """
+        gp = self.gp
+        X_train = self.X_train
+        y_train = self.y_train
+
+        gp.set_training_data(X_train, y_train)
+        gp.setup()
+        gp.fit_model()
+
+        with self.assertWarns(UserWarning) as context:
+            gp.set_training_data(X_train[:, :-1], y_train[:, :-1])
+        self.assertTrue(len(context.warnings) == 2)
+        self.assertTrue(str(context.warnings[0].message) == "Gaussian process was already executed. Use the fit_model()"
+                                                            " method again to optimize with respect to the newly set "
+                                                            "training data.")
+        self.assertTrue(str(context.warnings[1].message) == "Dimensions of training data set changed. Please run "
+                                                            "setup() method again.")
+
+
+class TestGaussianProcessSetup(TestCase):
+    """"""
+    def setUp(self) -> None:
+        """
+
+        :return:
+        """
+        self.gp = GP(['x', 'y'], 'z', solver='ipopt')
+        self.X_train = np.array([[0., .5, 1. / np.sqrt(2.), np.sqrt(3.) / 2., 1., 0.],
+                                 [1., np.sqrt(3.) / 2., 1. / np.sqrt(2.), .5, 0., -1.]])
+        self.y_train = np.array([[0., np.pi / 6., np.pi / 4., np.pi / 3., np.pi / 2., np.pi]])
+
+    def test_gaussian_process_no_training_data_supplied_x(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(RuntimeError) as context:
+            self.gp.setup()
+        self.assertTrue(str(context.exception) == "The training data has not been set. Please run the method "
+                                                  "set_training_data() to proceed.")
+
+    def test_gaussian_process_no_training_data_supplied_y(self) -> None:
+        """
+
+        :return:
+        """
+        gp = self.gp
+        gp.X_train = self.X_train
+        with self.assertRaises(RuntimeError) as context:
+            self.gp.setup()
+        self.assertTrue(str(context.exception) == "The training data has not been set. Please run the method "
+                                                  "set_training_data() to proceed.")
+
+    # def test_gaussian_process_hyperparameter_hyperprior_log_marginal_likelihood(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+
+    # def test_gaussian_process_hyperparameter_is_log_no_variance(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+
+    # def test_gaussian_process_hyperparameter_is_log(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+
+    # def test_gaussian_process_hyperparameter_is_not_log(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+
+    # def test_gaussian_process_hyperparameter_ard(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+
+    # def test_gaussian_process_fixed_parameter_is_log_no_variance(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+
+    # def test_gaussian_process_fixed_parameter_is_log(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+
+    # def test_gaussian_process_fixed_parameter_is_not_log(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+
+    # def test_gaussian_process_fixed_parameter_ard(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+
+    def test_gaussian_process_is_not_set_up(self) -> None:
+        """
+
+        :return:
+        """
+        self.assertFalse(self.gp.is_setup())
+
+    def test_gaussian_process_is_set_up(self) -> None:
+        """
+
+        :return:
+        """
+        gp = self.gp
+        gp.set_training_data(self.X_train, self.y_train)
+        gp.setup()
+        self.assertTrue(gp.is_setup())
+
+
 class TestOneFeatureOneLabel(TestCase):
     """"""
     def setUp(self) -> None:
