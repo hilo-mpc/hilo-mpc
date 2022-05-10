@@ -522,7 +522,7 @@ class TestKalmanFilterEstimation(TestCase):
         np.testing.assert_allclose(y_pred, np.array([[.4]]))
 
 
-class ExtendedKalmanFilter(TestCase):
+class TestExtendedKalmanFilter(TestCase):
     """"""
     def test_extended_kalman_filter_initialization_linear_model_warning(self) -> None:
         """
@@ -710,6 +710,7 @@ class UnscentedKalmanFilterSigmaPoints(TestCase):
         model.setup(dt=.1)
 
         ukf = UKF(model, alpha=1., plot_backend='bokeh')
+        ukf.setup()
         self.ukf = ukf
 
     def test_unscented_kalman_filter_predict_only(self) -> None:
@@ -723,10 +724,7 @@ class UnscentedKalmanFilterSigmaPoints(TestCase):
         p = [.15, 303.15, .13, .00025, 15., .14]
         Q = np.zeros((3, 3))
 
-        ukf = self.ukf
-        ukf.setup()
-        prediction = ukf.predict(np.append(x, P, axis=1), np.append([u], p), Q)
-
+        prediction = self.ukf.predict(np.append(x, P, axis=1), np.append([u], p), Q)
         np.testing.assert_allclose(prediction, np.array([[299.925, 0.970453, 1.08254e-06, -2.11206e-05, 299.925,
                                                           301.631, 299.925, 299.925, 298.218, 299.925, 299.925],
                                                          [0.219433, 1.08254e-06, 1.02165, -0.0848792, 0.219446,
@@ -739,3 +737,20 @@ class UnscentedKalmanFilterSigmaPoints(TestCase):
 
         :return:
         """
+        x = np.array([[299.925], [.219433], [19.9619]])
+        P = np.array([[.970453, 1.08254e-06, -2.11206e-05],
+                      [1.08254e-06, 1.02165, -.0848792],
+                      [-2.11206e-05, -.0848792, 1.00427]])
+        X = np.array([[299.925, 301.631, 299.925, 299.925, 298.218, 299.925, 299.925],
+                      [.219446, .219451, 1.97011, .219537, .21944, -1.53128, .219345],
+                      [19.9618, 19.9617, 19.8164, 21.6914, 19.9618, 20.1075, 18.2322]])
+        y = np.array([[300.941], [.245805]])
+        u = .01
+        p = [.15, 303.15, .13, .00025, 15., .14]
+        R = np.diag([.25, .01])
+
+        update, y_pred = self.ukf.update(np.concatenate([x, P, X], axis=1), y, np.append([u], p), R)
+        np.testing.assert_allclose(update, np.array([[300.733, 0.198539, -2.03814e-06, 1.56415e-06],
+                                                     [0.245549, -2.03814e-06, 0.00990874, -0.000819447],
+                                                     [19.9597, 1.56415e-06, -0.000819447, 0.997286]]), atol=1e-3)
+        np.testing.assert_allclose(y_pred, np.array([[299.925], [.219434]]), atol=1e-3)
