@@ -17,8 +17,8 @@ class TestKalmanFilterInitialization(TestCase):
         model.set_dynamical_equations('x^2')
         with self.assertRaises(ValueError) as context:
             KF(model)
-        self.assertTrue(str(context.exception) == "The supplied model is nonlinear. Please use an estimator targeted at"
-                                                  " the estimation of nonlinear systems.")
+        self.assertEqual(str(context.exception), "The supplied model is nonlinear. Please use an estimator targeted at "
+                                                 "the estimation of nonlinear systems.")
 
     def test_kalman_filter_model_not_set_up(self) -> None:
         """
@@ -30,8 +30,8 @@ class TestKalmanFilterInitialization(TestCase):
         model.set_dynamical_equations('2*x')
         with self.assertRaises(RuntimeError) as context:
             KF(model)
-        self.assertTrue(str(context.exception) == "Model is not set up. Run Model.setup() before passing it to the "
-                                                  "Kalman filter.")
+        self.assertEqual(str(context.exception), "Model is not set up. Run Model.setup() before passing it to the "
+                                                 "Kalman filter.")
 
     def test_kalman_filter_initial_dimensions(self) -> None:
         """
@@ -45,12 +45,12 @@ class TestKalmanFilterInitialization(TestCase):
 
         kf = KF(model, plot_backend='bokeh')
 
-        self.assertTrue(kf.n_x == 0)
-        self.assertTrue(kf.n_y == 0)
-        self.assertTrue(kf.n_z == 0)
-        self.assertTrue(kf.n_u == 0)
-        self.assertTrue(kf.n_p == 0)
-        self.assertTrue(kf.n_p_est == 0)
+        self.assertEqual(kf.n_x, 0)
+        self.assertEqual(kf.n_y, 0)
+        self.assertEqual(kf.n_z, 0)
+        self.assertEqual(kf.n_u, 0)
+        self.assertEqual(kf.n_p, 0)
+        self.assertEqual(kf.n_p_est, 0)
 
     def test_kalman_filter_initial_matrices(self) -> None:
         """
@@ -86,9 +86,9 @@ class TestKalmanFilterSetup(TestCase):
         kf = KF(model, plot_backend='bokeh')
         with self.assertWarns(UserWarning) as context:
             kf.setup()
-        self.assertTrue(len(context.warnings) == 1)
-        self.assertTrue(str(context.warning) == "The model has no measurement equations, I am assuming measurements of "
-                                                "all states ['x'] are available.")
+        self.assertEqual(len(context.warnings), 1)
+        self.assertEqual(str(context.warning), "The model has no measurement equations, I am assuming measurements of "
+                                               "all states ['x'] are available.")
         # TODO: Also check estimation once bug is fixed
 
     def test_kalman_filter_is_set_up(self) -> None:
@@ -123,12 +123,12 @@ class TestKalmanFilterSetup(TestCase):
         kf = KF(model, plot_backend='bokeh')
         kf.setup()
 
-        self.assertTrue(kf.n_x == 2)
-        self.assertTrue(kf.n_y == 1)
-        self.assertTrue(kf.n_z == 0)
-        self.assertTrue(kf.n_u == 1)
-        self.assertTrue(kf.n_p == 2)
-        self.assertTrue(kf.n_p_est == 0)
+        self.assertEqual(kf.n_x, 2)
+        self.assertEqual(kf.n_y, 1)
+        self.assertEqual(kf.n_z, 0)
+        self.assertEqual(kf.n_u, 1)
+        self.assertEqual(kf.n_p, 2)
+        self.assertEqual(kf.n_p_est, 0)
 
 
 class TestKalmanFilterMatrixSetters(TestCase):
@@ -171,8 +171,8 @@ class TestKalmanFilterMatrixSetters(TestCase):
         """
         with self.assertRaises(ValueError) as context:
             self.kf.Q = [0., 0., 0.]
-        self.assertTrue(str(context.exception) == "Dimension mismatch. Supplied dimension is 3x3, but required "
-                                                  "dimension is 2x2")
+        self.assertEqual(str(context.exception), "Dimension mismatch. Supplied dimension is 3x3, but required dimension"
+                                                 " is 2x2")
 
     def test_kalman_filter_process_noise_setter(self) -> None:
         """
@@ -191,8 +191,8 @@ class TestKalmanFilterMatrixSetters(TestCase):
         """
         with self.assertRaises(ValueError) as context:
             self.kf.R = [0., 0.]
-        self.assertTrue(str(context.exception) == "Dimension mismatch. Supplied dimension is 2x2, but required "
-                                                  "dimension is 1x1")
+        self.assertEqual(str(context.exception), "Dimension mismatch. Supplied dimension is 2x2, but required dimension"
+                                                 " is 1x1")
 
     def test_kalman_filter_measurement_noise_setter(self) -> None:
         """
@@ -211,8 +211,8 @@ class TestKalmanFilterMatrixSetters(TestCase):
         """
         with self.assertRaises(ValueError) as context:
             self.kf.set_initial_guess([.8, 0.], P0=[1., 1., 1.])
-        self.assertTrue(str(context.exception) == "Dimension mismatch. Supplied dimension is 3x3, but required "
-                                                  "dimension is 2x2")
+        self.assertEqual(str(context.exception), "Dimension mismatch. Supplied dimension is 3x3, but required dimension"
+                                                 " is 2x2")
 
     def test_kalman_filter_error_covariance_setter_default(self) -> None:
         """
@@ -266,8 +266,8 @@ class TestKalmanFilterEstimation(TestCase):
         """
         with self.assertRaises(RuntimeError) as context:
             self.kf.estimate()
-        self.assertTrue(str(context.exception) == "Kalman filter is not set up. Run KalmanFilter.setup() before running"
-                                                  " simulations.")
+        self.assertEqual(str(context.exception), "Kalman filter is not set up. Run KalmanFilter.setup() before running "
+                                                 "simulations.")
 
     def test_kalman_filter_no_initial_guess_supplied(self) -> None:
         """
@@ -279,8 +279,8 @@ class TestKalmanFilterEstimation(TestCase):
         kf.setup()
         with self.assertRaises(RuntimeError) as context:
             kf.estimate()
-        self.assertTrue(str(context.exception) == "No initial guess for the states found. Please set initial guess "
-                                                  "before running the Kalman filter!")
+        self.assertEqual(str(context.exception), "No initial guess for the states found. Please set initial guess "
+                                                 "before running the Kalman filter!")
 
     def test_kalman_filter_no_measurement_data_supplied(self) -> None:
         """
@@ -293,7 +293,7 @@ class TestKalmanFilterEstimation(TestCase):
         kf.set_initial_guess([.8, 0.])
         with self.assertRaises(RuntimeError) as context:
             kf.estimate()
-        self.assertTrue(str(context.exception) == "No measurement data supplied.")
+        self.assertEqual(str(context.exception), "No measurement data supplied.")
 
     def test_kalman_filter_one_step(self) -> None:
         """
@@ -348,8 +348,8 @@ class TestKalmanFilterEstimation(TestCase):
         # FIXME: Improve handling of dimensions
         with self.assertRaises(IndexError) as context:
             kf.estimate(y=np.array([[.3894626, .3894626]]), steps=3)
-        self.assertTrue(str(context.exception) == "Dimension mismatch for variable y. Supplied dimension is 2, but "
-                                                  "required dimension is 3.")
+        self.assertEqual(str(context.exception), "Dimension mismatch for variable y. Supplied dimension is 2, but "
+                                                 "required dimension is 3.")
 
     def test_kalman_filter_multi_step_dimension_mismatch_in_u(self) -> None:
         """
@@ -363,8 +363,8 @@ class TestKalmanFilterEstimation(TestCase):
         # FIXME: See test_kalman_filter_multi_step_dimension_mismatch_in_y
         with self.assertRaises(IndexError) as context:
             kf.estimate(y=np.array([[.3894626, .3894626, .3894626]]), u=np.array([[.8, .8]]), steps=3)
-        self.assertTrue(str(context.exception) == "Dimension mismatch for variable u. Supplied dimension is 2, but "
-                                                  "required dimension is 3.")
+        self.assertEqual(str(context.exception), "Dimension mismatch for variable u. Supplied dimension is 2, but "
+                                                 "required dimension is 3.")
 
     def test_kalman_filter_multi_step_dimension_mismatch_in_p(self) -> None:
         """
@@ -378,8 +378,8 @@ class TestKalmanFilterEstimation(TestCase):
         # FIXME: See test_kalman_filter_multi_step_dimension_mismatch_in_y
         with self.assertRaises(IndexError) as context:
             kf.estimate(y=np.array([[.3894626, .3894626, .3894626]]), p=np.array([[.5, .5], [.4, .4]]), steps=3)
-        self.assertTrue(str(context.exception) == "Dimension mismatch for variable p. Supplied dimension is 2, but "
-                                                  "required dimension is 3.")
+        self.assertEqual(str(context.exception), "Dimension mismatch for variable p. Supplied dimension is 2, but "
+                                                 "required dimension is 3.")
 
     # def test_kalman_filter_multi_step(self) -> None:
     #     """
@@ -541,9 +541,9 @@ class TestExtendedKalmanFilter(TestCase):
 
         with self.assertWarns(UserWarning) as context:
             EKF(model, plot_backend='bokeh')
-        self.assertTrue(len(context.warnings) == 1)
-        self.assertTrue(str(context.warning) == "The supplied model is linear. For better efficiency use an observer "
-                                                "targeted at the estimation of linear systems.")
+        self.assertEqual(len(context.warnings), 1)
+        self.assertEqual(str(context.warning), "The supplied model is linear. For better efficiency use an observer "
+                                               "targeted at the estimation of linear systems.")
 
     def test_extended_kalman_filter_one_step(self) -> None:
         """
@@ -585,9 +585,9 @@ class TestUnscentedKalmanFilter(TestCase):
 
         with self.assertWarns(UserWarning) as context:
             UKF(model, plot_backend='bokeh')
-        self.assertTrue(len(context.warnings) == 1)
-        self.assertTrue(str(context.warning) == "The supplied model is linear. For better efficiency use an observer "
-                                                "targeted at the estimation of linear systems.")
+        self.assertEqual(len(context.warnings), 1)
+        self.assertEqual(str(context.warning), "The supplied model is linear. For better efficiency use an observer "
+                                               "targeted at the estimation of linear systems.")
 
     # def test_unscented_kalman_filter_no_measurement_equations(self) -> None:
     #     """
@@ -674,8 +674,8 @@ class UnscentedKalmanFilterTuningParameters(TestCase):
         """
         with self.assertRaises(ValueError) as context:
             self.ukf.alpha = 2.
-        self.assertTrue(str(context.exception) == "The parameter alpha needs to lie in the interval (0, 1]. Supplied "
-                                                  "alpha is 2.0.")
+        self.assertEqual(str(context.exception), "The parameter alpha needs to lie in the interval (0, 1]. Supplied "
+                                                 "alpha is 2.0.")
 
     def test_unscented_kalman_filter_kappa_out_of_bounds(self) -> None:
         """
@@ -684,8 +684,8 @@ class UnscentedKalmanFilterTuningParameters(TestCase):
         """
         with self.assertRaises(ValueError) as context:
             self.ukf.kappa = -1.
-        self.assertTrue(str(context.exception) == "The parameter kappa needs to be greater or equal to 0. Supplied "
-                                                  "kappa is -1.0.")
+        self.assertEqual(str(context.exception), "The parameter kappa needs to be greater or equal to 0. Supplied kappa"
+                                                 " is -1.0.")
 
 
 class UnscentedKalmanFilterSigmaPoints(TestCase):

@@ -24,9 +24,12 @@ class TestParticleFilterInitialization(TestCase):
 
         with self.assertWarns(UserWarning) as context:
             PF(model, plot_backend='bokeh')
-        self.assertTrue(len(context.warnings) == 1)
-        self.assertTrue(str(context.warning) == "The supplied model is linear. For better efficiency use an observer "
-                                                "targeted at the estimation of linear systems.")
+        self.assertEqual(len(context.warnings), 1)
+        self.assertEqual(
+            str(context.warning),
+            "The supplied model is linear. For better efficiency use an observer targeted at the estimation of linear "
+            "systems."
+        )
 
     def test_particle_filter_initial_tuning_parameters(self) -> None:
         """
@@ -44,7 +47,7 @@ class TestParticleFilterInitialization(TestCase):
         self.assertTrue(callable(pf.probability_density_function))
         # TODO: Any other assertions with respect to the probability density function?
         self.assertIsNone(pf.variant)
-        self.assertTrue(pf.sample_size == 15)
+        self.assertEqual(pf.sample_size, 15)
 
 
 class TestParticleFilterPDF(TestCase):
@@ -72,8 +75,8 @@ class TestParticleFilterPDF(TestCase):
         """
         with self.assertRaises(ValueError) as context:
             self.pf.probability_density_function = 'pdf'
-        self.assertTrue(str(context.exception) == "Probability density function of the particle filter needs to be "
-                                                  "callable.")
+        self.assertEqual(str(context.exception),
+                         "Probability density function of the particle filter needs to be callable.")
 
     def test_particle_filter_pdf_annotations(self) -> None:
         """
@@ -114,8 +117,10 @@ class TestParticleFilterPDF(TestCase):
 
         with self.assertRaises(TypeError) as context:
             self.pf.probability_density_function = pdf
-        self.assertTrue(str(context.exception) == "The 1st argument to the probability density function (pdf) needs to "
-                                                  "be the 'mean' with type ndarray.")
+        self.assertEqual(
+            str(context.exception),
+            "The 1st argument to the probability density function (pdf) needs to be the 'mean' with type ndarray."
+        )
 
     def test_particle_filter_pdf_wrong_annotation_sigma(self) -> None:
         """
@@ -134,8 +139,10 @@ class TestParticleFilterPDF(TestCase):
 
         with self.assertRaises(TypeError) as context:
             self.pf.probability_density_function = pdf
-        self.assertTrue(str(context.exception) == "The 2nd argument to the probability density function (pdf) needs to "
-                                                  "be the 'covariance' with type ndarray.")
+        self.assertEqual(
+            str(context.exception),
+            "The 2nd argument to the probability density function (pdf) needs to be the 'covariance' with type ndarray."
+        )
 
     def test_particle_filter_pdf_wrong_annotation_n(self) -> None:
         """
@@ -154,8 +161,10 @@ class TestParticleFilterPDF(TestCase):
 
         with self.assertRaises(TypeError) as context:
             self.pf.probability_density_function = pdf
-        self.assertTrue(str(context.exception) == "The 3rd argument to the probability density function (pdf) needs to "
-                                                  "be the 'sample size' with type int.")
+        self.assertEqual(
+            str(context.exception),
+            "The 3rd argument to the probability density function (pdf) needs to be the 'sample size' with type int."
+        )
 
     def test_particle_filter_pdf_wrong_annotation_return(self) -> None:
         """
@@ -174,8 +183,11 @@ class TestParticleFilterPDF(TestCase):
 
         with self.assertRaises(TypeError) as context:
             self.pf.probability_density_function = pdf
-        self.assertTrue(str(context.exception) == "The return value of the probability density function (pdf) needs to "
-                                                  "be a 'random sample' with type ndarray.")
+        self.assertEqual(
+            str(context.exception),
+            "The return value of the probability density function (pdf) needs to be a 'random sample' with type "
+            "ndarray."
+        )
 
     def test_particle_filter_pdf_no_annotation(self) -> None:
         """
@@ -240,7 +252,7 @@ class TestParticleFilterPDF(TestCase):
     #     # FIXME: Right now this ValueError will be caught by the following except statement
     #     with self.assertRaises(ValueError) as context:
     #         pf.probability_density_function = pdf
-    #     self.assertTrue(str(context.exception) == "Dimension mismatch. Expected dimension 1x15, got 15x2.")
+    #     self.assertEqual(str(context.exception), "Dimension mismatch. Expected dimension 1x15, got 15x2.")
 
     def test_particle_filter_pdf_no_annotation_exception(self) -> None:
         """
@@ -259,16 +271,19 @@ class TestParticleFilterPDF(TestCase):
         pf = self.pf
         with self.assertRaises(RuntimeError) as context:
             pf.probability_density_function = pdf
-        self.assertTrue(str(context.exception) == "The following exception was raised\n"
-                                                  "   TypeError: 'pdf() takes 2 positional arguments but 3 were given'."
-                                                  "\n"
-                                                  "Please make sure that the supplied probability density function "
-                                                  "(pdf) has the following arguments\n"
-                                                  "   mu - mean of the pdf (type: numpy.ndarray),\n"
-                                                  "   sigma - covariance of the mean (type: numpy.ndarray),\n"
-                                                  "   n - sample size (type: int),\n"
-                                                  "and the following return value\n"
-                                                  "   X - random sample (type: numpy.ndarray).")
+        self.assertEqual(
+            str(context.exception),
+            "The following exception was raised\n"
+            "   TypeError: 'pdf() takes 2 positional arguments but 3 were given'."
+            "\n"
+            "Please make sure that the supplied probability density function "
+            "(pdf) has the following arguments\n"
+            "   mu - mean of the pdf (type: numpy.ndarray),\n"
+            "   sigma - covariance of the mean (type: numpy.ndarray),\n"
+            "   n - sample size (type: int),\n"
+            "and the following return value\n"
+            "   X - random sample (type: numpy.ndarray)."
+        )
 
 
 class TestParticleFilterOtherTunableParameterSetters(TestCase):
@@ -296,7 +311,7 @@ class TestParticleFilterOtherTunableParameterSetters(TestCase):
         """
         pf = self.pf
         pf.variant = 'default'
-        self.assertTrue(pf.variant == 'default')
+        self.assertEqual(pf.variant, 'default')
 
     def test_particle_filter_sample_size_setter(self) -> None:
         """
@@ -305,7 +320,7 @@ class TestParticleFilterOtherTunableParameterSetters(TestCase):
         """
         pf = self.pf
         pf.sample_size = 20
-        self.assertTrue(pf.sample_size == 20)
+        self.assertEqual(pf.sample_size, 20)
 
 
 class TestParticleFilterEstimation(TestCase):

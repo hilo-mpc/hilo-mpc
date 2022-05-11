@@ -40,8 +40,8 @@ class TestGeneral(TestCase):
         A = np.random.randn(2, 3)
         with self.assertRaises(ValueError) as context:
             self.model.A = A
-        self.assertTrue("The state matrix needs to be a square matrix. Supplied matrix has dimensions 2x3." == str(
-            context.exception))
+        self.assertEqual("The state matrix needs to be a square matrix. Supplied matrix has dimensions 2x3.",
+                         str(context.exception))
 
     def test_initialization_3(self) -> None:
         """
@@ -51,8 +51,8 @@ class TestGeneral(TestCase):
         M = np.eye(2, 3)
         with self.assertRaises(ValueError) as context:
             self.model.M = M
-        self.assertTrue("The mass matrix (M) needs to be a square matrix. Supplied matrix has dimensions 2x3." == str(
-            context.exception))
+        self.assertEqual("The mass matrix (M) needs to be a square matrix. Supplied matrix has dimensions 2x3.",
+                         str(context.exception))
 
 
 class TestODESystem(TestCase):
@@ -155,7 +155,7 @@ class TestODESystem(TestCase):
 
         self.model.setup(dt=1.)
         self.assertTrue(self.model.is_linear())
-        self.assertTrue(self.model.n_p, 4)
+        self.assertEqual(self.model.n_p, 4)
         self.assertTrue(ca.depends_on(self.model.ode, p))
         self.assertTrue(ca.depends_on(self.model.meas, p))
 
@@ -181,7 +181,7 @@ class TestODESystem(TestCase):
 
         self.model.setup(dt=1.)
         self.assertTrue(self.model.is_linear())
-        self.assertTrue(self.model.n_p, 4)
+        self.assertEqual(self.model.n_p, 4)
         self.assertTrue(ca.depends_on(self.model.ode, p))
         self.assertTrue(ca.depends_on(self.model.ode, c))
         self.assertTrue(ca.depends_on(self.model.meas, d))
@@ -220,13 +220,13 @@ class TestODESystem(TestCase):
         self.assertIsInstance(B_model, ca.SX)
         self.assertIsInstance(C_model, ca.SX)
 
-        self.assertTrue(A_model.shape == (5, 5))
+        self.assertEqual(A_model.shape, (5, 5))
         self.assertTrue(A_model.is_constant())
         self.assertTrue(ca.simplify(A - A_model).is_zero())
-        self.assertTrue(B_model.shape == (5, 1))
+        self.assertEqual(B_model.shape, (5, 1))
         self.assertTrue(B_model.is_constant())
         self.assertTrue(ca.simplify(B - B_model).is_zero())
-        self.assertTrue(C_model.shape == (1, 5))
+        self.assertEqual(C_model.shape, (1, 5))
         self.assertTrue(C_model.is_constant())
         self.assertTrue(ca.simplify(C - C_model).is_zero())
 
@@ -264,9 +264,10 @@ class TestODESystem(TestCase):
 
         with self.assertRaises(ValueError) as context:
             self.model.setup(dt=.01)
-        self.assertTrue(
-            "Dimension mismatch in state matrix (A). Supplied dimension is 4x4, but required dimension is 5x5." == str(
-                context.exception))
+        self.assertEqual(
+            "Dimension mismatch in state matrix (A). Supplied dimension is 4x4, but required dimension is 5x5.",
+            str(context.exception)
+        )
 
     def test_initialization_7(self):
         """
@@ -300,9 +301,10 @@ class TestODESystem(TestCase):
 
         with self.assertRaises(ValueError) as context:
             self.model.setup(dt=.01)
-        self.assertTrue(
-            "Dimension mismatch in input matrix (B). Supplied dimension is 4x1, but required dimension is 5x1." == str(
-                context.exception))
+        self.assertEqual(
+            "Dimension mismatch in input matrix (B). Supplied dimension is 4x1, but required dimension is 5x1.",
+            str(context.exception)
+        )
 
     def test_initialization_8(self):
         """
@@ -336,9 +338,10 @@ class TestODESystem(TestCase):
 
         with self.assertRaises(ValueError) as context:
             self.model.setup(dt=.01)
-        self.assertTrue(
-            "Dimension mismatch in output matrix (C). Supplied dimension is 1x4, but required dimension is 1x5." == str(
-                context.exception))
+        self.assertEqual(
+            "Dimension mismatch in output matrix (C). Supplied dimension is 1x4, but required dimension is 1x5.",
+            str(context.exception)
+        )
 
     def test_initialization_9(self):
         """
@@ -377,9 +380,10 @@ class TestODESystem(TestCase):
 
         with self.assertRaises(ValueError) as context:
             self.model.setup(dt=.01)
-        self.assertTrue(
-            "Dimension mismatch in feedthrough matrix (D). Supplied dimension is 2x1, but required dimension is 1x1."
-            == str(context.exception))
+        self.assertEqual(
+            "Dimension mismatch in feedthrough matrix (D). Supplied dimension is 2x1, but required dimension is 1x1.",
+            str(context.exception)
+        )
 
     @skip("Test will be moved to discrete model testing.")
     def test_initialization_12(self):
@@ -609,10 +613,10 @@ class TestDAESystem(TestCase):
         self.assertIsInstance(B_model, ca.SX)
         self.assertIsInstance(M_model, np.ndarray)
 
-        self.assertTrue(A_model.shape == (3, 3))
+        self.assertEqual(A_model.shape, (3, 3))
         self.assertFalse(A_model.is_constant())
         self.assertTrue(ca.simplify(A - A_model).is_zero())
-        self.assertTrue(B_model.shape == (3, 1))
+        self.assertEqual(B_model.shape, (3, 1))
         self.assertTrue(B_model.is_constant())
         self.assertTrue(ca.simplify(B - B_model).is_zero())
 
@@ -649,9 +653,11 @@ class TestDAESystem(TestCase):
 
         with self.assertRaises(ValueError) as context:
             self.model.setup(dt=1.)
-        self.assertTrue("Dimension mismatch. Supplied mass matrix (M) has 2 non-zero elements on its diagonal "
-                        "(i.e. dynamical states), but the number of set dynamical states is 1." ==
-                        str(context.exception))
+        self.assertEqual(
+            "Dimension mismatch. Supplied mass matrix (M) has 2 non-zero elements on its diagonal "
+            "(i.e. dynamical states), but the number of set dynamical states is 1.",
+            str(context.exception)
+        )
 
     def test_initialization_7(self):
         """
@@ -682,9 +688,11 @@ class TestDAESystem(TestCase):
 
         with self.assertRaises(ValueError) as context:
             self.model.setup(dt=1.)
-        self.assertTrue("Dimension mismatch. Supplied mass matrix (M) has 1 zero elements on its diagonal "
-                        "(i.e. algebraic states), but the number of set algebraic states is 2." ==
-                        str(context.exception))
+        self.assertEqual(
+            "Dimension mismatch. Supplied mass matrix (M) has 1 zero elements on its diagonal (i.e. algebraic states), "
+            "but the number of set algebraic states is 2.",
+            str(context.exception)
+        )
 
     def test_initialization_8(self):
         """
@@ -712,8 +720,8 @@ class TestDAESystem(TestCase):
 
         with self.assertRaises(ValueError) as context:
             self.model.setup(dt=1.)
-        self.assertTrue("Dimension mismatch in state matrix (A). Supplied dimension is 2x2, but required dimension is "
-                        "3x3." == str(context.exception))
+        self.assertEqual("Dimension mismatch in state matrix (A). Supplied dimension is 2x2, but required dimension is "
+                         "3x3.", str(context.exception))
 
     def test_initialization_9(self):
         """
@@ -742,5 +750,5 @@ class TestDAESystem(TestCase):
 
         with self.assertRaises(RuntimeError) as context:
             self.model.setup(dt=1.)
-        self.assertTrue("Only algebraic equations were supplied for the DAE system. ODE's are still missing." == str(
-            context.exception))
+        self.assertEqual("Only algebraic equations were supplied for the DAE system. ODE's are still missing.",
+                         str(context.exception))

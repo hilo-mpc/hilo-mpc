@@ -199,7 +199,7 @@ class TestLinearizationEquilibriumPointODE(TestCase):
         self.lin_model.setup(dt=.01)
         with self.assertRaises(ValueError) as context:
             self.lin_model.set_equilibrium_point(u_eq=[0.])
-        self.assertTrue("Dynamical state information is missing from the equilibrium point." == str(context.exception))
+        self.assertEqual("Dynamical state information is missing from the equilibrium point.", str(context.exception))
 
     def test_equilibrium_point_missing_u(self) -> None:
         """
@@ -210,7 +210,7 @@ class TestLinearizationEquilibriumPointODE(TestCase):
         self.lin_model.setup(dt=.01)
         with self.assertRaises(ValueError) as context:
             self.lin_model.set_equilibrium_point(x_eq=[0., 0.])
-        self.assertTrue("Input information is missing from the equilibrium point." == str(context.exception))
+        self.assertEqual("Input information is missing from the equilibrium point.", str(context.exception))
 
     def test_wrong_dimensions_in_x(self) -> None:
         """
@@ -221,8 +221,8 @@ class TestLinearizationEquilibriumPointODE(TestCase):
         self.lin_model.setup(dt=.01)
         with self.assertRaises(ValueError) as context:
             self.lin_model.set_equilibrium_point(x_eq=[0., 0., 0.], u_eq=[0.])
-        self.assertTrue("Dimension mismatch for the dynamical state information of the equilibrium point. "
-                        "Got 3, expected 2." == str(context.exception))
+        self.assertEqual("Dimension mismatch for the dynamical state information of the equilibrium point. Got 3, "
+                         "expected 2.", str(context.exception))
 
     def test_wrong_dimensions_in_u(self) -> None:
         """
@@ -233,8 +233,8 @@ class TestLinearizationEquilibriumPointODE(TestCase):
         self.lin_model.setup(dt=.01)
         with self.assertRaises(ValueError) as context:
             self.lin_model.set_equilibrium_point(x_eq=[0., 0.], u_eq=[0., 0.])
-        self.assertTrue("Dimension mismatch for the input information of the equilibrium point. "
-                        "Got 2, expected 1." == str(context.exception))
+        self.assertEqual("Dimension mismatch for the input information of the equilibrium point. Got 2, expected 1.",
+                         str(context.exception))
 
     def test_wrong_equilibrium_point_given(self) -> None:
         """
@@ -245,8 +245,7 @@ class TestLinearizationEquilibriumPointODE(TestCase):
         self.lin_model.setup(dt=.01)
         with self.assertRaises(ValueError) as context:
             self.lin_model.set_equilibrium_point(x_eq=[np.pi / 2., 0.], u_eq=[0.])
-        self.assertTrue("Supplied values are not an equilibrium point. Maximum error: 4.14159" == str(context.exception)
-                        )
+        self.assertEqual("Supplied values are not an equilibrium point. Maximum error: 4.14159", str(context.exception))
 
     def test_no_equilibrium_point_given(self) -> None:
         """
@@ -258,8 +257,11 @@ class TestLinearizationEquilibriumPointODE(TestCase):
         self.lin_model.set_initial_conditions([0., 0.])
         with self.assertRaises(RuntimeError) as context:
             self.lin_model.simulate(u=.1)
-        self.assertTrue("Model is linearized, but no equilibrium point was set. Please set equilibrium point before "
-                        "simulating the model!" == str(context.exception))
+        self.assertEqual(
+            "Model is linearized, but no equilibrium point was set. Please set equilibrium point before simulating the "
+            "model!",
+            str(context.exception)
+        )
 
     def test_equilibrium_point_given(self) -> None:
         """
@@ -379,7 +381,7 @@ class TestLinearizationEquilibriumPointDAE(TestCase):
         self.lin_model.setup(dt=.01)
         with self.assertRaises(ValueError) as context:
             self.lin_model.set_equilibrium_point(x_eq=[0., 0.])
-        self.assertTrue("Algebraic state information is missing from the equilibrium point." == str(context.exception))
+        self.assertEqual("Algebraic state information is missing from the equilibrium point.", str(context.exception))
 
     def test_equilibrium_point_missing_p(self) -> None:
         """
@@ -390,8 +392,11 @@ class TestLinearizationEquilibriumPointDAE(TestCase):
         self.lin_model.setup(dt=.01)
         with self.assertRaises(RuntimeError) as context:
             self.lin_model.set_equilibrium_point(x_eq=[0., 0.], z_eq=[0., 0., 0.])
-        self.assertTrue("Please set the values for the parameters by executing the 'set_initial_parameter_values' "
-                        "method before setting the equilibrium point." == str(context.exception))
+        self.assertEqual(
+            "Please set the values for the parameters by executing the 'set_initial_parameter_values' method before "
+            "setting the equilibrium point.",
+            str(context.exception)
+        )
 
     def test_wrong_dimensions_in_z(self) -> None:
         """
@@ -402,8 +407,10 @@ class TestLinearizationEquilibriumPointDAE(TestCase):
         self.lin_model.setup(dt=.01)
         with self.assertRaises(ValueError) as context:
             self.lin_model.set_equilibrium_point(x_eq=[0., 0.], z_eq=[0.])
-        self.assertTrue("Dimension mismatch for the algebraic state information of the equilibrium point. "
-                        "Got 1, expected 3." == str(context.exception))
+        self.assertEqual(
+            "Dimension mismatch for the algebraic state information of the equilibrium point. Got 1, expected 3.",
+            str(context.exception)
+        )
 
     def test_wrong_equilibrium_point_given(self) -> None:
         """
@@ -415,8 +422,7 @@ class TestLinearizationEquilibriumPointDAE(TestCase):
         self.lin_model.set_initial_parameter_values(.2)
         with self.assertRaises(ValueError) as context:
             self.lin_model.set_equilibrium_point(x_eq=[0., 0.], z_eq=[0., 0., 0])
-        self.assertTrue("Supplied values are not an equilibrium point. Maximum error: 0.04000" == str(context.exception)
-                        )
+        self.assertEqual("Supplied values are not an equilibrium point. Maximum error: 0.04000", str(context.exception))
 
     def test_equilibrium_point_given(self) -> None:
         """

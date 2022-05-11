@@ -105,9 +105,11 @@ class TestPIDTunableParameterSetter(TestCase):
         pid = PID(n_set_points=2, plot_backend='bokeh')
         with self.assertRaises(ValueError) as context:
             pid.k_p = 2.
-        self.assertTrue(str(context.exception) == "The number of set points is greater than 1, but the supplied matrix"
-                                                  " for K_P is not a diagonal matrix. Coupled multi-variable control is"
-                                                  " not supported at the moment.")
+        self.assertEqual(
+            str(context.exception),
+            "The number of set points is greater than 1, but the supplied matrix for K_P is not a diagonal matrix. "
+            "Coupled multi-variable control is not supported at the moment."
+        )
 
     def test_set_t_i_multiple_set_points_coupled(self) -> None:
         """
@@ -117,9 +119,11 @@ class TestPIDTunableParameterSetter(TestCase):
         pid = PID(n_set_points=2, plot_backend='bokeh')
         with self.assertRaises(ValueError) as context:
             pid.t_i = .1
-        self.assertTrue(str(context.exception) == "The number of set points is greater than 1, but the supplied matrix"
-                                                  " for T_I is not a diagonal matrix. Coupled multi-variable control is"
-                                                  " not supported at the moment.")
+        self.assertEqual(
+            str(context.exception),
+            "The number of set points is greater than 1, but the supplied matrix for T_I is not a diagonal matrix. "
+            "Coupled multi-variable control is not supported at the moment."
+        )
 
     def test_set_t_d_multiple_set_points_coupled(self) -> None:
         """
@@ -129,9 +133,11 @@ class TestPIDTunableParameterSetter(TestCase):
         pid = PID(n_set_points=2, plot_backend='bokeh')
         with self.assertRaises(ValueError) as context:
             pid.t_d = 2.
-        self.assertTrue(str(context.exception) == "The number of set points is greater than 1, but the supplied matrix"
-                                                  " for T_D is not a diagonal matrix. Coupled multi-variable control is"
-                                                  " not supported at the moment.")
+        self.assertEqual(
+            str(context.exception),
+            "The number of set points is greater than 1, but the supplied matrix for T_D is not a diagonal matrix. "
+            "Coupled multi-variable control is not supported at the moment."
+        )
 
     def test_set_k_p_multiple_set_points(self) -> None:
         """
@@ -211,8 +217,10 @@ class TestPIDSetPointSetter(TestCase):
         pid.setup(dt=.01)
         with self.assertRaises(ValueError) as context:
             pid.set_point = [1., 1., 1.]
-        self.assertTrue(str(context.exception) == "Dimension mismatch. Supplied dimension for the set point is 3x1, but"
-                                                  " required dimension is 4x1.")
+        self.assertEqual(
+            str(context.exception),
+            "Dimension mismatch. Supplied dimension for the set point is 3x1, but required dimension is 4x1."
+        )
 
 
 class TestPIDCall(TestCase):
@@ -225,8 +233,8 @@ class TestPIDCall(TestCase):
         pid = PID(plot_backend='bokeh')
         with self.assertRaises(RuntimeError) as context:
             pid.call()
-        self.assertTrue(str(context.exception) == "P controller is not set up. Run PID.setup() before calling the P "
-                                                  "controller")
+        self.assertEqual(str(context.exception),
+                         "P controller is not set up. Run PID.setup() before calling the P controller")
 
     def test_pi_not_set_up(self) -> None:
         """
@@ -236,8 +244,8 @@ class TestPIDCall(TestCase):
         pid = PID(t_i=.1, plot_backend='bokeh')
         with self.assertRaises(RuntimeError) as context:
             pid.call()
-        self.assertTrue(str(context.exception) == "PI controller is not set up. Run PID.setup() before calling the PI "
-                                                  "controller")
+        self.assertEqual(str(context.exception),
+                         "PI controller is not set up. Run PID.setup() before calling the PI controller")
 
     def test_pd_not_set_up(self) -> None:
         """
@@ -247,8 +255,8 @@ class TestPIDCall(TestCase):
         pid = PID(t_d=10., plot_backend='bokeh')
         with self.assertRaises(RuntimeError) as context:
             pid.call()
-        self.assertTrue(str(context.exception) == "PD controller is not set up. Run PID.setup() before calling the PD "
-                                                  "controller")
+        self.assertEqual(str(context.exception),
+                         "PD controller is not set up. Run PID.setup() before calling the PD controller")
 
     def test_pid_not_set_up(self) -> None:
         """
@@ -258,8 +266,8 @@ class TestPIDCall(TestCase):
         pid = PID(t_i=.1, t_d=10., plot_backend='bokeh')
         with self.assertRaises(RuntimeError) as context:
             pid.call()
-        self.assertTrue(str(context.exception) == "PID controller is not set up. Run PID.setup() before calling the PID"
-                                                  " controller")
+        self.assertEqual(str(context.exception),
+                         "PID controller is not set up. Run PID.setup() before calling the PID controller")
 
     def test_single_set_point(self) -> None:
         """
