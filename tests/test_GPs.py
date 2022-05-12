@@ -665,23 +665,80 @@ class TestGaussianProcessPrediction(TestCase):
         np.testing.assert_allclose(mean, mean_nf)
         np.testing.assert_array_less(var_nf, var)
 
-    # def test_gaussian_process_predict_symbolic(self) -> None:
-    #     """
-    #
-    #     :return:
-    #     """
+    def test_gaussian_process_predict_symbolic(self) -> None:
+        """
 
-    # def test_gaussian_process_predict_quantiles_test_data(self) -> None:
-    #     """
-    #
-    #     :return:
-    #     """
+        :return:
+        """
+        import casadi as ca
 
-    # def test_gaussian_process_predict_quantiles_mean_var(self) -> None:
-    #     """
-    #
-    #     :return:
-    #     """
+        gp = self.gp
+
+        X = ca.SX.sym('X', 2)
+        mean_sym, var_sym = gp.predict(X)
+        self.assertIsInstance(mean_sym, ca.SX)
+        self.assertIsInstance(var_sym, ca.SX)
+        fun_sx = ca.Function('fun_sx', [X], [mean_sym, var_sym])
+
+        X = ca.MX.sym('X', 2)
+        mean_sym, var_sym = gp.predict(X)
+        self.assertIsInstance(mean_sym, ca.MX)
+        self.assertIsInstance(var_sym, ca.MX)
+        fun_mx = ca.Function('fun_mx', [X], [mean_sym, var_sym])
+
+        X_test = np.array([[.25, .6, .75, .9, .4], [.9, .75, .6, .25, -.5]])
+        mean, var = gp.predict(X_test)
+        mean_sx, var_sx = fun_sx(X_test)
+        mean_mx, var_mx = fun_mx(X_test)
+
+        np.testing.assert_allclose(mean, mean_sx)
+        np.testing.assert_allclose(mean, mean_mx)
+        np.testing.assert_allclose(mean_sx, mean_mx)
+        np.testing.assert_allclose(var, var_sx)
+        np.testing.assert_allclose(var, var_mx)
+        np.testing.assert_allclose(var_sx, var_mx)
+
+    def test_gaussian_process_predict_quantiles_test_data(self) -> None:
+        """
+
+        :return:
+        """
+        gp = self.gp
+
+        X_test = np.array([[.25, .6, .75, .9, .4], [.9, .75, .6, .25, -.5]])
+        y_sin = np.array([[np.arcsin(.25), np.arcsin(.6), np.arcsin(.75), np.arcsin(.9), np.pi + np.arcsin(-.4)]])
+        y_cos = np.array([[np.arccos(.9), np.arccos(.75), np.arccos(.6), np.arccos(.25), np.arccos(-.5)]])
+
+        lb, ub = gp.predict_quantiles(X_query=X_test)
+        mean, _ = gp.predict(X_test)
+
+        np.testing.assert_array_less(lb, mean)
+        np.testing.assert_array_less(lb, y_sin)
+        np.testing.assert_array_less(lb, y_cos)
+        np.testing.assert_array_less(mean, ub)
+        np.testing.assert_array_less(y_sin, ub)
+        np.testing.assert_array_less(y_cos, ub)
+
+    def test_gaussian_process_predict_quantiles_mean_var(self) -> None:
+        """
+
+        :return:
+        """
+        gp = self.gp
+
+        X_test = np.array([[.25, .6, .75, .9, .4], [.9, .75, .6, .25, -.5]])
+        y_sin = np.array([[np.arcsin(.25), np.arcsin(.6), np.arcsin(.75), np.arcsin(.9), np.pi + np.arcsin(-.4)]])
+        y_cos = np.array([[np.arccos(.9), np.arccos(.75), np.arccos(.6), np.arccos(.25), np.arccos(-.5)]])
+
+        mean, var = gp.predict(X_test, noise_free=True)
+        lb, ub = gp.predict_quantiles(quantiles=(1., 99.), mean=mean, var=var)
+
+        np.testing.assert_array_less(lb, mean)
+        np.testing.assert_array_less(lb, y_sin)
+        np.testing.assert_array_less(lb, y_cos)
+        np.testing.assert_array_less(mean, ub)
+        np.testing.assert_array_less(y_sin, ub)
+        np.testing.assert_array_less(y_cos, ub)
 
     def test_gaussian_process_predict_quantiles_none(self) -> None:
         """
