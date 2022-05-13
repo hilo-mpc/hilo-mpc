@@ -30,6 +30,7 @@ import casadi.tools as catools
 import numpy as np
 
 from .base import Controller
+from ..dynamic_model.dynamic_model import Model
 from ..optimizer import DynamicOptimization
 from ...util.modeling import GenericCost, QuadraticCost, GenericConstraint, continuous2discrete
 from ...util.optimizer import IpoptDebugger
@@ -2190,6 +2191,124 @@ class LMPC(Controller, DynamicOptimization):
         :return:
         """
         return self._horizon
+
+
+class SMPC(NMPC):
+
+    """Class for Stochastic Nonlinear Model Predictive Control"""
+    def __init__(self, det_model, stoch_model, B, id=None, name=None, plot_backend=None, use_sx=True,
+                 stats=False):
+
+        # First transfor the problem in a deterministic problem
+
+        model_c, Kx = self._create_deterministic_surrogate(det_model, stoch_model, B, Kgain=None)
+        model_c.setup(dt = 1) # TODO put the dt from the solution
+
+        super().__init__(model_c, id=id, name=name, plot_backend=plot_backend, stats=stats, use_sx=use_sx)
+
+    def _create_deterministic_surrogate(self, det_model, gps, Bw, Kgain=None):
+        """
+        Create surrogate deterministic model
+        """
+        model_c = Model(plot_backend='matplotlib', discrete=True)
+        mu_x = model_c.set_dynamical_states([f'mu_{i}' for i in det_model.dynamical_state_names])
+        mu_u = model_c.set_inputs([f'mu_{i}' for i in det_model.input_names])
+        mu_p = model_c.set_parameters(det_model.parameter_names)
+        if mu_p.shape == (0, 0):
+            mu_p.resize(0,1)
+
+        if Kgain is None:
+            model_c.add_parameters([f'kgain_{i}' for i in range(det_model.n_x * det_model.n_u)])
+            Kgain = ca.reshape(model_c.p[det_model.n_p:], model_c.n_u, model_c.n_x)
+
+        jgps = []
+        mu_ds = []
+        Kd0s = []
+
+        if not isinstance(gps, list):
+            gps = [gps]
+
+        for gp in gps:
+            index = [det_model.dynamical_state_names.index(i) for i in gp.features]
+            xxx = det_model.x[index]
+            (y_pred_gp_ca, var_pred_gp_ca) = gp.predict(xxx)
+
+            # Compute jacobian of GP
+            jgp = ca.jacobian(y_pred_gp_ca, ca.vertcat(det_model.x, det_model.u))
+            jgp = ca.substitute(jgp, det_model.x, mu_x)
+            jgp = ca.substitute(jgp, det_model.u, mu_u)
+            jgp = ca.substitute(jgp, det_model.p, mu_p)
+            jgps.append(jgp)
+
+            mu_d = ca.substitute(y_pred_gp_ca, det_model.x, mu_x)
+            mu_d = ca.substitute(mu_d, det_model.u, mu_u)
+            mu_d = ca.substitute(mu_d, det_model.p, mu_p)
+            mu_ds.append(mu_d)
+
+            # Get the variance
+            Kd0 = ca.substitute(var_pred_gp_ca, det_model.x, mu_x)
+            Kd0 = ca.substitute(Kd0, det_model.u, mu_u)
+            Kd0 = ca.substitute(Kd0, det_model.p, mu_p)
+            Kd0s.append(Kd0)
+
+        mu_d = ca.vertcat(*mu_ds)
+        jgps = ca.vertcat(*jgps)
+        Kd0s = ca.diagcat(*Kd0s)
+
+        # Create new ode based on the means
+        ode = ca.substitute(det_model.ode, det_model.x, mu_x)
+        ode = ca.substitute(ode, det_model.u, mu_u)
+        ode = ca.substitute(ode, det_model.p, mu_p)
+        # Substitute the dt with the new model dt. They are the same thing but we need to do it becuse they need to be the same
+        # object
+        ode = ca.substitute(ode, det_model.dt, model_c.dt)
+        ode = ode + ca.mtimes(Bw, mu_d)
+
+        model_c.set_dynamical_equations(ode)
+
+        # Jacobian of the known part - necessary for uncertainty propagation
+        jode = ca.jacobian(det_model.ode, ca.vertcat(det_model.x, det_model.u))
+
+        # Substitute the means
+        jode = ca.substitute(jode, det_model.x, mu_x)
+        jode = ca.substitute(jode, det_model.u, mu_u)
+        jode = ca.substitute(jode, det_model.p, mu_p)
+
+        # Define variances and covariances of states inputs, unknown part and noise - x = f(x,u) + Bd(g(x,u)+w)
+        Kx = ca.SX.sym('kx', det_model.n_x, det_model.n_x)
+
+        # Add the state that describe the evolution of the states covariance matrix
+        model_c.add_dynamical_states(ca.reshape(Kx, det_model.n_x ** 2, 1))
+
+        Ku = ca.mtimes(ca.mtimes(Kgain, Kx), Kgain.T)
+        Kxu = ca.mtimes(Kx, Kgain.T)
+        Kux = Kxu.T
+
+        Kz = ca.vertcat(
+            ca.horzcat(Kx, Kxu),
+            ca.horzcat(Kux, Ku)
+        )
+
+        Kd = Kd0s + ca.mtimes(ca.mtimes(jgps, Kz), jgps.T)
+        Kzd = ca.mtimes(Kz, jgps.T)
+
+        # FIXME should I add a noise covariance matrix to Kd here?
+        bigK = ca.vertcat(
+            ca.horzcat(Kz, Kzd),
+            ca.horzcat(Kzd.T, Kd)
+        )
+
+        jodeBw = ca.horzcat(jode, Bw)
+
+        ode_c = ca.mtimes(jodeBw, ca.mtimes(bigK, jodeBw.T))
+
+        # Substitute the dt with the new model dt. They are the same thing but we need to do it becuse they need to be the same
+        # object
+        ode_c = ca.substitute(ode_c, det_model.dt, model_c.dt)
+
+        model_c.add_dynamical_equations(ca.reshape(ode_c, det_model.n_x ** 2, 1))
+
+        return model_c, Kx
 
 
 __all__ = [
