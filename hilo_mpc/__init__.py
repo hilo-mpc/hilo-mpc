@@ -43,6 +43,7 @@ import hilo_mpc.util.session as session
 Model = dyn_mod.Model
 NMPC = mpc.NMPC
 LMPC = mpc.LMPC
+SMPC = mpc.SMPC
 OptimalControlProblem = ocp.OptimalControlProblem
 OCP = OptimalControlProblem
 LinearQuadraticRegulator = lqr.LinearQuadraticRegulator
