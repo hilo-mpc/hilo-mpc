@@ -561,7 +561,7 @@ class NMPC(Controller, DynamicOptimization):
         # Save solution in the solution class
         self.solution.add('x', x_pred[:self._n_x, :])
         self.solution.add('u', u_pred[:self._n_u, :])
-        self.solution.add('thetapfo', x_pred[self._n_x:self._n_x+self.n_of_path_vars, :])
+        self.solution.add('thetapfo', x_pred[self._n_x:self._n_x + self.n_of_path_vars, :])
         if dt_pred is not None:
             dt_sum = 0
             for i in range(self.prediction_horizon):
@@ -572,563 +572,8 @@ class NMPC(Controller, DynamicOptimization):
                                  self.prediction_horizon + 1)
             self.solution.add('t', ca.DM(t_pred).T)
 
-    @property
-    def x_lb(self):
-        """
+    def _setup(self, options=None, solver_options=None):
 
-        :return:
-        """
-        return self._x_lb
-
-    @property
-    def x_ub(self):
-        """
-
-        :return:
-        """
-        return self._x_ub
-
-    @property
-    def u_lb(self):
-        """
-
-        :return:
-        """
-        return self._u_lb
-
-    @property
-    def u_ub(self):
-        """
-
-        :return:
-        """
-        return self._u_ub
-
-    def set_box_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
-                            z_lb=None):
-        """
-        Set box constraints to the model's variables. These look like
-
-        .. math::
-                                    x_{lb} \leq x \leq x_{ub}
-
-        :param x_ub: upper bound on states.
-        :type x_ub: list, numpy array or CasADi DM array
-        :param x_lb: lower bound on  states
-        :type x_lb: list, numpy array or CasADi DM array
-        :param u_ub: upper bound on inputs
-        :type u_ub: list, numpy array or CasADi DM array
-        :param u_lb: lower bound on inputs
-        :type u_lb: list, numpy array or CasADi DM array
-        :param y_ub: upper bound on measurements
-        :type y_ub: list, numpy array or CasADi DM array
-        :param y_lb: lower bound on measurements
-        :type y_lb: list, numpy array or CasADi DM array
-        :param z_ub: upper bound on algebraic states
-        :type z_ub: list, numpy array or CasADi DM array
-        :param z_lb: lower bound on algebraic states
-        :type z_lb: list, numpy array or CasADi DM array
-        :return:
-        """
-        if x_ub is not None:
-            x_ub = deepcopy(x_ub)
-            x_ub = check_and_wrap_to_list(x_ub)
-            if len(x_lb) != self._n_x:
-                raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
-            self._x_ub = x_ub
-        else:
-            self._x_ub = self._model.n_x * [ca.inf]
-
-        if x_lb is not None:
-            x_lb = deepcopy(x_lb)
-            x_lb = check_and_wrap_to_list(x_lb)
-            if len(x_lb) != self._n_x:
-                raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
-            self._x_lb = x_lb
-        else:
-            self._x_lb = self._model.n_x * [-ca.inf]
-
-        # Input constraints
-        if u_ub is not None:
-            u_ub = deepcopy(u_ub)
-            u_ub = check_and_wrap_to_list(u_ub)
-            if len(u_ub) != self._n_u:
-                raise TypeError(f"The model has {self._n_u} inputs. You need to pass the same number of bounds.")
-            self._u_ub = u_ub
-        else:
-            self._u_ub = self._model.n_u * [ca.inf]
-
-        if u_lb is not None:
-            u_lb = deepcopy(u_lb)
-            u_lb = check_and_wrap_to_list(u_lb)
-            if len(u_lb) != self._n_u:
-                raise TypeError(f"The model has {self._n_u} inputs. You need to pass the same number of bounds.")
-            self._u_lb = u_lb
-        else:
-            self._u_lb = self._model.n_u * [-ca.inf]
-
-        # Algebraic constraints
-        if z_ub is not None:
-            z_ub = deepcopy(z_ub)
-            z_ub = check_and_wrap_to_list(z_ub)
-            if len(z_ub) != self._n_z:
-                raise TypeError(f"The model has {self._n_z} algebraic states. You need to pass the same number of "
-                                f"bounds.")
-            self._z_ub = z_ub
-        else:
-            self._z_ub = self._model.n_z * [ca.inf]
-
-        if z_lb is not None:
-            z_lb = deepcopy(z_lb)
-            z_lb = check_and_wrap_to_list(z_lb)
-            if len(z_lb) != self._n_z:
-                raise TypeError(f"The model has {self._n_z} algebraic states. You need to pass the same number of "
-                                f"bounds.")
-            self._z_lb = z_lb
-        else:
-            self._z_lb = self._model.n_z * [-ca.inf]
-
-        if y_lb is not None or y_ub is not None:
-            # Measurement box constraints can be added by an extra stage and terminal constraint (possibly nonlinear)
-            self.set_stage_constraints(stage_constraint=self._model.meas, ub=deepcopy(y_ub), lb=deepcopy(y_lb),
-                                       name='measurement_constraint')
-            self.set_terminal_constraints(terminal_constraint=self._model.meas, ub=deepcopy(y_ub), lb=deepcopy(y_lb),
-                                          name='measurement_constraint')
-
-        self._box_constraints_is_set = True
-
-    def _optimize(self, v0, runs, param, **kwargs):
-        """
-
-        :param v0:
-        :param runs:
-        :param param:
-        :param kwargs:
-        :return:
-        """
-        if runs == 0:
-            sol = self._solver(x0=v0, lbx=self._v_lb, ubx=self._v_ub, lbg=self._g_lb, ubg=self._g_ub, p=param)
-            self._nlp_solution = sol
-            u_opt = sol['x'][self._u_ind[0]]
-            if self._nlp_options['warm_start']:
-                self._v0 = sol['x']
-        else:
-            pert_factor = kwargs.get('pert_factor', 0.1)
-            f_r_better = np.inf
-            v00 = v0
-            for r in range(runs):
-                sol = self._solver(x0=v00, lbx=self._v_lb, ubx=self._v_ub, lbg=self._g_lb, ubg=self._g_ub, p=param)
-                if sol['f'] < f_r_better:
-                    f_r_better = sol['f']
-                    self._nlp_solution = sol
-                    u_opt = sol['x'][self._u_ind[0]]
-                    if self._nlp_options['warm_start']:
-                        self._v0 = sol['x']
-                v00 = v0 + v0 * (1 - 2 * np.random.rand(self._n_v)) * pert_factor
-
-        return u_opt
-
-    def optimize(self, x0, cp=None, tvp=None, v0=None, runs=0, fix_x0=True, **kwargs):
-        """
-        Solves the MPC problem
-
-        :param x0: current system state
-        :type x0: list or casadi DM
-        :param cp: constant system parameters (these will be assumed constant along the prediction horizon)
-        :type cp: list or casadi DM, optional
-        :param tvp: time-varying system parameters (these can change during prediction horizon, entire parameter
-            history must be passed in)
-        :type tvp: dict, optional
-        :param v0: initial guess of the optimal vector
-        :type v0: list or casadi DM, optional
-        :param runs: number of optimizations to run. If different from zero will run very optimization will perturb the
-            initial guess v0 randomly.
-            ACHTUNG: This could cause problems with the integrators or give something outside constraints. The output
-            will be the solution with the minimum objective function (default 0)
-        :type runs: int
-        :param fix_x0: If True, the first state is fixed as the measured states. This is the classic MPC approach. If
-            False, also the initial state is optimized.
-        :type fix_x0: bool
-        :return: u_opt: first piece of optimal control sequence
-        """
-        if not self._nlp_setup_done:
-            raise ValueError("Howdy! You need to setup the MPC before optimizing. Run .setup() on the MPC object.")
-
-        # Check the constant parameters
-        if self._model.n_p - self._n_tvp != 0:
-            if cp is not None:
-                cp = check_and_wrap_to_DM(cp)
-
-            if cp is None or cp.size1() != self._model.n_p - self._n_tvp:
-                raise ValueError(
-                    f"The model has {self._model.n_p - self._n_tvp} constant parameter(s): "
-                    f"{self._model.parameter_names}. You must pass me the value of these before running the "
-                    f"optimization to the 'cp' parameter."
-                )
-        else:
-            if cp is not None:
-                warnings.warn("You are passing a parameter vector in the optimizer, but the model has no defined "
-                              "parameters. I am ignoring the vector.")
-
-        if self._nlp_options['ipopt_debugger']:
-            # Reset the solution of the debugger before next optimization
-            self.debugger.reset_solution()
-        # Check the state
-        x0 = check_and_wrap_to_DM(x0)
-
-        if x0.shape[0] != self._n_x:
-            raise ValueError(
-                f"We have an issue mate, the x0 you supplied has dimension {x0.shape[0]} but the model has {self._n_x} "
-                f"states."
-            )
-        if fix_x0 is True:
-            # Force the initial state to be the measured state.
-            # Note that the path following problem modifies the model dimensions,
-            # so only the first n_x positions need to be forced where n_x is state number of the original problem
-            self._v_lb[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x])
-            self._v_ub[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x])
-        else:
-            x0_lb = kwargs.get('x0_lb', self._x_lb)
-            x0_ub = kwargs.get('x0_ub', self._x_ub)
-            self._v_lb[self._x_ind[0][0:self._n_x]] = x0_lb / ca.DM(self._x_scaling[0:self._n_x])
-            self._v_ub[self._x_ind[0][0:self._n_x]] = x0_ub / ca.DM(self._x_scaling[0:self._n_x])
-
-        # Check and prepare parameters
-        param = self._get_nlp_parameters(cp, tvp, **kwargs)
-
-        if v0 is None:
-            v0 = self._v0
-
-        if self._stats:
-            start = time.time()
-
-        # Compute the MPC
-        u_opt = self._optimize(v0, runs, param)
-
-        # Get the status of the solver
-        self._solver_status_wrapper()
-
-        # Print output
-        self._print_message()
-
-        # Reset the solution
-        self.reset_solution()
-
-        # Populate solution with new results
-        if self._stats:
-            elapsed_time = time.time() - start
-            self.solution.add('extime', elapsed_time)
-            self.solution.add('niterations', self._n_iterations)
-            self.solution.add('solvstatus', self._solver_status_code)
-
-        if self.stage_constraint.is_set and self.stage_constraint.is_soft:
-            self.stage_constraint.e_soft_value = self._nlp_solution['x'][self._e_soft_stage_ind[0]]
-
-        if self.terminal_constraint.is_set and self.terminal_constraint.is_soft:
-            self.terminal_constraint.e_soft_value = self._nlp_solution['x'][self._e_soft_term_ind[0]]
-
-        # Save predictions in the solution object. Done for plotting purposes.
-        self._save_predictions()
-
-        # Save the references in the solution object. Done for plotting purposes.
-        self._save_references(param)
-
-        # Update the time clock - Useful for time-varying systems and references.
-        self._time += self.sampling_interval
-
-        # Interation counter
-        self._n_iterations += 1
-
-        # Extract first input from the optimal sequence
-        uopt = u_opt[0:self._n_u] * self._u_scaling[0:self._n_u]
-        return uopt
-
-    def minimize_final_time(self, weight=1):
-        """
-
-        :param weight:
-        :return:
-        """
-        self._minimize_final_time_flag = True
-        self._minimize_final_time_weight = weight
-
-    def plot_prediction(self, save_plot=False, plot_dir=None, name_file='mpc_prediction.html', show_plot=True,
-                        extras=None, extras_names=None, title=None, format_figure=None, **kwargs):
-        """
-        Plots the MPC predicted values.
-
-        :param save_plot: if True plot will be saved under 'plot_dir/name_file.html' if they are declared, otherwise in
-            current directory
-        :type save_plot: bool
-        :param plot_dir: path to the folder where plots are saved (default = None)
-        :type plot_dir: str
-        :param name_file: name of the file where plot will be saved  (default = mpc_prediction.html)
-        :type name_file: str
-        :param show_plot: if True, shows plots (default = False)
-        :type show_plot: bool
-        :param extras: dictionary with values that will be plotted over the predictions if keys are equal to predicted
-            states/inputs.
-        :type extras: dict
-        :param extras_names: tags that will be attached to the extras in the legend
-        :type extras_names: list
-        :param title: title of the plots
-        :type title: str
-        :param format_figure: python function that modifies the format of the figure
-        :type format_figure: python function taking a bokeh figure object as an input
-        :return:
-        """
-        import os
-
-        from bokeh.io import output_file, output_notebook, show, save
-        from bokeh.plotting import figure
-        from bokeh.models import ColumnDataSource, DataTable, TableColumn, CellFormatter, Div
-        from bokeh.layouts import gridplot, column, row, grid
-        from bokeh.palettes import Spectral4 as palettespectral
-
-        if self._nlp_solution is None:
-            raise RuntimeError("You need to run the MPC at least once to see the plots")
-        if save_plot:
-            if plot_dir is not None:
-                output_file(os.path.join(plot_dir, name_file))
-            else:
-                output_file(name_file)
-        else:
-            if kwargs.get('output_notebook', False):
-                output_notebook()
-
-        if extras is None:
-            extras = []
-        if extras_names is None:
-            extras_names = []
-        if isinstance(extras, dict):
-            extras = [extras]
-        elif not isinstance(extras, list) and not isinstance(extras, dict):
-            raise ValueError("The extras options should be a dictionary or a list of dictionaries")
-
-        res_extras_list = [0 for i in range(len(extras))]
-        for i in range(len(extras)):
-            res_extras_list[i] = {}
-            for k, name in enumerate(self._model.dynamical_state_names):
-                if name in extras[i].keys():
-                    res_extras_list[i][name] = extras[i][name]
-
-        if len(extras) != len(extras_names):
-            raise ValueError("The length of the extra and extras_names must be the same.")
-
-        time = self._time
-        # TODO: consider time step for the x axis
-        x_pred, u_pred, dt_pred = self.return_prediction()
-
-        if dt_pred is None:
-            time_vector = np.linspace(time, time + (self._prediction_horizon) * self.sampling_interval,
-                                      self._prediction_horizon + 1)
-        else:
-            time_vector = [self._time]
-            for i in range(self._prediction_horizon):
-                time_vector.append(time_vector[i] + dt_pred[i])
-
-        input_dict = {i: [] for i in self._model.input_names}
-        states_dict = {i: [] for i in self._model.dynamical_state_names}
-
-        for k, name in enumerate(self._model.input_names):
-            input_dict[name] = u_pred[k, :]
-
-        for k, name in enumerate(self._model.dynamical_state_names):
-            states_dict[name] = x_pred[k, :]
-
-        p1 = [figure(title=title, background_fill_color="#fafafa") for i in range(self._model.n_x)]
-
-        for s, name in enumerate(self._model.dynamical_state_names):
-            p1[s].line(x=time_vector,
-                       y=states_dict[name],
-                       legend_label=name + '_pred', line_width=2)
-            for i in range(len(self.quad_stage_cost._references_list)):
-                if name in self.quad_stage_cost._references_list[i]['names']:
-                    position = self.quad_stage_cost._references_list[i]['names'].index(name)
-                    value = self.quad_stage_cost._references_list[i]['ref'][position]
-                    p1[s].line([time_vector[0], time_vector[-1]], [value, value], legend_label=name + '_ref',
-                               line_dash='dashed', line_color="red", line_width=2)
-
-            p1[s].yaxis.axis_label = name
-            p1[s].xaxis.axis_label = 'time'
-            if format_figure is not None:
-                p1[s] = format_figure(p1[s])
-
-            for i in range(len(extras)):
-                if name in list(res_extras_list[i].keys()):
-                    p1[s].line(x=time_vector,
-                               y=res_extras_list[i][name], line_width=2, color=palettespectral[i + 1],
-                               legend_label=name + '_' + extras_names[i])
-                    p1[s].yaxis.axis_label = name
-                    p1[s].xaxis.axis_label = 'time'
-                    if format_figure is not None:
-                        p1[s] = format_figure(p1[s])
-
-        p2 = [figure(title=title, background_fill_color="#fafafa") for i in range(self._model.n_u)]
-        for s, name in enumerate(self._model.input_names):
-            p2[s].step(x=time_vector[:-1], y=input_dict[name],
-                       legend_label=name + '_pred', mode="after", line_width=2)
-            p2[s].yaxis.axis_label = name
-            p2[s].xaxis.axis_label = 'time'
-            if format_figure is not None:
-                p2[s] = format_figure(p2[s])
-
-        # Create some data to print statistics
-        variables = []
-        values = []
-        if self.stage_constraint.is_soft:
-            variables.append('Slack soft constraint')
-            values.append(float(np.array(self.stage_constraint.e_soft_value).squeeze()))
-
-        heading = Div(text="MPC stats", height=80, sizing_mode="stretch_width", align='center',
-                      style={'font-size': '200%'})
-        # heading fills available width
-        data = dict(
-            variables=variables,
-            values=values,
-        )
-        source = ColumnDataSource(data)
-
-        columns = [
-            TableColumn(field="variables", title="Variables"),
-            TableColumn(field="values", title="Values", formatter=CellFormatter()),
-        ]
-        data_table = DataTable(source=source, columns=columns, width=400, height=280)
-
-        grid_states = gridplot(p1, ncols=3, sizing_mode="stretch_width")
-        grid_inputs = gridplot(p2, ncols=3, sizing_mode="stretch_width")
-
-        if show_plot:
-            states_header = Div(text="Predicted States", height=10, sizing_mode="stretch_width", align='center',
-                                style={'font-size': '200%'})
-            inputs_header = Div(text="Predicted Inputs", height=10, sizing_mode="stretch_width", align='center',
-                                style={'font-size': '200%'})
-            layout = row(column(states_header, grid_states, inputs_header, grid_inputs), column(heading, data_table))
-            show(layout)
-        else:
-            if save_plot:
-                save(grid)
-
-    def create_path_variable(self, name='theta', u_pf_lb=0.0001, u_pf_ub=1, u_pf_ref=None, u_pf_weight=10,
-                             theta_guess=0, theta_lb=0, theta_ub=ca.inf):
-        """
-        Set the path following variable. This must be used for building SX expression of the path.
-
-        :param name: name of the variable, default = 'theta'
-        :type name: string
-        :param u_pf_lb: lower bound on the path virtual input :math:`vel_{lb} \leq \dot{ \\theta }`, default = 0.0001
-        :type u_pf_lb: float
-        :param u_pf_ub: upper bound on the path virtual input :math:`vel_{ub} \geq \dot{ \\theta }`, default = 1
-        :type u_pf_ub: float
-        :param u_pf_ref: Reference for the path virtual input, default = None
-        :type u_pf_ref: float
-        :param u_pf_weight: Weight for the path virtual input , default = 10
-        :type u_pf_weight: float
-        :param theta_guess:
-        :param theta_lb:
-        :param theta_ub:
-        :return: casadi.SX
-        """
-        if self._use_sx:
-            theta = ca.SX.sym(name)
-        else:
-            theta = ca.MX.sym(name)
-        self._paths_var_list.append(
-            {'theta': theta, 'u_pf_lb': u_pf_lb, 'u_pf_ub': u_pf_ub, 'u_pf_ref': u_pf_ref, 'u_pf_weight': u_pf_weight,
-             'theta_guess': theta_guess, 'theta_lb': theta_lb, 'theta_ub': theta_ub}
-        )
-        return theta
-
-    def get_time_variable(self):
-        """
-        Useful for trajectory tacking
-
-        :return:
-        """
-        self._time_var = self._model.t
-        return self._time_var
-
-    def set_quadratic_stage_cost(self, states=None, cost_states=None, states_references=None,
-                                 inputs=None, cost_inputs=None, inputs_references=None):
-        """
-        More compact way to set the quadratic cost for the MPC. Mostly left for backwards compatibility.
-        To use only for set-point-tracking problems.
-
-        :param states: list of states name that will appear in the quadratic cost
-        :type states: list
-        :param cost_states:  weights values that will be multiplied by the states
-        :type cost_states: list, numpy array, or casADi DM array
-        :param states_references:  list of reference values
-        :type states_references: list
-        :param inputs:  list of inputs names that will be multiplied by the states
-        :type inputs: list
-        :param cost_inputs:  list of inputs weights that will be multiplied by the states
-        :type cost_inputs: list, numpy array, or casADi DM array
-        :param inputs_references:  list of inputs reference values
-        :type inputs_references: list
-        :return:
-        """
-        self.quad_stage_cost.add_states(names=states, weights=cost_states, ref=states_references)
-        self.quad_stage_cost.add_inputs(names=inputs, weights=cost_inputs, ref=inputs_references)
-
-    def set_quadratic_terminal_cost(self, states=None, cost=None, references=None):
-        """
-        More compact way to set the quadratic cost for the MPC. Mostly left for backwards compatibility.
-        To use only for set-point-tracking problems.
-
-        :param states: list of states name that will appear in the quadratic cost
-        :type states: list
-        :param cost: list of weights values that will be multiplied by the states
-        :type cost: list, numpy array or CasADi DM
-        :param references: list of references values for the states
-        :type references:
-        :return:
-        """
-        self.quad_terminal_cost.add_states(names=states, weights=cost, ref=references)
-
-    def set_terminal_constraints(self,terminal_constraint,name='terminal_constraint', lb=None, ub=None, is_soft=False, max_violation=ca.inf,
-                                 weight=None):
-        """
-        Allows to add a (nonlinear) terminal constraint.
-
-        :param terminal_constraint:  It has to contain variables of the model
-        :type terminal_constraint: CasADi SX expression
-        :param lb:  Lower bound on the constraint
-        :type lb: list of float, integer or casadi.DM.
-        :param ub:  Upper bound on the constraint
-        :type ub: list of float, integer or casadi.DM.
-        :param is_soft:  if True soft constraints are used (default False)
-        :type is_soft: bool
-        :param max_violation: (optional) Maximum violation if constraint is soft. Default: inf
-        :type max_violation: list float,integer or casadi.DM
-        :param weight: (optional) matrix of appropriate dimension. If is_soft=True it will be used to weight the soft
-            constraint in the objective function using a quadratic cost.
-        :type weight: casadi.DM
-        :return:
-        """
-        # TODO check if all the variables used in the function are in the model
-        # TODO allow to pass either only the lower or the upper bound
-        self.terminal_constraint.constraint = terminal_constraint
-        self.terminal_constraint.lb = lb
-        self.terminal_constraint.ub = ub
-        self.terminal_constraint.is_soft = is_soft
-        self.terminal_constraint.max_violation = max_violation
-        self.terminal_constraint.weight = weight
-        self.terminal_constraint.name = name
-
-    def setup(self, options=None, solver_options=None) -> None:
-
-        """
-        Sets up the corresponding optimization problem (OP) of the MPC. This must be run before attempting to solve
-        the MPC.
-
-        :param options: Options for MPC. See documentation.
-        :type options: dict
-        :param solver_options: Dictionary with options for the optimizer. These options are solver specific. Refer to
-            the CasADi Documentation https://web.casadi.org/python-api/#nlp
-        :type solver_options: dict
-        :return: None
-        """
         if not self._scaling_is_set:
             self.set_scaling()
         if not self._time_varying_parameters_is_set:
@@ -1232,7 +677,7 @@ class NMPC(Controller, DynamicOptimization):
 
             # Check time varying parameters
             # tvp_ind = []
-            #TODO this should be moved in the optimiziation method
+            # TODO this should be moved in the optimiziation method
             if len(self._time_varying_parameters) != 0:
                 p_names = model.parameter_names
                 for tvp in self._time_varying_parameters:
@@ -1772,6 +1217,565 @@ class NMPC(Controller, DynamicOptimization):
                 )
             self._solver = solver
 
+    @property
+    def x_lb(self):
+        """
+
+        :return:
+        """
+        return self._x_lb
+
+    @property
+    def x_ub(self):
+        """
+
+        :return:
+        """
+        return self._x_ub
+
+    @property
+    def u_lb(self):
+        """
+
+        :return:
+        """
+        return self._u_lb
+
+    @property
+    def u_ub(self):
+        """
+
+        :return:
+        """
+        return self._u_ub
+
+    def set_box_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
+                            z_lb=None):
+        """
+        Set box constraints to the model's variables. These look like
+
+        .. math::
+                                    x_{lb} \leq x \leq x_{ub}
+
+        :param x_ub: upper bound on states.
+        :type x_ub: list, numpy array or CasADi DM array
+        :param x_lb: lower bound on  states
+        :type x_lb: list, numpy array or CasADi DM array
+        :param u_ub: upper bound on inputs
+        :type u_ub: list, numpy array or CasADi DM array
+        :param u_lb: lower bound on inputs
+        :type u_lb: list, numpy array or CasADi DM array
+        :param y_ub: upper bound on measurements
+        :type y_ub: list, numpy array or CasADi DM array
+        :param y_lb: lower bound on measurements
+        :type y_lb: list, numpy array or CasADi DM array
+        :param z_ub: upper bound on algebraic states
+        :type z_ub: list, numpy array or CasADi DM array
+        :param z_lb: lower bound on algebraic states
+        :type z_lb: list, numpy array or CasADi DM array
+        :return:
+        """
+        if x_ub is not None:
+            x_ub = deepcopy(x_ub)
+            x_ub = check_and_wrap_to_list(x_ub)
+            if len(x_lb) != self._n_x:
+                raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
+            self._x_ub = x_ub
+        else:
+            self._x_ub = self._model.n_x * [ca.inf]
+
+        if x_lb is not None:
+            x_lb = deepcopy(x_lb)
+            x_lb = check_and_wrap_to_list(x_lb)
+            if len(x_lb) != self._n_x:
+                raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
+            self._x_lb = x_lb
+        else:
+            self._x_lb = self._model.n_x * [-ca.inf]
+
+        # Input constraints
+        if u_ub is not None:
+            u_ub = deepcopy(u_ub)
+            u_ub = check_and_wrap_to_list(u_ub)
+            if len(u_ub) != self._n_u:
+                raise TypeError(f"The model has {self._n_u} inputs. You need to pass the same number of bounds.")
+            self._u_ub = u_ub
+        else:
+            self._u_ub = self._model.n_u * [ca.inf]
+
+        if u_lb is not None:
+            u_lb = deepcopy(u_lb)
+            u_lb = check_and_wrap_to_list(u_lb)
+            if len(u_lb) != self._n_u:
+                raise TypeError(f"The model has {self._n_u} inputs. You need to pass the same number of bounds.")
+            self._u_lb = u_lb
+        else:
+            self._u_lb = self._model.n_u * [-ca.inf]
+
+        # Algebraic constraints
+        if z_ub is not None:
+            z_ub = deepcopy(z_ub)
+            z_ub = check_and_wrap_to_list(z_ub)
+            if len(z_ub) != self._n_z:
+                raise TypeError(f"The model has {self._n_z} algebraic states. You need to pass the same number of "
+                                f"bounds.")
+            self._z_ub = z_ub
+        else:
+            self._z_ub = self._model.n_z * [ca.inf]
+
+        if z_lb is not None:
+            z_lb = deepcopy(z_lb)
+            z_lb = check_and_wrap_to_list(z_lb)
+            if len(z_lb) != self._n_z:
+                raise TypeError(f"The model has {self._n_z} algebraic states. You need to pass the same number of "
+                                f"bounds.")
+            self._z_lb = z_lb
+        else:
+            self._z_lb = self._model.n_z * [-ca.inf]
+
+        if y_lb is not None or y_ub is not None:
+            # Measurement box constraints can be added by an extra stage and terminal constraint (possibly nonlinear)
+            self.set_stage_constraints(stage_constraint=self._model.meas, ub=deepcopy(y_ub), lb=deepcopy(y_lb),
+                                       name='measurement_constraint')
+            self.set_terminal_constraints(terminal_constraint=self._model.meas, ub=deepcopy(y_ub), lb=deepcopy(y_lb),
+                                          name='measurement_constraint')
+
+        self._box_constraints_is_set = True
+
+    def _optimize(self, v0, runs, param, **kwargs):
+        """
+
+        :param v0:
+        :param runs:
+        :param param:
+        :param kwargs:
+        :return:
+        """
+        if runs == 0:
+            sol = self._solver(x0=v0, lbx=self._v_lb, ubx=self._v_ub, lbg=self._g_lb, ubg=self._g_ub, p=param)
+            self._nlp_solution = sol
+            u_opt = sol['x'][self._u_ind[0]]
+            if self._nlp_options['warm_start']:
+                self._v0 = sol['x']
+        else:
+            pert_factor = kwargs.get('pert_factor', 0.1)
+            f_r_better = np.inf
+            v00 = v0
+            for r in range(runs):
+                sol = self._solver(x0=v00, lbx=self._v_lb, ubx=self._v_ub, lbg=self._g_lb, ubg=self._g_ub, p=param)
+                if sol['f'] < f_r_better:
+                    f_r_better = sol['f']
+                    self._nlp_solution = sol
+                    u_opt = sol['x'][self._u_ind[0]]
+                    if self._nlp_options['warm_start']:
+                        self._v0 = sol['x']
+                v00 = v0 + v0 * (1 - 2 * np.random.rand(self._n_v)) * pert_factor
+
+        return u_opt
+
+    def optimize(self, x0, cp=None, tvp=None, v0=None, runs=0, fix_x0=True, **kwargs):
+        """
+        Solves the MPC problem
+
+        :param x0: current system state
+        :type x0: list or casadi DM
+        :param cp: constant system parameters (these will be assumed constant along the prediction horizon)
+        :type cp: list or casadi DM, optional
+        :param tvp: time-varying system parameters (these can change during prediction horizon, entire parameter
+            history must be passed in)
+        :type tvp: dict, optional
+        :param v0: initial guess of the optimal vector
+        :type v0: list or casadi DM, optional
+        :param runs: number of optimizations to run. If different from zero will run very optimization will perturb the
+            initial guess v0 randomly.
+            ACHTUNG: This could cause problems with the integrators or give something outside constraints. The output
+            will be the solution with the minimum objective function (default 0)
+        :type runs: int
+        :param fix_x0: If True, the first state is fixed as the measured states. This is the classic MPC approach. If
+            False, also the initial state is optimized.
+        :type fix_x0: bool
+        :return: u_opt: first piece of optimal control sequence
+        """
+        if not self._nlp_setup_done:
+            raise ValueError("Howdy! You need to setup the MPC before optimizing. Run .setup() on the MPC object.")
+
+        # Check the constant parameters
+        if self._model.n_p - self._n_tvp != 0:
+            if cp is not None:
+                cp = check_and_wrap_to_DM(cp)
+
+            if cp is None or cp.size1() != self._model.n_p - self._n_tvp:
+                raise ValueError(
+                    f"The model has {self._model.n_p - self._n_tvp} constant parameter(s): "
+                    f"{self._model.parameter_names}. You must pass me the value of these before running the "
+                    f"optimization to the 'cp' parameter."
+                )
+        else:
+            if cp is not None:
+                warnings.warn("You are passing a parameter vector in the optimizer, but the model has no defined "
+                              "parameters. I am ignoring the vector.")
+
+        if self._nlp_options['ipopt_debugger']:
+            # Reset the solution of the debugger before next optimization
+            self.debugger.reset_solution()
+        # Check the state
+        x0 = check_and_wrap_to_DM(x0)
+
+        if x0.shape[0] != self._n_x:
+            raise ValueError(
+                f"We have an issue mate, the x0 you supplied has dimension {x0.shape[0]} but the model has {self._n_x} "
+                f"states."
+            )
+        if fix_x0 is True:
+            # Force the initial state to be the measured state.
+            # Note that the path following problem modifies the model dimensions,
+            # so only the first n_x positions need to be forced where n_x is state number of the original problem
+            self._v_lb[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x])
+            self._v_ub[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x])
+        else:
+            x0_lb = kwargs.get('x0_lb', self._x_lb)
+            x0_ub = kwargs.get('x0_ub', self._x_ub)
+            self._v_lb[self._x_ind[0][0:self._n_x]] = x0_lb / ca.DM(self._x_scaling[0:self._n_x])
+            self._v_ub[self._x_ind[0][0:self._n_x]] = x0_ub / ca.DM(self._x_scaling[0:self._n_x])
+
+        # Check and prepare parameters
+        param = self._get_nlp_parameters(cp, tvp, **kwargs)
+
+        if v0 is None:
+            v0 = self._v0
+
+        if self._stats:
+            start = time.time()
+
+        # Compute the MPC
+        u_opt = self._optimize(v0, runs, param)
+
+        # Get the status of the solver
+        self._solver_status_wrapper()
+
+        # Print output
+        self._print_message()
+
+        # Reset the solution
+        self.reset_solution()
+
+        # Populate solution with new results
+        if self._stats:
+            elapsed_time = time.time() - start
+            self.solution.add('extime', elapsed_time)
+            self.solution.add('niterations', self._n_iterations)
+            self.solution.add('solvstatus', self._solver_status_code)
+
+        if self.stage_constraint.is_set and self.stage_constraint.is_soft:
+            self.stage_constraint.e_soft_value = self._nlp_solution['x'][self._e_soft_stage_ind[0]]
+
+        if self.terminal_constraint.is_set and self.terminal_constraint.is_soft:
+            self.terminal_constraint.e_soft_value = self._nlp_solution['x'][self._e_soft_term_ind[0]]
+
+        # Save predictions in the solution object. Done for plotting purposes.
+        self._save_predictions()
+
+        # Save the references in the solution object. Done for plotting purposes.
+        self._save_references(param)
+
+        # Update the time clock - Useful for time-varying systems and references.
+        self._time += self.sampling_interval
+
+        # Interation counter
+        self._n_iterations += 1
+
+        # Extract first input from the optimal sequence
+        uopt = u_opt[0:self._n_u] * self._u_scaling[0:self._n_u]
+        return uopt
+
+    def minimize_final_time(self, weight=1):
+        """
+
+        :param weight:
+        :return:
+        """
+        self._minimize_final_time_flag = True
+        self._minimize_final_time_weight = weight
+
+    def plot_prediction(self, save_plot=False, plot_dir=None, name_file='mpc_prediction.html', show_plot=True,
+                        extras=None, extras_names=None, title=None, format_figure=None, **kwargs):
+        """
+        Plots the MPC predicted values.
+
+        :param save_plot: if True plot will be saved under 'plot_dir/name_file.html' if they are declared, otherwise in
+            current directory
+        :type save_plot: bool
+        :param plot_dir: path to the folder where plots are saved (default = None)
+        :type plot_dir: str
+        :param name_file: name of the file where plot will be saved  (default = mpc_prediction.html)
+        :type name_file: str
+        :param show_plot: if True, shows plots (default = False)
+        :type show_plot: bool
+        :param extras: dictionary with values that will be plotted over the predictions if keys are equal to predicted
+            states/inputs.
+        :type extras: dict
+        :param extras_names: tags that will be attached to the extras in the legend
+        :type extras_names: list
+        :param title: title of the plots
+        :type title: str
+        :param format_figure: python function that modifies the format of the figure
+        :type format_figure: python function taking a bokeh figure object as an input
+        :return:
+        """
+        import os
+
+        from bokeh.io import output_file, output_notebook, show, save
+        from bokeh.plotting import figure
+        from bokeh.models import ColumnDataSource, DataTable, TableColumn, CellFormatter, Div
+        from bokeh.layouts import gridplot, column, row, grid
+        from bokeh.palettes import Spectral4 as palettespectral
+
+        if self._nlp_solution is None:
+            raise RuntimeError("You need to run the MPC at least once to see the plots")
+        if save_plot:
+            if plot_dir is not None:
+                output_file(os.path.join(plot_dir, name_file))
+            else:
+                output_file(name_file)
+        else:
+            if kwargs.get('output_notebook', False):
+                output_notebook()
+
+        if extras is None:
+            extras = []
+        if extras_names is None:
+            extras_names = []
+        if isinstance(extras, dict):
+            extras = [extras]
+        elif not isinstance(extras, list) and not isinstance(extras, dict):
+            raise ValueError("The extras options should be a dictionary or a list of dictionaries")
+
+        res_extras_list = [0 for i in range(len(extras))]
+        for i in range(len(extras)):
+            res_extras_list[i] = {}
+            for k, name in enumerate(self._model.dynamical_state_names):
+                if name in extras[i].keys():
+                    res_extras_list[i][name] = extras[i][name]
+
+        if len(extras) != len(extras_names):
+            raise ValueError("The length of the extra and extras_names must be the same.")
+
+        time = self._time
+        # TODO: consider time step for the x axis
+        x_pred, u_pred, dt_pred = self.return_prediction()
+
+        if dt_pred is None:
+            time_vector = np.linspace(time, time + (self._prediction_horizon) * self.sampling_interval,
+                                      self._prediction_horizon + 1)
+        else:
+            time_vector = [self._time]
+            for i in range(self._prediction_horizon):
+                time_vector.append(time_vector[i] + dt_pred[i])
+
+        input_dict = {i: [] for i in self._model.input_names}
+        states_dict = {i: [] for i in self._model.dynamical_state_names}
+
+        for k, name in enumerate(self._model.input_names):
+            input_dict[name] = u_pred[k, :]
+
+        for k, name in enumerate(self._model.dynamical_state_names):
+            states_dict[name] = x_pred[k, :]
+
+        p1 = [figure(title=title, background_fill_color="#fafafa") for i in range(self._model.n_x)]
+
+        for s, name in enumerate(self._model.dynamical_state_names):
+            p1[s].line(x=time_vector,
+                       y=states_dict[name],
+                       legend_label=name + '_pred', line_width=2)
+            for i in range(len(self.quad_stage_cost._references_list)):
+                if name in self.quad_stage_cost._references_list[i]['names']:
+                    position = self.quad_stage_cost._references_list[i]['names'].index(name)
+                    value = self.quad_stage_cost._references_list[i]['ref'][position]
+                    p1[s].line([time_vector[0], time_vector[-1]], [value, value], legend_label=name + '_ref',
+                               line_dash='dashed', line_color="red", line_width=2)
+
+            p1[s].yaxis.axis_label = name
+            p1[s].xaxis.axis_label = 'time'
+            if format_figure is not None:
+                p1[s] = format_figure(p1[s])
+
+            for i in range(len(extras)):
+                if name in list(res_extras_list[i].keys()):
+                    p1[s].line(x=time_vector,
+                               y=res_extras_list[i][name], line_width=2, color=palettespectral[i + 1],
+                               legend_label=name + '_' + extras_names[i])
+                    p1[s].yaxis.axis_label = name
+                    p1[s].xaxis.axis_label = 'time'
+                    if format_figure is not None:
+                        p1[s] = format_figure(p1[s])
+
+        p2 = [figure(title=title, background_fill_color="#fafafa") for i in range(self._model.n_u)]
+        for s, name in enumerate(self._model.input_names):
+            p2[s].step(x=time_vector[:-1], y=input_dict[name],
+                       legend_label=name + '_pred', mode="after", line_width=2)
+            p2[s].yaxis.axis_label = name
+            p2[s].xaxis.axis_label = 'time'
+            if format_figure is not None:
+                p2[s] = format_figure(p2[s])
+
+        # Create some data to print statistics
+        variables = []
+        values = []
+        if self.stage_constraint.is_soft:
+            variables.append('Slack soft constraint')
+            values.append(float(np.array(self.stage_constraint.e_soft_value).squeeze()))
+
+        heading = Div(text="MPC stats", height=80, sizing_mode="stretch_width", align='center',
+                      style={'font-size': '200%'})
+        # heading fills available width
+        data = dict(
+            variables=variables,
+            values=values,
+        )
+        source = ColumnDataSource(data)
+
+        columns = [
+            TableColumn(field="variables", title="Variables"),
+            TableColumn(field="values", title="Values", formatter=CellFormatter()),
+        ]
+        data_table = DataTable(source=source, columns=columns, width=400, height=280)
+
+        grid_states = gridplot(p1, ncols=3, sizing_mode="stretch_width")
+        grid_inputs = gridplot(p2, ncols=3, sizing_mode="stretch_width")
+
+        if show_plot:
+            states_header = Div(text="Predicted States", height=10, sizing_mode="stretch_width", align='center',
+                                style={'font-size': '200%'})
+            inputs_header = Div(text="Predicted Inputs", height=10, sizing_mode="stretch_width", align='center',
+                                style={'font-size': '200%'})
+            layout = row(column(states_header, grid_states, inputs_header, grid_inputs), column(heading, data_table))
+            show(layout)
+        else:
+            if save_plot:
+                save(grid)
+
+    def create_path_variable(self, name='theta', u_pf_lb=0.0001, u_pf_ub=1, u_pf_ref=None, u_pf_weight=10,
+                             theta_guess=0, theta_lb=0, theta_ub=ca.inf):
+        """
+        Set the path following variable. This must be used for building SX expression of the path.
+
+        :param name: name of the variable, default = 'theta'
+        :type name: string
+        :param u_pf_lb: lower bound on the path virtual input :math:`vel_{lb} \leq \dot{ \\theta }`, default = 0.0001
+        :type u_pf_lb: float
+        :param u_pf_ub: upper bound on the path virtual input :math:`vel_{ub} \geq \dot{ \\theta }`, default = 1
+        :type u_pf_ub: float
+        :param u_pf_ref: Reference for the path virtual input, default = None
+        :type u_pf_ref: float
+        :param u_pf_weight: Weight for the path virtual input , default = 10
+        :type u_pf_weight: float
+        :param theta_guess:
+        :param theta_lb:
+        :param theta_ub:
+        :return: casadi.SX
+        """
+        if self._use_sx:
+            theta = ca.SX.sym(name)
+        else:
+            theta = ca.MX.sym(name)
+        self._paths_var_list.append(
+            {'theta': theta, 'u_pf_lb': u_pf_lb, 'u_pf_ub': u_pf_ub, 'u_pf_ref': u_pf_ref, 'u_pf_weight': u_pf_weight,
+             'theta_guess': theta_guess, 'theta_lb': theta_lb, 'theta_ub': theta_ub}
+        )
+        return theta
+
+    def get_time_variable(self):
+        """
+        Useful for trajectory tacking
+
+        :return:
+        """
+        self._time_var = self._model.t
+        return self._time_var
+
+    def set_quadratic_stage_cost(self, states=None, cost_states=None, states_references=None,
+                                 inputs=None, cost_inputs=None, inputs_references=None):
+        """
+        More compact way to set the quadratic cost for the MPC. Mostly left for backwards compatibility.
+        To use only for set-point-tracking problems.
+
+        :param states: list of states name that will appear in the quadratic cost
+        :type states: list
+        :param cost_states:  weights values that will be multiplied by the states
+        :type cost_states: list, numpy array, or casADi DM array
+        :param states_references:  list of reference values
+        :type states_references: list
+        :param inputs:  list of inputs names that will be multiplied by the states
+        :type inputs: list
+        :param cost_inputs:  list of inputs weights that will be multiplied by the states
+        :type cost_inputs: list, numpy array, or casADi DM array
+        :param inputs_references:  list of inputs reference values
+        :type inputs_references: list
+        :return:
+        """
+        self.quad_stage_cost.add_states(names=states, weights=cost_states, ref=states_references)
+        self.quad_stage_cost.add_inputs(names=inputs, weights=cost_inputs, ref=inputs_references)
+
+    def set_quadratic_terminal_cost(self, states=None, cost=None, references=None):
+        """
+        More compact way to set the quadratic cost for the MPC. Mostly left for backwards compatibility.
+        To use only for set-point-tracking problems.
+
+        :param states: list of states name that will appear in the quadratic cost
+        :type states: list
+        :param cost: list of weights values that will be multiplied by the states
+        :type cost: list, numpy array or CasADi DM
+        :param references: list of references values for the states
+        :type references:
+        :return:
+        """
+        self.quad_terminal_cost.add_states(names=states, weights=cost, ref=references)
+
+    def set_terminal_constraints(self, terminal_constraint, name='terminal_constraint', lb=None, ub=None, is_soft=False,
+                                 max_violation=ca.inf,
+                                 weight=None):
+        """
+        Allows to add a (nonlinear) terminal constraint.
+
+        :param terminal_constraint:  It has to contain variables of the model
+        :type terminal_constraint: CasADi SX expression
+        :param lb:  Lower bound on the constraint
+        :type lb: list of float, integer or casadi.DM.
+        :param ub:  Upper bound on the constraint
+        :type ub: list of float, integer or casadi.DM.
+        :param is_soft:  if True soft constraints are used (default False)
+        :type is_soft: bool
+        :param max_violation: (optional) Maximum violation if constraint is soft. Default: inf
+        :type max_violation: list float,integer or casadi.DM
+        :param weight: (optional) matrix of appropriate dimension. If is_soft=True it will be used to weight the soft
+            constraint in the objective function using a quadratic cost.
+        :type weight: casadi.DM
+        :return:
+        """
+        # TODO check if all the variables used in the function are in the model
+        # TODO allow to pass either only the lower or the upper bound
+        self.terminal_constraint.constraint = terminal_constraint
+        self.terminal_constraint.lb = lb
+        self.terminal_constraint.ub = ub
+        self.terminal_constraint.is_soft = is_soft
+        self.terminal_constraint.max_violation = max_violation
+        self.terminal_constraint.weight = weight
+        self.terminal_constraint.name = name
+
+    def setup(self, options=None, solver_options=None) -> None:
+        """
+           Sets up the corresponding optimization problem (OP) of the MPC. This must be run before attempting to solve
+           the MPC.
+
+           :param options: Options for MPC. See documentation.
+           :type options: dict
+           :param solver_options: Dictionary with options for the optimizer. These options are solver specific. Refer to
+               the CasADi Documentation https://web.casadi.org/python-api/#nlp
+           :type solver_options: dict
+           :return: None
+       """
+        self._setup(options=options, solver_options=solver_options)
+
     def return_prediction(self):
         """
         Returns the mpc prediction.
@@ -1905,6 +1909,7 @@ class NMPC(Controller, DynamicOptimization):
 
 class LMPC(Controller, DynamicOptimization):
     """"""
+
     def __init__(self, model, id=None, name=None, plot_backend=None, use_sx=True):
         """Constructor method"""
         super().__init__(model, id=id, name=name, plot_backend=plot_backend)
