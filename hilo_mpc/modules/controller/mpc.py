@@ -28,7 +28,7 @@ import warnings
 import casadi as ca
 import casadi.tools as catools
 import numpy as np
-
+from scipy.special import erfinv
 from .base import Controller
 from ..dynamic_model.dynamic_model import Model
 from ..optimizer import DynamicOptimization
@@ -2198,17 +2198,20 @@ class LMPC(Controller, DynamicOptimization):
 
 
 class SMPC(NMPC):
-
     """Class for Stochastic Nonlinear Model Predictive Control"""
+
     def __init__(self, det_model, stoch_model, B, id=None, name=None, plot_backend=None, use_sx=True,
                  stats=False):
 
         # First transfor the problem in a deterministic problem
 
         model_c, Kx = self._create_deterministic_surrogate(det_model, stoch_model, B, Kgain=None)
-        model_c.setup(dt = 1) # TODO put the dt from the solution
+        model_c.setup(dt=1)  # TODO put the dt from the solution
 
         super().__init__(model_c, id=id, name=name, plot_backend=plot_backend, stats=stats, use_sx=use_sx)
+
+        self._smpc_options = None
+        self._smpc_options_is_set = False
 
     def _create_deterministic_surrogate(self, det_model, gps, Bw, Kgain=None):
         """
@@ -2219,7 +2222,7 @@ class SMPC(NMPC):
         mu_u = model_c.set_inputs([f'mu_{i}' for i in det_model.input_names])
         mu_p = model_c.set_parameters(det_model.parameter_names)
         if mu_p.shape == (0, 0):
-            mu_p.resize(0,1)
+            mu_p.resize(0, 1)
 
         if Kgain is None:
             model_c.add_parameters([f'kgain_{i}' for i in range(det_model.n_x * det_model.n_u)])
@@ -2313,6 +2316,97 @@ class SMPC(NMPC):
         model_c.add_dynamical_equations(ca.reshape(ode_c, det_model.n_x ** 2, 1))
 
         return model_c, Kx
+
+    def _update_type(self) -> None:
+        """
+
+        :return:
+        """
+        self._type = 'SMPC'
+
+    def _get_chance_constraints(self):
+
+        if self._smpc_options['chance_constraints'] == 'prs':
+            if self._box_constraints_is_set:
+                if any([i!=ca.inf for i in self._x_lb]) or any([i!=ca.inf for i in self._x_ub]):
+                    # Set state chance constraints
+                    self.stage_constraint.constraint = ca.vertcat(
+                        self._model + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
+                            1 * self.Kx * 1 + 1e-8),
+                        - self._model.x.get_by_name('mu_P') + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
+                            1 * self.Kx * 1 + 1e-8)
+                    )
+                    self.stage_constraint.ub = [20, -(0)]
+                    self.stage_constraint.lb = [-ca.inf, -ca.inf]
+
+                    self.terminal_constraint.constraint = ca.vertcat(
+                        self._model.x.get_by_name('mu_P') + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
+                            1 * self.Kx * 1 + 1e-8),
+                        -self._model.x.get_by_name('mu_P') + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
+                            1 * self.Kx * 1 + 1e-8)
+                    )
+                    self.terminal_constraint.ub = [15, -(10)]
+                    self.terminal_constraint.lb = [-ca.inf, -ca.inf]
+
+    def set_smpc_options(self, *args, **kwargs):
+        """
+            Sets the options that modify how the SMPC problem is set
+
+            :param args:
+            :param kwargs:
+            :return:
+        """
+        # TODO: when multiple-shooting and irk are implemented/tested add them to the list
+        possible_choices = {}
+        possible_choices['chance_constraints'] = ['prs']  # 'irk'
+
+        option_list = list(possible_choices.keys())
+
+        default_opts = {
+            'chance_constraints': 'prs',
+        }
+
+
+        opts = {}
+        if len(args) != 0:
+            if isinstance(args[0], dict):
+                opts = args[0]
+        else:
+            if len(kwargs) != 0:
+                opts = kwargs
+
+        for key, value in opts.items():
+            if key not in option_list:
+                raise ValueError(f"The option named {key} does not exist. Possible options are {option_list}.")
+            if possible_choices[key] is not None and value not in possible_choices[key]:
+                raise ValueError(f"The option {key} is set to value {value} but the only allowed values are "
+                                 f"{possible_choices[key]}.")
+            else:
+                default_opts[key] = value
+
+        self._smpc_options_is_set = True
+        self._smpc_options = default_opts
+
+    def set_custom_constraints_function(self, fun=None, lb=None, ub=None, soft=False, max_violation=ca.inf):
+        raise NotImplementedError(
+            f"{self.set_custom_constraints_function.__name__} is not yet implemented for {self._type} class. ")
+
+    def set_stage_constraints(self, stage_constraint=None, lb=None, ub=None, is_soft=False, max_violation=ca.inf,
+                              weight=None, name='stage_constraint'):
+        raise NotImplementedError(
+            f"{self.set_stage_constraints.__name__} is not yet implemented for {self._type} class. ")
+
+    def set_terminal_constraints(self, stage_constraint=None, lb=None, ub=None, is_soft=False, max_violation=ca.inf,
+                                 weight=None, name='stage_constraint'):
+        raise NotImplementedError(
+            f"{self.set_terminal_constraints.__name__} is not yet implemented for {self._type} class. ")
+
+    def setup(self, options=None, solver_options=None) -> None:
+
+        self._get_chance_constraints(options=options)
+
+        # Setup equivalent deterministic problem
+        self._setup(options=options, solver_options=solver_options)
 
 
 __all__ = [
