@@ -19,7 +19,7 @@ class TestIO(unittest.TestCase):
         a = inputs[0]
 
         # dpx = parameter*a
-        dpx =a
+        dpx = a
 
         plant.set_dynamical_equations([dpx])
 
@@ -47,9 +47,18 @@ class TestIO(unittest.TestCase):
         # Matrix
         self.B = np.array([[1]])
 
-    def test_io_1(self):
+    def test_box_constraints(self):
         smpc = SMPC(self.model, self.gp, self.B)
         smpc.set_box_constraints(x_lb=[10])
+
+    def test_box_constraints_1(self):
+        smpc = SMPC(self.model, self.gp, self.B)
+        self.assertRaises(TypeError, smpc.set_box_chance_constraints, x_lb=[10], x_lb_p=2)
+
+    def test_box_constraints_2(self):
+        smpc = SMPC(self.model, self.gp, self.B)
+        smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=1)
+
 
 
 if __name__ == '__main__':

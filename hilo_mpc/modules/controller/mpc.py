@@ -2217,6 +2217,16 @@ class SMPC(NMPC):
 
         super().__init__(model_c, id=id, name=name, plot_backend=plot_backend, stats=stats, use_sx=use_sx)
 
+        # Initialize change constraint probability
+        self._x_ub_p = None
+        self._x_lb_p = None
+        self._u_ub_p = None
+        self._u_lb_p = None
+        self._y_ub_p = None
+        self._y_lb_p = None
+        self._z_ub_p = None
+        self._z_lb_p = None
+
         self._smpc_options = None
         self._smpc_options_is_set = False
 
@@ -2355,6 +2365,20 @@ class SMPC(NMPC):
                     self.terminal_constraint.ub = [15, -(10)]
                     self.terminal_constraint.lb = [-ca.inf, -ca.inf]
 
+    def _sanity_check_probability_values(self,var,type):
+
+        if var is None:
+            return var
+        else:
+            var= check_and_wrap_to_list(var)
+
+            for i in var:
+                if i>=0 and i<=1:
+                    return i
+                else:
+                    raise TypeError(f"The probabilities must be between 0 and 1. The variable time {type} has some values"
+                                    f" ouside this range.")
+
     def set_smpc_options(self, *args, **kwargs):
         """
             Sets the options that modify how the SMPC problem is set
@@ -2395,6 +2419,11 @@ class SMPC(NMPC):
 
     def set_box_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
                             z_lb=None, *args, **kwargs):
+        raise TypeError("set_box_constraints is not available in stochastic MPC. Use 'set_box_chance_constraints' instead.")
+
+    def set_box_chance_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
+                            z_lb=None, *args, **kwargs):
+        # TODO: add method's documentation
         """
         Set box constraints for the SMPC.
         """
@@ -2408,48 +2437,72 @@ class SMPC(NMPC):
             var_x_ub[var_x_ub == 1] = 0
             var_x_ub = var_x_ub.flatten().tolist()
             x_ub = x_ub + var_x_ub
+
+            # Get probability of constraint satisfaction
+            self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p',None),'x_ub')
         if x_lb is not None:
             var_x_lb = np.eye(self._n_x_s)
             var_x_lb[var_x_lb == 0] = -ca.inf
             var_x_lb[var_x_lb == 1] = 0
             var_x_lb = var_x_lb.flatten().tolist()
             x_lb = x_lb + var_x_lb
+
+            # Get probability of constraint satisfaction
+            self._x_lb_p = self._sanity_check_probability_values(kwargs.get('x_lb_p',None),'x_lb')
         if u_ub is not None:
             var_t_ub = np.eye(self._n_u_s)
             var_t_ub[var_t_ub == 0] = ca.inf
             var_t_ub[var_t_ub == 1] = 0
             var_t_ub = var_t_ub.flatten().tolist()
             u_ub = u_ub + var_u_ub
+
+            # Get probability of constraint satisfaction
+            self._u_ub_p =  self._sanity_check_probability_values(kwargs.get('u_ub_p',None),'u_ub')
         if u_lb is not None:
             var_u_lb = np.eye(self._n_u_s)
             var_u_lb[var_u_lb == 0] = -ca.inf
             var_u_lb[var_u_lb == 1] = 0
             var_u_lb = var_u_lb.flatten().tolist()
             u_lb = u_lb + var_u_lb
+
+            # Get probability of constraint satisfaction
+            self._u_lb_p = kwargs.get('u_lb_p',None)
         if y_ub is not None:
             var_y_ub = np.eye(self._n_x_s)
             var_y_ub[var_y_ub == 0] = ca.inf
             var_y_ub[var_y_ub == 1] = 0
             var_y_ub = var_y_ub.flatten().tolist()
             y_ub = y_ub + var_y_ub
+
+            # Get probability of constraint satisfaction
+            self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_ub_p',None),'y_ub')
         if y_lb is not None:
             var_y_lb = np.eye(self._n_y_s)
             var_y_lb[var_y_lb == 0] = -ca.inf
             var_y_lb[var_y_lb == 1] = 0
             var_y_lb = var_y_lb.flatten().tolist()
-            y_lb + var_y_lb
+            y_lb = y_lb + var_y_lb
+
+            # Get probability of constraint satisfaction
+            self._y_lb_p = kwargs.get('y_lb_p',None)
         if z_ub is not None:
             var_z_ub = np.eye(self._n_z_s)
             var_z_ub[var_z_ub == 0] = ca.inf
             var_z_ub[var_z_ub == 1] = 0
             var_z_ub = var_z_ub.flatten().tolist()
             z_ub = z_ub + var_z_ub
+
+            # Get probability of constraint satisfaction
+            self._z_ub_p =  self._sanity_check_probability_values(kwargs.get('z_ub_p',None),'z_ub')
         if z_lb is not None:
             var_z_lb = np.eye(self._n_x_s)
             var_z_lb[var_z_lb == 0] = -ca.inf
             var_z_lb[var_z_lb == 1] = 0
             var_z_lb = var_z_lb.flatten().tolist()
             z_lb = z_lb + var_z_lb
+
+            # Get probability of constraint satisfaction
+            self._z_lb_p = self._sanity_check_probability_values(kwargs.get('z_lb_p',None), 'z_lb')
 
         super(SMPC, self).set_box_constraints(x_ub=x_ub, x_lb=x_lb,u_ub=u_ub,u_lb=u_lb,y_ub=y_ub,y_lb=y_lb, z_ub=z_ub,
                                               z_lb=z_lb)
