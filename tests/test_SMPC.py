@@ -49,7 +49,7 @@ class TestIO(unittest.TestCase):
 
     def test_io_1(self):
         smpc = SMPC(self.model, self.gp, self.B)
-        smpc.set_custom_constraints_function()
+        smpc.set_box_constraints(x_lb=[10])
 
 
 if __name__ == '__main__':

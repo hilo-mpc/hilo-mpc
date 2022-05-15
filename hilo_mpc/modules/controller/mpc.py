@@ -1250,7 +1250,7 @@ class NMPC(Controller, DynamicOptimization):
         return self._u_ub
 
     def set_box_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
-                            z_lb=None):
+                            z_lb=None, *args, **kwargs):
         """
         Set box constraints to the model's variables. These look like
 
@@ -2204,9 +2204,16 @@ class SMPC(NMPC):
     def __init__(self, det_model, stoch_model, B, id=None, name=None, plot_backend=None, use_sx=True,
                  stats=False):
 
+        # Save dimension of original (stochastic) model
+        self._n_x_s = det_model.n_x
+        self._n_u_s = det_model.n_u
+        self._n_y_s = det_model.n_y
+        self._n_p_s = det_model.n_p
+        self._n_z_s = det_model.n_z
         # First transfor the problem in a deterministic problem
-
         model_c, Kx = self._create_deterministic_surrogate(det_model, stoch_model, B, Kgain=None)
+        self.Kx = Kx
+
         model_c.setup(dt=1)  # TODO put the dt from the solution
 
         super().__init__(model_c, id=id, name=name, plot_backend=plot_backend, stats=stats, use_sx=use_sx)
@@ -2367,7 +2374,6 @@ class SMPC(NMPC):
             'chance_constraints': 'prs',
         }
 
-
         opts = {}
         if len(args) != 0:
             if isinstance(args[0], dict):
@@ -2387,6 +2393,68 @@ class SMPC(NMPC):
 
         self._smpc_options_is_set = True
         self._smpc_options = default_opts
+
+    def set_box_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
+                            z_lb=None, *args, **kwargs):
+        """
+        Set box constraints for the SMPC.
+        """
+        # The equivalent deterministic case has n_x_s + n_x_s**2 number of states. So we need to expand the bounds provided
+        # by the user
+        # TODO: this can be simplified by looping over all bounds instead of writing everything again
+        # NOTE: once issue #3 is solved, the following lines should be not necessary anymore
+        if x_ub is not None:
+            var_x_ub = np.eye(self._n_x_s)
+            var_x_ub[var_x_ub == 0] = ca.inf
+            var_x_ub[var_x_ub == 1] = 0
+            var_x_ub = var_x_ub.flatten().tolist()
+            x_ub = x_ub + var_x_ub
+        if x_lb is not None:
+            var_x_lb = np.eye(self._n_x_s)
+            var_x_lb[var_x_lb == 0] = -ca.inf
+            var_x_lb[var_x_lb == 1] = 0
+            var_x_lb = var_x_lb.flatten().tolist()
+            x_lb = x_lb + var_x_lb
+        if u_ub is not None:
+            var_t_ub = np.eye(self._n_u_s)
+            var_t_ub[var_t_ub == 0] = ca.inf
+            var_t_ub[var_t_ub == 1] = 0
+            var_t_ub = var_t_ub.flatten().tolist()
+            u_ub = u_ub + var_u_ub
+        if u_lb is not None:
+            var_u_lb = np.eye(self._n_u_s)
+            var_u_lb[var_u_lb == 0] = -ca.inf
+            var_u_lb[var_u_lb == 1] = 0
+            var_u_lb = var_u_lb.flatten().tolist()
+            u_lb = u_lb + var_u_lb
+        if y_ub is not None:
+            var_y_ub = np.eye(self._n_x_s)
+            var_y_ub[var_y_ub == 0] = ca.inf
+            var_y_ub[var_y_ub == 1] = 0
+            var_y_ub = var_y_ub.flatten().tolist()
+            y_ub = y_ub + var_y_ub
+        if y_lb is not None:
+            var_y_lb = np.eye(self._n_y_s)
+            var_y_lb[var_y_lb == 0] = -ca.inf
+            var_y_lb[var_y_lb == 1] = 0
+            var_y_lb = var_y_lb.flatten().tolist()
+            y_lb + var_y_lb
+        if z_ub is not None:
+            var_z_ub = np.eye(self._n_z_s)
+            var_z_ub[var_z_ub == 0] = ca.inf
+            var_z_ub[var_z_ub == 1] = 0
+            var_z_ub = var_z_ub.flatten().tolist()
+            z_ub = z_ub + var_z_ub
+        if z_lb is not None:
+            var_z_lb = np.eye(self._n_x_s)
+            var_z_lb[var_z_lb == 0] = -ca.inf
+            var_z_lb[var_z_lb == 1] = 0
+            var_z_lb = var_z_lb.flatten().tolist()
+            z_lb = z_lb + var_z_lb
+
+        super(SMPC, self).set_box_constraints(x_ub=x_ub, x_lb=x_lb,u_ub=u_ub,u_lb=u_lb,y_ub=y_ub,y_lb=y_lb, z_ub=z_ub,
+                                              z_lb=z_lb)
+
 
     def set_custom_constraints_function(self, fun=None, lb=None, ub=None, soft=False, max_violation=ca.inf):
         raise NotImplementedError(
