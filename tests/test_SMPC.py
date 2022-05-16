@@ -46,6 +46,7 @@ class TestIO(unittest.TestCase):
         self.gp = gp
         # Matrix
         self.B = np.array([[1]])
+        self.x0 = x0
 
     def test_box_constraints(self):
         smpc = SMPC(self.model, self.gp, self.B)
@@ -55,10 +56,20 @@ class TestIO(unittest.TestCase):
         smpc = SMPC(self.model, self.gp, self.B)
         self.assertRaises(TypeError, smpc.set_box_chance_constraints, x_lb=[10], x_lb_p=2)
 
-    def test_box_constraints_2(self):
+    def test_setup(self):
         smpc = SMPC(self.model, self.gp, self.B)
+        smpc.horizon = 10
+        smpc.quad_stage_cost.add_states(names='mu_px', ref=1, weights=10)
         smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=1)
+        smpc.setup(options={'chance_constraints': 'prs'})
 
+    def test_one_iter(self):
+        smpc = SMPC(self.model, self.gp, self.B)
+        smpc.horizon = 10
+        smpc.quad_stage_cost.add_states(names='mu_px', ref=1, weights=10)
+        smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=1)
+        smpc.setup(options={'chance_constraints': 'prs'})
+        smpc.optimize(x0=self.x0 + [0], cp=0)
 
 
 if __name__ == '__main__':
