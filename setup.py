@@ -16,7 +16,7 @@ def read(file_name):
 
 setup(
     name='HILO-MPC',
-    version='1.0.0',
+    version='1.0.1',
     description='HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported optimal '
                 'control and estimation problems',
     long_description=read('README.md'),

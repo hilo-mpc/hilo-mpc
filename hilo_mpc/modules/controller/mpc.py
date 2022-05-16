@@ -632,7 +632,7 @@ class NMPC(Controller, DynamicOptimization):
         if x_ub is not None:
             x_ub = deepcopy(x_ub)
             x_ub = check_and_wrap_to_list(x_ub)
-            if len(x_lb) != self._n_x:
+            if len(x_ub) != self._n_x:
                 raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
             self._x_ub = x_ub
         else:
