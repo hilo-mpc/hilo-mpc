@@ -2201,7 +2201,7 @@ class SMPC(NMPC):
     """Class for Stochastic Nonlinear Model Predictive Control"""
 
     def __init__(self, det_model, stoch_model, B, id=None, name=None, plot_backend=None, use_sx=True,
-                 stats=False):
+                 stats=False, Kgain=None):
 
         # Save dimension of original (stochastic) model
         self._n_x_s = det_model.n_x
@@ -2209,8 +2209,14 @@ class SMPC(NMPC):
         self._n_y_s = det_model.n_y
         self._n_p_s = det_model.n_p
         self._n_z_s = det_model.n_z
+
+        if Kgain is not None:
+            Kgain = check_and_wrap_to_DM(Kgain)
+            self._Kgain_is_set = True
+        else:
+            self._Kgain_is_set = False
         # First transfor the problem in a deterministic problem
-        model_c, Kx = self._create_deterministic_surrogate(det_model, stoch_model, B, Kgain=None)
+        model_c, Kx = self._create_deterministic_surrogate(det_model, stoch_model, B, Kgain=Kgain)
         self.Kx = Kx
 
         model_c.setup(dt=1)  # TODO put the dt from the solution
@@ -2514,6 +2520,31 @@ class SMPC(NMPC):
         # Setup equivalent deterministic problem
         self._setup(options=options, solver_options=solver_options)
 
+    def optimize(self, x0, cp=None, tvp=None, v0=None, runs=0, fix_x0=True, **kwargs):
+
+        cov_x0 = kwargs.get('cov_x0',None)
+        if cov_x0 is None:
+            raise ValueError("To solve the SMPC you need to provide an intial condition for state covariance values. "
+                            "Please pass a 'cov_x0' as well.")
+
+        if self._Kgain_is_set is False:
+            Kgain = kwargs.get('Kgain',None)
+            if Kgain is None:
+                raise ValueError("It looks like you have not passed the gain of the ancillary controller yet. "
+                                 "Please provide a 'Kgain' to the optimize method.")
+            else:
+                Kgain = check_and_wrap_to_DM(Kgain)
+                kgain = ca.reshape(Kgain,self._n_x_s*self._n_u_s,1)
+                if cp is not None:
+                    cp = ca.vertcat(cp,kgain)
+                else:
+                    cp = kgain
+
+        x0 = check_and_wrap_to_DM(x0)
+        cov_x0 = check_and_wrap_to_DM(cov_x0)
+
+        x0 = ca.vertcat(x0,cov_x0)
+        super().optimize(x0, cp=cp, tvp=tvp, v0=v0, runs=runs, fix_x0=fix_x0, **kwargs)
 
 __all__ = [
     'NMPC',
