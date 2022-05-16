@@ -69,7 +69,15 @@ class TestIO(unittest.TestCase):
         smpc.quad_stage_cost.add_states(names='mu_px', ref=1, weights=10)
         smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=1)
         smpc.setup(options={'chance_constraints': 'prs'})
-        smpc.optimize(x0=self.x0 + [0], cp=0)
+        smpc.optimize(x0=self.x0, cov_x0=[0], Kgain=0)
+
+    def test_not_passing_k0(self):
+        smpc = SMPC(self.model, self.gp, self.B)
+        smpc.horizon = 10
+        smpc.quad_stage_cost.add_states(names='mu_px', ref=1, weights=10)
+        smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=1)
+        smpc.setup(options={'chance_constraints': 'prs'})
+        self.assertRaises(ValueError, smpc.optimize, x0=self.x0, Kgain=0)
 
 
 if __name__ == '__main__':
