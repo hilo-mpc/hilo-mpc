@@ -131,3 +131,6 @@ dmypy.json
 
 # Pycharm stuff
 .idea
+
+# Private stuff
+private
