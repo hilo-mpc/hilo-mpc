@@ -29,6 +29,8 @@ import casadi as ca
 import casadi.tools as catools
 import numpy as np
 from scipy.special import erfinv
+
+import hilo_mpc
 from .base import Controller
 from ..dynamic_model.dynamic_model import Model
 from ..optimizer import DynamicOptimization
@@ -2292,7 +2294,7 @@ class SMPC(NMPC):
         mu_ds = []
         Kd0s = []
 
-        if not isinstance(gps, list):
+        if isinstance(gps, hilo_mpc.gp.GaussianProcess):
             gps = [gps]
 
         for gp in gps:
@@ -2390,10 +2392,10 @@ class SMPC(NMPC):
             if self._box_constraints_is_set:
                 if any([i != ca.inf for i in self._x_lb]) or any([i != ca.inf for i in self._x_ub]):
                     # Set state chance constraints
-                    x_prob_ub = self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
-                            (ca.DM.ones(self._n_x_s, 1).T @ self.Kx ) @ ca.DM.ones(self._n_x_s, 1) + 1e-8)
+                    x_prob_ub = self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * np.array(self._x_ub_p) - 1)) * ca.sqrt(
+                            (ca.DM.ones(self._n_x_s, 1).T @ self.Kx ) @ ca.DM.ones(self._n_x_s, 1)+ 1e-8)
 
-                    x_prob_lb = -self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
+                    x_prob_lb = -self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * np.array(self._x_lb_p) - 1)) * ca.sqrt(
                         ca.DM.ones(self._n_x_s, 1).T @ self.Kx @ ca.DM.ones(self._n_x_s, 1) +  1e-8)
 
                     self.stage_constraint.constraint = ca.vertcat(x_prob_ub, x_prob_lb)
@@ -2412,12 +2414,12 @@ class SMPC(NMPC):
             var = check_and_wrap_to_list(var)
 
             for i in var:
-                if i >= 0 and i <= 1:
-                    return i
-                else:
+                if i < 0 and i > 1:
                     raise TypeError(
                         f"The probabilities must be between 0 and 1. The variable time {type} has some values"
                         f" ouside this range.")
+
+            return var
 
     def set_box_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
                             z_lb=None, *args, **kwargs):
@@ -2438,12 +2440,12 @@ class SMPC(NMPC):
             self.x_ub_s = x_ub
             var_x_ub = np.eye(self._n_x_s)
             var_x_ub[var_x_ub == 0] = ca.inf
-            var_x_ub[var_x_ub == 1] = 0
+            var_x_ub[var_x_ub == 1] = ca.inf
             var_x_ub = var_x_ub.flatten().tolist()
             x_ub = x_ub + var_x_ub
 
             # Get probability of constraint satisfaction
-            self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p', None), 'x_ub')
+        self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p',np.ones(self._n_x_s)*0.954), 'x_ub')
         if x_lb is not None:
             self.x_lb_s = x_lb
             var_x_lb = np.eye(self._n_x_s)
@@ -2453,37 +2455,18 @@ class SMPC(NMPC):
             x_lb = x_lb + var_x_lb
 
             # Get probability of constraint satisfaction
-            self._x_lb_p = self._sanity_check_probability_values(kwargs.get('x_lb_p', None), 'x_lb')
-        if u_ub is not None:
-            self.u_ub_s = u_ub
-            var_t_ub = np.eye(self._n_u_s)
-            var_t_ub[var_t_ub == 0] = ca.inf
-            var_t_ub[var_t_ub == 1] = 0
-            var_t_ub = var_t_ub.flatten().tolist()
-            u_ub = u_ub + var_u_ub
+        self._x_lb_p = self._sanity_check_probability_values(kwargs.get('x_lb_p', np.ones(self._n_x_s)*0.954), 'x_lb')
 
-            # Get probability of constraint satisfaction
-            self._u_ub_p = self._sanity_check_probability_values(kwargs.get('u_ub_p', None), 'u_ub')
-        if u_lb is not None:
-            self.u_lb_s = u_lb
-            var_u_lb = np.eye(self._n_u_s)
-            var_u_lb[var_u_lb == 0] = -ca.inf
-            var_u_lb[var_u_lb == 1] = 0
-            var_u_lb = var_u_lb.flatten().tolist()
-            u_lb = u_lb + var_u_lb
-
-            # Get probability of constraint satisfaction
-            self._u_lb_p = kwargs.get('u_lb_p', None)
         if y_ub is not None:
             self.y_ub_s = y_ub
             var_y_ub = np.eye(self._n_x_s)
             var_y_ub[var_y_ub == 0] = ca.inf
-            var_y_ub[var_y_ub == 1] = 0
+            var_y_ub[var_y_ub == 1] = ca.inf
             var_y_ub = var_y_ub.flatten().tolist()
             y_ub = y_ub + var_y_ub
 
             # Get probability of constraint satisfaction
-            self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_ub_p', None), 'y_ub')
+        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_ub_p', np.ones(self._n_y_s)*0.954), 'y_ub')
         if y_lb is not None:
             self.y_lb_s = y_lb
             var_y_lb = np.eye(self._n_y_s)
@@ -2493,17 +2476,17 @@ class SMPC(NMPC):
             y_lb = y_lb + var_y_lb
 
             # Get probability of constraint satisfaction
-            self._y_lb_p = kwargs.get('y_lb_p', None)
+        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_lb_p', np.ones(self._n_y_s)*0.954), 'y_lb')
         if z_ub is not None:
             self.z_ub_s = z_ub
             var_z_ub = np.eye(self._n_z_s)
             var_z_ub[var_z_ub == 0] = ca.inf
-            var_z_ub[var_z_ub == 1] = 0
+            var_z_ub[var_z_ub == 1] = ca.inf
             var_z_ub = var_z_ub.flatten().tolist()
             z_ub = z_ub + var_z_ub
 
             # Get probability of constraint satisfaction
-            self._z_ub_p = self._sanity_check_probability_values(kwargs.get('z_ub_p', None), 'z_ub')
+        self._z_ub_p = self._sanity_check_probability_values(kwargs.get('z_ub_p', np.ones(self._n_z_s)*0.954), 'z_ub')
         if z_lb is not None:
             self.z_lb_s = z_lb
             var_z_lb = np.eye(self._n_x_s)
@@ -2513,7 +2496,7 @@ class SMPC(NMPC):
             z_lb = z_lb + var_z_lb
 
             # Get probability of constraint satisfaction
-            self._z_lb_p = self._sanity_check_probability_values(kwargs.get('z_lb_p', None), 'z_lb')
+        self._z_lb_p = self._sanity_check_probability_values(kwargs.get('z_lb_p', np.ones(self._n_z_s)*0.954), 'z_lb')
 
         # Note: the deterministic MPC problem takes the bounds also for the covariance elements since the model is
         # expanded by the covariance elements
@@ -2566,7 +2549,7 @@ class SMPC(NMPC):
 
         x0 = check_and_wrap_to_DM(x0)
         cov_x0 = check_and_wrap_to_DM(cov_x0)
-        cov_x0 = ca.reshape(cov_x0, 2*self._n_x_s, 1)
+        cov_x0 = ca.reshape(cov_x0, self._n_x_s**2, 1)
         x0 = ca.vertcat(x0, cov_x0)
         super().optimize(x0, cp=cp, tvp=tvp, v0=v0, runs=runs, fix_x0=fix_x0, **kwargs)
 
