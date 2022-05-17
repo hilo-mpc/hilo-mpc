@@ -142,7 +142,7 @@ class TestMIMOSystem(unittest.TestCase):
         smpc.horizon = 10
         smpc.quad_stage_cost.add_states(names=['mu_px', 'mu_py'], ref=[1, 1], weights=[10,10])
         smpc.quad_terminal_cost.add_states(names=['mu_px', 'mu_py'], ref=[1, 1], weights=[10,10])
-        smpc.set_box_chance_constraints(x_lb=[0, 0], x_lb_p=[1, 1])
+        smpc.set_box_chance_constraints(x_lb=[0, 0], x_lb_p=[0.97, 0.97])
         smpc.setup(options={'chance_constraints': 'prs'})
         cov_x0 = np.array([[0, 0], [0, 0]])
         Kgain = np.array([[0, 0], [0, 0]])
