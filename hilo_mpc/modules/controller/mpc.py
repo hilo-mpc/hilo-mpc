@@ -39,6 +39,7 @@ from ...util.util import check_and_wrap_to_list, check_and_wrap_to_DM, scale_vec
 
 class NMPC(Controller, DynamicOptimization):
     """Class for Nonlinear Model Predictive Control"""
+
     def __init__(self, model, id=None, name=None, plot_backend=None, use_sx=True, stats=False):
         """Constructor method"""
         # TODO: when discrete_u or discrete_x is given to the opts structure, but NMPC is used, raise an error saying
@@ -1526,7 +1527,7 @@ class NMPC(Controller, DynamicOptimization):
 
         from bokeh.io import output_file, output_notebook, show, save
         from bokeh.plotting import figure
-        from bokeh.models import ColumnDataSource, DataTable, TableColumn, CellFormatter, Div
+        from bokeh.models import ColumnDataSource, DataTable, TableColumn, CellFormatter, Div, Band
         from bokeh.layouts import gridplot, column, row, grid
         from bokeh.palettes import Spectral4 as palettespectral
 
@@ -1564,6 +1565,18 @@ class NMPC(Controller, DynamicOptimization):
         # TODO: consider time step for the x axis
         x_pred, u_pred, dt_pred = self.return_prediction()
 
+        if self._type == 'SMPC':
+            n_x = kwargs.get('n_x_s')
+            # Get also the variance of the predictions
+            sigma_x = ca.DM.zeros(n_x, x_pred.shape[1])
+            for i in range(x_pred.shape[1]):
+                k_flat = x_pred[n_x:, i]
+                k = ca.reshape(k_flat, n_x, n_x)
+                cov_ = ca.diag(k)
+                sigma_x[:, i] = ca.sqrt(cov_)
+        else:
+            n_x = self._model.n_x
+
         if dt_pred is None:
             time_vector = np.linspace(time, time + (self._prediction_horizon) * self.sampling_interval,
                                       self._prediction_horizon + 1)
@@ -1573,27 +1586,40 @@ class NMPC(Controller, DynamicOptimization):
                 time_vector.append(time_vector[i] + dt_pred[i])
 
         input_dict = {i: [] for i in self._model.input_names}
-        states_dict = {i: [] for i in self._model.dynamical_state_names}
+        states_dict = {i: [] for i in self._model.dynamical_state_names[:n_x]}
 
         for k, name in enumerate(self._model.input_names):
             input_dict[name] = u_pred[k, :]
 
-        for k, name in enumerate(self._model.dynamical_state_names):
+        for k, name in enumerate(self._model.dynamical_state_names[:n_x]):
             states_dict[name] = x_pred[k, :]
 
-        p1 = [figure(title=title, background_fill_color="#fafafa") for i in range(self._model.n_x)]
+        p1 = [figure(title=title, background_fill_color="#fafafa") for i in range(n_x)]
 
-        for s, name in enumerate(self._model.dynamical_state_names):
+        for s, name in enumerate(self._model.dynamical_state_names[:n_x]):
             p1[s].line(x=time_vector,
                        y=states_dict[name],
                        legend_label=name + '_pred', line_width=2)
+
+            if self._type == 'SMPC':
+                res_dict = {
+                    'lower': np.array(ca.DM(x_pred[s, :]) - 2 * sigma_x[s, :].T).squeeze(),
+                    'upper': np.array(ca.DM(x_pred[s, :]) + 2 * sigma_x[s, :].T).squeeze(),
+                    'x': time_vector
+                }
+                source = ColumnDataSource(res_dict)
+
+                band = Band(base='x', lower='lower', upper='upper',
+                            level='underlay', fill_alpha=0.5, line_width=2, line_color='black', source=source,
+                            fill_color='red')
+                p1[s].add_layout(band)
+
             for i in range(len(self.quad_stage_cost._references_list)):
                 if name in self.quad_stage_cost._references_list[i]['names']:
                     position = self.quad_stage_cost._references_list[i]['names'].index(name)
                     value = self.quad_stage_cost._references_list[i]['ref'][position]
                     p1[s].line([time_vector[0], time_vector[-1]], [value, value], legend_label=name + '_ref',
                                line_dash='dashed', line_color="red", line_width=2)
-
             p1[s].yaxis.axis_label = name
             p1[s].xaxis.axis_label = 'time'
             if format_figure is not None:
@@ -2235,14 +2261,14 @@ class SMPC(NMPC):
         self._z_lb_p = None
 
         # Initialize the original constraints
-        self.x_ub_s = ca.inf*ca.DM.ones(det_model.n_x)
-        self.x_lb_s = -ca.inf*ca.DM.ones(det_model.n_x)
-        self.u_ub_s = ca.inf*ca.DM.ones(det_model.n_u)
-        self.u_lb_s = -ca.inf*ca.DM.ones(det_model.n_u)
-        self.y_ub_s = ca.inf*ca.DM.ones(det_model.n_y)
-        self.y_lb_s = -ca.inf*ca.DM.ones(det_model.n_y)
-        self.z_ub_s = ca.inf*ca.DM.ones(det_model.n_z)
-        self.z_lb_s = -ca.inf*ca.DM.ones(det_model.n_z)
+        self.x_ub_s = ca.inf * ca.DM.ones(det_model.n_x)
+        self.x_lb_s = -ca.inf * ca.DM.ones(det_model.n_x)
+        self.u_ub_s = ca.inf * ca.DM.ones(det_model.n_u)
+        self.u_lb_s = -ca.inf * ca.DM.ones(det_model.n_u)
+        self.y_ub_s = ca.inf * ca.DM.ones(det_model.n_y)
+        self.y_lb_s = -ca.inf * ca.DM.ones(det_model.n_y)
+        self.z_ub_s = ca.inf * ca.DM.ones(det_model.n_z)
+        self.z_lb_s = -ca.inf * ca.DM.ones(det_model.n_z)
 
         self._smpc_options = None
         self._smpc_options_is_set = False
@@ -2362,47 +2388,44 @@ class SMPC(NMPC):
 
         if self._nlp_options['chance_constraints'] == 'prs':
             if self._box_constraints_is_set:
-                if any([i!=ca.inf for i in self._x_lb]) or any([i!=ca.inf for i in self._x_ub]):
+                if any([i != ca.inf for i in self._x_lb]) or any([i != ca.inf for i in self._x_ub]):
                     # Set state chance constraints
-                    self.stage_constraint.constraint = ca.vertcat(
-                        self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
-                            ca.DM.ones(self._n_x_s,1).T @ self.Kx * ca.DM.ones(self._n_x_s,1).T + 1e-8),
-                        - self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
-                            ca.DM.ones(self._n_x_s, 1).T @ self.Kx * ca.DM.ones(self._n_x_s, 1).T + 1e-8)
-                    )
+                    x_prob_ub = self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
+                            (ca.DM.ones(self._n_x_s, 1).T @ self.Kx ) @ ca.DM.ones(self._n_x_s, 1) + 1e-8)
+
+                    x_prob_lb = -self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
+                        ca.DM.ones(self._n_x_s, 1).T @ self.Kx @ ca.DM.ones(self._n_x_s, 1) +  1e-8)
+
+                    self.stage_constraint.constraint = ca.vertcat(x_prob_ub, x_prob_lb)
                     self.stage_constraint.ub = ca.vertcat(ca.DM(self.x_ub_s), -ca.DM(self.x_lb_s))
-                    self.stage_constraint.lb = -ca.inf * ca.DM.ones(2*self._n_x_s)
+                    self.stage_constraint.lb = -ca.inf * ca.DM.ones(2 * self._n_x_s)
 
-                    self.terminal_constraint.constraint = ca.vertcat(
-                        self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
-                            1 * self.Kx * 1 + 1e-8),
-                        -self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * 0.9773 - 1)) * ca.sqrt(
-                            1 * self.Kx * 1 + 1e-8)
-                    )
+                    self.terminal_constraint.constraint = ca.vertcat(x_prob_ub, x_prob_lb)
                     self.terminal_constraint.ub = ca.vertcat(ca.DM(self.x_ub_s), -ca.DM(self.x_lb_s))
-                    self.terminal_constraint.lb = -ca.inf * ca.DM.ones(2*self._n_x_s)
+                    self.terminal_constraint.lb = -ca.inf * ca.DM.ones(2 * self._n_x_s)
 
-    def _sanity_check_probability_values(self,var,type):
+    def _sanity_check_probability_values(self, var, type):
 
         if var is None:
             return var
         else:
-            var= check_and_wrap_to_list(var)
+            var = check_and_wrap_to_list(var)
 
             for i in var:
-                if i>=0 and i<=1:
+                if i >= 0 and i <= 1:
                     return i
                 else:
-                    raise TypeError(f"The probabilities must be between 0 and 1. The variable time {type} has some values"
-                                    f" ouside this range.")
-
+                    raise TypeError(
+                        f"The probabilities must be between 0 and 1. The variable time {type} has some values"
+                        f" ouside this range.")
 
     def set_box_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
                             z_lb=None, *args, **kwargs):
-        raise TypeError("set_box_constraints is not available in stochastic MPC. Use 'set_box_chance_constraints' instead.")
+        raise TypeError(
+            "set_box_constraints is not available in stochastic MPC. Use 'set_box_chance_constraints' instead.")
 
     def set_box_chance_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
-                            z_lb=None, *args, **kwargs):
+                                   z_lb=None, *args, **kwargs):
         # TODO: add method's documentation
         """
         Set box constraints for the SMPC.
@@ -2420,7 +2443,7 @@ class SMPC(NMPC):
             x_ub = x_ub + var_x_ub
 
             # Get probability of constraint satisfaction
-            self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p',None),'x_ub')
+            self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p', None), 'x_ub')
         if x_lb is not None:
             self.x_lb_s = x_lb
             var_x_lb = np.eye(self._n_x_s)
@@ -2430,7 +2453,7 @@ class SMPC(NMPC):
             x_lb = x_lb + var_x_lb
 
             # Get probability of constraint satisfaction
-            self._x_lb_p = self._sanity_check_probability_values(kwargs.get('x_lb_p',None),'x_lb')
+            self._x_lb_p = self._sanity_check_probability_values(kwargs.get('x_lb_p', None), 'x_lb')
         if u_ub is not None:
             self.u_ub_s = u_ub
             var_t_ub = np.eye(self._n_u_s)
@@ -2440,7 +2463,7 @@ class SMPC(NMPC):
             u_ub = u_ub + var_u_ub
 
             # Get probability of constraint satisfaction
-            self._u_ub_p =  self._sanity_check_probability_values(kwargs.get('u_ub_p',None),'u_ub')
+            self._u_ub_p = self._sanity_check_probability_values(kwargs.get('u_ub_p', None), 'u_ub')
         if u_lb is not None:
             self.u_lb_s = u_lb
             var_u_lb = np.eye(self._n_u_s)
@@ -2450,7 +2473,7 @@ class SMPC(NMPC):
             u_lb = u_lb + var_u_lb
 
             # Get probability of constraint satisfaction
-            self._u_lb_p = kwargs.get('u_lb_p',None)
+            self._u_lb_p = kwargs.get('u_lb_p', None)
         if y_ub is not None:
             self.y_ub_s = y_ub
             var_y_ub = np.eye(self._n_x_s)
@@ -2460,7 +2483,7 @@ class SMPC(NMPC):
             y_ub = y_ub + var_y_ub
 
             # Get probability of constraint satisfaction
-            self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_ub_p',None),'y_ub')
+            self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_ub_p', None), 'y_ub')
         if y_lb is not None:
             self.y_lb_s = y_lb
             var_y_lb = np.eye(self._n_y_s)
@@ -2470,7 +2493,7 @@ class SMPC(NMPC):
             y_lb = y_lb + var_y_lb
 
             # Get probability of constraint satisfaction
-            self._y_lb_p = kwargs.get('y_lb_p',None)
+            self._y_lb_p = kwargs.get('y_lb_p', None)
         if z_ub is not None:
             self.z_ub_s = z_ub
             var_z_ub = np.eye(self._n_z_s)
@@ -2480,7 +2503,7 @@ class SMPC(NMPC):
             z_ub = z_ub + var_z_ub
 
             # Get probability of constraint satisfaction
-            self._z_ub_p =  self._sanity_check_probability_values(kwargs.get('z_ub_p',None),'z_ub')
+            self._z_ub_p = self._sanity_check_probability_values(kwargs.get('z_ub_p', None), 'z_ub')
         if z_lb is not None:
             self.z_lb_s = z_lb
             var_z_lb = np.eye(self._n_x_s)
@@ -2490,13 +2513,13 @@ class SMPC(NMPC):
             z_lb = z_lb + var_z_lb
 
             # Get probability of constraint satisfaction
-            self._z_lb_p = self._sanity_check_probability_values(kwargs.get('z_lb_p',None), 'z_lb')
+            self._z_lb_p = self._sanity_check_probability_values(kwargs.get('z_lb_p', None), 'z_lb')
 
         # Note: the deterministic MPC problem takes the bounds also for the covariance elements since the model is
         # expanded by the covariance elements
-        super(SMPC, self).set_box_constraints(x_ub=x_ub, x_lb=x_lb,u_ub=u_ub,u_lb=u_lb,y_ub=y_ub,y_lb=y_lb, z_ub=z_ub,
+        super(SMPC, self).set_box_constraints(x_ub=x_ub, x_lb=x_lb, u_ub=u_ub, u_lb=u_lb, y_ub=y_ub, y_lb=y_lb,
+                                              z_ub=z_ub,
                                               z_lb=z_lb)
-
 
     def set_custom_constraints_function(self, fun=None, lb=None, ub=None, soft=False, max_violation=ca.inf):
         raise NotImplementedError(
@@ -2523,29 +2546,39 @@ class SMPC(NMPC):
 
     def optimize(self, x0, cp=None, tvp=None, v0=None, runs=0, fix_x0=True, **kwargs):
 
-        cov_x0 = kwargs.get('cov_x0',None)
+        cov_x0 = kwargs.get('cov_x0', None)
         if cov_x0 is None:
             raise ValueError("To solve the SMPC you need to provide an intial condition for state covariance values. "
-                            "Please pass a 'cov_x0' as well.")
+                             "Please pass a 'cov_x0' as well.")
 
         if self._Kgain_is_set is False:
-            Kgain = kwargs.get('Kgain',None)
+            Kgain = kwargs.get('Kgain', None)
             if Kgain is None:
                 raise ValueError("It looks like you have not passed the gain of the ancillary controller yet. "
                                  "Please provide a 'Kgain' to the optimize method.")
             else:
                 Kgain = check_and_wrap_to_DM(Kgain)
-                kgain = ca.reshape(Kgain,self._n_x_s*self._n_u_s,1)
+                kgain = ca.reshape(Kgain, self._n_x_s * self._n_u_s, 1)
                 if cp is not None:
-                    cp = ca.vertcat(cp,kgain)
+                    cp = ca.vertcat(cp, kgain)
                 else:
                     cp = kgain
 
         x0 = check_and_wrap_to_DM(x0)
         cov_x0 = check_and_wrap_to_DM(cov_x0)
-
-        x0 = ca.vertcat(x0,cov_x0)
+        cov_x0 = ca.reshape(cov_x0, 2*self._n_x_s, 1)
+        x0 = ca.vertcat(x0, cov_x0)
         super().optimize(x0, cp=cp, tvp=tvp, v0=v0, runs=runs, fix_x0=fix_x0, **kwargs)
+
+    def plot_prediction(self, save_plot=False, plot_dir=None, name_file='mpc_prediction.html', show_plot=True,
+                        extras=None, extras_names=None, title=None, format_figure=None, **kwargs):
+
+        # I need to tell the NMPC how many stochastic states there are
+        kwargs['n_x_s'] = self._n_x_s
+        super().plot_prediction(save_plot=save_plot, plot_dir=plot_dir, name_file=name_file, show_plot=show_plot,
+                                extras=extras, extras_names=extras_names, title=title, format_figure=format_figure,
+                                **kwargs)
+
 
 __all__ = [
     'NMPC',
