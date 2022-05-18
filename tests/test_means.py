@@ -16,7 +16,7 @@ class TestConstantMean(TestCase):
         mean = Mean.constant()
 
         self.assertIsNone(mean.active_dims)
-        self.assertFalse(hasattr(mean, 'log'))
+        self.assertFalse(hasattr(mean.bias, 'log'))
         np.testing.assert_equal(mean.bias.value, np.ones((1, 1)))
         self.assertEqual(len(mean.hyperparameters), 1)
         self.assertEqual(mean.hyperparameter_names, ['Const.bias'])
@@ -101,7 +101,7 @@ class TestZeroMean(TestCase):
         mean = self.mean
 
         self.assertIsNone(mean.active_dims)
-        self.assertFalse(hasattr(mean, 'log'))
+        self.assertFalse(hasattr(mean.bias, 'log'))
         np.testing.assert_equal(mean.bias, 0.)
         self.assertEqual(len(mean.hyperparameters), 0)
 
@@ -163,7 +163,7 @@ class TestOneMean(TestCase):
         mean = self.mean
 
         self.assertIsNone(mean.active_dims)
-        self.assertFalse(hasattr(mean, 'log'))
+        self.assertFalse(hasattr(mean.bias, 'log'))
         np.testing.assert_equal(mean.bias, 1.)
         self.assertEqual(len(mean.hyperparameters), 0)
 
@@ -218,11 +218,12 @@ class TestPolynomialMean(TestCase):
         mean = Mean.polynomial(2)
 
         self.assertIsNone(mean.active_dims)
-        self.assertFalse(hasattr(mean, 'log'))
+        self.assertFalse(hasattr(mean.coefficient, 'log'))
         np.testing.assert_equal(mean.coefficient.value, np.ones((1, 1)))
         self.assertEqual(mean.degree, 2)
         self.assertEqual(len(mean.hyperparameters), 2)
         self.assertEqual(mean.hyperparameter_names, ['Poly.coefficient', 'Poly.offset'])
+        self.assertFalse(hasattr(mean.offset, 'log'))
         np.testing.assert_equal(mean.offset.value, np.ones((1, 1)))
 
         mean.degree = 3
@@ -419,11 +420,12 @@ class TestLinearMean(TestCase):
         mean = Mean.linear()
 
         self.assertIsNone(mean.active_dims)
-        self.assertFalse(hasattr(mean, 'log'))
+        self.assertFalse(hasattr(mean.coefficient, 'log'))
         np.testing.assert_equal(mean.coefficient.value, np.ones((1, 1)))
         self.assertEqual(mean.degree, 1)
         self.assertEqual(len(mean.hyperparameters), 1)
         self.assertEqual(mean.hyperparameter_names, ['Lin.coefficient'])
+        self.assertFalse(hasattr(mean.offset, 'log'))
         np.testing.assert_equal(mean.offset, 0.)
 
     def test_linear_mean_fixed(self) -> None:
