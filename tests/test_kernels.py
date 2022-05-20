@@ -2609,3 +2609,680 @@ class TestRationalQuadraticKernel(TestCase):
         np.testing.assert_allclose(cov, np.array([[.61780206, .57735027, .54073807],
                                                   [.66226618, .61780206, .57735027],
                                                   [.71066905, .66226618, .61780206]]))
+
+
+class TestPiecewisePolynomialKernel(TestCase):
+    """"""
+    def test_piecewise_polynomial_kernel_no_hyperprior(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.piecewise_polynomial(1)
+
+        self.assertIsNone(kernel.active_dims)
+        self.assertEqual(kernel.degree, 1)
+        self.assertEqual(len(kernel.hyperparameters), 2)
+        self.assertEqual(kernel.hyperparameter_names, ['PP.length_scales', 'PP.signal_variance'])
+        self.assertTrue(hasattr(kernel.length_scales, 'log'))
+        np.testing.assert_equal(kernel.length_scales.value, np.ones((1, 1)))
+        np.testing.assert_equal(kernel.length_scales.log, np.zeros((1, 1)))
+        self.assertTrue(hasattr(kernel.signal_variance, 'log'))
+        np.testing.assert_equal(kernel.signal_variance.value, np.ones((1, 1)))
+        np.testing.assert_equal(kernel.signal_variance.log, np.zeros((1, 1)))
+
+    def test_piecewise_polynomial_kernel_wrong_degree(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            Kernel.piecewise_polynomial(4)
+        self.assertEqual(str(context.exception),
+                         "The parameter 'degree' has to be one of the following integers: 0, 1, 2, 3")
+
+    def test_piecewise_polynomial_kernel_degree_setter(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.piecewise_polynomial(1)
+        self.assertEqual(kernel.degree, 1)
+
+        kernel.degree = 2
+        self.assertEqual(kernel.degree, 2)
+
+        with self.assertRaises(ValueError) as context:
+            kernel.degree = 4
+        self.assertEqual(str(context.exception),
+                         "The property 'degree' has to be one of the following integers: 0, 1, 2, 3")
+
+    def test_piecewise_polynomial_kernel_fixed(self) -> None:
+        """
+
+        :return:
+        """
+        # TODO: Change according to test_means.py when first TODO is finished
+        kernel = Kernel.piecewise_polynomial(1)
+        kernel.length_scales.fixed = True
+        kernel.signal_variance.fixed = True
+
+        self.assertTrue(kernel.length_scales.fixed)
+        self.assertTrue(kernel.signal_variance.fixed)
+
+    # def test_piecewise_polynomial_kernel_hyperprior_gaussian(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     # TODO: Create according to test_means.py when first TODO is finished
+
+    def test_piecewise_polynomial_kernel_ard_no_active_dims(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            Kernel.piecewise_polynomial(1, ard=True)
+        self.assertEqual(str(context.exception),
+                         "The key word 'ard' can only be set to True if the key word 'active_dims' was supplied")
+
+    def test_piecewise_polynomial_kernel_ard_dimension_mismatch(self) -> None:
+        """
+
+        :return:
+        """
+        with self.assertRaises(ValueError) as context:
+            Kernel.piecewise_polynomial(1, active_dims=[0, 1], length_scales=[1., 1., 1.])
+        self.assertEqual(str(context.exception),
+                         "Dimension mismatch between 'active_dims' (2) and the number of length_scales (3)")
+
+    def test_piecewise_polynomial_kernel_symbolic_call_sx(self) -> None:
+        """
+
+        :return:
+        """
+        x = ca.SX.sym('x')
+
+        val = None
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k, signal_variance=.5)
+            cov = kernel(x)
+
+            self.assertIsInstance(cov, ca.SX)
+            self.assertFalse(ca.depends_on(cov, kernel.length_scales.SX))
+            self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+            self.assertFalse(ca.depends_on(cov, x))
+
+            fun = ca.Function('fun', [kernel.signal_variance.SX], [cov])
+
+            if val is not None:
+                np.testing.assert_allclose(fun(kernel.signal_variance.log), val)
+            val = fun(kernel.signal_variance.log)
+
+    # def test_piecewise_polynomial_kernel_symbolic_call_mx(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     x = ca.MX.sym('x')
+    #
+    #     val = None
+    #     for k in range(4):
+    #         kernel = Kernel.piecewise_polynomial(k, signal_variance=.5)
+    #         # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #         cov = kernel(x)
+    #
+    #         self.assertIsInstance(cov, ca.MX)
+    #         self.assertFalse(ca.depends_on(cov, kernel.length_scales.MX))
+    #         self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #         self.assertFalse(ca.depends_on(cov, x))
+    #
+    #         fun = ca.Function('fun', [kernel.signal_variance.MX], [cov])
+    #
+    #         if val is not None:
+    #             np.testing.assert_allclose(fun(kernel.signal_variance.log), val)
+    #         val = fun(kernel.signal_variance.log)
+
+    def test_piecewise_polynomial_kernel_numeric_call(self) -> None:
+        """
+
+        :return:
+        """
+        x = np.array([[1., 2., 3., 4., 5.]])
+
+        val = [.25, .15625, .0859375, .04638672]
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k, length_scales=2., signal_variance=.5)
+            cov = kernel(x)
+
+            self.assertIsInstance(cov, np.ndarray)
+            np.testing.assert_allclose(cov, np.array([[.5, val[k], 0., 0., 0.],
+                                                      [val[k], .5, val[k], 0., 0.],
+                                                      [0., val[k], .5, val[k], 0.],
+                                                      [0., 0., val[k], .5, val[k]],
+                                                      [0., 0., 0., val[k], .5]]))
+
+    def test_piecewise_polynomial_kernel_symbolic_call_x_x_bar_wrong_type(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.piecewise_polynomial(0)
+
+        x = ca.SX.sym('x')
+        y = np.array([[2.]])
+        # FIXME: Convert to TypeError
+        with self.assertRaises(ValueError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar need to have the same type")
+
+    def test_piecewise_polynomial_kernel_symbolic_call_x_x_bar_dimension_mismatch(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.piecewise_polynomial(0)
+
+        x = ca.SX.sym('x', 2)
+        y = ca.SX.sym('y')
+        # FIXME: Convert to ValueError
+        with self.assertRaises(AssertionError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar do not have the same input space dimensions")
+
+    def test_piecewise_polynomial_kernel_symbolic_call_x_x_bar_sx(self) -> None:
+        """
+
+        :return:
+        """
+        x = ca.SX.sym('x')
+        y = ca.SX.sym('y')
+
+        val = None
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k, length_scales=2., signal_variance=.5)
+            cov = kernel(x, y)
+
+            self.assertIsInstance(cov, ca.SX)
+            self.assertTrue(ca.depends_on(cov, kernel.length_scales.SX))
+            self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+            self.assertTrue(ca.depends_on(cov, x))
+            self.assertTrue(ca.depends_on(cov, y))
+
+            fun = ca.Function('fun', [kernel.length_scales.SX, kernel.signal_variance.SX, x, y], [cov])
+
+            if val is not None:
+                np.testing.assert_array_less(fun(kernel.length_scales.log, kernel.signal_variance.log, 1., 2.), val)
+            val = fun(kernel.length_scales.log, kernel.signal_variance.log, 1., 2.)
+
+    # def test_piecewise_polynomial_kernel_symbolic_call_x_x_bar_mx(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     x = ca.MX.sym('x')
+    #     y = ca.MX.sym('y')
+    #
+    #     val = None
+    #     for k in range(4):
+    #         kernel = Kernel.piecewise_polynomial(k, length_scales=2., signal_variance=.5)
+    #         # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #         cov = kernel(x, y)
+    #
+    #         self.assertIsInstance(cov, ca.MX)
+    #         self.assertTrue(ca.depends_on(cov, kernel.length_scales.MX))
+    #         self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #         self.assertTrue(ca.depends_on(cov, x))
+    #         self.assertTrue(ca.depends_on(cov, y))
+    #
+    #         fun = ca.Function('fun', [kernel.length_scales.MX, kernel.signal_variance.MX, x, y], [cov])
+    #
+    #         if val is not None:
+    #             np.testing.assert_array_less(fun(kernel.length_scales.log, kernel.signal_variance.log, 1., 2.), val)
+    #         val = fun(kernel.length_scales.log, kernel.signal_variance.log, 1., 2.)
+
+    def test_piecewise_polynomial_kernel_numeric_call_x_x_bar_wrong_type(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.piecewise_polynomial(0)
+
+        x = np.array([[2.]])
+        y = ca.SX.sym('y')
+        # FIXME: Convert to TypeError
+        with self.assertRaises(ValueError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar need to have the same type")
+
+    def test_piecewise_polynomial_kernel_numeric_call_x_x_bar_dimension_mismatch(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.piecewise_polynomial(0)
+
+        x = np.array([[1.], [2.]])
+        y = np.array([[1.]])
+        # FIXME: Convert to ValueError
+        with self.assertRaises(AssertionError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar do not have the same input space dimensions")
+
+    def test_piecewise_polynomial_kernel_numeric_call_x_x_bar(self) -> None:
+        """
+
+        :return:
+        """
+        x = np.array([[1., 2., 3., 4., 5.]])
+        y = np.array([[1., 2., 3., 4., 5.]]) / 2.
+
+        val = [.5, .3125, .171875, .09277344]
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k)
+            cov = kernel(x, y)
+
+            self.assertIsInstance(cov, np.ndarray)
+            np.testing.assert_allclose(cov, np.array([[val[k], 1., val[k], 0., 0.],
+                                                      [0., 0., val[k], 1., val[k]],
+                                                      [0., 0., 0., 0., val[k]],
+                                                      [0., 0., 0., 0., 0.],
+                                                      [0., 0., 0., 0., 0.]]))
+
+    def test_piecewise_polynomial_kernel_ard(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.piecewise_polynomial(0, active_dims=[0, 1], length_scales=[1., 1.])
+
+        self.assertEqual(kernel.active_dims, [0, 1])
+        np.testing.assert_equal(kernel.length_scales.value, np.ones((2, 1)))
+
+        kernel = Kernel.piecewise_polynomial(0, active_dims=[0, 1, 2], ard=True)
+
+        self.assertEqual(kernel.active_dims, [0, 1, 2])
+        np.testing.assert_equal(kernel.length_scales.value, np.ones((3, 1)))
+
+    # def test_piecewise_polynomial_kernel_ard_call_dimension_mismatch(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     # TODO: Create similar test for means
+    #     kernel = Kernel.piecewise_polynomial(0, active_dims=[0, 1], length_scales=[1., 1.])
+    #
+    #     x = ca.SX.sym('x')
+    #     # FIXME: This will result in another error that could be unclear to the user. We should probably catch it and
+    #     #  return a more informative error message.
+    #     cov = kernel(x)
+
+    def test_piecewise_polynomial_kernel_ard_call_dimension_mismatch(self) -> None:
+        """
+
+        :return:
+        """
+        # TODO: Create similar test for means
+        kernel = Kernel.piecewise_polynomial(0, length_scales=[1., 1.])
+
+        x = ca.SX.sym('x')
+        with self.assertRaises(ValueError) as context:
+            kernel(x)
+        self.assertEqual(str(context.exception), "Length scales vector dimension does not equal input space dimension.")
+
+    def test_piecewise_polynomial_kernel_ard_symbolic_call_sx(self) -> None:
+        """
+
+        :return:
+        """
+        x = ca.SX.sym('x', 2)
+
+        val = None
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k, length_scales=[1., 1.], signal_variance=.5)
+            cov = kernel(x)
+
+            self.assertIsInstance(cov, ca.SX)
+            self.assertFalse(ca.depends_on(cov, kernel.length_scales.SX))
+            self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+            self.assertFalse(ca.depends_on(cov, x))
+
+            fun = ca.Function('fun', [kernel.signal_variance.SX], [cov])
+
+            if val is not None:
+                np.testing.assert_allclose(fun(kernel.signal_variance.log), val)
+            val = fun(kernel.signal_variance.log)
+
+    def test_piecewise_polynomial_kernel_ard_symbolic_call_sx_not_all_active(self) -> None:
+        """
+
+        :return:
+        """
+        x = ca.SX.sym('x', 3)
+
+        val = None
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k, active_dims=[0, 2], length_scales=[1., 1.], signal_variance=.5)
+            cov = kernel(x)
+
+            self.assertIsInstance(cov, ca.SX)
+            self.assertFalse(ca.depends_on(cov, kernel.length_scales.SX))
+            self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+            self.assertFalse(ca.depends_on(cov, x))
+
+            fun = ca.Function('fun', [kernel.signal_variance.SX], [cov])
+
+            if val is not None:
+                np.testing.assert_allclose(fun(kernel.signal_variance.log), val)
+            val = fun(kernel.signal_variance.log)
+
+    # def test_piecewise_polynomial_kernel_ard_symbolic_call_mx(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     x = ca.MX.sym('x', 2)
+    #
+    #     val = None
+    #     for k in range(4):
+    #         kernel = Kernel.piecewise_polynomial(k, length_scales=[1., 1.], signal_variance=.5)
+    #         # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #         cov = kernel(x)
+    #
+    #         self.assertIsInstance(cov, ca.MX)
+    #         self.assertFalse(ca.depends_on(cov, kernel.length_scales.MX))
+    #         self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #         self.assertFalse(ca.depends_on(cov, x))
+    #
+    #         fun = ca.Function('fun', [kernel.signal_variance.MX], [cov])
+    #
+    #         if val is not None:
+    #             np.testing.assert_allclose(fun(kernel.signal_variance.log), val)
+    #         val = fun(kernel.signal_variance.log)
+
+    # def test_piecewise_polynomial_kernel_ard_symbolic_call_mx_not_all_active(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     x = ca.MX.sym('x', 3)
+    #
+    #     val = None
+    #     for k in range(4):
+    #         kernel = Kernel.piecewise_polynomial(k, active_dims=[0, 2], length_scales=[1., 1.], signal_variance=.5)
+    #         # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #         cov = kernel(x)
+    #
+    #         self.assertIsInstance(cov, ca.MX)
+    #         self.assertFalse(ca.depends_on(cov, kernel.length_scales.MX))
+    #         self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #         self.assertFalse(ca.depends_on(cov, x))
+    #
+    #         fun = ca.Function('fun', [kernel.signal_variance.MX], [cov])
+    #
+    #         if val is not None:
+    #             np.testing.assert_allclose(fun(kernel.signal_variance.log), val)
+    #         val = fun(kernel.signal_variance.log)
+
+    def test_piecewise_polynomial_kernel_ard_numeric_call(self) -> None:
+        """
+
+        :return:
+        """
+        x = np.array([[1., 2., 3., 4., 5.], [.1, .2, .3, .4, .5]])
+
+        val = [.12375622, .09219916, .052774, .02888485]
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k, length_scales=[2., 2.], signal_variance=.5)
+            cov = kernel(x)
+
+            self.assertIsInstance(cov, np.ndarray)
+            np.testing.assert_allclose(cov, np.array([[.5, val[k], 0., 0., 0.],
+                                                      [val[k], .5, val[k], 0., 0.],
+                                                      [0., val[k], .5, val[k], 0.],
+                                                      [0., 0., val[k], .5, val[k]],
+                                                      [0., 0., 0., val[k], .5]
+                                                      ]))
+
+    def test_piecewise_polynomial_kernel_ard_numeric_call_not_all_active(self) -> None:
+        """
+
+        :return:
+        """
+        x = np.array([[1., 2., 3., 4., 5.], [6., 7., 8., 9., 0.], [.1, .2, .3, .4, .5]])
+
+        val = [.12375622, .09219916, .052774, .02888485]
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k, active_dims=[0, 2], length_scales=[2., 2.], signal_variance=.5)
+            cov = kernel(x)
+
+            self.assertIsInstance(cov, np.ndarray)
+            np.testing.assert_allclose(cov, np.array([[.5, val[k], 0., 0., 0.],
+                                                      [val[k], .5, val[k], 0., 0.],
+                                                      [0., val[k], .5, val[k], 0.],
+                                                      [0., 0., val[k], .5, val[k]],
+                                                      [0., 0., 0., val[k], .5]
+                                                      ]))
+
+    def test_piecewise_polynomial_kernel_ard_symbolic_call_sx_x_x_bar(self) -> None:
+        """
+
+        :return:
+        """
+        x = ca.SX.sym('x', 2)
+        y = ca.SX.sym('y', 2)
+
+        x_val = np.array([[1.], [1.]])
+        y_val = np.array([[2.], [2.]])
+
+        val = None
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k, length_scales=[2., 2.], signal_variance=.5)
+            cov = kernel(x, y)
+
+            self.assertIsInstance(cov, ca.SX)
+            for length_scale in kernel.length_scales.SX.elements():
+                self.assertTrue(ca.depends_on(cov, length_scale))
+            self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+            for xk in x.elements():
+                self.assertTrue(ca.depends_on(cov, xk))
+            for yk in y.elements():
+                self.assertTrue(ca.depends_on(cov, yk))
+
+            fun = ca.Function('fun', [kernel.length_scales.SX, kernel.signal_variance.SX, x, y], [cov])
+
+            if val is not None:
+                np.testing.assert_array_less(fun(kernel.length_scales.log, kernel.signal_variance.log, x_val, y_val),
+                                             val)
+            val = fun(kernel.length_scales.log, kernel.signal_variance.log, x_val, y_val)
+
+    def test_piecewise_polynomial_kernel_ard_symbolic_call_sx_x_x_bar_not_all_active(self) -> None:
+        """
+
+        :return:
+        """
+        x = ca.SX.sym('x', 3)
+        y = ca.SX.sym('y', 3)
+
+        x_val = np.array([[1.], [1.], [1.]])
+        y_val = np.array([[2.], [2.], [2.]])
+
+        val = None
+        for k in range(4):
+            kernel = Kernel.piecewise_polynomial(k, active_dims=[0, 2], length_scales=[2., 2.], signal_variance=.5)
+            cov = kernel(x, y)
+
+            self.assertIsInstance(cov, ca.SX)
+            for length_scale in kernel.length_scales.SX.elements():
+                self.assertTrue(ca.depends_on(cov, length_scale))
+            self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+            for kk, xk in enumerate(x.elements()):
+                if kk == 1:
+                    self.assertFalse(ca.depends_on(cov, xk))
+                else:
+                    self.assertTrue(ca.depends_on(cov, xk))
+            for kk, yk in enumerate(y.elements()):
+                if kk == 1:
+                    self.assertFalse(ca.depends_on(cov, yk))
+                else:
+                    self.assertTrue(ca.depends_on(cov, yk))
+
+            fun = ca.Function('fun', [kernel.length_scales.SX, kernel.signal_variance.SX, x, y], [cov])
+
+            if val is not None:
+                np.testing.assert_array_less(fun(kernel.length_scales.log, kernel.signal_variance.log, x_val, y_val),
+                                             val)
+            val = fun(kernel.length_scales.log, kernel.signal_variance.log, x_val, y_val)
+
+    # def test_piecewise_polynomial_kernel_ard_symbolic_call_mx_x_x_bar(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     x = ca.MX.sym('x', 2)
+    #     y = ca.MX.sym('y', 2)
+    #
+    #     x_val = np.array([[1.], [1.]])
+    #     y_val = np.array([[2.], [2.]])
+    #
+    #     val = None
+    #     for k in range(4):
+    #         kernel = Kernel.piecewise_polynomial(k, length_scales=[2., 2.], signal_variance=.5)
+    #         # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #         cov = kernel(x, y)
+    #
+    #         self.assertIsInstance(cov, ca.MX)
+    #         for length_scale in kernel.length_scales.MX.elements():
+    #             self.assertTrue(ca.depends_on(cov, length_scale))
+    #         self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #         for xk in x.elements():
+    #             self.assertTrue(ca.depends_on(cov, xk))
+    #         for yk in y.elements():
+    #             self.assertTrue(ca.depends_on(cov, yk))
+    #
+    #         fun = ca.Function('fun', [kernel.length_scales.MX, kernel.signal_variance.MX, x, y], [cov])
+    #
+    #         if val is not None:
+    #             np.testing.assert_array_less(fun(kernel.length_scales.log, kernel.signal_variance.log, x_val, y_val),
+    #                                          val)
+    #         val = fun(kernel.length_scales.log, kernel.signal_variance.log, x_val, y_val)
+
+    # def test_piecewise_polynomial_kernel_ard_symbolic_call_mx_x_x_bar_not_all_active(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     x = ca.MX.sym('x', 3)
+    #     y = ca.MX.sym('y', 3)
+    #
+    #     x_val = np.array([[1.], [1.], [1.]])
+    #     y_val = np.array([[2.], [2.], [2.]])
+    #
+    #     val = None
+    #     for k in range(4):
+    #         kernel = Kernel.piecewise_polynomial(k, active_dims=[0, 2], length_scales=[2., 2.], signal_variance=.5)
+    #         # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #         cov = kernel(x, y)
+    #
+    #         self.assertIsInstance(cov, ca.MX)
+    #         for length_scale in kernel.length_scales.MX.elements():
+    #             self.assertTrue(ca.depends_on(cov, length_scale))
+    #         self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #         for kk, xk in enumerate(x.elements()):
+    #             if kk == 1:
+    #                 self.assertFalse(ca.depends_on(cov, xk))
+    #             else:
+    #                 self.assertTrue(ca.depends_on(cov, xk))
+    #         for kk, yk in enumerate(y.elements()):
+    #             if kk == 1:
+    #                 self.assertFalse(ca.depends_on(cov, yk))
+    #             else:
+    #                 self.assertTrue(ca.depends_on(cov, yk))
+    #
+    #         fun = ca.Function('fun', [kernel.length_scales.MX, kernel.signal_variance.MX, x, y], [cov])
+    #
+    #         if val is not None:
+    #             np.testing.assert_array_less(fun(kernel.length_scales.log, kernel.signal_variance.log, x_val, y_val),
+    #                                          val)
+    #         val = fun(kernel.length_scales.log, kernel.signal_variance.log, x_val, y_val)
+
+    def test_piecewise_polynomial_kernel_ard_numeric_call_x_x_bar(self) -> None:
+        """
+
+        :return:
+        """
+        x = np.array([[1., 1.1, 1.2], [1.3, 1.4, 1.5]])
+        y = np.array([[1.6, 1.7, 1.8], [1.9, 2., 2.1]])
+
+        kernel = Kernel.piecewise_polynomial(0, length_scales=[2., 2.])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.33147186, .25505051, .18862915],
+                                                  [.41789322, .33147186, .25505051],
+                                                  [.51431458, .41789322, .33147186]]))
+
+        kernel = Kernel.piecewise_polynomial(1, length_scales=[2., 2.])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.29633527, .1938447, .11609147],
+                                                  [.42160556, .29633527, .1938447],
+                                                  [.56378911, .42160556, .29633527]]))
+
+        kernel = Kernel.piecewise_polynomial(2, length_scales=[2., 2.])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.20561221, .11328793, .05454821],
+                                                  [.33421706, .20561221, .11328793],
+                                                  [.4939008, .33421706, .20561221]]))
+
+        kernel = Kernel.piecewise_polynomial(3, length_scales=[2., 2.])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.13687316, .06332761, .024456803],
+                                                  [.25519039, .13687316, .06332761],
+                                                  [.41890106, .25519039, .13687316]]))
+
+    def test_piecewise_polynomial_kernel_ard_numeric_call_x_x_bar_not_all_active(self) -> None:
+        """
+
+        :return:
+        """
+        x = np.array([[1., 1.1, 1.2], [1.3, 1.4, 1.5], [1.6, 1.7, 1.8]])
+        y = np.array([[1.9, 2., 2.1], [2.2, 2.3, 2.4], [2.5, 2.6, 2.7]])
+
+        kernel = Kernel.piecewise_polynomial(0, active_dims=[0, 2], length_scales=[2., 2.])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.13220779, .08578644, .04936508],
+                                                  [.18862915, .13220779, .08578644],
+                                                  [.25505051, .18862915, .13220779]]))
+
+        kernel = Kernel.piecewise_polynomial(1, active_dims=[0, 2], length_scales=[2., 2.])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.06197292, .028174593, .0100188],
+                                                  [.11609147, .06197292, .028174593],
+                                                  [.1938447, .11609147, .06197292]]))
+
+        kernel = Kernel.piecewise_polynomial(2, active_dims=[0, 2], length_scales=[2., 2.])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.022053282, .006992586, .0015308248],
+                                                  [.05454821, .022053282, .006992586],
+                                                  [.11328793, .05454821, .022053282]]))
+
+        kernel = Kernel.piecewise_polynomial(3, active_dims=[0, 2], length_scales=[2., 2.])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.007474003, .00165027, .0002221374],
+                                                  [.024456803, .007474003, .00165027],
+                                                  [.06332761, .024456803, .007474003]]))
