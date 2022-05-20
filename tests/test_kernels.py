@@ -3286,3 +3286,184 @@ class TestPiecewisePolynomialKernel(TestCase):
         np.testing.assert_allclose(cov, np.array([[.007474003, .00165027, .0002221374],
                                                   [.024456803, .007474003, .00165027],
                                                   [.06332761, .024456803, .007474003]]))
+
+
+class TestPolynomialKernel(TestCase):
+    """"""
+    def test_polynomial_kernel_no_hyperprior(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.polynomial(1)
+
+        self.assertIsNone(kernel.active_dims)
+        self.assertEqual(kernel.degree, 1)
+        self.assertEqual(len(kernel.hyperparameters), 2)
+        self.assertEqual(kernel.hyperparameter_names, ['Poly.signal_variance', 'Poly.offset'])
+        self.assertTrue(hasattr(kernel.signal_variance, 'log'))
+        np.testing.assert_equal(kernel.signal_variance.value, np.ones((1, 1)))
+        np.testing.assert_equal(kernel.signal_variance.log, np.zeros((1, 1)))
+        self.assertTrue(hasattr(kernel.offset, 'log'))
+        np.testing.assert_equal(kernel.offset.value, np.ones((1, 1)))
+        np.testing.assert_equal(kernel.offset.log, np.zeros((1, 1)))
+
+    def test_polynomial_kernel_degree_setter(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.polynomial(1)
+        self.assertEqual(kernel.degree, 1)
+
+        kernel.degree = 2
+        self.assertEqual(kernel.degree, 2)
+
+    def test_polynomial_kernel_fixed(self) -> None:
+        """
+
+        :return:
+        """
+        # TODO: Change according to test_means.py when first TODO is finished
+        kernel = Kernel.polynomial(1)
+        kernel.signal_variance.fixed = True
+        kernel.offset.fixed = True
+
+        self.assertTrue(kernel.signal_variance.fixed)
+        self.assertTrue(kernel.offset.fixed)
+
+    # def test_polynomial_kernel_hyperprior_gaussian(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     # TODO: Create according to test_means.py when first TODO is finished
+
+    def test_polynomial_kernel_symbolic_call_sx(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.polynomial(2)
+
+        x = ca.SX.sym('x')
+        cov = kernel(x)
+
+        self.assertIsInstance(cov, ca.SX)
+        self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+        self.assertTrue(ca.depends_on(cov, kernel.offset.SX))
+        self.assertTrue(ca.depends_on(cov, x))
+
+    # def test_polynomial_kernel_symbolic_call_mx(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     kernel = Kernel.polynomial(2)
+    #
+    #     x = ca.MX.sym('x')
+    #     # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #     cov = kernel(x)
+    #
+    #     self.assertIsInstance(cov, ca.MX)
+    #     self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #     self.assertTrue(ca.depends_on(cov, kernel.offset.MX))
+    #     self.assertTrue(ca.depends_on(cov, x))
+
+    def test_polynomial_kernel_numeric_call(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.polynomial(2)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[4., 9., 16., 25., 36.],
+                                                  [9., 25., 49., 81., 121.],
+                                                  [16., 49., 100., 169., 256.],
+                                                  [25., 81., 169., 289., 441.],
+                                                  [36., 121., 256., 441., 676.]]))
+
+    def test_polynomial_kernel_symbolic_call_x_x_bar_wrong_type(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.polynomial(2)
+
+        x = ca.SX.sym('x')
+        y = np.array([[2.]])
+        # FIXME: Convert to TypeError
+        with self.assertRaises(ValueError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar need to have the same type")
+
+    def test_polynomial_kernel_symbolic_call_x_x_bar_sx(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.polynomial(2)
+
+        x = ca.SX.sym('x')
+        y = ca.SX.sym('y')
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, ca.SX)
+        self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+        self.assertTrue(ca.depends_on(cov, kernel.offset.SX))
+        self.assertTrue(ca.depends_on(cov, x))
+        self.assertTrue(ca.depends_on(cov, y))
+
+    # def test_polynomial_kernel_symbolic_call_x_x_bar_mx(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     kernel = Kernel.polynomial(2)
+    #
+    #     x = ca.MX.sym('x')
+    #     y = ca.MX.sym('y')
+    #     # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #     cov = kernel(x, y)
+    #
+    #     self.assertIsInstance(cov, ca.MX)
+    #     self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #     self.assertTrue(ca.depends_on(cov, kernel.offset.MX))
+    #     self.assertTrue(ca.depends_on(cov, x))
+    #     self.assertTrue(ca.depends_on(cov, y))
+
+    def test_polynomial_kernel_numeric_call_x_x_bar_wrong_type(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.polynomial(2)
+
+        x = np.array([[2.]])
+        y = ca.SX.sym('y')
+        # FIXME: Convert to TypeError
+        with self.assertRaises(ValueError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar need to have the same type")
+
+    def test_polynomial_kernel_numeric_call_x_x_bar(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.polynomial(2)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        y = np.array([[.6, .7, .8, .9, 0.]])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[2.56, 2.89, 3.24, 3.61, 1.],
+                                                  [4.84, 5.76, 6.76, 7.84, 1.],
+                                                  [7.84, 9.61, 11.56, 13.69, 1.],
+                                                  [11.56, 14.44, 17.64, 21.16, 1.],
+                                                  [16., 20.25, 25., 30.25, 1.]]))
