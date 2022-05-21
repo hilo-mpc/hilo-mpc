@@ -125,7 +125,7 @@ class QuadraticCost(GenericCost):
         # Initialize weighting matrices
         self._Q = None
         self._R = None
-        self._N = None
+        self._P = None
 
     @staticmethod
     def _check_dimensions(var_list, var_weight, var_ref, type):
