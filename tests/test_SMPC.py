@@ -108,7 +108,7 @@ class TestMIMOSystem(unittest.TestCase):
 
         # dpx = parameter*a
         dpx = a1
-        dpy = a2 + px
+        dpy = a2
 
         plant.set_dynamical_equations([dpx, dpy])
 
@@ -134,7 +134,7 @@ class TestMIMOSystem(unittest.TestCase):
         gp.fit_model()
         self.gp = gp
         # matrix
-        self.B = np.array([[1, 0]]).T
+        self.B = np.array([[1, 1]]).T
         self.x0 = x0
 
     def test_simple_mimo(self):
@@ -143,6 +143,19 @@ class TestMIMOSystem(unittest.TestCase):
         smpc.quad_stage_cost.add_states(names=['mu_px', 'mu_py'], ref=[1, 1], weights=[10,10])
         smpc.quad_terminal_cost.add_states(names=['mu_px', 'mu_py'], ref=[1, 1], weights=[10,10])
         smpc.set_box_chance_constraints(x_lb=[0, 0], x_lb_p=[0.97, 0.97])
+        smpc.setup(options={'chance_constraints': 'prs'})
+        cov_x0 = np.array([[0, 0], [0, 0]])
+        Kgain = np.array([[0, 0], [0, 0]])
+        smpc.optimize(x0=self.x0, cov_x0=cov_x0, Kgain=Kgain)
+        smpc.plot_prediction()
+
+    def test_simple_negative_bounds(self):
+        smpc = SMPC(self.model, self.gp, self.B)
+        smpc.horizon = 15
+        smpc.quad_stage_cost.add_states(names=['mu_px'], ref=[1], weights=[10])
+        smpc.quad_terminal_cost.add_states(names=['mu_px'], ref=[1], weights=[10])
+        smpc.set_box_chance_constraints(x_lb=[-100, 0], x_lb_p=[0.95, 0.95], x_ub=[100, 30], x_ub_p=[0.95,0.95])
+        # smpc.set_box_chance_constraints(x_ub=[100, 30], x_ub_p=[0.95,0.95])
         smpc.setup(options={'chance_constraints': 'prs'})
         cov_x0 = np.array([[0, 0], [0, 0]])
         Kgain = np.array([[0, 0], [0, 0]])

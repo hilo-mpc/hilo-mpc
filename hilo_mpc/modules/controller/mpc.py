@@ -1280,7 +1280,7 @@ class NMPC(Controller, DynamicOptimization):
         if x_ub is not None:
             x_ub = deepcopy(x_ub)
             x_ub = check_and_wrap_to_list(x_ub)
-            if len(x_lb) != self._n_x:
+            if len(x_ub) != self._n_x:
                 raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
             self._x_ub = x_ub
         else:
@@ -2244,8 +2244,9 @@ class SMPC(NMPC):
         else:
             self._Kgain_is_set = False
         # First transfor the problem in a deterministic problem
-        model_c, Kx = self._create_deterministic_surrogate(det_model, stoch_model, B, Kgain=Kgain)
+        model_c, Kx, Kgain = self._create_deterministic_surrogate(det_model, stoch_model, B, Kgain=Kgain)
         self.Kx = Kx
+        self.Kgain = Kgain
 
         model_c.setup(dt=1)  # TODO put the dt from the solution
 
@@ -2376,7 +2377,7 @@ class SMPC(NMPC):
 
         model_c.add_dynamical_equations(ca.reshape(ode_c, det_model.n_x ** 2, 1))
 
-        return model_c, Kx
+        return model_c, Kx, Kgain
 
     def _update_type(self) -> None:
         """
@@ -2386,16 +2387,20 @@ class SMPC(NMPC):
         self._type = 'SMPC'
 
     def _get_chance_constraints(self):
-
+        # Note:
+        # I am taking the diagonal of Kx because I am assuming only box constrains. For different kind of constraints
+        # one should it id differenttly
         if self._nlp_options['chance_constraints'] == 'prs':
             if self._box_constraints_is_set:
                 if any([i != ca.inf for i in self._x_lb]) or any([i != ca.inf for i in self._x_ub]):
                     # Set state chance constraints
-                    x_prob_ub = self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * np.array(self._x_ub_p) - 1)) * ca.sqrt(
-                            (ca.DM.ones(self._n_x_s, 1).T @ self.Kx ) @ ca.DM.ones(self._n_x_s, 1)+ 1e-8)
+                    x_prob_ub = self._model.x[:self._n_x_s] + (
+                            ca.sqrt(2) * erfinv(2 * np.array(self._x_ub_p) - 1)) * ca.sqrt(
+                        ca.diag(self.Kx) + 1e-8)
 
-                    x_prob_lb = -self._model.x[:self._n_x_s] + (ca.sqrt(2) * erfinv(2 * np.array(self._x_lb_p) - 1)) * ca.sqrt(
-                        ca.DM.ones(self._n_x_s, 1).T @ self.Kx @ ca.DM.ones(self._n_x_s, 1) +  1e-8)
+                    x_prob_lb = -self._model.x[:self._n_x_s] + (
+                            ca.sqrt(2) * erfinv(2 * np.array(self._x_lb_p) - 1)) * ca.sqrt(
+                        ca.diag(self.Kx) + 1e-8)
 
                     self.stage_constraint.constraint = ca.vertcat(x_prob_ub, x_prob_lb)
                     self.stage_constraint.ub = ca.vertcat(ca.DM(self.x_ub_s), -ca.DM(self.x_lb_s))
@@ -2444,7 +2449,7 @@ class SMPC(NMPC):
             x_ub = x_ub + var_x_ub
 
             # Get probability of constraint satisfaction
-        self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p',np.ones(self._n_x_s)*0.954), 'x_ub')
+        self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p', np.ones(self._n_x_s) * 0.954), 'x_ub')
         if x_lb is not None:
             self.x_lb_s = x_lb
             var_x_lb = np.eye(self._n_x_s)
@@ -2454,7 +2459,7 @@ class SMPC(NMPC):
             x_lb = x_lb + var_x_lb
 
             # Get probability of constraint satisfaction
-        self._x_lb_p = self._sanity_check_probability_values(kwargs.get('x_lb_p', np.ones(self._n_x_s)*0.954), 'x_lb')
+        self._x_lb_p = self._sanity_check_probability_values(kwargs.get('x_lb_p', np.ones(self._n_x_s) * 0.954), 'x_lb')
 
         if y_ub is not None:
             self.y_ub_s = y_ub
@@ -2465,7 +2470,7 @@ class SMPC(NMPC):
             y_ub = y_ub + var_y_ub
 
             # Get probability of constraint satisfaction
-        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_ub_p', np.ones(self._n_y_s)*0.954), 'y_ub')
+        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_ub_p', np.ones(self._n_y_s) * 0.954), 'y_ub')
         if y_lb is not None:
             self.y_lb_s = y_lb
             var_y_lb = np.eye(self._n_y_s)
@@ -2475,7 +2480,7 @@ class SMPC(NMPC):
             y_lb = y_lb + var_y_lb
 
             # Get probability of constraint satisfaction
-        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_lb_p', np.ones(self._n_y_s)*0.954), 'y_lb')
+        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_lb_p', np.ones(self._n_y_s) * 0.954), 'y_lb')
         if z_ub is not None:
             self.z_ub_s = z_ub
             var_z_ub = np.eye(self._n_z_s)
@@ -2485,7 +2490,7 @@ class SMPC(NMPC):
             z_ub = z_ub + var_z_ub
 
             # Get probability of constraint satisfaction
-        self._z_ub_p = self._sanity_check_probability_values(kwargs.get('z_ub_p', np.ones(self._n_z_s)*0.954), 'z_ub')
+        self._z_ub_p = self._sanity_check_probability_values(kwargs.get('z_ub_p', np.ones(self._n_z_s) * 0.954), 'z_ub')
         if z_lb is not None:
             self.z_lb_s = z_lb
             var_z_lb = np.eye(self._n_x_s)
@@ -2495,7 +2500,7 @@ class SMPC(NMPC):
             z_lb = z_lb + var_z_lb
 
             # Get probability of constraint satisfaction
-        self._z_lb_p = self._sanity_check_probability_values(kwargs.get('z_lb_p', np.ones(self._n_z_s)*0.954), 'z_lb')
+        self._z_lb_p = self._sanity_check_probability_values(kwargs.get('z_lb_p', np.ones(self._n_z_s) * 0.954), 'z_lb')
 
         # Note: the deterministic MPC problem takes the bounds also for the covariance elements since the model is
         # expanded by the covariance elements
@@ -2523,6 +2528,9 @@ class SMPC(NMPC):
 
         self._get_chance_constraints()
 
+        Kx = self.Kx
+        Ku = self.Kgain @ Kx @ self.Kgain.T
+
         # Setup equivalent deterministic problem
         self._setup(options=options, solver_options=solver_options)
 
@@ -2548,7 +2556,7 @@ class SMPC(NMPC):
 
         x0 = check_and_wrap_to_DM(x0)
         cov_x0 = check_and_wrap_to_DM(cov_x0)
-        cov_x0 = ca.reshape(cov_x0, self._n_x_s**2, 1)
+        cov_x0 = ca.reshape(cov_x0, self._n_x_s ** 2, 1)
         x0 = ca.vertcat(x0, cov_x0)
         super().optimize(x0, cp=cp, tvp=tvp, v0=v0, runs=runs, fix_x0=fix_x0, **kwargs)
 
