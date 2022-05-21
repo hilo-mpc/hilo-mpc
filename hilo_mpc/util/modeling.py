@@ -32,12 +32,12 @@ import numpy as np
 from .util import check_and_wrap_to_list, check_if_has_duplicates, check_if_list_of_type, check_if_list_of_none, \
     check_if_square, who_am_i
 
-
 Symbolic = TypeVar('Symbolic', ca.SX, ca.MX)
 
 
 class GenericCost:
     """Class for generic cost functions"""
+
     def __init__(self, model, use_sx=True):
         """Constructor method"""
         self._cost = 0
@@ -88,6 +88,7 @@ class GenericCost:
 
 class QuadraticCost(GenericCost):
     """"""
+
     def __init__(self, model, use_sx=True):
         """Constructor method"""
         super().__init__(model, use_sx=use_sx)
@@ -120,6 +121,11 @@ class QuadraticCost(GenericCost):
 
         # Store the name of all the varying trajectories for which the trajectory has not yet been provided
         self._open_varying_trajectories_names = []
+
+        # Initialize weighting matrices
+        self._Q = None
+        self._R = None
+        self._N = None
 
     @staticmethod
     def _check_dimensions(var_list, var_weight, var_ref, type):
@@ -485,17 +491,14 @@ class QuadraticCost(GenericCost):
     @property
     def Q(self):
         """
-
         :return:
         """
-        # TODO: generalize this
-        warnings.warn("This property is supposed to be used only if muAO-MPC is used to solve the linear MPC problem.")
+        if self._Q is None:
+            self._Q = ca.DM(ca.jacobian(ca.jacobian(self.cost, self._model.x), self._model.x))/2
         return self._Q
 
     @Q.setter
     def Q(self, arg):
-        # TODO: generalize this
-        warnings.warn("This setter is supposed to be used only if muAO-MPC is used to solve the linear MPC problem.")
         self._Q = arg
 
     @property
@@ -504,13 +507,12 @@ class QuadraticCost(GenericCost):
 
         :return:
         """
-        # TODO: generalize this
-        warnings.warn("This property is supposed to be used only if muAO-MPC is used to solve the linear MPC problem.")
-        return self._Q
+        if self._R is None:
+            self._R = ca.DM(ca.jacobian(ca.jacobian(self.cost, self._model.u), self._model.u))/2
+        return self._R
 
     @R.setter
     def R(self, arg):
-        # TODO: generalize this
         self._R = arg
 
     @property
@@ -519,19 +521,18 @@ class QuadraticCost(GenericCost):
 
         :return:
         """
-        # TODO: generalize this
-        warnings.warn("This property is supposed to be used only if muAO-MPC is used to solve the linear MPC problem.")
         return self._P
 
     @P.setter
     def P(self, arg):
-        # TODO: generalize this
-        warnings.warn("This setter is supposed to be used only if muAO-MPC is used to solve the linear MPC problem.")
+        if self._P is None:
+            self._P = ca.DM(ca.jacobian(ca.jacobian(self.cost, self._model.x), self._model.x))/2
         self._P = arg
 
 
 class MHEQuadraticCost(GenericCost):
     """"""
+
     def __init__(self, model, use_sx=True):
         """Constructor method"""
         super().__init__(model, use_sx)
@@ -818,6 +819,7 @@ class MHEQuadraticCost(GenericCost):
 
 class GenericConstraint:
     """Class for generic constraints"""
+
     def __init__(self, model, name='constraint'):
         """Constructor method"""
         self._is_soft = False
@@ -1085,6 +1087,7 @@ EXPLICIT_METHODS = {
 
 class RungeKutta:
     """"""
+
     @staticmethod
     def _construct_polynomial_basis(
             degree: int,
