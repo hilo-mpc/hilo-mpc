@@ -50,7 +50,7 @@ class TestIO(unittest.TestCase):
 
     def test_box_constraints(self):
         smpc = SMPC(self.model, self.gp, self.B)
-        smpc.set_box_constraints(x_lb=[10])
+        smpc.set_box_chance_constraints(x_lb=[10])
 
     def test_box_constraints_1(self):
         smpc = SMPC(self.model, self.gp, self.B)

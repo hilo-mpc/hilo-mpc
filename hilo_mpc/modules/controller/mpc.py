@@ -2379,7 +2379,6 @@ class SMPC(NMPC):
 
         return model_c, Kx, Kgain
 
-
     def _update_type(self) -> None:
         """
 
@@ -2419,7 +2418,7 @@ class SMPC(NMPC):
             var = check_and_wrap_to_list(var)
 
             for i in var:
-                if i < 0 and i > 1:
+                if i < 0 or i > 1:
                     raise TypeError(
                         f"The probabilities must be between 0 and 1. The variable time {type} has some values"
                         f" ouside this range.")
@@ -2530,8 +2529,12 @@ class SMPC(NMPC):
 
         self._get_chance_constraints()
 
-        Kx = self.Kx
+        Kx = self.Kx[0:self._n_x_s, 0:self._n_x_s]
         Ku = self.Kgain @ Kx @ self.Kgain.T
+        Q = self.quad_stage_cost.Q[0:self._n_x_s, 0:self._n_x_s]
+        R = self.quad_stage_cost.R
+        # Add covariance component in the objective function
+        self.stage_cost.cost = ca.trace(Q @ Kx) + ca.trace(R @ Ku)
         # Setup equivalent deterministic problem
         self._setup(options=options, solver_options=solver_options)
 
