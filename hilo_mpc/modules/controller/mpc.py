@@ -2379,6 +2379,7 @@ class SMPC(NMPC):
 
         return model_c, Kx, Kgain
 
+
     def _update_type(self) -> None:
         """
 
@@ -2450,6 +2451,7 @@ class SMPC(NMPC):
 
             # Get probability of constraint satisfaction
         self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p', np.ones(self._n_x_s) * 0.954), 'x_ub')
+
         if x_lb is not None:
             self.x_lb_s = x_lb
             var_x_lb = np.eye(self._n_x_s)
@@ -2530,7 +2532,6 @@ class SMPC(NMPC):
 
         Kx = self.Kx
         Ku = self.Kgain @ Kx @ self.Kgain.T
-
         # Setup equivalent deterministic problem
         self._setup(options=options, solver_options=solver_options)
 
