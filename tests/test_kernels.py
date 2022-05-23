@@ -3801,3 +3801,179 @@ class TestNeuralNetworkKernel(TestCase):
                                                   [.58182321, .63395099, .68275027, .72817205, .21484983],
                                                   [.54879429, .60359622, .65514193, .70337798, .16744808],
                                                   [.52486635, .58095355, .63381639, .68340053, .13650631]]))
+
+
+class TestPeriodicKernel(TestCase):
+    """"""
+    def test_periodic_kernel_no_hyperprior(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.periodic()
+
+        self.assertIsNone(kernel.active_dims)
+        # TODO: Disable degree setter
+        self.assertEqual(len(kernel.hyperparameters), 3)
+        self.assertEqual(kernel.hyperparameter_names, ['Periodic.signal_variance', 'Periodic.length_scales',
+                                                       'Periodic.period'])
+        self.assertTrue(hasattr(kernel.signal_variance, 'log'))
+        np.testing.assert_equal(kernel.signal_variance.value, np.ones((1, 1)))
+        np.testing.assert_equal(kernel.signal_variance.log, np.zeros((1, 1)))
+        self.assertTrue(hasattr(kernel.length_scales, 'log'))
+        np.testing.assert_equal(kernel.length_scales.value, np.ones((1, 1)))
+        np.testing.assert_equal(kernel.length_scales.log, np.zeros((1, 1)))
+        self.assertTrue(hasattr(kernel.period, 'log'))
+        np.testing.assert_equal(kernel.period.value, np.ones((1, 1)))
+        np.testing.assert_equal(kernel.period.log, np.zeros((1, 1)))
+
+    def test_periodic_kernel_fixed(self) -> None:
+        """
+
+        :return:
+        """
+        # TODO: Change according to test_means.py when first TODO is finished
+        kernel = Kernel.periodic()
+        kernel.signal_variance.fixed = True
+        kernel.length_scales.fixed = True
+        kernel.period.fixed = True
+
+        self.assertTrue(kernel.signal_variance.fixed)
+        self.assertTrue(kernel.length_scales.fixed)
+        self.assertTrue(kernel.period.fixed)
+
+    # def test_periodic_kernel_hyperprior_gaussian(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     # TODO: Create according to test_means.py when first TODO is finished
+
+    def test_periodic_kernel_symbolic_call_sx(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.periodic()
+
+        x = ca.SX.sym('x')
+        cov = kernel(x)
+
+        self.assertIsInstance(cov, ca.SX)
+        self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+        self.assertFalse(ca.depends_on(cov, kernel.length_scales.SX))
+        self.assertFalse(ca.depends_on(cov, kernel.period.SX))
+        self.assertFalse(ca.depends_on(cov, x))
+
+    # def test_periodic_kernel_symbolic_call_mx(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     kernel = Kernel.periodic()
+    #
+    #     x = ca.MX.sym('x')
+    #     # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #     cov = kernel(x)
+    #
+    #     self.assertIsInstance(cov, ca.MX)
+    #     self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #     self.assertFalse(ca.depends_on(cov, kernel.length_scales.MX))
+    #     self.assertFalse(ca.depends_on(cov, kernel.period.MX))
+    #     self.assertFalse(ca.depends_on(cov, x))
+
+    def test_periodic_kernel_numeric_call(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.periodic(signal_variance=.5)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, .5 * np.ones((5, 5)))
+
+    def test_periodic_kernel_symbolic_call_x_x_bar_wrong_type(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.periodic()
+
+        x = ca.SX.sym('x')
+        y = np.array([[2.]])
+        # FIXME: Convert to TypeError
+        with self.assertRaises(ValueError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar need to have the same type")
+
+    def test_periodic_kernel_symbolic_call_x_x_bar_sx(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.periodic()
+
+        x = ca.SX.sym('x')
+        y = ca.SX.sym('y')
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, ca.SX)
+        self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+        self.assertTrue(ca.depends_on(cov, kernel.length_scales.SX))
+        self.assertTrue(ca.depends_on(cov, kernel.period.SX))
+        self.assertTrue(ca.depends_on(cov, x))
+        self.assertTrue(ca.depends_on(cov, y))
+
+    # def test_periodic_kernel_symbolic_call_x_x_bar_mx(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     kernel = Kernel.periodic()
+    #
+    #     x = ca.MX.sym('x')
+    #     y = ca.MX.sym('y')
+    #     # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #     cov = kernel(x, y)
+    #
+    #     self.assertIsInstance(cov, ca.MX)
+    #     self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #     self.assertTrue(ca.depends_on(cov, kernel.length_scales.MX))
+    #     self.assertTrue(ca.depends_on(cov, kernel.period.MX))
+    #     self.assertTrue(ca.depends_on(cov, x))
+    #     self.assertTrue(ca.depends_on(cov, y))
+
+    def test_periodic_kernel_numeric_call_x_x_bar_wrong_type(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.periodic()
+
+        x = np.array([[2.]])
+        y = ca.SX.sym('y')
+        # FIXME: Convert to TypeError
+        with self.assertRaises(ValueError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar need to have the same type")
+
+    def test_periodic_kernel_numeric_call_x_x_bar(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.periodic(signal_variance=.5, length_scales=2., period=.5)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        y = np.array([[.6, .7, .8, .9, 0.]])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.42067575, .3180962, .3180962, .42067575, .5],
+                                                  [.42067575, .3180962, .3180962, .42067575, .5],
+                                                  [.42067575, .3180962, .3180962, .42067575, .5],
+                                                  [.42067575, .3180962, .3180962, .42067575, .5],
+                                                  [.42067575, .3180962, .3180962, .42067575, .5]]))
