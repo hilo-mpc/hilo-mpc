@@ -3631,3 +3631,173 @@ class TestLinearKernel(TestCase):
                                                   [1.8, 2.1, 2.4, 2.7, 0.],
                                                   [2.4, 2.8, 3.2, 3.6, 0.],
                                                   [3., 3.5, 4., 4.5, 0.]]))
+
+
+class TestNeuralNetworkKernel(TestCase):
+    """"""
+    def test_neural_network_kernel_no_hyperprior(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.neural_network()
+
+        self.assertIsNone(kernel.active_dims)
+        # TODO: Disable degree setter
+        self.assertEqual(len(kernel.hyperparameters), 2)
+        self.assertEqual(kernel.hyperparameter_names, ['NN.signal_variance', 'NN.weight_variance'])
+        self.assertTrue(hasattr(kernel.signal_variance, 'log'))
+        np.testing.assert_equal(kernel.signal_variance.value, np.ones((1, 1)))
+        np.testing.assert_equal(kernel.signal_variance.log, np.zeros((1, 1)))
+        self.assertTrue(hasattr(kernel.weight_variance, 'log'))
+        np.testing.assert_equal(kernel.weight_variance.value, np.ones((1, 1)))
+        np.testing.assert_equal(kernel.weight_variance.log, np.zeros((1, 1)))
+
+    def test_neural_network_kernel_fixed(self) -> None:
+        """
+
+        :return:
+        """
+        # TODO: Change according to test_means.py when first TODO is finished
+        kernel = Kernel.neural_network()
+        kernel.signal_variance.fixed = True
+        kernel.weight_variance.fixed = True
+
+        self.assertTrue(kernel.signal_variance.fixed)
+        self.assertTrue(kernel.weight_variance.fixed)
+
+    # def test_neural_network_kernel_hyperprior_gaussian(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     # TODO: Create according to test_means.py when first TODO is finished
+
+    def test_neural_network_kernel_symbolic_call_sx(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.neural_network()
+
+        x = ca.SX.sym('x')
+        cov = kernel(x)
+
+        self.assertIsInstance(cov, ca.SX)
+        self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+        self.assertTrue(ca.depends_on(cov, kernel.weight_variance.SX))
+        self.assertTrue(ca.depends_on(cov, x))
+
+    # def test_neural_network_kernel_symbolic_call_mx(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     kernel = Kernel.neural_network()
+    #
+    #     x = ca.MX.sym('x')
+    #     # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #     cov = kernel(x)
+    #
+    #     self.assertIsInstance(cov, ca.MX)
+    #     self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #     self.assertTrue(ca.depends_on(cov, kernel.weight_variance.MX))
+    #     self.assertTrue(ca.depends_on(cov, x))
+
+    def test_neural_network_kernel_numeric_call(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.neural_network()
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.72972766, .78539816, .77024433, .74832717, .72972766],
+                                                  [.78539816, .98511078, 1.03849312, 1.04719755, 1.04364093],
+                                                  [.77024433, 1.03849312, 1.14109666, 1.17807174, 1.19012163],
+                                                  [.74832717, 1.04719755, 1.17807174, 1.23590017, 1.26160301],
+                                                  [.72972766, 1.04364093, 1.19012163, 1.26160301, 1.2977837]]))
+
+    def test_neural_network_kernel_symbolic_call_x_x_bar_wrong_type(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.neural_network()
+
+        x = ca.SX.sym('x')
+        y = np.array([[2.]])
+        # FIXME: Convert to TypeError
+        with self.assertRaises(ValueError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar need to have the same type")
+
+    def test_neural_network_kernel_symbolic_call_x_x_bar_sx(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.neural_network()
+
+        x = ca.SX.sym('x')
+        y = ca.SX.sym('y')
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, ca.SX)
+        self.assertTrue(ca.depends_on(cov, kernel.signal_variance.SX))
+        self.assertTrue(ca.depends_on(cov, kernel.weight_variance.SX))
+        self.assertTrue(ca.depends_on(cov, x))
+        self.assertTrue(ca.depends_on(cov, y))
+
+    # def test_neural_network_kernel_symbolic_call_x_x_bar_mx(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     kernel = Kernel.neural_network()
+    #
+    #     x = ca.MX.sym('x')
+    #     y = ca.MX.sym('y')
+    #     # FIXME: This will result in a mixture of SX and MX (should we remove MX completely?)
+    #     cov = kernel(x, y)
+    #
+    #     self.assertIsInstance(cov, ca.MX)
+    #     self.assertTrue(ca.depends_on(cov, kernel.signal_variance.MX))
+    #     self.assertTrue(ca.depends_on(cov, kernel.weight_variance.MX))
+    #     self.assertTrue(ca.depends_on(cov, x))
+    #     self.assertTrue(ca.depends_on(cov, y))
+
+    def test_neural_network_kernel_numeric_call_x_x_bar_wrong_type(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.neural_network()
+
+        x = np.array([[2.]])
+        y = ca.SX.sym('y')
+        # FIXME: Convert to TypeError
+        with self.assertRaises(ValueError) as context:
+            kernel(x, y)
+        self.assertEqual(str(context.exception), "X and X_bar need to have the same type")
+
+    def test_neural_network_kernel_numeric_call_x_x_bar(self) -> None:
+        """
+
+        :return:
+        """
+        kernel = Kernel.neural_network()
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        y = np.array([[.6, .7, .8, .9, 0.]])
+        cov = kernel(x, y)
+
+        self.assertIsInstance(cov, np.ndarray)
+        np.testing.assert_allclose(cov, np.array([[.64514815, .67129112, .69398059, .71338192, .42053434],
+                                                  [.62444045, .66991635, .71190145, .75037546, .29284277],
+                                                  [.58182321, .63395099, .68275027, .72817205, .21484983],
+                                                  [.54879429, .60359622, .65514193, .70337798, .16744808],
+                                                  [.52486635, .58095355, .63381639, .68340053, .13650631]]))
