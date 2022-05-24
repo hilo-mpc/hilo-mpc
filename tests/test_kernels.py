@@ -3977,3 +3977,275 @@ class TestPeriodicKernel(TestCase):
                                                   [.42067575, .3180962, .3180962, .42067575, .5],
                                                   [.42067575, .3180962, .3180962, .42067575, .5],
                                                   [.42067575, .3180962, .3180962, .42067575, .5]]))
+
+
+class TestKernelOperators(TestCase):
+    """"""
+    def test_kernel_sum(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc import LinearKernel, ConstantKernel
+
+        kernel = LinearKernel() + ConstantKernel()
+
+        self.assertIsNone(kernel.active_dims)
+        self.assertEqual(len(kernel.hyperparameters), 2)
+        self.assertEqual(kernel.hyperparameter_names, ['Lin.signal_variance', 'Const.bias'])
+        self.assertIsInstance(kernel.kernel_1, LinearKernel)
+        self.assertIsInstance(kernel.kernel_2, ConstantKernel)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        np.testing.assert_allclose(cov, np.array([[2., 3., 4., 5., 6.],
+                                                  [3., 5., 7., 9., 11.],
+                                                  [4., 7., 10., 13., 16.],
+                                                  [5., 9., 13., 17., 21.],
+                                                  [6., 11., 16., 21., 26.]]))
+
+    # def test_kernel_scale(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     # TODO: Implement Scale operator
+    #     from hilo_mpc import ConstantKernel
+    #
+    #     kernel = 2. * ConstantKernel()
+    #
+    #     self.assertIsNone(kernel.active_dims)
+    #     self.assertEqual(len(kernel.hyperparameters), 1)
+    #     self.assertEqual(kernel.hyperparameter_names, ['Const.bias'])
+    #     self.assertIsInstance(kernel.kernel_1, ConstantKernel)
+    #     self.assertIsNone(kernel.kernel_2)
+    #     np.testing.assert_equal(kernel.scale, 2.)
+    #
+    #     x = np.array([[1., 2., 3., 4., 5.]])
+    #     cov = kernel(x)
+    #
+    #     np.testing.assert_allclose(cov, np.array([[2., 2., 2., 2., 2.]]))
+
+    # def test_kernel_scale_from_the_right(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     # TODO: Implement Scale operator
+    #     from hilo_mpc import ConstantKernel
+    #
+    #     kernel = ConstantKernel() * 2.
+    #
+    #     self.assertIsNone(kernel.active_dims)
+    #     self.assertEqual(len(kernel.hyperparameters), 1)
+    #     self.assertEqual(kernel.hyperparameter_names, ['Const.bias'])
+    #     self.assertIsInstance(kernel.kernel_1, ConstantKernel)
+    #     self.assertIsNone(kernel.kernel_2)
+    #     np.testing.assert_equal(kernel.scale, 2.)
+    #
+    #     x = np.array([[1., 2., 3., 4., 5.]])
+    #     cov = kernel(x)
+    #
+    #     np.testing.assert_allclose(cov, np.array([[2., 2., 2., 2., 2.]]))
+
+    def test_kernel_product(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc import ConstantKernel
+
+        kernel = ConstantKernel() * ConstantKernel(bias=.5)
+
+        self.assertIsNone(kernel.active_dims)
+        self.assertEqual(len(kernel.hyperparameters), 2)
+        self.assertEqual(kernel.hyperparameter_names, ['Const_1.bias', 'Const_2.bias'])
+        self.assertIsInstance(kernel.kernel_1, ConstantKernel)
+        self.assertIsInstance(kernel.kernel_2, ConstantKernel)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        np.testing.assert_allclose(cov, .25 * np.ones((5, 5)))
+
+    def test_mean_power(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc import ConstantKernel
+
+        kernel = ConstantKernel(bias=.5) ** 2
+
+        self.assertIsNone(kernel.active_dims)
+        self.assertEqual(len(kernel.hyperparameters), 1)
+        self.assertEqual(kernel.hyperparameter_names, ['Const.bias'])
+        self.assertIsInstance(kernel.kernel_1, ConstantKernel)
+        self.assertIsNone(kernel.kernel_2)
+        np.testing.assert_equal(kernel.power, 2)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        np.testing.assert_allclose(cov, .0625 * np.ones((5, 5)))
+
+    # def test_mean_multi_op_sum_power(self) -> None:
+    #     """
+    #
+    #     :return:
+    #     """
+    #     from hilo_mpc import LinearKernel, ConstantKernel, PolynomialKernel
+    #
+    #     kernel = (LinearKernel() + ConstantKernel()) ** 2
+    #
+    #     self.assertIsNone(kernel.active_dims)
+    #     self.assertEqual(len(kernel.hyperparameters), 2)
+    #     self.assertEqual(kernel.hyperparameter_names, ['Lin.signal_variance', 'Const.bias'])
+    #     self.assertIsNone(kernel.kernel_1.active_dims)
+    #     self.assertEqual(len(kernel.kernel_1.hyperparameters), 2)
+    #     self.assertEqual(kernel.kernel_1.hyperparameter_names, ['Lin.signal_variance', 'Const.bias'])
+    #     self.assertIsInstance(kernel.kernel_1.kernel_1, LinearKernel)
+    #     self.assertIsInstance(kernel.kernel_1.kernel_2, ConstantKernel)
+    #     self.assertIsNone(kernel.kernel_2)
+    #     np.testing.assert_equal(kernel.power, 2)
+    #
+    #     poly_kernel = PolynomialKernel(2)
+    #
+    #     x = np.array([[1., 2., 3., 4., 5.]])
+    #     # FIXME: Power doesn't use x_bar
+    #     cov = kernel(x)
+    #     poly_cov = poly_kernel(x)
+    #
+    #     # NOTE: The following only holds true, if signal variance, offset and bias all are equal to 1
+    #     # TODO: Uncomment once above bug is fixed
+    #     np.testing.assert_allclose(cov, poly_cov)
+    #     np.testing.assert_allclose(cov, np.array([[4., 9., 16., 25., 36.],
+    #                                               [9., 25., 49., 81., 121.],
+    #                                               [16., 49., 100., 169., 256.],
+    #                                               [25., 81., 169., 289., 441.],
+    #                                               [36., 121., 256., 441., 676.]]))
+
+    def test_kernel_multi_op_sum_1(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc import LinearKernel
+
+        kernel = LinearKernel() + LinearKernel(signal_variance=.5) + LinearKernel(signal_variance=2.)
+
+        self.assertIsNone(kernel.active_dims)
+        self.assertEqual(len(kernel.hyperparameters), 3)
+        self.assertEqual(kernel.hyperparameter_names,
+                         ['Lin_1.signal_variance', 'Lin_2.signal_variance', 'Lin_3.signal_variance'])
+        self.assertIsNone(kernel.kernel_1.active_dims)
+        self.assertEqual(len(kernel.kernel_1.hyperparameters), 2)
+        self.assertEqual(kernel.kernel_1.hyperparameter_names, ['Lin_1.signal_variance', 'Lin_2.signal_variance'])
+        self.assertIsInstance(kernel.kernel_1.kernel_1, LinearKernel)
+        self.assertIsInstance(kernel.kernel_1.kernel_2, LinearKernel)
+        self.assertIsInstance(kernel.kernel_2, LinearKernel)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        np.testing.assert_allclose(cov, np.array([[3.5, 7., 10.5, 14., 17.5],
+                                                  [7., 14., 21., 28., 35.],
+                                                  [10.5, 21., 31.5, 42., 52.5],
+                                                  [14., 28., 42., 56., 70.],
+                                                  [17.5, 35., 52.5, 70., 87.5]]))
+
+    def test_kernel_multi_op_product(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc import LinearKernel
+
+        kernel = LinearKernel() * LinearKernel(signal_variance=.1) * LinearKernel(signal_variance=.2)
+
+        self.assertIsNone(kernel.active_dims)
+        self.assertEqual(len(kernel.hyperparameters), 3)
+        self.assertEqual(kernel.hyperparameter_names,
+                         ['Lin_1.signal_variance', 'Lin_2.signal_variance', 'Lin_3.signal_variance'])
+        self.assertIsNone(kernel.kernel_1.active_dims)
+        self.assertEqual(len(kernel.kernel_1.hyperparameters), 2)
+        self.assertEqual(kernel.kernel_1.hyperparameter_names, ['Lin_1.signal_variance', 'Lin_2.signal_variance'])
+        self.assertIsInstance(kernel.kernel_1.kernel_1, LinearKernel)
+        self.assertIsInstance(kernel.kernel_1.kernel_2, LinearKernel)
+        self.assertIsInstance(kernel.kernel_2, LinearKernel)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        np.testing.assert_allclose(cov, np.array([[.02, .16, .54, 1.28, 2.5],
+                                                  [.16, 1.28, 4.32, 10.24, 20.],
+                                                  [.54, 4.32, 14.58, 34.56, 67.5],
+                                                  [1.28, 10.24, 34.56, 81.92, 160.],
+                                                  [2.5, 20., 67.5, 160., 312.5]]))
+
+    def test_kernel_multi_op_sum_2(self) -> None:
+        """
+
+        :return:
+        """
+        # TODO: Add __sub__ dunder method which uses Scale and Sum classes?
+        from hilo_mpc import LinearKernel
+
+        kernel = LinearKernel() + (LinearKernel(signal_variance=.5) + LinearKernel(signal_variance=2.))
+
+        self.assertIsNone(kernel.active_dims)
+        self.assertEqual(len(kernel.hyperparameters), 3)
+        self.assertEqual(kernel.hyperparameter_names,
+                         ['Lin_1.signal_variance', 'Lin_2.signal_variance', 'Lin_3.signal_variance'])
+        self.assertIsInstance(kernel.kernel_1, LinearKernel)
+        self.assertIsNone(kernel.kernel_2.active_dims)
+        self.assertEqual(len(kernel.kernel_2.hyperparameters), 2)
+        self.assertEqual(kernel.kernel_2.hyperparameter_names, ['Lin_2.signal_variance', 'Lin_3.signal_variance'])
+        self.assertIsInstance(kernel.kernel_2.kernel_1, LinearKernel)
+        self.assertIsInstance(kernel.kernel_2.kernel_2, LinearKernel)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        np.testing.assert_allclose(cov, np.array([[3.5, 7., 10.5, 14., 17.5],
+                                                  [7., 14., 21., 28., 35.],
+                                                  [10.5, 21., 31.5, 42., 52.5],
+                                                  [14., 28., 42., 56., 70.],
+                                                  [17.5, 35., 52.5, 70., 87.5]]))
+
+    def test_kernel_multi_op_sum_of_products(self) -> None:
+        """
+
+        :return:
+        """
+        from hilo_mpc import LinearKernel
+
+        kernel = (LinearKernel() * LinearKernel(signal_variance=.7)) + \
+                 (LinearKernel() * LinearKernel(signal_variance=.3))
+
+        self.assertIsNone(kernel.active_dims)
+        self.assertEqual(len(kernel.hyperparameters), 4)
+        self.assertEqual(
+            kernel.hyperparameter_names,
+            ['Lin_1.signal_variance', 'Lin_2.signal_variance', 'Lin_3.signal_variance', 'Lin_4.signal_variance']
+        )
+        self.assertIsNone(kernel.kernel_1.active_dims)
+        self.assertEqual(len(kernel.kernel_1.hyperparameters), 2)
+        self.assertEqual(kernel.kernel_1.hyperparameter_names, ['Lin_1.signal_variance', 'Lin_2.signal_variance'])
+        self.assertIsInstance(kernel.kernel_1.kernel_1, LinearKernel)
+        self.assertIsInstance(kernel.kernel_1.kernel_2, LinearKernel)
+        self.assertIsNone(kernel.kernel_2.active_dims)
+        self.assertEqual(len(kernel.kernel_2.hyperparameters), 2)
+        self.assertEqual(kernel.kernel_2.hyperparameter_names, ['Lin_3.signal_variance', 'Lin_4.signal_variance'])
+        self.assertIsInstance(kernel.kernel_2.kernel_1, LinearKernel)
+        self.assertIsInstance(kernel.kernel_2.kernel_2, LinearKernel)
+
+        x = np.array([[1., 2., 3., 4., 5.]])
+        cov = kernel(x)
+
+        np.testing.assert_allclose(cov, np.array([[1., 4., 9., 16., 25.],
+                                                  [4., 16., 36., 64., 100.],
+                                                  [9., 36., 81., 144., 225.],
+                                                  [16., 64., 144., 256., 400.],
+                                                  [25., 100., 225., 400., 625.]]))
