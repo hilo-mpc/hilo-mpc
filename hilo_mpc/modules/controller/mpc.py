@@ -2280,8 +2280,8 @@ class SMPC(NMPC):
         Create surrogate deterministic model
         """
         model_c = Model(plot_backend='matplotlib', discrete=True)
-        mu_x = model_c.set_dynamical_states([f'mu_{i}' for i in det_model.dynamical_state_names])
-        mu_u = model_c.set_inputs([f'mu_{i}' for i in det_model.input_names])
+        mu_x = model_c.set_dynamical_states([f'{i}' for i in det_model.dynamical_state_names])
+        mu_u = model_c.set_inputs([f'{i}' for i in det_model.input_names])
         mu_p = model_c.set_parameters(det_model.parameter_names)
         if mu_p.shape == (0, 0):
             mu_p.resize(0, 1)

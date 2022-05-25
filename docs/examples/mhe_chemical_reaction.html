@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Moving Horizon Estimator &mdash; HILO-MPC 1.0 documentation</title>
+  <title>Moving Horizon Estimator &mdash; HILO-MPC 1.0.1 documentation</title>
   
 
   
@@ -41,7 +42,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="HILO-MPC 1.0 documentation" href="../index.html"/>
+    <link rel="top" title="HILO-MPC 1.0.1 documentation" href="../index.html"/>
         <link rel="next" title="Formula 1" href="mpc_formula1.html"/>
         <link rel="prev" title="Learning Supported MPC" href="nmpc_hybrid_bio.html"/> 
 
@@ -439,7 +440,7 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<div class="section" id="Moving-Horizon-Estimator">
+<section id="Moving-Horizon-Estimator">
 <h1>Moving Horizon Estimator<a class="headerlink" href="#Moving-Horizon-Estimator" title="Permalink to this headline">¶</a></h1>
 <p>This example is meant as a quickstart with the Moving Horizon Estimator implemented in HILO-MPC. We will use a model of a chemical reaction. We will se how:</p>
 <ol class="arabic simple">
@@ -453,7 +454,7 @@ div.rendered_html tbody tr:hover {
 <li><p><a class="reference internal" href="../api/estimators.html#hilo_mpc.MovingHorizonEstimator"><span class="std std-ref">API</span></a></p></li>
 </ol>
 <p>let’s get started now.</p>
-<div class="section" id="Introduction">
+<section id="Introduction">
 <h2>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
 <div class="line">The model describe a gas-phase chemical reaction with three reactants.</div>
@@ -470,23 +471,23 @@ div.rendered_html tbody tr:hover {
 </div></blockquote>
 <div class="math notranslate nohighlight">
 \[y = \frac{R T}{V} (C_a  + C_b + C_c)\]</div>
-</div>
-<div class="section" id="Model">
+</section>
+<section id="Model">
 <h2>Model<a class="headerlink" href="#Model" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span> <span class="c1"># You don&#39;t need this if you installed HILO-MPC using pip!</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../../&#39;</span><span class="p">)</span> <span class="c1"># You don&#39;t need this if you installed HILO-MPC using pip!</span>
-<span class="kn">from</span> <span class="nn">hilo_mpc</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">MHE</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import sys # You don&#39;t need this if you installed HILO-MPC using pip!
+sys.path.append(&#39;../../../&#39;) # You don&#39;t need this if you installed HILO-MPC using pip!
+from hilo_mpc import Model, MHE
 
-<span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="n">output_notebook</span><span class="p">,</span> <span class="n">show</span>
-<span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">figure</span>
-<span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">gridplot</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+from bokeh.io import output_notebook, show
+from bokeh.plotting import figure
+from bokeh.layouts import gridplot
+import numpy as np
+import warnings
+warnings.filterwarnings(&quot;ignore&quot;)
 </pre></div>
 </div>
 </div>
@@ -494,72 +495,72 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create model</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">plot_backend</span><span class="o">=</span><span class="s1">&#39;bokeh&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Create model
+model = Model(plot_backend=&#39;bokeh&#39;)
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">set_dynamical_states</span><span class="p">([</span><span class="s1">&#39;Ca&#39;</span><span class="p">,</span> <span class="s1">&#39;Cb&#39;</span><span class="p">,</span> <span class="s1">&#39;Cc&#39;</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mol/l&#39;</span><span class="p">,</span> <span class="s1">&#39;mol/l&#39;</span><span class="p">,</span> <span class="s1">&#39;mol/l&#39;</span><span class="p">],</span> <span class="n">short_description</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Ca&#39;</span><span class="p">,</span> <span class="s1">&#39;Cb&#39;</span><span class="p">,</span> <span class="s1">&#39;Cc&#39;</span><span class="p">])</span>
+x = model.set_dynamical_states([&#39;Ca&#39;, &#39;Cb&#39;, &#39;Cc&#39;], units=[&#39;mol/l&#39;, &#39;mol/l&#39;, &#39;mol/l&#39;], short_description=[&#39;Ca&#39;, &#39;Cb&#39;, &#39;Cc&#39;])
 
-<span class="n">model</span><span class="o">.</span><span class="n">set_measurements</span><span class="p">([</span><span class="s1">&#39;P&#39;</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;atm&#39;</span><span class="p">],</span> <span class="n">short_description</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pressure&#39;</span><span class="p">])</span>
+model.set_measurements([&#39;P&#39;], units=[&#39;atm&#39;], short_description=[&#39;Pressure&#39;])
 
-<span class="c1"># Unwrap states</span>
-<span class="n">Ca</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">Cb</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">Cc</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+# Unwrap states
+Ca = x[0]
+Cb = x[1]
+Cc = x[2]
 
-<span class="c1"># Known Parameters</span>
-<span class="n">k1</span> <span class="o">=</span> <span class="mf">0.5</span>
-<span class="n">k_1</span> <span class="o">=</span> <span class="mf">0.05</span>
-<span class="n">k2</span> <span class="o">=</span> <span class="mf">0.2</span>
-<span class="n">k_2</span> <span class="o">=</span> <span class="mf">0.01</span>
-<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.25</span>
-<span class="n">RT</span> <span class="o">=</span> <span class="mf">32.84</span>  <span class="c1"># L atm/ (mol)</span>
+# Known Parameters
+k1 = 0.5
+k_1 = 0.05
+k2 = 0.2
+k_2 = 0.01
+dt = 0.25
+RT = 32.84  # L atm/ (mol)
 
-<span class="n">dCa</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">k1</span> <span class="o">*</span> <span class="n">Ca</span> <span class="o">-</span> <span class="n">k_1</span> <span class="o">*</span> <span class="n">Cb</span> <span class="o">*</span> <span class="n">Cc</span><span class="p">)</span>
-<span class="n">dCb</span> <span class="o">=</span> <span class="n">k1</span> <span class="o">*</span> <span class="n">Ca</span> <span class="o">-</span> <span class="n">k_1</span> <span class="o">*</span> <span class="n">Cb</span> <span class="o">*</span> <span class="n">Cc</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">k2</span> <span class="o">*</span> <span class="n">Cb</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">k_2</span> <span class="o">*</span> <span class="n">Cc</span><span class="p">)</span>
-<span class="n">dCc</span> <span class="o">=</span> <span class="n">k1</span> <span class="o">*</span> <span class="n">Ca</span> <span class="o">-</span> <span class="n">k_1</span> <span class="o">*</span> <span class="n">Cb</span> <span class="o">*</span> <span class="n">Cc</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">k2</span> <span class="o">*</span> <span class="n">Cb</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">k_2</span> <span class="o">*</span> <span class="n">Cc</span><span class="p">)</span>
+dCa = - (k1 * Ca - k_1 * Cb * Cc)
+dCb = k1 * Ca - k_1 * Cb * Cc - 2 * (k2 * Cb ** 2 - k_2 * Cc)
+dCc = k1 * Ca - k_1 * Cb * Cc + 1 * (k2 * Cb ** 2 - k_2 * Cc)
 
-<span class="n">model</span><span class="o">.</span><span class="n">set_measurement_equations</span><span class="p">(</span><span class="n">RT</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ca</span> <span class="o">+</span> <span class="n">Cb</span> <span class="o">+</span> <span class="n">Cc</span><span class="p">))</span>
-<span class="n">model</span><span class="o">.</span><span class="n">set_dynamical_equations</span><span class="p">([</span><span class="n">dCa</span><span class="p">,</span> <span class="n">dCb</span><span class="p">,</span> <span class="n">dCc</span><span class="p">])</span>
+model.set_measurement_equations(RT * (Ca + Cb + Cc))
+model.set_dynamical_equations([dCa, dCb, dCc])
 
-<span class="n">model</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+model.setup(dt=dt)
 
-<span class="c1"># Initial conditions</span>
-<span class="n">x0_real</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="n">x0_est</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+# Initial conditions
+x0_real = [0.5, 0.05, 0]
+x0_est = [1, 0, 4]
 
-<span class="n">model</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x0_real</span><span class="p">)</span>
+model.set_initial_conditions(x0=x0_real)
 
-<span class="n">n_steps</span> <span class="o">=</span> <span class="mi">120</span>
+n_steps = 120
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="id2">
+</section>
+<section id="id2">
 <h2>Moving Horizon Estimator<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setup the MHE</span>
-<span class="n">mhe</span> <span class="o">=</span> <span class="n">MHE</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Setup the MHE
+mhe = MHE(model)
 
-<span class="n">mhe</span><span class="o">.</span><span class="n">quad_arrival_cost</span><span class="o">.</span><span class="n">add_states</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mf">0.5</span><span class="o">**</span><span class="mi">2</span><span class="p">)],</span> <span class="n">guess</span><span class="o">=</span><span class="n">x0_est</span><span class="p">)</span>
+mhe.quad_arrival_cost.add_states(weights=[1/(0.5**2), 1/(0.5**2), 1/(0.5**2)], guess=x0_est)
 
-<span class="n">mhe</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">add_measurements</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mf">0.25</span><span class="o">**</span><span class="mi">2</span><span class="p">)])</span>
+mhe.quad_stage_cost.add_measurements(weights=[1/(0.25**2)])
 
-<span class="n">mhe</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">add_state_noise</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mf">0.001</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mf">0.001</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mf">0.001</span><span class="o">**</span><span class="mi">2</span><span class="p">)])</span>
+mhe.quad_stage_cost.add_state_noise(weights=[1/(0.001**2), 1/(0.001**2), 1/(0.001**2)])
 
-<span class="n">mhe</span><span class="o">.</span><span class="n">set_box_constraints</span><span class="p">(</span><span class="n">x_lb</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+mhe.set_box_constraints(x_lb=[0, 0, 0])
 
-<span class="n">mhe</span><span class="o">.</span><span class="n">horizon</span> <span class="o">=</span> <span class="mi">20</span>
+mhe.horizon = 20
 
-<span class="n">mhe</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;print_level&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+mhe.setup(options={&#39;print_level&#39;: 0})
 
-<span class="c1"># Run the simulation</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">):</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
-    <span class="n">mhe</span><span class="o">.</span><span class="n">add_measurements</span><span class="p">(</span><span class="n">y_meas</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">][:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">])</span>
-    <span class="n">x_est</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">mhe</span><span class="o">.</span><span class="n">estimate</span><span class="p">()</span>
+# Run the simulation
+for i in range(n_steps):
+    model.simulate()
+    mhe.add_measurements(y_meas=model.solution[&#39;y&#39;][:, -2])
+    x_est, _ = mhe.estimate()
 </pre></div>
 </div>
 </div>
@@ -577,31 +578,31 @@ This program contains Ipopt, a library for large-scale nonlinear optimization.
 
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Plotting">
+</section>
+<section id="Plotting">
 <h2>Plotting<a class="headerlink" href="#Plotting" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">output_notebook</span><span class="p">()</span>
-<span class="n">p_tot</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">p</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">background_fill_color</span><span class="o">=</span><span class="s2">&quot;#fafafa&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mhe</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mhe</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;Ca&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;Estimated&#39;</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;Ca&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;Real&#39;</span><span class="p">)</span>
-<span class="n">p_tot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>output_notebook()
+p_tot = []
+p = figure(background_fill_color=&quot;#fafafa&quot;, width=300, height=300)
+p.scatter(x=np.array(mhe.solution[&#39;t&#39;]).squeeze(), y=np.array(mhe.solution[&#39;Ca&#39;]).squeeze(), legend_label=&#39;Estimated&#39;)
+p.line(x=np.array(model.solution[&#39;t&#39;]).squeeze(), y=np.array(model.solution[&#39;Ca&#39;]).squeeze(), legend_label=&#39;Real&#39;)
+p_tot.append(p)
 
-<span class="n">p</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">background_fill_color</span><span class="o">=</span><span class="s2">&quot;#fafafa&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mhe</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mhe</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;Cb&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;Estimated&#39;</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;Cb&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;Real&#39;</span><span class="p">)</span>
-<span class="n">p_tot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+p = figure(background_fill_color=&quot;#fafafa&quot;, width=300, height=300)
+p.scatter(x=np.array(mhe.solution[&#39;t&#39;]).squeeze(), y=np.array(mhe.solution[&#39;Cb&#39;]).squeeze(), legend_label=&#39;Estimated&#39;)
+p.line(x=np.array(model.solution[&#39;t&#39;]).squeeze(), y=np.array(model.solution[&#39;Cb&#39;]).squeeze(), legend_label=&#39;Real&#39;)
+p_tot.append(p)
 
-<span class="n">p</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">background_fill_color</span><span class="o">=</span><span class="s2">&quot;#fafafa&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mhe</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mhe</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;Cc&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;Estimated&#39;</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;Cc&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;Real&#39;</span><span class="p">)</span>
-<span class="n">p_tot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+p = figure(background_fill_color=&quot;#fafafa&quot;, width=300, height=300)
+p.scatter(x=np.array(mhe.solution[&#39;t&#39;]).squeeze(), y=np.array(mhe.solution[&#39;Cc&#39;]).squeeze(), legend_label=&#39;Estimated&#39;)
+p.line(x=np.array(model.solution[&#39;t&#39;]).squeeze(), y=np.array(model.solution[&#39;Cc&#39;]).squeeze(), legend_label=&#39;Real&#39;)
+p_tot.append(p)
 
-<span class="n">show</span><span class="p">(</span><span class="n">gridplot</span><span class="p">(</span><span class="n">p_tot</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+show(gridplot(p_tot, ncols=2))
 <br/><br/></pre></div>
 </div>
 </div>
@@ -960,14 +961,15 @@ var element = document.currentScript.previousSibling.previousSibling;
 })(window);
 </script></div>
 </div>
-<p id="id3"><dl class="footnote brackets">
+<div class="docutils container" id="id3">
+<dl class="footnote brackets">
 <dt class="label" id="footcite-rawlings2017model"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
 <dd><p>J.B. Rawlings, D.Q. Mayne, and M. Diehl. <em>Model Predictive Control: Theory, Computation, and Design</em>. Nob Hill Publishing, 2017. ISBN 9780975937730. URL: <a class="reference external" href="https://books.google.de/books?id=MrJctAEACAAJ">https://books.google.de/books?id=MrJctAEACAAJ</a>.</p>
 </dd>
 </dl>
-</p>
 </div>
-</div>
+</section>
+</section>
 
 
            </div>
@@ -1010,7 +1012,7 @@ var element = document.currentScript.previousSibling.previousSibling;
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0',
+            VERSION:'1.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

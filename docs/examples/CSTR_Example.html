@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>CSTR Reactor &mdash; HILO-MPC 1.0 documentation</title>
+  <title>CSTR Reactor &mdash; HILO-MPC 1.0.1 documentation</title>
   
 
   
@@ -41,7 +42,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="HILO-MPC 1.0 documentation" href="../index.html"/>
+    <link rel="top" title="HILO-MPC 1.0.1 documentation" href="../index.html"/>
         <link rel="next" title="Learning an MPC controller with a NN" href="learn_mpc.html"/>
         <link rel="prev" title="Path following vs Trajectory Tracking MPC" href="path_following_mpc.html"/> 
 
@@ -449,35 +450,35 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<div class="section" id="CSTR-Reactor">
+<section id="CSTR-Reactor">
 <h1>CSTR Reactor<a class="headerlink" href="#CSTR-Reactor" title="Permalink to this headline">¶</a></h1>
 <p>This example follows the example shown in <a class="reference external" href="https://www.mdpi.com/2227-7390/7/10/890">Zhang et al. (2019)</a> where a continuous stirred tank reactor (CSTR) with a reversible exothermic reaction <span class="math notranslate nohighlight">\(A\leftrightarrow B\)</span> is used to show how neural networks can be used with model predictive control to control and optimise a chemical process.</p>
-<p><img alt="c6194434cbfc48eb8a9eaa2d920c0ad2" class="no-scaled-link" src="../_images/CSTR_Example_image.png" style="width: 800px;" /></p>
+<p><img alt="461f4ea2b51f4ec4a7e2ff93b23fb66f" class="no-scaled-link" src="../_images/CSTR_Example_image.png" style="width: 800px;" /></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add HILO-MPC to path. NOT NECESSARY if it was installed via pip.</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../../&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Add HILO-MPC to path. NOT NECESSARY if it was installed via pip.
+import sys
+sys.path.append(&#39;../../../&#39;)
 
-<span class="c1">##### Import Libraries #####</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">casadi</span> <span class="k">as</span> <span class="nn">ca</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">hilo_mpc</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">hilo_mpc</span> <span class="kn">import</span> <span class="n">ANN</span><span class="p">,</span> <span class="n">Layer</span>
-<span class="kn">from</span> <span class="nn">hilo_mpc</span> <span class="kn">import</span> <span class="n">NMPC</span>
+##### Import Libraries #####
+import pandas as pd
+import numpy as np
+import math
+import casadi as ca
+import matplotlib.pyplot as plt
+from hilo_mpc import Model
+from hilo_mpc import ANN, Layer
+from hilo_mpc import NMPC
 
-<span class="c1"># Ignore deprecation warnings coming from tensorflow</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+# Ignore deprecation warnings coming from tensorflow
+import warnings
+warnings.filterwarnings(&quot;ignore&quot;)
 </pre></div>
 </div>
 </div>
-<div class="section" id="Process-Model">
+<section id="Process-Model">
 <h2>Process Model<a class="headerlink" href="#Process-Model" title="Permalink to this headline">¶</a></h2>
 <p>The dynamic equations for the concentration of component A and B is obtained from the mass balance. The <a class="reference external" href="https://en.wikipedia.org/wiki/Arrhenius_equation">Arrhenius rate equation</a>, <span class="math notranslate nohighlight">\(k=Ae^{\frac{-E_{a}}{RT}}\)</span>, is used as the reaction rate expression due to its <a class="reference external" href="https://en.wikipedia.org/wiki/Reaction_rate">dependency on temperature</a>. The reactor temperature is described from the energy balance where the CSTR is modelled with a cooling jacket with duty Q.</p>
 <div class="math notranslate nohighlight">
@@ -495,8 +496,8 @@ div.rendered_html tbody tr:hover {
 <li><p>If <span class="math notranslate nohighlight">\(C_{A_{0}}\)</span> is constant, then <a class="reference external" href="#mjx-eqn-eq2">equation 2</a> is not necessary and <span class="math notranslate nohighlight">\(C_{B}=C_{A_{0}}-C_{A}\)</span>. In this example <span class="math notranslate nohighlight">\(C_{A_{0}}\)</span> is constant but the full implementation is shown.</p></li>
 <li><p>A low reactor temperature will result in a slow forward reaction rate and subsequently a low conversion of A. A high reactor temperature will favour the reversible reaction and will result in a lower conversion of A. The optimal conversion of A is achieved at 438.47K.</p></li>
 </ul>
-<p><img alt="49f36a01af9b4edb9ac144172597c294" src="../_images/CSTR_Example_Reaction_Rate.png" /></p>
-<div class="section" id="Parameter,-steady-state,-and-limit-values">
+<p><img alt="b80d2c51352f4bb4a323747346f261d5" src="../_images/CSTR_Example_Reaction_Rate.png" /></p>
+<section id="Parameter,-steady-state,-and-limit-values">
 <h3>Parameter, steady-state, and limit values<a class="headerlink" href="#Parameter,-steady-state,-and-limit-values" title="Permalink to this headline">¶</a></h3>
 <table><tr><td><table class="docutils align-default">
 <colgroup>
@@ -644,51 +645,51 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##### Parameter, Steady-state, and Limit Values #####</span>
-<span class="c1"># Parameter values</span>
-<span class="n">T_0</span> <span class="o">=</span> <span class="mi">400</span>
-<span class="n">tau</span> <span class="o">=</span> <span class="mi">60</span>
-<span class="n">k_A</span> <span class="o">=</span> <span class="mi">5000</span>
-<span class="n">k_B</span> <span class="o">=</span> <span class="mf">1e6</span>
-<span class="n">E_A</span> <span class="o">=</span> <span class="mf">1e4</span>
-<span class="n">E_B</span> <span class="o">=</span> <span class="mf">1.5e4</span>
-<span class="n">R</span> <span class="o">=</span> <span class="mf">1.987</span>
-<span class="n">dH</span> <span class="o">=</span> <span class="o">-</span><span class="mi">5000</span>
-<span class="n">rho</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">Cp</span> <span class="o">=</span> <span class="mi">1000</span>
-<span class="n">C_A_0</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">V</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">C_B_0</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Initial concentration for B is 0</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>##### Parameter, Steady-state, and Limit Values #####
+# Parameter values
+T_0 = 400
+tau = 60
+k_A = 5000
+k_B = 1e6
+E_A = 1e4
+E_B = 1.5e4
+R = 1.987
+dH = -5000
+rho = 1
+Cp = 1000
+C_A_0 = 1
+V = 100
+C_B_0 = 0 # Initial concentration for B is 0
 
-<span class="c1"># Steady-state values</span>
-<span class="n">C_A_SS</span> <span class="o">=</span> <span class="mf">0.4912</span>
-<span class="n">C_B_SS</span> <span class="o">=</span> <span class="mf">0.5088</span>
-<span class="n">T_SS</span> <span class="o">=</span> <span class="mf">438.47</span>
-<span class="n">Q_SS</span> <span class="o">=</span> <span class="mf">59881.84</span>
+# Steady-state values
+C_A_SS = 0.4912
+C_B_SS = 0.5088
+T_SS = 438.47
+Q_SS = 59881.84
 
-<span class="c1"># States and input limits</span>
-<span class="n">C_A_ll</span> <span class="o">=</span> <span class="mf">0.</span>
-<span class="n">C_A_ul</span> <span class="o">=</span> <span class="mf">1.</span>
-<span class="n">C_B_ll</span> <span class="o">=</span> <span class="mf">0.</span>
-<span class="n">C_B_ul</span> <span class="o">=</span> <span class="mf">1.</span>
-<span class="n">T_ll</span> <span class="o">=</span> <span class="mf">400.</span>
-<span class="n">T_ul</span> <span class="o">=</span> <span class="mf">500.</span>
-<span class="n">Q_ll</span> <span class="o">=</span> <span class="mf">0.</span>
-<span class="n">Q_ul</span> <span class="o">=</span> <span class="mf">1e5</span>
+# States and input limits
+C_A_ll = 0.
+C_A_ul = 1.
+C_B_ll = 0.
+C_B_ul = 1.
+T_ll = 400.
+T_ul = 500.
+Q_ll = 0.
+Q_ul = 1e5
 
-<span class="c1"># ANN training data limits</span>
-<span class="n">C_A_ll_nn</span> <span class="o">=</span> <span class="mf">0.</span>
-<span class="n">C_A_ul_nn</span> <span class="o">=</span> <span class="mf">1.</span>
-<span class="n">C_B_ll_nn</span> <span class="o">=</span> <span class="mf">0.</span>
-<span class="n">C_B_ul_nn</span> <span class="o">=</span> <span class="mf">1.</span>
-<span class="n">T_ll_nn</span> <span class="o">=</span> <span class="mf">400.</span>
-<span class="n">T_ul_nn</span> <span class="o">=</span> <span class="mf">500.</span>
+# ANN training data limits
+C_A_ll_nn = 0.
+C_A_ul_nn = 1.
+C_B_ll_nn = 0.
+C_B_ul_nn = 1.
+T_ll_nn = 400.
+T_ul_nn = 500.
 </pre></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="Model-Builder">
+</section>
+</section>
+<section id="Model-Builder">
 <h2>Model Builder<a class="headerlink" href="#Model-Builder" title="Permalink to this headline">¶</a></h2>
 <p>The states are the concentration of species A, <span class="math notranslate nohighlight">\(C_{A}\)</span>, and B, <span class="math notranslate nohighlight">\(C_{B}\)</span>, as well as the reactor temperature, <span class="math notranslate nohighlight">\(T\)</span>. The heat rate of the cooling jacking is the only one input, <span class="math notranslate nohighlight">\(Q\)</span>.</p>
 <p>The true plant model is used to compare against the hybrid model. Both the plant and hybrid model is defined similar with only the reaction rate defined as a parameter in the hybrid model.</p>
@@ -696,100 +697,100 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##### Model Builder #####</span>
-<span class="k">def</span> <span class="nf">true_plant_model</span><span class="p">():</span>
-    <span class="n">true_plant_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">plot_backend</span><span class="o">=</span><span class="s1">&#39;bokeh&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;plant&#39;</span><span class="p">)</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">true_plant_model</span><span class="o">.</span><span class="n">set_dynamical_states</span><span class="p">([</span><span class="s1">&#39;C_A&#39;</span><span class="p">,</span> <span class="s1">&#39;C_B&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">])</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">true_plant_model</span><span class="o">.</span><span class="n">set_inputs</span><span class="p">([</span><span class="s1">&#39;Q&#39;</span><span class="p">])</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>##### Model Builder #####
+def true_plant_model():
+    true_plant_model = Model(plot_backend=&#39;bokeh&#39;, name=&#39;plant&#39;)
+    x = true_plant_model.set_dynamical_states([&#39;C_A&#39;, &#39;C_B&#39;, &#39;T&#39;])
+    u = true_plant_model.set_inputs([&#39;Q&#39;])
 
-    <span class="c1"># Unwrap states</span>
-    <span class="n">C_A</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">C_B</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    # Unwrap states
+    C_A = x[0]
+    C_B = x[1]
+    T = x[2]
 
-    <span class="c1"># Unwrap inputs</span>
-    <span class="n">Q</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    # Unwrap inputs
+    Q = u[0]
 
-    <span class="c1"># Unknown reaction rates</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">k_A</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="o">-</span><span class="n">E_A</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">*</span> <span class="n">C_A</span> <span class="o">-</span> <span class="n">k_B</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="o">-</span><span class="n">E_B</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">*</span> <span class="n">C_B</span>
+    # Unknown reaction rates
+    r = k_A * ca.exp((-E_A)/(R * T)) * C_A - k_B * ca.exp((-E_B)/(R * T)) * C_B
 
-    <span class="n">dC_A</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">tau</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_A_0</span> <span class="o">-</span> <span class="n">C_A</span><span class="p">)</span> <span class="o">-</span> <span class="n">r</span>
-    <span class="n">dC_B</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">tau</span> <span class="o">*</span> <span class="n">C_B</span> <span class="o">+</span> <span class="n">r</span>
-    <span class="n">dT</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">dH</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">rho</span> <span class="o">*</span> <span class="n">Cp</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="n">tau</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_0</span> <span class="o">-</span> <span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">Q</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho</span> <span class="o">*</span> <span class="n">Cp</span> <span class="o">*</span> <span class="n">V</span><span class="p">)</span>
+    dC_A = 1/tau * (C_A_0 - C_A) - r
+    dC_B = -1/tau * C_B + r
+    dT = - (dH * r)/(rho * Cp) + 1/tau * (T_0 - T) + Q / (rho * Cp * V)
 
-    <span class="n">true_plant_model</span><span class="o">.</span><span class="n">set_dynamical_equations</span><span class="p">([</span><span class="n">dC_A</span><span class="p">,</span> <span class="n">dC_B</span><span class="p">,</span> <span class="n">dT</span><span class="p">])</span>
-    <span class="n">true_plant_model</span><span class="o">.</span><span class="n">set_measurement_equations</span><span class="p">([</span><span class="n">r</span><span class="p">])</span>
+    true_plant_model.set_dynamical_equations([dC_A, dC_B, dT])
+    true_plant_model.set_measurement_equations([r])
 
-    <span class="k">return</span> <span class="n">true_plant_model</span>
+    return true_plant_model
 
-<span class="k">def</span> <span class="nf">hybrid_model</span><span class="p">():</span>
-    <span class="n">hybrid_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">plot_backend</span><span class="o">=</span><span class="s1">&#39;bokeh&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">hybrid_model</span><span class="o">.</span><span class="n">set_dynamical_states</span><span class="p">([</span><span class="s1">&#39;C_A&#39;</span><span class="p">,</span> <span class="s1">&#39;C_B&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">])</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">hybrid_model</span><span class="o">.</span><span class="n">set_inputs</span><span class="p">([</span><span class="s1">&#39;Q&#39;</span><span class="p">])</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">hybrid_model</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">([</span><span class="s1">&#39;r&#39;</span><span class="p">])</span>
+def hybrid_model():
+    hybrid_model = Model(plot_backend=&#39;bokeh&#39;, name=&#39;model&#39;)
+    x = hybrid_model.set_dynamical_states([&#39;C_A&#39;, &#39;C_B&#39;, &#39;T&#39;])
+    u = hybrid_model.set_inputs([&#39;Q&#39;])
+    p = hybrid_model.set_parameters([&#39;r&#39;])
 
-    <span class="c1"># Unwrap states</span>
-    <span class="n">C_A</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">C_B</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    # Unwrap states
+    C_A = x[0]
+    C_B = x[1]
+    T = x[2]
 
-    <span class="c1"># Unwrap inputs</span>
-    <span class="n">Q</span> <span class="o">=</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    # Unwrap inputs
+    Q = u[0]
 
-    <span class="c1"># Unknown reaction rates</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    # Unknown reaction rates
+    r = p[0]
 
-    <span class="n">dC_A</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">tau</span> <span class="o">*</span> <span class="p">(</span><span class="n">C_A_0</span> <span class="o">-</span> <span class="n">C_A</span><span class="p">)</span> <span class="o">-</span> <span class="n">r</span>
-    <span class="n">dC_B</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">tau</span> <span class="o">*</span> <span class="n">C_B</span> <span class="o">+</span> <span class="n">r</span>
-    <span class="n">dT</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="n">dH</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">rho</span> <span class="o">*</span> <span class="n">Cp</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="n">tau</span><span class="o">*</span><span class="p">(</span><span class="n">T_0</span> <span class="o">-</span> <span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="n">Q</span> <span class="o">/</span> <span class="p">(</span><span class="n">rho</span> <span class="o">*</span> <span class="n">Cp</span> <span class="o">*</span> <span class="n">V</span><span class="p">)</span>
+    dC_A = 1/tau * (C_A_0 - C_A) - r
+    dC_B = -1/tau * C_B + r
+    dT = - (dH * r)/(rho * Cp) + 1/tau*(T_0 - T) + Q / (rho * Cp * V)
 
-    <span class="n">hybrid_model</span><span class="o">.</span><span class="n">set_dynamical_equations</span><span class="p">([</span><span class="n">dC_A</span><span class="p">,</span> <span class="n">dC_B</span><span class="p">,</span> <span class="n">dT</span><span class="p">])</span>
-    <span class="n">hybrid_model</span><span class="o">.</span><span class="n">set_measurement_equations</span><span class="p">([</span><span class="n">r</span><span class="p">])</span>
+    hybrid_model.set_dynamical_equations([dC_A, dC_B, dT])
+    hybrid_model.set_measurement_equations([r])
 
-    <span class="k">return</span> <span class="n">hybrid_model</span>
+    return hybrid_model
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Neural-Network">
+</section>
+<section id="Neural-Network">
 <h2>Neural Network<a class="headerlink" href="#Neural-Network" title="Permalink to this headline">¶</a></h2>
 <p>The reaction rate expression (<a class="reference external" href="#mjx-eqn-eq4">equation 4</a>) is difficult to obtain in practice. Some reactions have complex reaction mechanisms resulting in a very complex rate expression. Obtaining kinetic parameters are also difficult and costly. Machine learning techniques can be used to obtain a reaction rate approximation using experimental/plant data.</p>
-<div class="section" id="Training-Data-Generation">
+<section id="Training-Data-Generation">
 <h3>Training Data Generation<a class="headerlink" href="#Training-Data-Generation" title="Permalink to this headline">¶</a></h3>
 <p>The assumed reaction rate expression and parameters for this example is used to create data to illustrate how a neural network can be used to model the reaction rate from data. <a class="reference external" href="https://www.mdpi.com/2227-7390/7/10/890">Zhang et al. (2019)</a> generated eight million data points (200 data points per feature) by varying the reactor temperature and concentrations of both components equidistantly. In this example only 20 data points per feature is used to get to a total of 800 data points.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##### Training Data Generation #####</span>
-<span class="n">training_data_array</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">data_points_per_feature</span> <span class="o">=</span> <span class="mi">20</span> <span class="c1"># The size of the training data set will be data_points_per_feature^[number of features=3]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>##### Training Data Generation #####
+training_data_array = []
+data_points_per_feature = 20 # The size of the training data set will be data_points_per_feature^[number of features=3]
 
-<span class="c1"># Create ranges for the state variables</span>
+# Create ranges for the state variables
 
-<span class="n">T_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T_ll_nn</span><span class="p">,</span> <span class="n">T_ul_nn</span> <span class="o">+</span> <span class="p">(</span><span class="n">T_ul_nn</span> <span class="o">-</span> <span class="n">T_ll_nn</span><span class="p">)</span>
-                    <span class="o">/</span> <span class="n">data_points_per_feature</span><span class="p">,</span> <span class="p">(</span><span class="n">T_ul_nn</span> <span class="o">-</span> <span class="n">T_ll_nn</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">data_points_per_feature</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+T_range = np.arange(T_ll_nn, T_ul_nn + (T_ul_nn - T_ll_nn)
+                    / data_points_per_feature, (T_ul_nn - T_ll_nn) / (data_points_per_feature - 1))
 
-<span class="n">C_A_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">C_A_ll_nn</span><span class="p">,</span> <span class="n">C_A_ul_nn</span> <span class="o">+</span> <span class="p">(</span><span class="n">C_A_ul_nn</span> <span class="o">-</span> <span class="n">C_A_ll_nn</span><span class="p">)</span>
-                      <span class="o">/</span> <span class="n">data_points_per_feature</span><span class="p">,</span> <span class="p">(</span><span class="n">C_A_ul_nn</span> <span class="o">-</span> <span class="n">C_A_ll_nn</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">data_points_per_feature</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+C_A_range = np.arange(C_A_ll_nn, C_A_ul_nn + (C_A_ul_nn - C_A_ll_nn)
+                      / data_points_per_feature, (C_A_ul_nn - C_A_ll_nn) / (data_points_per_feature - 1))
 
-<span class="n">C_B_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">C_B_ll_nn</span><span class="p">,</span> <span class="n">C_B_ul_nn</span> <span class="o">+</span> <span class="p">(</span><span class="n">C_B_ul_nn</span> <span class="o">-</span> <span class="n">C_B_ll_nn</span><span class="p">)</span>
-                      <span class="o">/</span> <span class="n">data_points_per_feature</span><span class="p">,</span> <span class="p">(</span><span class="n">C_B_ul_nn</span> <span class="o">-</span> <span class="n">C_B_ll_nn</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">data_points_per_feature</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+C_B_range = np.arange(C_B_ll_nn, C_B_ul_nn + (C_B_ul_nn - C_B_ll_nn)
+                      / data_points_per_feature, (C_B_ul_nn - C_B_ll_nn) / (data_points_per_feature - 1))
 
-<span class="c1"># Calculate the reaction rate at each combination</span>
-<span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">T_range</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">C_A</span> <span class="ow">in</span> <span class="n">C_A_range</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">C_B</span> <span class="ow">in</span> <span class="n">C_B_range</span><span class="p">:</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">k_A</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="o">-</span><span class="n">E_A</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">*</span> <span class="n">C_A</span> <span class="o">-</span> <span class="n">k_B</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="o">-</span><span class="n">E_B</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">*</span> <span class="n">C_B</span>
-            <span class="n">training_data_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">C_A</span><span class="p">,</span> <span class="n">C_B</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">r</span><span class="p">])</span>
+# Calculate the reaction rate at each combination
+for T in T_range:
+    for C_A in C_A_range:
+        for C_B in C_B_range:
+            r = k_A * math.exp((-E_A) / (R * T)) * C_A - k_B * math.exp((-E_B) / (R * T)) * C_B
+            training_data_array.append([C_A, C_B, T, r])
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">training_data_array</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;C_A&quot;</span><span class="p">,</span> <span class="s2">&quot;C_B&quot;</span><span class="p">,</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">])</span>
+df = pd.DataFrame(training_data_array, columns = [&quot;C_A&quot;, &quot;C_B&quot;, &quot;T&quot;, &quot;r&quot;])
 </pre></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="Neural-Network-Parameters">
+</section>
+</section>
+<section id="Neural-Network-Parameters">
 <h2>Neural Network Parameters<a class="headerlink" href="#Neural-Network-Parameters" title="Permalink to this headline">¶</a></h2>
 <p>The neural network parameters are summarised in Table 3.</p>
 <table class="docutils align-default">
@@ -856,65 +857,65 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##### Neural Network #####</span>
-<span class="c1"># Hyperparameters</span>
-    <span class="c1"># Setup</span>
-<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.001</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="s1">&#39;Adam&#39;</span>
-<span class="n">loss</span> <span class="o">=</span> <span class="s1">&#39;mse&#39;</span>
-<span class="n">backend</span> <span class="o">=</span> <span class="s1">&#39;pytorch&#39;</span>
-<span class="n">number_of_hidden_neurons</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">activation_function</span> <span class="o">=</span> <span class="s1">&#39;tanh&#39;</span>                   <span class="c1"># See https://pytorch.org/docs/stable/nn.init.html for different activation functions</span>
-<span class="n">seed</span> <span class="o">=</span> <span class="s1">&#39;42&#39;</span>
-<span class="n">device</span> <span class="o">=</span> <span class="s1">&#39;cpu&#39;</span>
-    <span class="c1"># Training</span>
-<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">epochs</span> <span class="o">=</span> <span class="mi">500</span>
-<span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">validation_split</span> <span class="o">=</span> <span class="mf">0.2</span>
-<span class="n">test_split</span> <span class="o">=</span> <span class="mf">0.2</span>
-<span class="n">patience</span> <span class="o">=</span> <span class="mi">100</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>##### Neural Network #####
+# Hyperparameters
+    # Setup
+learning_rate = 0.001
+optimizer = &#39;Adam&#39;
+loss = &#39;mse&#39;
+backend = &#39;pytorch&#39;
+number_of_hidden_neurons = 10
+activation_function = &#39;tanh&#39;                   # See https://pytorch.org/docs/stable/nn.init.html for different activation functions
+seed = &#39;42&#39;
+device = &#39;cpu&#39;
+    # Training
+batch_size = 100
+epochs = 500
+verbose = 0
+validation_split = 0.2
+test_split = 0.2
+patience = 100
 
-<span class="c1"># Neural network features and labels</span>
-<span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C_A&#39;</span><span class="p">,</span> <span class="s1">&#39;C_B&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">]</span>                 <span class="c1"># States of the model</span>
-<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>                                 <span class="c1"># Unknown parameter</span>
+# Neural network features and labels
+features = [&#39;C_A&#39;, &#39;C_B&#39;, &#39;T&#39;]                 # States of the model
+labels = [&#39;r&#39;]                                 # Unknown parameter
 
-<span class="c1"># Create and train neural network</span>
-<span class="n">ann</span> <span class="o">=</span> <span class="n">ANN</span><span class="p">(</span><span class="n">features</span><span class="p">,</span>
-          <span class="n">labels</span><span class="p">,</span>
-          <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span><span class="p">,</span>       <span class="c1"># Default=0.001</span>
-          <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">,</span>               <span class="c1"># Default=Adam</span>
-          <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="p">,</span>                         <span class="c1"># Default=mse</span>
-          <span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span><span class="p">)</span>                   <span class="c1"># Default=pytorch</span>
+# Create and train neural network
+ann = ANN(features,
+          labels,
+          learning_rate = learning_rate,       # Default=0.001
+          optimizer = optimizer,               # Default=Adam
+          loss = loss,                         # Default=mse
+          backend = backend)                   # Default=pytorch
 
-<span class="c1"># Add hidden layers to the nerual network</span>
-<span class="n">ann</span><span class="o">.</span><span class="n">add_layers</span><span class="p">(</span><span class="n">Layer</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="n">number_of_hidden_neurons</span><span class="p">,</span> <span class="n">activation</span> <span class="o">=</span> <span class="n">activation_function</span><span class="p">))</span> <span class="c1"># Dense in Keras is similar to Linear in PyTorch</span>
+# Add hidden layers to the nerual network
+ann.add_layers(Layer.dense(number_of_hidden_neurons, activation = activation_function)) # Dense in Keras is similar to Linear in PyTorch
 
-<span class="c1"># Setup nerual network</span>
-<span class="n">ann</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span><span class="p">,</span>                         <span class="c1"># Default=42</span>
-          <span class="n">save_tensorboard</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>             <span class="c1"># Default=False</span>
-          <span class="n">tensorboard_log_dir</span> <span class="o">=</span> <span class="s1">&#39;./NN&#39;</span><span class="p">,</span>        <span class="c1"># Folder where ANN tensorboard model will be saved</span>
-          <span class="n">device</span> <span class="o">=</span> <span class="n">device</span><span class="p">)</span>                     <span class="c1"># CUDA is used if available. Device can also be set if required</span>
+# Setup nerual network
+ann.setup(seed = seed,                         # Default=42
+          save_tensorboard = True,             # Default=False
+          tensorboard_log_dir = &#39;./NN&#39;,        # Folder where ANN tensorboard model will be saved
+          device = device)                     # CUDA is used if available. Device can also be set if required
 
-<span class="c1"># Add the dataset to the trainer</span>
-    <span class="c1"># Data is Z-score/Standard score normalised (mean of the data is shifted to zero and standard deviation of 1 is created)</span>
-    <span class="c1"># Output is scaled back</span>
-<span class="n">ann</span><span class="o">.</span><span class="n">add_data_set</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+# Add the dataset to the trainer
+    # Data is Z-score/Standard score normalised (mean of the data is shifted to zero and standard deviation of 1 is created)
+    # Output is scaled back
+ann.add_data_set(df)
 
-<span class="c1"># Train nerual network</span>
-<span class="n">ann</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span><span class="p">,</span>             <span class="c1"># Number of samples per gradient update.</span>
-          <span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span><span class="p">,</span>                     <span class="c1"># Number of epochs to train the model.</span>
-          <span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span><span class="p">,</span>                   <span class="c1"># Verbosity mode (0 = silent, 1 = progress bar, 2 = one line per epoch). Default=1</span>
-          <span class="n">validation_split</span> <span class="o">=</span> <span class="n">validation_split</span><span class="p">,</span> <span class="c1"># Fraction of the training data to be used as validation data. Default=0, range [0,1).</span>
-          <span class="n">test_split</span> <span class="o">=</span> <span class="n">test_split</span><span class="p">,</span>             <span class="c1"># Default=0, range [0,1)</span>
-          <span class="n">patience</span> <span class="o">=</span> <span class="n">patience</span><span class="p">,</span>                 <span class="c1"># Number of epochs with no improvement after which training will be stopped. Default=None, np.split()</span>
-          <span class="n">scaler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                       <span class="c1"># Default=None (StandardScaler)</span>
-          <span class="n">scale_data</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                   <span class="c1"># Default=None</span>
-          <span class="n">scaler_backend</span> <span class="o">=</span> <span class="s1">&#39;sklearn&#39;</span><span class="p">,</span>          <span class="c1"># Optional, Default=None</span>
-          <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>                      <span class="c1"># Default=True, uses numpy.random.shuffle()</span>
+# Train nerual network
+ann.train(batch_size = batch_size,             # Number of samples per gradient update.
+          epochs = epochs,                     # Number of epochs to train the model.
+          verbose = verbose,                   # Verbosity mode (0 = silent, 1 = progress bar, 2 = one line per epoch). Default=1
+          validation_split = validation_split, # Fraction of the training data to be used as validation data. Default=0, range [0,1).
+          test_split = test_split,             # Default=0, range [0,1)
+          patience = patience,                 # Number of epochs with no improvement after which training will be stopped. Default=None, np.split()
+          scaler = None,                       # Default=None (StandardScaler)
+          scale_data = True,                   # Default=None
+          scaler_backend = &#39;sklearn&#39;,          # Optional, Default=None
+          shuffle = True)                      # Default=True, uses numpy.random.shuffle()
 
-<span class="c1"># To see the tensorboard results</span>
-<span class="c1"># ann.show_tensorboard()</span>
+# To see the tensorboard results
+# ann.show_tensorboard()
 </pre></div>
 </div>
 </div>
@@ -926,8 +927,8 @@ div.rendered_html tbody tr:hover {
 Evaluate on test data
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="MPC">
+</section>
+<section id="MPC">
 <h2>MPC<a class="headerlink" href="#MPC" title="Permalink to this headline">¶</a></h2>
 <p>An economic model predictive controller (MPC) is used to control the plant at the set points. The set points for the plant is calculated by the economic MPC. The article uses a real-time optimisation (RTO) strategy with a Lyapunov-based MPC (LMPC). Table 4 summarises the MPC parameters.</p>
 <table class="docutils align-default">
@@ -979,42 +980,42 @@ Evaluate on test data
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##### Hybrid Model MPC Setup #####</span>
-<span class="c1"># MPC Parameters</span>
-<span class="n">sampling_period</span> <span class="o">=</span> <span class="mi">1</span>               <span class="c1"># unit of time (dependent on the time units used in the modelling equations)</span>
-<span class="n">heat_price</span> <span class="o">=</span> <span class="mf">7e-7</span>
-<span class="n">modelling_period</span> <span class="o">=</span> <span class="mi">1000</span>
-<span class="n">prediction_horizon</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="n">n_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">modelling_period</span> <span class="o">/</span> <span class="n">sampling_period</span><span class="p">)</span>
-<span class="n">x_scaling_value</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1e2</span><span class="p">]</span>
-<span class="n">u_scaling_value</span> <span class="o">=</span> <span class="mf">1e5</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>##### Hybrid Model MPC Setup #####
+# MPC Parameters
+sampling_period = 1               # unit of time (dependent on the time units used in the modelling equations)
+heat_price = 7e-7
+modelling_period = 1000
+prediction_horizon = 10
+n_steps = int(modelling_period / sampling_period)
+x_scaling_value = [1, 1, 1e2]
+u_scaling_value = 1e5
 
-<span class="c1"># Plant Setup</span>
-<span class="n">plant</span> <span class="o">=</span> <span class="n">true_plant_model</span><span class="p">()</span>
-<span class="n">plant</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">dt</span> <span class="o">=</span> <span class="n">sampling_period</span><span class="p">)</span>
-<span class="n">x0_plant</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_A_0</span><span class="p">,</span> <span class="n">C_B_0</span><span class="p">,</span> <span class="n">T_0</span><span class="p">]</span>
-<span class="n">plant</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">(</span><span class="n">x0_plant</span><span class="p">)</span>
+# Plant Setup
+plant = true_plant_model()
+plant.setup(dt = sampling_period)
+x0_plant = [C_A_0, C_B_0, T_0]
+plant.set_initial_conditions(x0_plant)
 
-<span class="c1"># Model Setup</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">hybrid_model</span><span class="p">()</span>
-<span class="n">model</span><span class="o">.</span><span class="n">substitute_from</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span> <span class="c1"># Substite the labels in the model with the ANN model</span>
-<span class="n">model</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">dt</span> <span class="o">=</span> <span class="n">sampling_period</span><span class="p">)</span>
+# Model Setup
+model = hybrid_model()
+model.substitute_from(ann) # Substite the labels in the model with the ANN model
+model.setup(dt = sampling_period)
 
-<span class="c1"># NMPC Hybrid Model Setup</span>
-<span class="n">nmpc_hybrid_model</span> <span class="o">=</span> <span class="n">NMPC</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-<span class="n">nmpc_hybrid_model</span><span class="o">.</span><span class="n">set_scaling</span><span class="p">(</span><span class="n">x_scaling</span> <span class="o">=</span> <span class="n">x_scaling_value</span><span class="p">,</span> <span class="n">u_scaling</span> <span class="o">=</span> <span class="n">u_scaling_value</span><span class="p">)</span>
-<span class="n">nmpc_hybrid_model</span><span class="o">.</span><span class="n">stage_cost</span><span class="o">.</span><span class="n">cost</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">C_A_0</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">heat_price</span>
-<span class="n">nmpc_hybrid_model</span><span class="o">.</span><span class="n">horizon</span> <span class="o">=</span> <span class="n">prediction_horizon</span>
-<span class="n">nmpc_hybrid_model</span><span class="o">.</span><span class="n">set_box_constraints</span><span class="p">(</span><span class="n">x_lb</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_A_ll</span><span class="p">,</span> <span class="n">C_B_ll</span><span class="p">,</span> <span class="n">T_ll</span><span class="p">],</span> <span class="n">x_ub</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_A_ul</span><span class="p">,</span> <span class="n">C_B_ul</span><span class="p">,</span> <span class="n">T_ul</span><span class="p">],</span> <span class="n">u_lb</span> <span class="o">=</span> <span class="p">[</span><span class="n">Q_ll</span><span class="p">],</span> <span class="n">u_ub</span> <span class="o">=</span> <span class="p">[</span><span class="n">Q_ul</span><span class="p">])</span>
-<span class="n">nmpc_hybrid_model</span><span class="o">.</span><span class="n">set_initial_guess</span><span class="p">(</span><span class="n">x_guess</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_A_SS</span><span class="p">,</span> <span class="n">C_B_SS</span><span class="p">,</span> <span class="n">T_SS</span><span class="p">],</span> <span class="n">u_guess</span> <span class="o">=</span> <span class="p">[</span><span class="n">Q_SS</span><span class="p">])</span>
-<span class="n">nmpc_hybrid_model</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;print_level&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">})</span>
+# NMPC Hybrid Model Setup
+nmpc_hybrid_model = NMPC(model)
+nmpc_hybrid_model.set_scaling(x_scaling = x_scaling_value, u_scaling = u_scaling_value)
+nmpc_hybrid_model.stage_cost.cost = model.x[0] / C_A_0 + model.u[0] * heat_price
+nmpc_hybrid_model.horizon = prediction_horizon
+nmpc_hybrid_model.set_box_constraints(x_lb = [C_A_ll, C_B_ll, T_ll], x_ub = [C_A_ul, C_B_ul, T_ul], u_lb = [Q_ll], u_ub = [Q_ul])
+nmpc_hybrid_model.set_initial_guess(x_guess = [C_A_SS, C_B_SS, T_SS], u_guess = [Q_SS])
+nmpc_hybrid_model.setup(options = {&#39;print_level&#39;:0})
 
-<span class="c1"># Solve NMPC</span>
-<span class="n">solution_hybrid</span> <span class="o">=</span> <span class="n">plant</span><span class="o">.</span><span class="n">solution</span>
-<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">):</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">nmpc_hybrid_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">x0_plant</span><span class="p">)</span>
-    <span class="n">plant</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">u</span> <span class="o">=</span> <span class="n">u</span><span class="p">)</span>
-    <span class="n">x0_plant</span> <span class="o">=</span> <span class="n">solution_hybrid</span><span class="p">[</span><span class="s1">&#39;xf&#39;</span><span class="p">]</span>
+# Solve NMPC
+solution_hybrid = plant.solution
+for step in range(n_steps):
+    u = nmpc_hybrid_model.optimize(x0_plant)
+    plant.simulate(u = u)
+    x0_plant = solution_hybrid[&#39;xf&#39;]
 </pre></div>
 </div>
 </div>
@@ -1032,98 +1033,98 @@ This program contains Ipopt, a library for large-scale nonlinear optimization.
 
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Plant-MPC-Comparison">
+</section>
+<section id="Plant-MPC-Comparison">
 <h2>Plant MPC Comparison<a class="headerlink" href="#Plant-MPC-Comparison" title="Permalink to this headline">¶</a></h2>
 <p>The true plant model is used to evaluate the performance of the hybrid MPC setup.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##### True Plant Model MPC Setup #####</span>
-<span class="c1"># Plant Setup</span>
-<span class="n">plant</span> <span class="o">=</span> <span class="n">true_plant_model</span><span class="p">()</span>
-<span class="n">plant</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">dt</span> <span class="o">=</span> <span class="n">sampling_period</span><span class="p">)</span>
-<span class="n">x0_plant</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_A_0</span><span class="p">,</span> <span class="n">C_B_0</span><span class="p">,</span> <span class="n">T_0</span><span class="p">]</span>
-<span class="n">plant</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">(</span><span class="n">x0_plant</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>##### True Plant Model MPC Setup #####
+# Plant Setup
+plant = true_plant_model()
+plant.setup(dt = sampling_period)
+x0_plant = [C_A_0, C_B_0, T_0]
+plant.set_initial_conditions(x0_plant)
 
-<span class="c1"># NMPC Plant Model Setup</span>
-<span class="n">nmpc_plant</span> <span class="o">=</span> <span class="n">NMPC</span><span class="p">(</span><span class="n">plant</span><span class="p">)</span>
-<span class="n">nmpc_plant</span><span class="o">.</span><span class="n">set_scaling</span><span class="p">(</span><span class="n">x_scaling</span> <span class="o">=</span> <span class="n">x_scaling_value</span><span class="p">,</span> <span class="n">u_scaling</span> <span class="o">=</span> <span class="n">u_scaling_value</span><span class="p">)</span>
-<span class="n">nmpc_plant</span><span class="o">.</span><span class="n">stage_cost</span><span class="o">.</span><span class="n">cost</span> <span class="o">=</span> <span class="n">plant</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">C_A_0</span> <span class="o">+</span> <span class="n">plant</span><span class="o">.</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">heat_price</span>
-<span class="n">nmpc_plant</span><span class="o">.</span><span class="n">horizon</span> <span class="o">=</span> <span class="n">prediction_horizon</span>
-<span class="n">nmpc_plant</span><span class="o">.</span><span class="n">set_box_constraints</span><span class="p">(</span><span class="n">x_lb</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_A_ll</span><span class="p">,</span> <span class="n">C_B_ll</span><span class="p">,</span> <span class="n">T_ll</span><span class="p">],</span> <span class="n">x_ub</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_A_ul</span><span class="p">,</span> <span class="n">C_B_ul</span><span class="p">,</span> <span class="n">T_ul</span><span class="p">],</span> <span class="n">u_lb</span> <span class="o">=</span> <span class="p">[</span><span class="n">Q_ll</span><span class="p">],</span> <span class="n">u_ub</span> <span class="o">=</span> <span class="p">[</span><span class="n">Q_ul</span><span class="p">])</span>
-<span class="n">nmpc_plant</span><span class="o">.</span><span class="n">set_initial_guess</span><span class="p">(</span><span class="n">x_guess</span> <span class="o">=</span> <span class="p">[</span><span class="n">C_A_SS</span><span class="p">,</span> <span class="n">C_B_SS</span><span class="p">,</span> <span class="n">T_SS</span><span class="p">],</span> <span class="n">u_guess</span> <span class="o">=</span> <span class="p">[</span><span class="n">Q_SS</span><span class="p">])</span>
-<span class="n">nmpc_plant</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;print_level&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">})</span>
+# NMPC Plant Model Setup
+nmpc_plant = NMPC(plant)
+nmpc_plant.set_scaling(x_scaling = x_scaling_value, u_scaling = u_scaling_value)
+nmpc_plant.stage_cost.cost = plant.x[0] / C_A_0 + plant.u[0] * heat_price
+nmpc_plant.horizon = prediction_horizon
+nmpc_plant.set_box_constraints(x_lb = [C_A_ll, C_B_ll, T_ll], x_ub = [C_A_ul, C_B_ul, T_ul], u_lb = [Q_ll], u_ub = [Q_ul])
+nmpc_plant.set_initial_guess(x_guess = [C_A_SS, C_B_SS, T_SS], u_guess = [Q_SS])
+nmpc_plant.setup(options = {&#39;print_level&#39;:0})
 
-<span class="c1"># Solve NMPC</span>
-<span class="n">solution_true</span> <span class="o">=</span> <span class="n">plant</span><span class="o">.</span><span class="n">solution</span>
-<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">):</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">nmpc_plant</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">x0_plant</span><span class="p">)</span>
-    <span class="n">plant</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">u</span> <span class="o">=</span> <span class="n">u</span><span class="p">)</span>
-    <span class="n">x0_plant</span> <span class="o">=</span> <span class="n">solution_true</span><span class="p">[</span><span class="s1">&#39;xf&#39;</span><span class="p">]</span>
+# Solve NMPC
+solution_true = plant.solution
+for step in range(n_steps):
+    u = nmpc_plant.optimize(x0_plant)
+    plant.simulate(u = u)
+    x0_plant = solution_true[&#39;xf&#39;]
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="MPC-Performance-Comparison">
+</section>
+<section id="MPC-Performance-Comparison">
 <h2>MPC Performance Comparison<a class="headerlink" href="#MPC-Performance-Comparison" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">##### MPC Performance Comparison #####</span>
-<span class="c1"># Solution Values</span>
-    <span class="c1"># Hybrid Model</span>
-<span class="n">Q_hybrid_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">solution_hybrid</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-<span class="n">Ca_hybrid_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">solution_hybrid</span><span class="p">[</span><span class="s1">&#39;C_A&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-<span class="n">Cb_hybrid_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">solution_hybrid</span><span class="p">[</span><span class="s1">&#39;C_B&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-<span class="n">T_hybrid_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">solution_hybrid</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-<span class="n">converson_hybrid_values</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Ca_hybrid_values</span> <span class="o">/</span> <span class="n">C_A_0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
-    <span class="c1"># True Plant Model</span>
-<span class="n">Q_true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">solution_true</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-<span class="n">Ca_true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">solution_true</span><span class="p">[</span><span class="s1">&#39;C_A&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-<span class="n">Cb_true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">solution_true</span><span class="p">[</span><span class="s1">&#39;C_B&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-<span class="n">T_true_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">solution_true</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-<span class="n">converson_true_values</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Ca_true_values</span> <span class="o">/</span> <span class="n">C_A_0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>##### MPC Performance Comparison #####
+# Solution Values
+    # Hybrid Model
+Q_hybrid_values = np.array(solution_hybrid[&#39;Q&#39;]).squeeze()
+Ca_hybrid_values = np.array(solution_hybrid[&#39;C_A&#39;]).squeeze()
+Cb_hybrid_values = np.array(solution_hybrid[&#39;C_B&#39;]).squeeze()
+T_hybrid_values = np.array(solution_hybrid[&#39;T&#39;]).squeeze()
+converson_hybrid_values = (1 - Ca_hybrid_values / C_A_0) * 100
+    # True Plant Model
+Q_true_values = np.array(solution_true[&#39;Q&#39;]).squeeze()
+Ca_true_values = np.array(solution_true[&#39;C_A&#39;]).squeeze()
+Cb_true_values = np.array(solution_true[&#39;C_B&#39;]).squeeze()
+T_true_values = np.array(solution_true[&#39;T&#39;]).squeeze()
+converson_true_values = (1 - Ca_true_values / C_A_0) * 100
 
-<span class="c1"># Final Values</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hybrid: </span><span class="se">\t</span><span class="s2">Q: </span><span class="si">{Q_hybrid_values[-1]:.4f}</span><span class="s2"> </span><span class="se">\t</span><span class="s2">C_A: </span><span class="si">{Ca_hybrid_values[-1]:.4f}</span><span class="s2"> </span><span class="se">\t</span><span class="s2">C_B: </span><span class="si">{Cb_hybrid_values[-1]:.4f}</span><span class="s2"> </span><span class="se">\t</span><span class="s2">T: </span><span class="si">{T_hybrid_values[-1]:.4f}</span><span class="s2"> </span><span class="se">\t</span><span class="s2"> Conversion: </span><span class="si">{converson_hybrid_values[-1]:.2f}</span><span class="s2">%&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;True: </span><span class="se">\t\t</span><span class="s2">Q: </span><span class="si">{Q_true_values[-1]:.4f}</span><span class="s2"> </span><span class="se">\t</span><span class="s2">C_A: </span><span class="si">{Ca_true_values[-1]:.4f}</span><span class="s2"> </span><span class="se">\t</span><span class="s2">C_B: </span><span class="si">{Cb_true_values[-1]:.4f}</span><span class="s2"> </span><span class="se">\t</span><span class="s2">T: </span><span class="si">{T_true_values[-1]:.4f}</span><span class="s2"> </span><span class="se">\t</span><span class="s2"> Conversion: </span><span class="si">{converson_true_values[-1]:.2f}</span><span class="s2">%&quot;</span><span class="p">)</span>
+# Final Values
+print(f&quot;Hybrid: \tQ: {Q_hybrid_values[-1]:.4f} \tC_A: {Ca_hybrid_values[-1]:.4f} \tC_B: {Cb_hybrid_values[-1]:.4f} \tT: {T_hybrid_values[-1]:.4f} \t Conversion: {converson_hybrid_values[-1]:.2f}%&quot;)
+print(f&quot;True: \t\tQ: {Q_true_values[-1]:.4f} \tC_A: {Ca_true_values[-1]:.4f} \tC_B: {Cb_true_values[-1]:.4f} \tT: {T_true_values[-1]:.4f} \t Conversion: {converson_true_values[-1]:.2f}%&quot;)
 
-<span class="c1"># Comparison Graphs</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">)),</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">321</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Ca_hybrid_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">Ca_hybrid_values</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Ca_true_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">Ca_true_values</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;C_A_hybrid_model&#39;</span><span class="p">,</span><span class="s1">&#39;C_A_true&#39;</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Concentration of A&#39;</span><span class="p">)</span>
+# Comparison Graphs
+plt.figure(figsize=(16, 16)),
+plt.subplot(321)
+plt.plot(np.arange(Ca_hybrid_values.shape[0]),Ca_hybrid_values, &#39;b&#39;)
+plt.plot(np.arange(Ca_true_values.shape[0]),Ca_true_values, &#39;g&#39;)
+plt.legend([&#39;C_A_hybrid_model&#39;,&#39;C_A_true&#39;])
+plt.title(&#39;Concentration of A&#39;)
 
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">322</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Cb_hybrid_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">Cb_hybrid_values</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Cb_true_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">Cb_true_values</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;C_B_hybrid_model&#39;</span><span class="p">,</span><span class="s1">&#39;C_B_true&#39;</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Concentration of B&#39;</span><span class="p">)</span>
+plt.subplot(322)
+plt.plot(np.arange(Cb_hybrid_values.shape[0]),Cb_hybrid_values, &#39;b&#39;)
+plt.plot(np.arange(Cb_true_values.shape[0]),Cb_true_values, &#39;g&#39;)
+plt.legend([&#39;C_B_hybrid_model&#39;,&#39;C_B_true&#39;])
+plt.title(&#39;Concentration of B&#39;)
 
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">323</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Q_hybrid_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">Q_hybrid_values</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Q_true_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">Q_true_values</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Q_hybrid_model&#39;</span><span class="p">,</span><span class="s1">&#39;Q_true&#39;</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Heat duty input&#39;</span><span class="p">)</span>
+plt.subplot(323)
+plt.plot(np.arange(Q_hybrid_values.shape[0]),Q_hybrid_values, &#39;b&#39;)
+plt.plot(np.arange(Q_true_values.shape[0]),Q_true_values, &#39;g&#39;)
+plt.legend([&#39;Q_hybrid_model&#39;,&#39;Q_true&#39;])
+plt.title(&#39;Heat duty input&#39;)
 
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">324</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T_hybrid_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">T_hybrid_values</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T_true_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">T_true_values</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;T_hybrid_model&#39;</span><span class="p">,</span><span class="s1">&#39;T_true&#39;</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Reactor Temperature&#39;</span><span class="p">)</span>
+plt.subplot(324)
+plt.plot(np.arange(T_hybrid_values.shape[0]),T_hybrid_values, &#39;b&#39;)
+plt.plot(np.arange(T_true_values.shape[0]),T_true_values, &#39;g&#39;)
+plt.legend([&#39;T_hybrid_model&#39;,&#39;T_true&#39;])
+plt.title(&#39;Reactor Temperature&#39;)
 
-<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">325</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">converson_hybrid_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">converson_hybrid_values</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">converson_true_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">converson_true_values</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Conversion_hybrid_model&#39;</span><span class="p">,</span><span class="s1">&#39;Conversion_true&#39;</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Conversion&#39;</span><span class="p">)</span>
+plt.subplot(325)
+plt.plot(np.arange(converson_hybrid_values.shape[0]),converson_hybrid_values, &#39;b&#39;)
+plt.plot(np.arange(converson_true_values.shape[0]),converson_true_values, &#39;g&#39;)
+plt.legend([&#39;Conversion_hybrid_model&#39;,&#39;Conversion_true&#39;])
+plt.title(&#39;Conversion&#39;)
 
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+plt.show()
 </pre></div>
 </div>
 </div>
@@ -1143,12 +1144,12 @@ True:           Q: 59882.1817   C_A: 0.4912     C_B: 0.5088     T: 438.4732     
 <img alt="../_images/examples_CSTR_Example_16_1.png" src="../_images/examples_CSTR_Example_16_1.png" />
 </div>
 </div>
-</div>
-<div class="section" id="Acknowledgement">
+</section>
+<section id="Acknowledgement">
 <h2>Acknowledgement<a class="headerlink" href="#Acknowledgement" title="Permalink to this headline">¶</a></h2>
 <p>This exaple was gently provided by <a class="reference external" href="http://ifatwww.et.uni-magdeburg.de/syst/about_us/people/kok/index.shtml">Rudolph Kok</a>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
@@ -1191,7 +1192,7 @@ True:           Q: 59882.1817   C_A: 0.4912     C_B: 0.5088     T: 438.4732     
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0',
+            VERSION:'1.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

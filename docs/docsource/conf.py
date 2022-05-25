@@ -17,7 +17,6 @@ import sphinx_theme
 
 sys.path.insert(0, os.path.abspath('../..'))
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'HILO-MPC'
@@ -25,7 +24,7 @@ copyright = '2022, Johannes Pohlodek, Bruno Morabito'
 author = 'Johannes Pohlodek, Bruno Morabito'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0'
+release = '1.0.1'
 
 # -- General configuration ---------------------------------------------------
 
@@ -50,7 +49,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 # Removes type hints from signature
 autodoc_typehints = 'none'  # 'description'
@@ -59,6 +58,15 @@ autodoc_member_order = 'groupwise'
 
 # Variable for project name
 rst_epilog = f'.. |project_name| replace:: {project}'
+
+# -- Options for Latex -------------------------------------------------------
+# FIXME This does not see to work
+latex_elements = {
+    'preamble':
+        r'''
+        \newcommand{\tran}{{\mkern-1.5mu\mathsf{T}}}
+        ''',
+}
 
 # -- Options for HTML output -------------------------------------------------
 

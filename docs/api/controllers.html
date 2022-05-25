@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Controllers &mdash; HILO-MPC 1.0 documentation</title>
+  <title>Controllers &mdash; HILO-MPC 1.0.1 documentation</title>
   
 
   
@@ -41,7 +42,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="HILO-MPC 1.0 documentation" href="../index.html"/>
+    <link rel="top" title="HILO-MPC 1.0.1 documentation" href="../index.html"/>
         <link rel="next" title="Machine Learning" href="learning.html"/>
         <link rel="prev" title="Observer module" href="../modules/estimators.html"/> 
 
@@ -185,7 +186,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="controllers">
+  <section id="controllers">
 <span id="controller-automodel"></span><h1>Controllers<a class="headerlink" href="#controllers" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="hilo_mpc.NMPC">
@@ -366,7 +367,7 @@ states/inputs.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.set_box_constraints">
-<span class="sig-name descname"><span class="pre">set_box_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.set_box_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.set_box_constraints" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_box_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.set_box_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.set_box_constraints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set box constraints to the model’s variables. These look like</p>
 <div class="math notranslate nohighlight">
 \[x_{lb} \leq x \leq x_{ub}\]</div>
@@ -1085,7 +1086,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -1128,7 +1129,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0',
+            VERSION:'1.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

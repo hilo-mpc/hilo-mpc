@@ -2,7 +2,7 @@ import unittest
 import casadi as ca
 import numpy as np
 from hilo_mpc import Model, SMPC, GP
-
+import scipy
 
 class TestIO(unittest.TestCase):
     def setUp(self):
@@ -48,6 +48,42 @@ class TestIO(unittest.TestCase):
         self.B = np.array([[1]])
         self.x0 = x0
 
+        def dlqr(A, B, Q, R, N=None):
+            """Solve the discrete time infinite-horizon lqr controller.
+
+            x[k+1] = A x[k] + B u[k]
+
+            cost = sum x[k].T*Q*x[k] + u[k].T*R*u[k]
+            """
+            if N is None:
+
+                # ref Bertsekas, p.151
+
+                # first, try to solve the Riccati equation
+                X = np.matrix(scipy.linalg.solve_discrete_are(A, B, Q, R))
+
+                # compute the LQR gain
+                K = np.matrix(scipy.linalg.inv(B.T * X * B + R) * (B.T * X * A))
+
+                eigVals, eigVecs = scipy.linalg.eig(A - B * K)
+
+                return K, X, eigVals
+
+            else:
+                P = Q
+                K = []
+                for i in range(N):
+                    if isinstance(A, list) and isinstance(B, list):
+                        A_i = A[i]
+                        B_i = B[i]
+                    else:
+                        A_i = A
+                        B_i = B
+                    K.append(-np.linalg.inv(R + B_i.T @ P @ B_i) @ (B_i.T @ P @ A_i))
+                    P = A_i.T @ P @ A_i - (A_i.T @ P @ B_i) @ np.linalg.inv(B_i.T @ P @ B_i) @ (B_i.T @ P @ A_i) + Q
+
+                return K, None, None
+
     def test_box_constraints(self):
         smpc = SMPC(self.model, self.gp, self.B)
         smpc.set_box_chance_constraints(x_lb=[10])
@@ -59,32 +95,32 @@ class TestIO(unittest.TestCase):
     def test_setup(self):
         smpc = SMPC(self.model, self.gp, self.B)
         smpc.horizon = 10
-        smpc.quad_stage_cost.add_states(names='mu_px', ref=1, weights=10)
-        smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=1)
+        smpc.quad_stage_cost.add_states(names='px', ref=1, weights=10)
+        smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=0.9)
         smpc.setup(options={'chance_constraints': 'prs'})
 
     def test_one_iter(self):
         smpc = SMPC(self.model, self.gp, self.B)
         smpc.horizon = 10
-        smpc.quad_stage_cost.add_states(names='mu_px', ref=1, weights=10)
-        smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=1)
+        smpc.quad_stage_cost.add_states(names='px', ref=1, weights=10)
+        smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=0.9)
         smpc.setup(options={'chance_constraints': 'prs'})
         smpc.optimize(x0=self.x0, cov_x0=[0], Kgain=0)
 
     def test_not_passing_k0(self):
         smpc = SMPC(self.model, self.gp, self.B)
         smpc.horizon = 10
-        smpc.quad_stage_cost.add_states(names='mu_px', ref=1, weights=10)
-        smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=1)
+        smpc.quad_stage_cost.add_states(names='px', ref=1, weights=10)
+        smpc.set_box_chance_constraints(x_lb=[10], x_lb_p=0.9)
         smpc.setup(options={'chance_constraints': 'prs'})
         self.assertRaises(ValueError, smpc.optimize, x0=self.x0, Kgain=0)
 
     def test_plot(self):
         smpc = SMPC(self.model, self.gp, self.B)
         smpc.horizon = 10
-        smpc.quad_stage_cost.add_states(names='mu_px', ref=1, weights=10)
-        smpc.quad_terminal_cost.add_states(names='mu_px', ref=1, weights=10)
-        smpc.set_box_chance_constraints(x_lb=[0], x_lb_p=1)
+        smpc.quad_stage_cost.add_states(names='px', ref=1, weights=10)
+        smpc.quad_terminal_cost.add_states(names='px', ref=1, weights=10)
+        smpc.set_box_chance_constraints(x_lb=[0], x_lb_p=0.9)
         smpc.setup(options={'chance_constraints': 'prs'})
         smpc.optimize(x0=self.x0, cov_x0=[0], Kgain=0)
         smpc.plot_prediction()
@@ -140,8 +176,8 @@ class TestMIMOSystem(unittest.TestCase):
     def test_simple_mimo(self):
         smpc = SMPC(self.model, self.gp, self.B)
         smpc.horizon = 10
-        smpc.quad_stage_cost.add_states(names=['mu_px', 'mu_py'], ref=[1, 1], weights=[10,10])
-        smpc.quad_terminal_cost.add_states(names=['mu_px', 'mu_py'], ref=[1, 1], weights=[10,10])
+        smpc.quad_stage_cost.add_states(names=['px', 'py'], ref=[1, 1], weights=[10, 10])
+        smpc.quad_terminal_cost.add_states(names=['px', 'py'], ref=[1, 1], weights=[10, 10])
         smpc.set_box_chance_constraints(x_lb=[0, 0], x_lb_p=[0.97, 0.97])
         smpc.setup(options={'chance_constraints': 'prs'})
         cov_x0 = np.array([[0, 0], [0, 0]])
@@ -152,9 +188,9 @@ class TestMIMOSystem(unittest.TestCase):
     def test_simple_negative_bounds(self):
         smpc = SMPC(self.model, self.gp, self.B)
         smpc.horizon = 15
-        smpc.quad_stage_cost.add_states(names=['mu_px'], ref=[1], weights=[10])
-        smpc.quad_terminal_cost.add_states(names=['mu_px'], ref=[1], weights=[10])
-        smpc.set_box_chance_constraints(x_lb=[-100, 0], x_lb_p=[0.95, 0.95], x_ub=[100, 30], x_ub_p=[0.95,0.95])
+        smpc.quad_stage_cost.add_states(names=['px'], ref=[1], weights=[10])
+        smpc.quad_terminal_cost.add_states(names=['px'], ref=[1], weights=[10])
+        smpc.set_box_chance_constraints(x_lb=[-100, 0], x_lb_p=[0.95, 0.95], x_ub=[100, 30], x_ub_p=[0.95, 0.95])
         # smpc.set_box_chance_constraints(x_ub=[100, 30], x_ub_p=[0.95,0.95])
         smpc.setup(options={'chance_constraints': 'prs'})
         cov_x0 = np.array([[0, 0], [0, 0]])
@@ -162,6 +198,51 @@ class TestMIMOSystem(unittest.TestCase):
         smpc.optimize(x0=self.x0, cov_x0=cov_x0, Kgain=Kgain)
         smpc.plot_prediction()
 
+    def test_K_gain(self):
+        from hilo_mpc import LQR
+
+        lqr = LQR(self.model)
+        lqr.horizon = 10
+        lqr.setup()
+        lqr.Q = 10 * np.eye(2)
+        lqr.R = 10 * np.eye(2)
+        lqr.feedback_gain
+
+    def test_lqr(self):
+        import numpy as np
+
+        from hilo_mpc import Model, LQR, SimpleControlLoop
+
+        # Initialize empty model
+        model = Model(discrete=True, time_unit='', plot_backend='bokeh')
+
+        # Set model matrices
+        model.A = np.array([[1., 1.], [0., 1.]])
+        model.B = np.array([[0.], [1.]])
+
+        # Set up model
+        model.setup()
+
+        # Initialize LQR
+        lqr = LQR(model, plot_backend='bokeh')
+
+        # Set LQR horizon for finite horizon formulation
+        lqr.horizon = 5
+
+        # Set up LQR
+        lqr.setup()
+
+        # Initial conditions of the model
+        model.set_initial_conditions([2, 1])
+
+        # Set LQR matrices
+        lqr.Q = 2. * np.ones((2, 2))
+        lqr.R = 2.
+
+        # Run simulation
+        scl = SimpleControlLoop(model, lqr)
+        scl.run(20)
+        scl.plot()
 
 if __name__ == '__main__':
     unittest.main()
