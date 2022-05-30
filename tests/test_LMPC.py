@@ -90,6 +90,50 @@ class MyTestCase(unittest.TestCase):
 
         mpc.optimize(x0=x0)
 
+    def test_plot_prediction(self):
+        model = Model(plot_backend='bokeh')
+
+        states = model.set_dynamical_states(['px', 'py', 'v', 'phi'])
+        inputs = model.set_inputs(['a', 'delta'])
+
+        # Unwrap states
+        px = states[0]
+        py = states[1]
+        v = states[2]
+        phi = states[3]
+
+        # Unwrap states
+        a = inputs[0]
+        delta = inputs[1]
+
+        # Parameters
+        lr = 1.4  # [m]
+        lf = 1.8  # [m]
+        beta = ca.arctan(lr / (lr + lf) * ca.tan(delta))
+
+        # ODE
+        dpx = v * ca.cos(phi + beta)
+        dpy = v * ca.sin(phi + beta)
+        dv = a
+        dphi = v / lr * ca.sin(beta)
+
+        model.set_dynamical_equations([dpx, dpy, dv, dphi])
+        model.discretize(method='rk4', inplace=True)
+        model = model.linearize()
+        dt = 0.05
+        model.setup(dt=dt)
+
+        mpc = LMPC(model)
+        mpc.horizon = 10
+        mpc.Q = np.eye(model.n_x)
+        mpc.R = np.eye(model.n_u)
+        mpc.setup()
+        x0 = [0.5, 0, 0, 0]
+
+        mpc.optimize(x0=x0)
+        mpc.solution.plot()
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1904,13 +1904,14 @@ class NMPC(Controller, DynamicOptimization):
 
 class LMPC(Controller, DynamicOptimization):
     """"""
-    def __init__(self, model, id=None, name=None, plot_backend=None, use_sx=True):
+    def __init__(self, model, id=None, name=None, plot_backend='bokeh', use_sx=True):
         """Constructor method"""
         super().__init__(model, id=id, name=name, plot_backend=plot_backend)
         if not model.is_linear():
             raise TypeError("The model must be linear. Use the NMPC class instead.")
         if not model.discrete:
-            raise TypeError("The model not discrete-time. Use the NMPC class instead.")
+            raise TypeError("The model not discrete-time. Please run model.discretize() before or build "
+                            "directl a discrete model.")
 
         self._may_term_flag = False
         self._lag_term_flag = False
@@ -2000,12 +2001,28 @@ class LMPC(Controller, DynamicOptimization):
                 f"set_time_varying_parameters() method."
             )
 
-    def setup(self, options=None, solver_options=None, nlp_solver='qpoases'):
+    def _save_predictions(self):
+        """
+        Store prediction in the solution object. Necessary for plotting.
+
+        :return:
+        """
+        # Save prediction in solution
+        x_pred, u_pred = self.return_prediction()
+
+        # Save solution in the solution class
+        self.solution.add('x', x_pred[:self._n_x, :])
+        self.solution.add('u', u_pred[:self._n_u, :])
+        t_pred = np.linspace(self._time, self._time + (self.prediction_horizon) * self.sampling_interval,
+                             self.prediction_horizon + 1)
+        self.solution.add('t', ca.DM(t_pred).T)
+
+    def setup(self, options=None, solver_options=None, solver='qpoases'):
         """
 
         :param options:
         :param solver_options:
-        :param nlp_solver:
+        :param :
         :return:
         """
         if not self._scaling_is_set:
@@ -2014,13 +2031,13 @@ class LMPC(Controller, DynamicOptimization):
             self.set_time_varying_parameters()
         if not self._box_constraints_is_set:
             self.set_box_constraints()
-        if not self._initial_guess_is_set:
-            self.set_initial_guess()
-
         if not self._nlp_solver_is_set:
-            self.set_nlp_solver(nlp_solver)
+            self.set_nlp_solver(solver)
         if not self._sampling_time_is_set:
             self.set_sampling_interval()
+
+
+        self._populate_solution()
 
         n_x = self._n_x
         n_u = self._n_u
@@ -2033,7 +2050,7 @@ class LMPC(Controller, DynamicOptimization):
         dim_states = n_x * (self._horizon + 1)
         dim_control = n_u * self._horizon
 
-        # Build Adis
+        # Build Aeq
         aux1 = np.eye(self._horizon, self._horizon + 1)
         Abar1 = ca.kron(aux1, A)
         aux2 = np.zeros((self._horizon, self._horizon + 1))
@@ -2059,10 +2076,10 @@ class LMPC(Controller, DynamicOptimization):
         Abar3 = ca.kron(aux3, B)
 
         # Add constraints for the ode
-        Adis = ca.horzcat(Abar1 + Abar2, Abar3)
+        Aeq = ca.horzcat(Abar1 + Abar2, Abar3)
 
         # generate parameters
-        bdis = ca.kron(ca.DM.zeros(self._model.n_x), ca.DM.ones(self.horizon))
+        beq = ca.kron(ca.DM.zeros(self._model.n_x), ca.DM.ones(self.horizon))
         # Add constraints for the polytope constraints
         # TODO, they should be added to A
 
@@ -2083,7 +2100,7 @@ class LMPC(Controller, DynamicOptimization):
 
         qp = {
             'h': H.sparsity(),
-            'a': Adis.sparsity()
+            'a': Aeq.sparsity()
         }
 
         # TODO move this check of the solver into the setup_solver method
@@ -2107,9 +2124,9 @@ class LMPC(Controller, DynamicOptimization):
 
         self._H = ca.DM(H)
         self._g = g
-        self._Ad = Adis
-        self._Ad_lb = bdis
-        self._Ad_ub = bdis
+        self._Ad = Aeq
+        self._Ad_lb = beq
+        self._Ad_ub = beq
         self._v_lb = v_lb
         self._v_ub = v_ub
         self._x_ind = x_ind
@@ -2179,9 +2196,52 @@ class LMPC(Controller, DynamicOptimization):
         self._nlp_solution = sol
         u_opt = sol['x'][self._u_ind[0]]
 
+        # Reset the old solution
+        self.reset_solution()
+
+        # Save predictions in the solution object. Done for plotting purposes.
+        self._save_predictions()
+
+        # Update the time clock - Useful for time-varying systems and references.
+        self._time += self.sampling_interval
+
+        # Interation counter
         self._n_iterations += 1
 
+
         return u_opt
+
+    def set_stage_constraints(self, stage_constraint=None, lb=None, ub=None, is_soft=False, max_violation=ca.inf,
+                              weight=None, name='stage_constraint'):
+        raise NotImplementedError(f"The method {self.set_stage_constraints.__name__} is not available for LMPC.")
+
+    def set_custom_constraints_function(self, fun=None, lb=None, ub=None, soft=False, max_violation=ca.inf):
+        raise NotImplementedError(f"The method {self.set_custom_constraints_function.__name__} is not available for LMPC.")
+
+    def set_initial_guess(self, x_guess=None, u_guess=None, z_guess=None):
+        raise NotImplementedError(
+            f"The method {self.set_initial_guess.__name__} is not available for LMPC.")
+
+    def return_prediction(self):
+        """
+        Returns the mpc prediction.
+
+        :return: x_pred, u_pred, t_pred
+        """
+
+        if self._nlp_solution is not None:
+            x_pred = np.zeros((self._model.n_x, self._prediction_horizon + 1))
+            u_pred = np.zeros((self._model.n_u, self._control_horizon))
+            dt_pred = np.zeros(self._prediction_horizon)
+            for ii in range(self._prediction_horizon + 1):
+                x_pred[:, ii] = np.asarray(self._nlp_solution['x'][self._x_ind[ii]]).squeeze() * self._x_scaling
+            for ii in range(self._control_horizon):
+                u_pred[:, ii] = np.asarray(self._nlp_solution['x'][self._u_ind[ii]]).squeeze() * self._u_scaling
+            return x_pred, u_pred
+
+        else:
+            warnings.warn("There is still no mpc solution available. Run mpc.optimize() to get one.")
+            return None, None, None
 
     @property
     def prediction_horizon(self):
