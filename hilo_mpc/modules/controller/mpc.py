@@ -556,11 +556,10 @@ class NMPC(Controller, DynamicOptimization):
         """
         # Save prediction in solution
         x_pred, u_pred, dt_pred = self.return_prediction()
-
         # Save solution in the solution class
         self.solution.add('x', x_pred[:self._n_x, :])
         self.solution.add('u', u_pred[:self._n_u, :])
-        self.solution.add('thetapfo', x_pred[self._n_x:self._n_x+self.n_of_path_vars, :])
+        self.solution.add('thetapfo', x_pred[self._n_x:self._n_x + self.n_of_path_vars, :])
         if dt_pred is not None:
             dt_sum = 0
             for i in range(self.prediction_horizon):
@@ -1085,7 +1084,8 @@ class NMPC(Controller, DynamicOptimization):
         """
         self.quad_terminal_cost.add_states(names=states, weights=cost, ref=references)
 
-    def set_terminal_constraints(self,terminal_constraint,name='terminal_constraint', lb=None, ub=None, is_soft=False, max_violation=ca.inf,
+    def set_terminal_constraints(self, terminal_constraint, name='terminal_constraint', lb=None, ub=None, is_soft=False,
+                                 max_violation=ca.inf,
                                  weight=None):
         """
         Allows to add a (nonlinear) terminal constraint.
@@ -1231,7 +1231,7 @@ class NMPC(Controller, DynamicOptimization):
 
             # Check time varying parameters
             # tvp_ind = []
-            #TODO this should be moved in the optimiziation method
+            # TODO this should be moved in the optimiziation method
             if len(self._time_varying_parameters) != 0:
                 p_names = model.parameter_names
                 for tvp in self._time_varying_parameters:
@@ -1904,6 +1904,7 @@ class NMPC(Controller, DynamicOptimization):
 
 class LMPC(Controller, DynamicOptimization):
     """"""
+
     def __init__(self, model, id=None, name=None, plot_backend='bokeh', use_sx=True):
         """Constructor method"""
         super().__init__(model, id=id, name=name, plot_backend=plot_backend)
@@ -2001,7 +2002,7 @@ class LMPC(Controller, DynamicOptimization):
                 f"set_time_varying_parameters() method."
             )
 
-    def _save_predictions(self):
+    def _save_predictions(self, cp):
         """
         Store prediction in the solution object. Necessary for plotting.
 
@@ -2013,6 +2014,7 @@ class LMPC(Controller, DynamicOptimization):
         # Save solution in the solution class
         self.solution.add('x', x_pred[:self._n_x, :])
         self.solution.add('u', u_pred[:self._n_u, :])
+        self.solution.add('p', cp)
         t_pred = np.linspace(self._time, self._time + (self.prediction_horizon) * self.sampling_interval,
                              self.prediction_horizon + 1)
         self.solution.add('t', ca.DM(t_pred).T)
@@ -2036,8 +2038,10 @@ class LMPC(Controller, DynamicOptimization):
         if not self._sampling_time_is_set:
             self.set_sampling_interval()
 
-
         self._populate_solution()
+
+        # Predefine parameters (those are fixed and not optimized)
+        param_npl_mpc = catools.struct_symSX([catools.entry("tv_p", shape=(self._n_tvp, self._prediction_horizon))])
 
         n_x = self._n_x
         n_u = self._n_u
@@ -2051,8 +2055,17 @@ class LMPC(Controller, DynamicOptimization):
         dim_control = n_u * self._horizon
 
         # Build Aeq
-        aux1 = np.eye(self._horizon, self._horizon + 1)
-        Abar1 = ca.kron(aux1, A)
+        # aux1 = np.eye(self._horizon, self._horizon + 1)
+        # Abar1 = ca.kron(aux1, A)
+        Abar1 = ca.substitute(A, self._model.p[self._time_varying_parameters_ind],
+                                                    param_npl_mpc['tv_p'][:, 0])
+        for i in range(1,self._prediction_horizon):
+            Abar1 = ca.diagcat(Abar1, ca.substitute(A, self._model.p[self._time_varying_parameters_ind],
+                                                    param_npl_mpc['tv_p'][:, i]))
+
+        # Add a column of zero matrices
+        Abar1 = ca.horzcat(Abar1, ca.DM.zeros(self._prediction_horizon * self._n_x, self._n_x))
+
         aux2 = np.zeros((self._horizon, self._horizon + 1))
 
         # Save indices variables
@@ -2072,8 +2085,12 @@ class LMPC(Controller, DynamicOptimization):
             offset_u += n_u
 
         Abar2 = ca.kron(aux2, ca.DM.eye(n_x))
-        aux3 = np.eye(self._horizon, self._horizon)
-        Abar3 = ca.kron(aux3, B)
+        # aux3 = np.eye(self._horizon, self._horizon)
+        Abar3 = ca.substitute(B, self._model.p[self._time_varying_parameters_ind],
+                                                    param_npl_mpc['tv_p'][:, 0])
+        for i in range(1, self._prediction_horizon):
+            Abar3 = ca.diagcat(Abar3, ca.substitute(B, self._model.p[self._time_varying_parameters_ind],
+                                                    param_npl_mpc['tv_p'][:, i]))
 
         # Add constraints for the ode
         Aeq = ca.horzcat(Abar1 + Abar2, Abar3)
@@ -2105,6 +2122,7 @@ class LMPC(Controller, DynamicOptimization):
 
         # TODO move this check of the solver into the setup_solver method
         if self._solver_name in self._solver_name_list_qp:
+            self._nlp_opts.update({'p': param_npl_mpc})
             solver = ca.conic("solver", self._solver_name, qp, self._nlp_opts)
         elif self._solver_name == 'muaompc':
             try:
@@ -2200,14 +2218,13 @@ class LMPC(Controller, DynamicOptimization):
         self.reset_solution()
 
         # Save predictions in the solution object. Done for plotting purposes.
-        self._save_predictions()
+        self._save_predictions(cp)
 
         # Update the time clock - Useful for time-varying systems and references.
         self._time += self.sampling_interval
 
         # Interation counter
         self._n_iterations += 1
-
 
         return u_opt
 
@@ -2216,7 +2233,8 @@ class LMPC(Controller, DynamicOptimization):
         raise NotImplementedError(f"The method {self.set_stage_constraints.__name__} is not available for LMPC.")
 
     def set_custom_constraints_function(self, fun=None, lb=None, ub=None, soft=False, max_violation=ca.inf):
-        raise NotImplementedError(f"The method {self.set_custom_constraints_function.__name__} is not available for LMPC.")
+        raise NotImplementedError(
+            f"The method {self.set_custom_constraints_function.__name__} is not available for LMPC.")
 
     def set_initial_guess(self, x_guess=None, u_guess=None, z_guess=None):
         raise NotImplementedError(
