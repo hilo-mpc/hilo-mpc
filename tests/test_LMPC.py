@@ -88,6 +88,7 @@ class TestLinearizedModel(unittest.TestCase):
         model = model.linearize()
         dt = 0.05
         model.setup(dt=dt)
+        model.set_equilibrium_point(x_eq=[0, 0, 0, 0], u_eq=[0, 0])
 
         self.model = model
 
@@ -149,7 +150,12 @@ class TestModelWithParameters(unittest.TestCase):
         model.discretize(method='rk4', inplace=True)
         model = model.linearize()
         dt = 0.05
+        lr0 = 1.4  # [m]
+        lf0 = 1.8  # [m]
         model.setup(dt=dt)
+        model.set_initial_parameter_values(p=[lr0, lf0])
+        model.set_equilibrium_point(x_eq=[0, 0, 0, 0], u_eq=[0, 0])
+
         self.model = model
 
     def test_constant_parameters(self):
@@ -172,14 +178,66 @@ class TestModelWithParameters(unittest.TestCase):
         mpc.horizon = 10
         mpc.Q = np.eye(model.n_x)
         mpc.R = np.eye(model.n_u)
-        mpc.set_time_varying_parameters(names=['lr'])
+        mpc.set_time_varying_parameters(names=['lf'])
         mpc.setup()
-        x0 = [0, 0, 0, 0]
+        x0 = [1, 1, 0, 0]
         lr0 = 1.4  # [m]
         lf0 = 1.8  # [m]
 
-        mpc.optimize(x0=x0, cp=[lf0], tvp={'lr': [1.4, 1.4, 1.4, 1.4, 1.4, 1, 1, 1, 1, 1]})
+        mpc.optimize(x0=x0, cp=[lr0], tvp={'lf': [1.8, 1.8, 1.8, 1.8, 1.8, 1.4, 1.4, 1.4, 1.4, 1.4]})
         mpc.solution.plot()
+
+
+class TestAlreadyLinearModelWithTvp(unittest.TestCase):
+    def setUp(self) -> None:
+        model = Model(plot_backend='bokeh', discrete=True)
+        x = model.set_dynamical_states(['x_1', 'x_2'])
+        u = model.set_inputs(['u_1', 'u_2'])
+        p = model.set_parameters('p')
+        A = np.array([[-1, 2 * p], [0, -1]])
+        B = np.array([[1, 0], [0, 1]])
+        model.set_dynamical_equations(A @ x + B @ u)
+        model.setup()
+        self.model = model
+        self.x0 = [1, 2]
+        self.tvp = 60 * [1] + 50 * [0]
+
+    def test_compare_NMPC_LMPC(self):
+        model = self.model
+        x0 = self.x0
+        nmpc = NMPC(model)
+        nmpc.horizon = 10
+        nmpc.quad_stage_cost.add_states(names=['x_1', 'x_2'], weights=[1, 1])
+        nmpc.quad_stage_cost.add_inputs(names=['u_1', 'u_2'], weights=[1, 1])
+        nmpc.set_box_constraints(u_ub=[0.5, 10])
+        nmpc.set_time_varying_parameters(names=['p'], values={'p': self.tvp})
+        nmpc.setup()
+        model.set_initial_conditions(x0=x0)
+        xi = x0.copy()
+        for i in range(100):
+            u = nmpc.optimize(x0=xi)
+            model.simulate(u=u, p=self.tvp[i])
+            xi = model.solution['x:f']
+
+        model.solution.plot()
+
+        model.reset_solution(keep_initial_conditions=False)
+        model.set_initial_conditions(x0=x0)
+
+        lmpc = LMPC(model)
+        lmpc.horizon = 10
+        lmpc.Q = ca.DM.eye(2)
+        lmpc.R = ca.DM.eye(2)
+        lmpc.set_time_varying_parameters(names=['p'], values={'p': self.tvp})
+        lmpc.set_box_constraints(u_ub=[0.5, 10])
+        lmpc.setup()
+        xi = x0.copy()
+        for i in range(100):
+            u = lmpc.optimize(x0=xi)
+            model.simulate(u=u, p=self.tvp[i])
+            xi = model.solution['x:f']
+
+        model.solution.plot()
 
 
 if __name__ == '__main__':
