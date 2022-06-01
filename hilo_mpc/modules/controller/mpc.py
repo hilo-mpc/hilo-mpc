@@ -1967,6 +1967,12 @@ class LMPC(Controller, DynamicOptimization):
         self._n_m = 1
         self._options = {}
 
+        # Initialize weighting matrices
+        self._P = None
+        self._Q = None
+        self._R = None
+
+        # default solver
         self._solver_name = 'qpoases'
 
     def _update_type(self) -> None:
@@ -2015,10 +2021,10 @@ class LMPC(Controller, DynamicOptimization):
         # Save prediction in solution
         x_pred, u_pred = self.return_prediction()
 
-        if self._n_tvp>0:
-            p = self._rearrange_parameters_numeric(tvp[:,0],cp)
-            for ii in range(1,self._prediction_horizon):
-                p = ca.horzcat(p,self._rearrange_parameters_numeric(tvp[:,ii],cp))
+        if self._n_tvp > 0:
+            p = self._rearrange_parameters_numeric(tvp[:, 0], cp)
+            for ii in range(1, self._prediction_horizon):
+                p = ca.horzcat(p, self._rearrange_parameters_numeric(tvp[:, ii], cp))
         else:
             p = cp
         # Save solution in the solution class
@@ -2045,8 +2051,56 @@ class LMPC(Controller, DynamicOptimization):
         self._model.scale(self._x_scaling, id='x')
 
         # ... cost matrices ...
-        self.Q = np.array(self._x_scaling).T * self.Q * np.array(self._x_scaling).T
-        self.R = np.array(self._u_scaling).T * self.R * np.array(self._u_scaling).T
+        if self.Q is not None:
+            self.Q = np.array(self._x_scaling).T * self.Q * np.array(self._x_scaling).T
+
+        if self.P is not None:
+            self.P = np.array(self._x_scaling).T * self.P * np.array(self._x_scaling).T
+
+        if self.R is not None:
+            self.R = np.array(self._u_scaling).T * self.R * np.array(self._u_scaling).T
+
+    def _check_mpc_is_well_posed(self):
+        """
+
+        :return:
+        """
+        if self.Q is None and self.R is None and self.P is None:
+            raise ValueError("You need to define at least one of the weighting matrices before setting up the LMPC.")
+        if not self._prediction_horizon_is_set:
+            raise ValueError("You must set a prediction horizon length before")
+        if not self._control_horizon_is_set:
+            raise ValueError("You must set a control horizon length before.")
+
+        if self._Q is not None:
+            if self._Q.shape != (self._n_x, self._n_x):
+                raise ValueError(f"The state matrix Q must be of dimension {(self._n_x, self._n_x)}, you have dimension {self._Q.shape}")
+
+        if self._P is not None:
+            if self._P.shape != (self._n_x, self._n_x):
+                raise ValueError(
+                    f"The state matrix P must be of dimension {(self._n_x, self._n_x)}, you have dimension {self._P.shape}")
+
+        if self._R is not None:
+            if self._R.shape != (self._n_u, self._n_u):
+                raise ValueError(
+                    f"The input matrix Q must be of dimension {(self._n_u, self._n_u)}, you have dimension {self._R.shape}")
+
+        # # Check tvp and initialize horizon of tvp values
+        # if self._time_varying_parameters_values is not None:
+        #     self._time_varying_parameters_horizon = ca.DM.zeros((self._n_tvp), self.prediction_horizon)
+        #     tvp_counter = 0
+        #     for key, value in self._time_varying_parameters_values.items():
+        #         if len(value) < self.prediction_horizon:
+        #             raise TypeError(
+        #                 f"When passing time-varying parameters, you need to pass a number of values at least "
+        #                 f"as long as the prediction horizon. The parameter {key} has {len(value)} values but the MPC "
+        #                 f"has a prediction horizon length of {self._prediction_horizon}."
+        #             )
+        #
+        #         value = self._time_varying_parameters_values[key]
+        #         self._time_varying_parameters_horizon[tvp_counter, :] = value[0:self._prediction_horizon]
+        #         tvp_counter += 1
 
     def setup(self, options=None, solver_options=None, solver='qpoases'):
         """
@@ -2056,6 +2110,8 @@ class LMPC(Controller, DynamicOptimization):
         :param :
         :return:
         """
+
+        self._check_mpc_is_well_posed()
         if not self._scaling_is_set:
             self.set_scaling()
         if not self._time_varying_parameters_is_set:
@@ -2082,8 +2138,14 @@ class LMPC(Controller, DynamicOptimization):
         B = self._model.input_matrix
         Q = self.Q
         R = self.R
+        P = self.P
 
-
+        if Q is None:
+            Q = ca.DM.zeros(self._n_x,self._n_x)
+        if P is None:
+            P = ca.DM.zeros(self._n_x, self._n_x)
+        if R is None:
+            R = ca.DM.zeros(self._n_u, self._n_u)
 
         dim_states = n_x * (self._horizon + 1)
         dim_control = n_u * self._horizon
@@ -2091,7 +2153,7 @@ class LMPC(Controller, DynamicOptimization):
         # Build Aeq
         # aux1 = np.eye(self._horizon, self._horizon + 1)
         # Abar1 = ca.kron(aux1, A)
-        if self._n_tvp>0:
+        if self._n_tvp > 0:
             Abar1 = ca.substitute(A, self._model.p[self._time_varying_parameters_ind],
                                   param_lmpc[:, 0])
             for i in range(1, self._prediction_horizon):
@@ -2125,7 +2187,7 @@ class LMPC(Controller, DynamicOptimization):
 
         Abar2 = ca.kron(aux2, ca.DM.eye(n_x))
         # aux3 = np.eye(self._horizon, self._horizon)
-        if self._n_tvp>0:
+        if self._n_tvp > 0:
             Abar3 = ca.substitute(B, self._model.p[self._time_varying_parameters_ind],
                                   param_lmpc[:, 0])
             for i in range(1, self._prediction_horizon):
@@ -2133,7 +2195,7 @@ class LMPC(Controller, DynamicOptimization):
                                                         param_lmpc[:, i]))
         else:
             aux3 = np.eye(self._horizon, self._horizon)
-            Abar3 = ca.kron(B,aux3)
+            Abar3 = ca.kron(B, aux3)
         # Add constraints for the ode
         Aeq = ca.horzcat(Abar1 + Abar2, Abar3)
 
@@ -2142,7 +2204,8 @@ class LMPC(Controller, DynamicOptimization):
         # Add constraints for the polytope constraints
         # TODO, they should be added to A
 
-        H_states = ca.kron(ca.DM.eye(self._horizon + 1), Q)
+        H_states = ca.kron(ca.DM.eye(self._horizon), Q)
+        H_states = ca.diagcat(H_states, P)
         H_control = ca.kron(ca.DM.eye(self._horizon), R)
 
         H = ca.diagcat(H_states, H_control)
@@ -2255,9 +2318,9 @@ class LMPC(Controller, DynamicOptimization):
 
         if self._n_tvp:
             for i in range(self._prediction_horizon):
-                Ad = ca.substitute(Ad, self._param_lmpc[:,i], self._time_varying_parameters_horizon[:, i])
-                Ad_ub = ca.substitute(Ad_ub, self._param_lmpc[:,i], self._time_varying_parameters_horizon[:, i])
-                Ad_lb = ca.substitute(Ad_lb, self._param_lmpc[:,i], self._time_varying_parameters_horizon[:, i])
+                Ad = ca.substitute(Ad, self._param_lmpc[:, i], self._time_varying_parameters_horizon[:, i])
+                Ad_ub = ca.substitute(Ad_ub, self._param_lmpc[:, i], self._time_varying_parameters_horizon[:, i])
+                Ad_lb = ca.substitute(Ad_lb, self._param_lmpc[:, i], self._time_varying_parameters_horizon[:, i])
 
         Ad = ca.DM(Ad)
         Ad_ub = ca.DM(Ad_ub)
@@ -2266,13 +2329,13 @@ class LMPC(Controller, DynamicOptimization):
         sol = self._solver(h=self._H, g=self._g, a=Ad, lbx=self._v_lb, ubx=self._v_ub, lba=Ad_lb, uba=Ad_ub)
 
         self._nlp_solution = sol
-        u_opt = sol['x'][self._u_ind[0]]*np.array(self._u_scaling)
+        u_opt = sol['x'][self._u_ind[0]] * np.array(self._u_scaling)
 
         # Reset the old solution
         self.reset_solution()
 
         # Save predictions in the solution object. Done for plotting purposes.
-        self._save_predictions(cp,self._time_varying_parameters_horizon)
+        self._save_predictions(cp, self._time_varying_parameters_horizon)
 
         # Update the time clock - Useful for time-varying systems and references.
         self._time += self.sampling_interval
@@ -2322,6 +2385,30 @@ class LMPC(Controller, DynamicOptimization):
         :return:
         """
         return self._horizon
+
+    @property
+    def P(self):
+        return self._P
+
+    @P.setter
+    def P(self, arg):
+        self._P = check_and_wrap_to_DM(arg)
+
+    @property
+    def Q(self):
+        return self._Q
+
+    @Q.setter
+    def Q(self, arg):
+        self._Q = check_and_wrap_to_DM(arg)
+
+    @property
+    def R(self):
+        return self._R
+
+    @R.setter
+    def R(self, arg):
+        self._R = check_and_wrap_to_DM(arg)
 
 
 __all__ = [

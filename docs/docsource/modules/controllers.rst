@@ -169,6 +169,7 @@ if you have a continuous system but you want to use a discrete objective functio
     nmpc.setup(options={'objective_function': 'discrete'})
 
 
+.. _tvp_nmpc:
 Time-varying parameters
 -----------------------
 Time-varying parameters are model parameters which are not constant in time. For example they could model the effect
@@ -456,3 +457,37 @@ A quick way to visualize the results is with the method :code:`plot_iterations`
     At the moment the :code:`plot_iteration` method works only with `bokeh <https://bokeh.org/>`_.
 
 To visualize the states, pass :code:`plot_states= True`. Note that if optimizer performs many iterations, the plots could take quite a while to load.
+
+
+-----------------------------------
+Linear Model Predictive Control
+-----------------------------------
+The linear model predictive control class solves the following problem
+
+.. math::
+
+    \min_{\mathbf{u}} \sum_{i=0}^{N-1} \left( x^T_i Q x_i +  u^T_i R u_i \right) + x^T_N P x_N \\
+    x_{i+1} = Ax_i + Bu_i\, \quad x_0 = \hat{x}(t_0)\\
+    x_{\text{lb}} \leq x \leq x_{\text{ub}} \\
+    u_{\text{lb}} \leq u \leq u_{\text{ub}} \\
+    \forall i \in [1,...,N]
+
+where :math:`\mathbb{u} = [u_0^T,u_1^T,...,u_{N-1}^T]`. Note that it uses discrete-time linear systems with box constraints.
+The problem is reformulated as a quadratic programming problem
+
+.. math::
+
+    \min_{\mathbf{z}} \mathbf{z} ^T H \mathbf{z}  + q\mathbf{z}  + f \\
+    A_{\text{eq}} \mathbf{z} = b_{\text{eq}} \\
+    A_{\text{d}} \mathbf{z} \leq b_\text{d}
+
+where :math:`\mathbf{z} = [\mathbb{x}^T, \mathbb{u}^T]^T` and :math:`\mathbb{x} = [x_0^T,x_1^T,...,x_{N}^T]^T` using a sparse approach.
+
+Time-varying parameters
+------------------------
+Time-varying can be defined exactly in the same way of the NMPC (:ref:`see section<tvp_nmpc>`).
+
+Solvers
+--------
+
+

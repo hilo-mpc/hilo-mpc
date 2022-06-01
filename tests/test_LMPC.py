@@ -25,8 +25,8 @@ class TestAlreadyLinearMOdels(unittest.TestCase):
         mpc = LMPC(model)
         mpc.Q = np.eye(2)
         mpc.R = 1
+        mpc.P = np.eye(2)
         mpc.horizon = 10
-        mpc.set_initial_guess(x_guess=x0, u_guess=[0])
         mpc.set_box_constraints(x_lb=[-5, -5], x_ub=[5, 5], u_lb=[-1], u_ub=[1])
         mpc.setup()
 
@@ -208,6 +208,7 @@ class TestAlreadyLinearModelWithTvp(unittest.TestCase):
         nmpc = NMPC(model)
         nmpc.horizon = 10
         nmpc.quad_stage_cost.add_states(names=['x_1', 'x_2'], weights=[1, 1])
+        nmpc.quad_terminal_cost.add_states(names=['x_1', 'x_2'], weights=[1, 1])
         nmpc.quad_stage_cost.add_inputs(names=['u_1', 'u_2'], weights=[1, 1])
         nmpc.set_box_constraints(u_ub=[0.5, 10])
         nmpc.set_time_varying_parameters(names=['p'], values={'p': self.tvp})
@@ -227,6 +228,7 @@ class TestAlreadyLinearModelWithTvp(unittest.TestCase):
         lmpc = LMPC(model)
         lmpc.horizon = 10
         lmpc.Q = ca.DM.eye(2)
+        lmpc.P = ca.DM.eye(2)
         lmpc.R = ca.DM.eye(2)
         lmpc.set_time_varying_parameters(names=['p'], values={'p': self.tvp})
         lmpc.set_box_constraints(u_ub=[0.5, 10])
@@ -239,6 +241,33 @@ class TestAlreadyLinearModelWithTvp(unittest.TestCase):
             xi = model.solution['x:f']
 
         model.solution.plot()
+
+
+class TestErrors(unittest.TestCase):
+    def setUp(self) -> None:
+        model = Model(plot_backend='bokeh', discrete=True)
+
+        Ts = 0.5
+        x0 = [1, 1]
+        model.A = np.array([[1, model.dt], [0, 1]])
+        model.B = np.array([[model.dt ** 2 / 2], [model.dt]])
+
+        model.setup(dt=Ts)
+        model.set_initial_conditions(x0=x0)
+        self.model = model
+        self.x0 = x0
+
+    def test_wron_weights_dimensions(self):
+        model = self.model
+        x0 = self.x0
+
+        mpc = LMPC(model)
+        mpc.Q = np.eye(1)
+        mpc.R = 1
+        mpc.horizon = 10
+        mpc.set_box_constraints(x_lb=[-5, -5], x_ub=[5, 5], u_lb=[-1], u_ub=[1])
+        self.assertRaises(ValueError, mpc.setup)
+
 
 
 if __name__ == '__main__':
