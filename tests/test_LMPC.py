@@ -230,6 +230,7 @@ class TestAlreadyLinearModelWithTvp(unittest.TestCase):
         lmpc.R = ca.DM.eye(2)
         lmpc.set_time_varying_parameters(names=['p'], values={'p': self.tvp})
         lmpc.set_box_constraints(u_ub=[0.5, 10])
+        lmpc.set_scaling(x_scaling=[2, 2], u_scaling=[0.9, 0.9])
         lmpc.setup()
         xi = x0.copy()
         for i in range(100):

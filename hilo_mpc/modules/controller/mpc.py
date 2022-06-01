@@ -2029,6 +2029,25 @@ class LMPC(Controller, DynamicOptimization):
                              self.prediction_horizon + 1)
         self.solution.add('t', ca.DM(t_pred).T)
 
+    def _scale_problem(self):
+        """
+
+        :return:
+        """
+        self._u_ub = scale_vector(self._u_ub, self._u_scaling)
+        self._u_lb = scale_vector(self._u_lb, self._u_scaling)
+
+        self._x_ub = scale_vector(self._x_ub, self._x_scaling)
+        self._x_lb = scale_vector(self._x_lb, self._x_scaling)
+
+        # ... ode ...
+        self._model.scale(self._u_scaling, id='u')
+        self._model.scale(self._x_scaling, id='x')
+
+        # ... cost matrices ...
+        self.Q = np.array(self._x_scaling).T * self.Q * np.array(self._x_scaling).T
+        self.R = np.array(self._u_scaling).T * self.R * np.array(self._u_scaling).T
+
     def setup(self, options=None, solver_options=None, solver='qpoases'):
         """
 
@@ -2050,6 +2069,9 @@ class LMPC(Controller, DynamicOptimization):
 
         self._populate_solution()
 
+        # Scale problem
+        self._scale_problem()
+
         # Predefine parameters (those are fixed and not optimized)
         param_lmpc = ca.SX.sym("tv_p", self._n_tvp, self._prediction_horizon)
 
@@ -2060,6 +2082,8 @@ class LMPC(Controller, DynamicOptimization):
         B = self._model.input_matrix
         Q = self.Q
         R = self.R
+
+
 
         dim_states = n_x * (self._horizon + 1)
         dim_control = n_u * self._horizon
@@ -2226,8 +2250,8 @@ class LMPC(Controller, DynamicOptimization):
             Ad_ub = ca.substitute(Ad_ub, self._model.p[ind_cp_par], cp)
             Ad_lb = ca.substitute(Ad_lb, self._model.p[ind_cp_par], cp)
 
-        self._v_lb[self._x_ind[0][0:self._n_x]] = x0
-        self._v_ub[self._x_ind[0][0:self._n_x]] = x0
+        self._v_lb[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x])
+        self._v_ub[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x])
 
         if self._n_tvp:
             for i in range(self._prediction_horizon):
@@ -2242,7 +2266,7 @@ class LMPC(Controller, DynamicOptimization):
         sol = self._solver(h=self._H, g=self._g, a=Ad, lbx=self._v_lb, ubx=self._v_ub, lba=Ad_lb, uba=Ad_ub)
 
         self._nlp_solution = sol
-        u_opt = sol['x'][self._u_ind[0]]
+        u_opt = sol['x'][self._u_ind[0]]*np.array(self._u_scaling)
 
         # Reset the old solution
         self.reset_solution()
