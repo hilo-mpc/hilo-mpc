@@ -472,7 +472,7 @@ The linear model predictive control class solves the following problem
     u_{\text{lb}} \leq u \leq u_{\text{ub}} \\
     \forall i \in [1,...,N]
 
-where :math:`\mathbb{u} = [u_0^T,u_1^T,...,u_{N-1}^T]`. Note that it uses discrete-time linear systems with box constraints.
+where :math:`\mathbf{u} = [u_0^T,u_1^T,...,u_{N-1}^T]`. Note that it uses discrete-time linear systems with box constraints.
 The problem is reformulated as a quadratic programming problem
 
 .. math::
@@ -481,13 +481,30 @@ The problem is reformulated as a quadratic programming problem
     A_{\text{eq}} \mathbf{z} = b_{\text{eq}} \\
     A_{\text{d}} \mathbf{z} \leq b_\text{d}
 
-where :math:`\mathbf{z} = [\mathbb{x}^T, \mathbb{u}^T]^T` and :math:`\mathbb{x} = [x_0^T,x_1^T,...,x_{N}^T]^T` using a sparse approach.
+where :math:`\mathbf{z} = [\mathbf{x}^T, \mathbf{u}^T]^T` and :math:`\mathbf{x} = [x_0^T,x_1^T,...,x_{N}^T]^T` using a sparse approach.
 
 Time-varying parameters
 ------------------------
+
 Time-varying can be defined exactly in the same way of the NMPC (:ref:`see section<tvp_nmpc>`).
 
 Solvers
 --------
 
+To solve the LMPC, the it is possible to use any of the solvers supported by CasADi.
+The default solver is `qpoasis`, which is dispatched with CasADi. Other solvers are: `gurobi <https://www.gurobi.com/>`_,
+`cplex <https://www.ibm.com/de-de/analytics/cplex-optimizer>`_, `OOQP <https://pages.cs.wisc.edu/~swright/ooqp/>`_, and
+`SQIC <https://ccom.ucsd.edu/~optimizers/solvers/sqic/>`_ among others.
+See `the CasADi documentation <https://web.casadi.org/python-api/#qp>`_ for the complete list of the solver as well as the options for every solver. The solver and its options can be set when calling the setup method of the LMPC. For example:
 
+.. code-block:: python
+
+    lmpc = LMPC(model) # initialize the LMPC with a linear time-discrete model
+    # ...
+    # here sets its parameters, e.g., horizon length etc
+    # ...
+    lmpc.setup(solver='qpoases', solver_options={'sparse':True})
+
+.. note::
+
+    The options can vary depending on the solver used.

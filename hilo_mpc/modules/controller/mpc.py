@@ -2123,13 +2123,15 @@ class LMPC(Controller, DynamicOptimization):
         if not self._sampling_time_is_set:
             self.set_sampling_interval()
 
+        self._solver_options = solver_options
+
         self._populate_solution()
 
         # Scale problem
         self._scale_problem()
 
         # Predefine parameters (those are fixed and not optimized)
-        param_lmpc = ca.SX.sym("tv_p", self._n_tvp, self._prediction_horizon)
+        param_lmpc = ca.SX.sym("tv_p", self._n_tvp, self._horizon)
 
         n_x = self._n_x
         n_u = self._n_u
@@ -2156,7 +2158,7 @@ class LMPC(Controller, DynamicOptimization):
         if self._n_tvp > 0:
             Abar1 = ca.substitute(A, self._model.p[self._time_varying_parameters_ind],
                                   param_lmpc[:, 0])
-            for i in range(1, self._prediction_horizon):
+            for i in range(1, self._horizon):
                 Abar1 = ca.diagcat(Abar1, ca.substitute(A, self._model.p[self._time_varying_parameters_ind],
                                                         param_lmpc[:, i]))
 
@@ -2165,7 +2167,7 @@ class LMPC(Controller, DynamicOptimization):
             Abar1 = ca.kron(aux1, A)
 
         # Add a column of zero matrices
-        Abar1 = ca.horzcat(Abar1, ca.DM.zeros(self._prediction_horizon * self._n_x, self._n_x))
+        Abar1 = ca.horzcat(Abar1, ca.DM.zeros(self._horizon * self._n_x, self._n_x))
 
         aux2 = np.zeros((self._horizon, self._horizon + 1))
 
@@ -2190,7 +2192,7 @@ class LMPC(Controller, DynamicOptimization):
         if self._n_tvp > 0:
             Abar3 = ca.substitute(B, self._model.p[self._time_varying_parameters_ind],
                                   param_lmpc[:, 0])
-            for i in range(1, self._prediction_horizon):
+            for i in range(1, self._horizon):
                 Abar3 = ca.diagcat(Abar3, ca.substitute(B, self._model.p[self._time_varying_parameters_ind],
                                                         param_lmpc[:, i]))
         else:
@@ -2228,7 +2230,7 @@ class LMPC(Controller, DynamicOptimization):
         # TODO move this check of the solver into the setup_solver method
         if self._solver_name in self._solver_name_list_qp:
             # self._nlp_opts.update({'p': param_lmpc})
-            solver = ca.conic("solver", self._solver_name, qp)
+            solver = ca.conic("solver", self._solver_name, qp, self._solver_options)
             # x = ca.SX.sym('x', H.shape[0])
             # qp = {'x':x, 'f': x.T@H@x, 'g':Aeq@x, 'p':param_npl_mpc }
             # solver = ca.qpsol("solver", self._solver_name, qp)
@@ -2317,7 +2319,7 @@ class LMPC(Controller, DynamicOptimization):
         self._v_ub[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x])
 
         if self._n_tvp:
-            for i in range(self._prediction_horizon):
+            for i in range(self._horizon):
                 Ad = ca.substitute(Ad, self._param_lmpc[:, i], self._time_varying_parameters_horizon[:, i])
                 Ad_ub = ca.substitute(Ad_ub, self._param_lmpc[:, i], self._time_varying_parameters_horizon[:, i])
                 Ad_lb = ca.substitute(Ad_lb, self._param_lmpc[:, i], self._time_varying_parameters_horizon[:, i])
@@ -2365,10 +2367,10 @@ class LMPC(Controller, DynamicOptimization):
         """
 
         if self._nlp_solution is not None:
-            x_pred = np.zeros((self._model.n_x, self._prediction_horizon + 1))
+            x_pred = np.zeros((self._model.n_x, self._horizon + 1))
             u_pred = np.zeros((self._model.n_u, self._control_horizon))
-            dt_pred = np.zeros(self._prediction_horizon)
-            for ii in range(self._prediction_horizon + 1):
+            dt_pred = np.zeros(self._horizon)
+            for ii in range(self._horizon + 1):
                 x_pred[:, ii] = np.asarray(self._nlp_solution['x'][self._x_ind[ii]]).squeeze() * self._x_scaling
             for ii in range(self._control_horizon):
                 u_pred[:, ii] = np.asarray(self._nlp_solution['x'][self._u_ind[ii]]).squeeze() * self._u_scaling

@@ -5,7 +5,8 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Controllers &mdash; HILO-MPC 1.0 documentation</title>
@@ -185,7 +186,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="controllers">
+  <section id="controllers">
 <span id="controller-automodel"></span><h1>Controllers<a class="headerlink" href="#controllers" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="hilo_mpc.NMPC">
@@ -868,7 +869,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hilo_mpc.LMPC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">LMPC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">LMPC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bokeh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="hilo_mpc.LMPC.optimize">
 <span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tvp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.optimize" title="Permalink to this definition">¶</a></dt>
@@ -887,20 +888,91 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="hilo_mpc.LMPC.setup">
-<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qpoases'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.setup" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dt class="sig sig-object py" id="hilo_mpc.LMPC.return_prediction">
+<span class="sig-name descname"><span class="pre">return_prediction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.return_prediction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.return_prediction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mpc prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>x_pred, u_pred, t_pred</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.LMPC.set_custom_constraints_function">
+<span class="sig-name descname"><span class="pre">set_custom_constraints_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">soft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_violation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.set_custom_constraints_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.set_custom_constraints_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Set a custom function that will be added as last position in the nonlinear constraints vector:</dt><dd><p>lb &lt;= fun &lt;= ub</p>
+</dd>
+<dt>This must take the entire optimization vector z and the indices of states and inputs as</dt><dd><p>fun(v, x_ind, u_ind)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>options</strong> – </p></li>
-<li><p><strong>solver_options</strong> – </p></li>
-<li><p><strong>nlp_solver</strong> – </p></li>
+<li><p><strong>fun</strong> – python function</p></li>
+<li><p><strong>lb</strong> – lower bound</p></li>
+<li><p><strong>ub</strong> – upper bound</p></li>
+<li><p><strong>soft</strong> – </p></li>
+<li><p><strong>max_violation</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.LMPC.set_initial_guess">
+<span class="sig-name descname"><span class="pre">set_initial_guess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.set_initial_guess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.set_initial_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets initial guess for the optimizer when no other information of the states or inputs are available.
+:param x_guess: optimal state guesss
+:type x_guess: list, numpy array, float or casADi DM array
+:param u_guess: optimal input guess
+:type u_guess: list, numpy array, float or casADi DM array
+:param z_guess: optimal algebraic states guess
+:type z_guess: list, numpy array, float or casADi DM array
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.LMPC.set_stage_constraints">
+<span class="sig-name descname"><span class="pre">set_stage_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_soft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_violation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'stage_constraint'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.set_stage_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.set_stage_constraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to add a (nonlinear) stage constraint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stage_constraint</strong> – SX expression. It has to contain variables of the model</p></li>
+<li><p><strong>lb</strong> – Vector or list float,integer or casadi.DM. Lower bound on the constraint</p></li>
+<li><p><strong>ub</strong> – Vector or list float,integer or casadi.DM. Upper bound on the constraint</p></li>
+<li><p><strong>is_soft</strong> – bool: if True soft constraints are used.</p></li>
+<li><p><strong>max_violation</strong> – (optional) Vector or list float,integer or casadi.DM. Maximum violation if constraint is
+soft. If None, there is no limit on the violation of the soft constraints</p></li>
+<li><p><strong>weight</strong> – (optional) matrix of appropriate dimension. If is_soft=True it will be used to weight the soft
+constraint in the objective function using a quadratic cost.</p></li>
+<li><p><strong>name</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.LMPC.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qpoases'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.setup" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>options</strong> – </p></li>
+<li><p><strong>solver_options</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>:param :
+:return:</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1085,7 +1157,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

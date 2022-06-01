@@ -269,6 +269,32 @@ class TestErrors(unittest.TestCase):
         self.assertRaises(ValueError, mpc.setup)
 
 
+class TestSolvers(unittest.TestCase):
+    def setUp(self) -> None:
+        model = Model(plot_backend='bokeh', discrete=True)
+
+        Ts = 0.5
+        x0 = [1, 1]
+        model.A = np.array([[1, 0], [0, 1]])
+        model.B = np.array([[1], [1]])
+
+        model.setup(dt=Ts)
+        model.set_initial_conditions(x0=x0)
+        self.model = model
+        self.x0 = x0
+
+    def test_gurobi(self):
+        model = self.model
+        x0 = self.x0
+
+        mpc = LMPC(model)
+        mpc.Q = np.eye(2)
+        mpc.R = 1
+        mpc.horizon = 10
+        mpc.set_box_constraints(x_lb=[-5, -5], x_ub=[5, 5], u_lb=[-1], u_ub=[1])
+        mpc.setup(solver='qpoases', solver_options={'sparse':True})
+        mpc.optimize(x0=x0)
+
 
 if __name__ == '__main__':
     unittest.main()
