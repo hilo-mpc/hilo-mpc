@@ -85,6 +85,7 @@ class LinearQuadraticRegulator(Controller, Base):
         self._n_u = 0
         self._n_p = 0
         self._horizon = None
+        self._hamiltonian = None
 
         self._solution = TimeSeries(plot_backend, parent=self)
 
@@ -94,6 +95,22 @@ class LinearQuadraticRegulator(Controller, Base):
         :return:
         """
         self._type = 'LQR'
+
+    @property
+    def discrete(self) -> bool:
+        """
+
+        :return:
+        """
+        return self._model.discrete
+
+    @property
+    def continuous(self) -> bool:
+        """
+
+        :return:
+        """
+        return self._model.continuous
 
     @property
     def Q(self) -> Optional[ca.DM]:
@@ -207,57 +224,98 @@ class LinearQuadraticRegulator(Controller, Base):
         :param kwargs:
         :return:
         """
-        self._n_x = self._model.n_x
-        self._n_u = self._model.n_u
-        self._n_p = self._model.n_p
+        n_x = self._model.n_x
+        n_u = self._model.n_u
+        n_p = self._model.n_p
 
-        x = ca.SX.sym('x', self._n_x)
-        p = ca.SX.sym('p', self._n_p)
+        x = ca.SX.sym('x', n_x)
+        p = ca.SX.sym('p', n_p)
+
+        # Model matrices
+        state_matrix = ca.Function('state_matrix', [self._model.p, self._model.dt, self._model.t], [self._model.A])
+        input_matrix = ca.Function('input_matrix', [self._model.p, self._model.dt, self._model.t], [self._model.B])
+        # NOTE: For now we ignore time-variant systems (i.e., [] instead of t)
+        A = state_matrix(p, self._model.solution.dt, [])  # switch to self._solution if it is used
+        B = input_matrix(p, self._model.solution.dt, [])  # switch to self._solution if it is used
+
+        # LQR matrices
+        Q = ca.SX.sym('Q', n_x, n_x)
+        R = ca.SX.sym('R', n_u, n_u)
+        N = ca.SX.sym('N', n_x, n_u)
 
         # NOTE: For now only discrete formulations are supported
         if self._horizon is None:
             # Infinite horizon LQR
-            raise NotImplementedError("Infinite horizon LQR will be implemented in future releases")
+            # Discrete or continuous?
+            discrete = self._model.discrete
+
+            # Check if state matrix A is invertible
+            inv_tol = kwargs.get('inv_tol')
+            if inv_tol is None:
+                inv_tol = 1e-8
+            if ca.fabs(ca.det(A)) < inv_tol:
+                raise RuntimeError("State matrix (A) of the supplied model is not invertible. Infinite-horizon LQR only"
+                                   " works with invertible state matrices.")
+
+            # Define Hamiltonian matrix
+            if discrete:
+                I = A.eye(n_x)
+                Z12 = -B @ ca.solve(R, ca.solve(A, B).T)
+                Z11 = A - Z12 @ Q
+                Z22 = ca.solve(A, I).T
+                Z21 = -Z22 @ Q
+                Z = ca.vertcat(ca.horzcat(Z11, Z12), ca.horzcat(Z21, Z22))
+            else:
+                Z = ca.vertcat(ca.horzcat(A, -B @ ca.solve(R, B.T)), ca.horzcat(-Q, -A.T))
+            self._hamiltonian = ca.Function('Hamiltonian', [p, Q, R], [Z])
+
+            # Schur decomposition
+            U = ca.SX.sym('U', Z.shape[0], n_x)
+            U11 = U[:n_x, :]
+            U21 = U[n_x:, :]
+            P = ca.solve(U11.T, U21.T).T
+
+            # Optimal control gain
+            if discrete:
+                K = ca.solve(R + B.T @ P @ B, B.T @ P @ A + N.T)
+            else:
+                K = ca.solve(R, B.T @ P + N.T)
         else:
             # Finite horizon LQR
-            # Model matrices
-            state_matrix = ca.Function('state_matrix', [self._model.p, self._model.dt, self._model.t], [self._model.A])
-            input_matrix = ca.Function('input_matrix', [self._model.p, self._model.dt, self._model.t], [self._model.B])
-            # NOTE: For now we ignore time-variant systems (i.e., [] instead of t)
-            A = state_matrix(p, self._model.solution.dt, [])  # switch to self._solution if it is used
-            B = input_matrix(p, self._model.solution.dt, [])  # switch to self._solution if it is used
-
-            # LQR matrices
-            P = ca.SX.sym('P', self._n_x, self._n_x)
-            Q = ca.SX.sym('Q', self._n_x, self._n_x)
-            R = ca.SX.sym('R', self._n_u, self._n_u)
-            N = ca.SX.sym('N', self._n_x, self._n_u)
+            # Terminal condition
+            P = ca.SX.sym('P', n_x, n_x)
+            Pk = P
 
             # Solve dynamic Riccati equation
-            Pk = P
             for k in range(self._horizon):
                 APBN = A.T @ Pk @ B + N
                 RBPB = R + B.T @ Pk @ B
                 Pk = A.T @ Pk @ A - ca.solve(RBPB.T, APBN.T).T @ (B.T @ Pk @ A + N.T) + Q
 
-            # Optimal control input
+            # Optimal control gain
             K = ca.solve(R + B.T @ Pk @ B, B.T @ Pk @ A + N.T)
-            u = -K @ x
 
-            self._function = ca.Function('function',
-                                         [x, p, P, Q, R, N],
-                                         [u, K],
-                                         ['x', 'p', 'P', 'Q', 'R', 'N'],
-                                         ['u', 'K'])
+        # Optimal control input
+        u = -K @ x
 
-            self.check_consistency()
+        self._function = ca.Function('function',
+                                     [x, p, P, Q, R, N],
+                                     [u, K],
+                                     ['x', 'p', 'P', 'Q', 'R', 'N'],
+                                     ['u', 'K'])
 
-            self._Q = None
-            self._R = None
-            self._N = ca.DM.zeros(N.shape)
-            self._K = None
+        self.check_consistency()
 
-            # TODO: Set up and use solution?
+        self._n_x = n_x
+        self._n_u = n_u
+        self._n_p = n_p
+
+        self._Q = None
+        self._R = None
+        self._N = ca.DM.zeros(N.shape)
+        self._K = None
+
+        # TODO: Set up and use solution?
 
     def call(self, *args, **kwargs):
         """
