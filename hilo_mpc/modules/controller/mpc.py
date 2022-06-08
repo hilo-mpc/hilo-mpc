@@ -2102,7 +2102,7 @@ class LMPC(Controller, DynamicOptimization):
         #         self._time_varying_parameters_horizon[tvp_counter, :] = value[0:self._prediction_horizon]
         #         tvp_counter += 1
 
-    def setup(self, options=None, solver_options=None, solver='qpoases'):
+    def setup(self, options=None, solver_options={}, solver='qpoases'):
         """
 
         :param options:
