@@ -5,7 +5,8 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Observer module &mdash; HILO-MPC 1.0 documentation</title>
@@ -196,7 +197,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="observer-module">
+  <section id="observer-module">
 <span id="id1"></span><h1>Observer module<a class="headerlink" href="#observer-module" title="Permalink to this headline">¶</a></h1>
 <p>The HILO-MPC Observer module contains several state (and parameter) observers.
 Observer are used to infer states and parameters from measurements. For a more detailed
@@ -209,16 +210,16 @@ description of the methods refer to <a class="reference internal" href="../api/e
 <li><p>Unscented Kalman Filter (UKF)</p></li>
 <li><p>Particle Filter (PF)</p></li>
 </ul>
-<div class="section" id="moving-horizon-estimator">
+<section id="moving-horizon-estimator">
 <h2>Moving Horizon Estimator<a class="headerlink" href="#moving-horizon-estimator" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="non-uniform-sampling-intervals">
+<section id="non-uniform-sampling-intervals">
 <h3>Non-uniform sampling intervals<a class="headerlink" href="#non-uniform-sampling-intervals" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="multi-rate-measurements">
+</section>
+<section id="multi-rate-measurements">
 <h3>Multi-rate measurements<a class="headerlink" href="#multi-rate-measurements" title="Permalink to this headline">¶</a></h3>
-</div>
-</div>
-<div class="section" id="kalman-filter">
+</section>
+</section>
+<section id="kalman-filter">
 <h2>Kalman Filter<a class="headerlink" href="#kalman-filter" title="Permalink to this headline">¶</a></h2>
 <p>The class <a class="reference internal" href="../api/estimators.html#hilo_mpc.KalmanFilter" title="hilo_mpc.KalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">KalmanFilter</span></code></a> (alias <a class="reference internal" href="../api/estimators.html#hilo_mpc.KF" title="hilo_mpc.KF"><code class="xref py py-class docutils literal notranslate"><span class="pre">KF</span></code></a>) implements the Kalman filter developed by Rudolf E. Kálmán. To set up the Kalman filter you need an already set up <a class="reference internal" href="../api/modelling.html#hilo_mpc.Model" title="hilo_mpc.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> instance. Additionally you might want to supply a plot backend (via the <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_backend</span></code> keyword argument) in order to visualize the estimation results later on. At the moment only <a class="reference external" href="https://matplotlib.org/">Matplotlib</a> and <a class="reference external" href="https://bokeh.org/">Bokeh</a> are supported for plotting. The Kalman filter can be initialized as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hilo_mpc</span> <span class="kn">import</span> <span class="n">KF</span>
@@ -229,17 +230,17 @@ description of the methods refer to <a class="reference internal" href="../api/e
 </pre></div>
 </div>
 <p>Required information, like e.g. the model dynamics or the sampling time, will be automatically extracted from the <a class="reference internal" href="../api/modelling.html#hilo_mpc.Model" title="hilo_mpc.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> instance.</p>
-</div>
-<div class="section" id="extended-kalman-filter">
+</section>
+<section id="extended-kalman-filter">
 <h2>Extended Kalman Filter<a class="headerlink" href="#extended-kalman-filter" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="unscented-kalman-filter">
+</section>
+<section id="unscented-kalman-filter">
 <h2>Unscented Kalman Filter<a class="headerlink" href="#unscented-kalman-filter" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="particle-filter">
+</section>
+<section id="particle-filter">
 <h2>Particle Filter<a class="headerlink" href="#particle-filter" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

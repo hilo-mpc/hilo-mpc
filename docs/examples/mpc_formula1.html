@@ -5,7 +5,8 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Formula 1 &mdash; HILO-MPC 1.0 documentation</title>
@@ -449,7 +450,7 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<div class="section" id="Formula-1">
+<section id="Formula-1">
 <h1>Formula 1<a class="headerlink" href="#Formula-1" title="Permalink to this headline">¶</a></h1>
 <p>In this example we will consider a path-following problem in the presence of an obstacle. In this example we will se how</p>
 <ol class="arabic simple">
@@ -457,7 +458,7 @@ div.rendered_html tbody tr:hover {
 <li><p>to add soft generic stage and terminal constraints to the MPC.</p></li>
 </ol>
 <p><img alt="drawing" class="no-scaled-link" src="../_images/f1_example.png" style="width: 800px;" /></p>
-<div class="section" id="Introduction">
+<section id="Introduction">
 <h2>Introduction<a class="headerlink" href="#Introduction" title="Permalink to this headline">¶</a></h2>
 <p>We consider the problem of a racing F1 car along a ellipsoidal track. At some point of the track an obstacle is present due to an accident. For the car model we use a simple bicycle model:</p>
 <p><img alt="drawing" class="no-scaled-link" src="../_images/bike.png" style="width: 600px;" /></p>
@@ -480,33 +481,33 @@ div.rendered_html tbody tr:hover {
 <p>The obstacle is circular with radious <span class="math notranslate nohighlight">\(r=2\)</span> centered in <span class="math notranslate nohighlight">\((obs_{X}, obs_{Y}) = (30, 15)\)</span> will be modelled by adding the following nonlinear constraints</p>
 <div class="math notranslate nohighlight">
 \[c(p_X,p_Y) = (p_X - obs_X)^2 + (p_Y - obs_Y)^2 \geq r^2\]</div>
-</div>
-<div class="section" id="Simulation">
+</section>
+<section id="Simulation">
 <h2>Simulation<a class="headerlink" href="#Simulation" title="Permalink to this headline">¶</a></h2>
 <p>we start importing the necessary modules</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add HILO-MPC to path. NOT NECESSARY if it was installed via pip.</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;../../../&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Add HILO-MPC to path. NOT NECESSARY if it was installed via pip.
+import sys
+sys.path.append(&#39;../../../&#39;)
 
-<span class="kn">from</span> <span class="nn">hilo_mpc</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">NMPC</span>
-<span class="kn">import</span> <span class="nn">casadi</span> <span class="k">as</span> <span class="nn">ca</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+from hilo_mpc import Model, NMPC
+import casadi as ca
+import pandas as pd
+import numpy as np
 
-<span class="c1"># Necessary for plots</span>
-<span class="kn">import</span> <span class="nn">yaml</span>
-<span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">column</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">row</span>
-<span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="n">ColumnDataSource</span><span class="p">,</span> <span class="n">Slider</span><span class="p">,</span> <span class="n">ImageURL</span><span class="p">,</span> <span class="n">Band</span>
-<span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">figure</span>
-<span class="kn">from</span> <span class="nn">bokeh.themes</span> <span class="kn">import</span> <span class="n">Theme</span>
-<span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="n">show</span><span class="p">,</span> <span class="n">output_notebook</span>
-<span class="kn">from</span> <span class="nn">bokeh.sampledata.sea_surface_temperature</span> <span class="kn">import</span> <span class="n">sea_surface_temperature</span>
+# Necessary for plots
+import yaml
+from bokeh.layouts import column, layout, row
+from bokeh.models import ColumnDataSource, Slider, ImageURL, Band
+from bokeh.plotting import figure
+from bokeh.themes import Theme
+from bokeh.io import show, output_notebook
+from bokeh.sampledata.sea_surface_temperature import sea_surface_temperature
 
-<span class="n">output_notebook</span><span class="p">()</span>
+output_notebook()
 </pre></div>
 </div>
 </div>
@@ -824,118 +825,118 @@ var element = document.currentScript.previousSibling.previousSibling;
 }(window));
 </script></div>
 </div>
-<div class="section" id="Model">
+<section id="Model">
 <h3>Model<a class="headerlink" href="#Model" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">plot_backend</span><span class="o">=</span><span class="s1">&#39;bokeh&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model = Model(plot_backend=&#39;bokeh&#39;)
 
-<span class="n">states</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">set_dynamical_states</span><span class="p">([</span><span class="s1">&#39;px&#39;</span><span class="p">,</span> <span class="s1">&#39;py&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;phi&#39;</span><span class="p">])</span>
-<span class="n">inputs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">set_inputs</span><span class="p">([</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;delta&#39;</span><span class="p">])</span>
+states = model.set_dynamical_states([&#39;px&#39;, &#39;py&#39;, &#39;v&#39;, &#39;phi&#39;])
+inputs = model.set_inputs([&#39;a&#39;, &#39;delta&#39;])
 
-<span class="c1"># Unwrap states</span>
-<span class="n">px</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">py</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">v</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-<span class="n">phi</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+# Unwrap states
+px = states[0]
+py = states[1]
+v = states[2]
+phi = states[3]
 
-<span class="c1"># Unwrap states</span>
-<span class="n">a</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">delta</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+# Unwrap states
+a = inputs[0]
+delta = inputs[1]
 
-<span class="c1"># Parameters</span>
-<span class="n">lr</span> <span class="o">=</span> <span class="mf">1.4</span>  <span class="c1"># [m]</span>
-<span class="n">lf</span> <span class="o">=</span> <span class="mf">1.8</span>  <span class="c1"># [m]</span>
-<span class="n">beta</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">lr</span> <span class="o">/</span> <span class="p">(</span><span class="n">lr</span> <span class="o">+</span> <span class="n">lf</span><span class="p">)</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">delta</span><span class="p">))</span>
+# Parameters
+lr = 1.4  # [m]
+lf = 1.8  # [m]
+beta = ca.arctan(lr / (lr + lf) * ca.tan(delta))
 
-<span class="c1"># ODE</span>
-<span class="n">dpx</span> <span class="o">=</span> <span class="n">v</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span> <span class="o">+</span> <span class="n">beta</span><span class="p">)</span>
-<span class="n">dpy</span> <span class="o">=</span> <span class="n">v</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span> <span class="o">+</span> <span class="n">beta</span><span class="p">)</span>
-<span class="n">dv</span> <span class="o">=</span> <span class="n">a</span>
-<span class="n">dphi</span> <span class="o">=</span> <span class="n">v</span> <span class="o">/</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+# ODE
+dpx = v * ca.cos(phi + beta)
+dpy = v * ca.sin(phi + beta)
+dv = a
+dphi = v / lr * ca.sin(beta)
 
 
-<span class="n">model</span><span class="o">.</span><span class="n">set_dynamical_equations</span><span class="p">([</span><span class="n">dpx</span><span class="p">,</span> <span class="n">dpy</span><span class="p">,</span> <span class="n">dv</span><span class="p">,</span> <span class="n">dphi</span><span class="p">])</span>
+model.set_dynamical_equations([dpx, dpy, dv, dphi])
 
-<span class="c1"># Initial conditions</span>
-<span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="n">u0</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]</span>
+# Initial conditions
+x0 = [15, 30, 0, 0]
+u0 = [0., 0.]
 
-<span class="c1"># Create model and run simulation</span>
-<span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">model</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">)</span>
+# Create model and run simulation
+dt = 1
+model.setup(dt=dt)
+model.set_initial_conditions(x0=x0)
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Obstacle">
+</section>
+<section id="Obstacle">
 <h3>Obstacle<a class="headerlink" href="#Obstacle" title="Permalink to this headline">¶</a></h3>
 <p>We define a round obstacle with radius of 2 meters occupying almost the entire road cross-section.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Obstacle position and geometry</span>
-<span class="n">obs_x</span> <span class="o">=</span> <span class="mi">30</span>
-<span class="n">obs_y</span> <span class="o">=</span> <span class="mi">15</span>
-<span class="n">obs_rad</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1">#[m]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Obstacle position and geometry
+obs_x = 30
+obs_y = 15
+obs_rad = 2 #[m]
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Setup-the-MPC">
+</section>
+<section id="Setup-the-MPC">
 <h3>Setup the MPC<a class="headerlink" href="#Setup-the-MPC" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setup NMPC</span>
-<span class="n">nmpc</span> <span class="o">=</span> <span class="n">NMPC</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Setup NMPC
+nmpc = NMPC(model)
 
 
-<span class="n">theta</span> <span class="o">=</span> <span class="n">nmpc</span><span class="o">.</span><span class="n">create_path_variable</span><span class="p">(</span><span class="n">u_pf_lb</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">u_pf_ub</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+theta = nmpc.create_path_variable(u_pf_lb=0.1, u_pf_ub=1)
 
-<span class="c1"># You can also put the reference on the virtual input</span>
-<span class="c1"># theta = nmpc.create_path_variable(u_pf_lb=0.1, u_pf_ub=1, u_pf_ref=None, u_pf_weight=10)</span>
+# You can also put the reference on the virtual input
+# theta = nmpc.create_path_variable(u_pf_lb=0.1, u_pf_ub=1, u_pf_ref=None, u_pf_weight=10)
 
-<span class="n">path_x</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">-</span> <span class="mi">14</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-<span class="n">path_y</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">-</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+path_x = 30 - 14 * ca.cos(theta)
+path_y = 30 - 16 * ca.sin(theta)
 
-<span class="n">nmpc</span><span class="o">.</span><span class="n">horizon</span> <span class="o">=</span> <span class="mi">30</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">add_states</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;px&#39;</span><span class="p">,</span> <span class="s1">&#39;py&#39;</span><span class="p">],</span> <span class="n">ref</span><span class="o">=</span><span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                                <span class="n">path_following</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+nmpc.horizon = 30
+nmpc.quad_stage_cost.add_states(names=[&#39;px&#39;, &#39;py&#39;], ref=ca.vertcat(path_x, path_y), weights=[1, 1],
+                                path_following=True)
 
 
-<span class="n">nmpc</span><span class="o">.</span><span class="n">quad_terminal_cost</span><span class="o">.</span><span class="n">add_states</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;px&#39;</span><span class="p">,</span> <span class="s1">&#39;py&#39;</span><span class="p">],</span> <span class="n">ref</span><span class="o">=</span><span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                                   <span class="n">path_following</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+nmpc.quad_terminal_cost.add_states(names=[&#39;px&#39;, &#39;py&#39;], ref=ca.vertcat(path_x, path_y), weights=[1, 1],
+                                   path_following=True)
 
-<span class="n">nmpc</span><span class="o">.</span><span class="n">set_box_constraints</span><span class="p">(</span><span class="n">x_lb</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">],</span> <span class="n">x_ub</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">u_lb</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">u_ub</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+nmpc.set_box_constraints(x_lb=[-100, -100, -10, -100], x_ub=[100, 100, 10, 100], u_lb=[-1, -1], u_ub=[1, 1])
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Add-nonlinear-stage-and-terminal-constraints">
+</section>
+<section id="Add-nonlinear-stage-and-terminal-constraints">
 <h3>Add nonlinear stage and terminal constraints<a class="headerlink" href="#Add-nonlinear-stage-and-terminal-constraints" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nmpc</span><span class="o">.</span><span class="n">stage_constraint</span><span class="o">.</span><span class="n">constraint</span> <span class="o">=</span> <span class="p">(</span><span class="n">px</span> <span class="o">-</span> <span class="n">obs_x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">py</span> <span class="o">-</span> <span class="n">obs_y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">stage_constraint</span><span class="o">.</span><span class="n">ub</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">inf</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">stage_constraint</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="n">obs_rad</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">stage_constraint</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="mi">10</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>nmpc.stage_constraint.constraint = (px - obs_x) ** 2 + (py - obs_y) ** 2
+nmpc.stage_constraint.ub = ca.inf
+nmpc.stage_constraint.lb = obs_rad ** 2
+nmpc.stage_constraint.weight = 10
 
 
-<span class="n">nmpc</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">constraint</span> <span class="o">=</span> <span class="p">(</span><span class="n">px</span> <span class="o">-</span> <span class="n">obs_x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">py</span> <span class="o">-</span> <span class="n">obs_y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">ub</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">inf</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="n">obs_rad</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="mi">10</span>
+nmpc.terminal_constraint.constraint = (px - obs_x) ** 2 + (py - obs_y) ** 2
+nmpc.terminal_constraint.ub = ca.inf
+nmpc.terminal_constraint.lb = obs_rad ** 2
+nmpc.terminal_constraint.weight = 10
 
-<span class="n">nmpc</span><span class="o">.</span><span class="n">set_initial_guess</span><span class="p">(</span><span class="n">x_guess</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">u_guess</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;print_level&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">})</span>
+nmpc.set_initial_guess(x_guess=x0, u_guess=[0, 0])
+nmpc.setup(options={&#39;print_level&#39;:0})
 </pre></div>
 </div>
 </div>
@@ -944,34 +945,34 @@ var element = document.currentScript.previousSibling.previousSibling;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create function to plot the path</span>
-<span class="n">pp</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">SX</span><span class="o">.</span><span class="n">sym</span><span class="p">(</span><span class="s1">&#39;pp&#39;</span><span class="p">)</span>
-<span class="n">path_x</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">-</span> <span class="p">(</span><span class="mi">14</span><span class="o">*</span><span class="n">pp</span><span class="p">)</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-<span class="n">path_y</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">-</span> <span class="p">(</span><span class="mi">16</span><span class="o">*</span><span class="n">pp</span><span class="p">)</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Create function to plot the path
+pp = ca.SX.sym(&#39;pp&#39;)
+path_x = 30 - (14*pp) * ca.cos(theta)
+path_y = 30 - (16*pp) * ca.sin(theta)
 
-<span class="n">path_fun</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">,[</span><span class="n">theta</span><span class="p">,</span> <span class="n">pp</span><span class="p">],[</span><span class="n">path_x</span><span class="p">,</span><span class="n">path_y</span><span class="p">])</span>
+path_fun = ca.Function(&#39;path&#39;,[theta, pp],[path_x,path_y])
 
-<span class="n">x_path</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">y_path</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">800</span><span class="p">):</span>
-    <span class="n">x_p</span><span class="p">,</span> <span class="n">y_p</span> <span class="o">=</span> <span class="n">path_fun</span><span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">x_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x_p</span><span class="p">))</span>
-    <span class="n">y_path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">y_p</span><span class="p">))</span>
+x_path = []
+y_path = []
+for t in range(800):
+    x_p, y_p = path_fun(t / 100, 1)
+    x_path.append(float(x_p))
+    y_path.append(float(y_p))
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="id1">
+</section>
+<section id="id1">
 <h3>Simulation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_steps</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">):</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">nmpc</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
-    <span class="n">x0</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;xf&#39;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>n_steps = 100
+for i in range(n_steps):
+    u = nmpc.optimize(x0)
+    model.simulate(u=u)
+    x0 = model.solution[&#39;xf&#39;]
 </pre></div>
 </div>
 </div>
@@ -989,29 +990,29 @@ This program contains Ipopt, a library for large-scale nonlinear optimization.
 
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Results">
+</section>
+<section id="Results">
 <h3>Results<a class="headerlink" href="#Results" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">y_range</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">x_range</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">y_axis_label</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">x_axis_label</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;F1 racing with obstacle.&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plot = figure(y_range=(10, 50), x_range=(10, 50), y_axis_label=&#39;y&#39;, x_axis_label=&#39;x&#39;, title=&quot;F1 racing with obstacle.&quot;)
 
-<span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_path</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_path</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
-<span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_path</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_path</span><span class="p">,</span> <span class="n">line_dash</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+plot.line(x=x_path, y=y_path, alpha=0.8, color=&#39;grey&#39;, line_width=80)
+plot.line(x=x_path, y=y_path, line_dash=&#39;dashed&#39;, color=&#39;white&#39;)
 
-<span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;px&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;py&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
-          <span class="n">line_width</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;position&#39;</span><span class="p">)</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">obs_x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">obs_y</span><span class="p">)</span>
-<span class="n">glyph</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">glyph</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">obs_rad</span> <span class="o">/</span> <span class="mi">2</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">fill_alpha</span> <span class="o">=</span> <span class="mf">0.9</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">fill_color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">line_color</span> <span class="o">=</span> <span class="s2">&quot;firebrick&quot;</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">line_width</span> <span class="o">=</span> <span class="mi">2</span>
+plot.line(x=np.array(model.solution[&#39;px&#39;]).squeeze(), y=np.array(model.solution[&#39;py&#39;]).squeeze(), color=&#39;red&#39;,
+          line_width=3, legend_label=&#39;position&#39;)
+r = plot.circle(x=obs_x, y=obs_y)
+glyph = r.glyph
+glyph.radius = obs_rad / 2
+glyph.fill_alpha = 0.9
+glyph.fill_color = &#39;black&#39;
+glyph.line_color = &quot;firebrick&quot;
+glyph.line_width = 2
 
-<span class="n">show</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+show(plot)
 <br/></pre></div>
 </div>
 </div>
@@ -1056,19 +1057,19 @@ var element = document.currentScript.previousSibling.previousSibling;
 })(window);
 </script></div>
 </div>
-</div>
-</div>
-<div class="section" id="Soft-constraints">
+</section>
+</section>
+<section id="Soft-constraints">
 <h2>Soft constraints<a class="headerlink" href="#Soft-constraints" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">reset_solution</span><span class="p">()</span>
-<span class="n">model</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
-<span class="c1"># Initial conditions</span>
-<span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="n">model</span><span class="o">.</span><span class="n">set_initial_conditions</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>model.reset_solution()
+model.setup(dt=dt)
+# Initial conditions
+x0 = [15, 30, 0, 0]
+model.set_initial_conditions(x0=x0)
 </pre></div>
 </div>
 </div>
@@ -1076,18 +1077,18 @@ var element = document.currentScript.previousSibling.previousSibling;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setup NMPC</span>
-<span class="n">nmpc</span> <span class="o">=</span> <span class="n">NMPC</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Setup NMPC
+nmpc = NMPC(model)
 
 
-<span class="n">theta</span> <span class="o">=</span> <span class="n">nmpc</span><span class="o">.</span><span class="n">create_path_variable</span><span class="p">(</span><span class="n">u_pf_lb</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">u_pf_ub</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">path_x</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">-</span> <span class="mi">14</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-<span class="n">path_y</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">-</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">ca</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+theta = nmpc.create_path_variable(u_pf_lb=0.1, u_pf_ub=1)
+path_x = 30 - 14 * ca.cos(theta)
+path_y = 30 - 16 * ca.sin(theta)
 
-<span class="n">nmpc</span><span class="o">.</span><span class="n">horizon</span> <span class="o">=</span> <span class="mi">30</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">quad_stage_cost</span><span class="o">.</span><span class="n">add_states</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;px&#39;</span><span class="p">,</span> <span class="s1">&#39;py&#39;</span><span class="p">],</span> <span class="n">ref</span><span class="o">=</span><span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">path_following</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">quad_terminal_cost</span><span class="o">.</span><span class="n">add_states</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;px&#39;</span><span class="p">,</span> <span class="s1">&#39;py&#39;</span><span class="p">],</span> <span class="n">ref</span><span class="o">=</span><span class="n">ca</span><span class="o">.</span><span class="n">vertcat</span><span class="p">(</span><span class="n">path_x</span><span class="p">,</span> <span class="n">path_y</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">path_following</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">set_box_constraints</span><span class="p">(</span><span class="n">x_lb</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">],</span> <span class="n">x_ub</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">u_lb</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">u_ub</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+nmpc.horizon = 30
+nmpc.quad_stage_cost.add_states(names=[&#39;px&#39;, &#39;py&#39;], ref=ca.vertcat(path_x, path_y), weights=[1, 1], path_following=True)
+nmpc.quad_terminal_cost.add_states(names=[&#39;px&#39;, &#39;py&#39;], ref=ca.vertcat(path_x, path_y), weights=[1, 1], path_following=True)
+nmpc.set_box_constraints(x_lb=[-100, -100, -10, -100], x_ub=[100, 100, 10, 100], u_lb=[-1, -1], u_ub=[1, 1])
 </pre></div>
 </div>
 </div>
@@ -1095,20 +1096,20 @@ var element = document.currentScript.previousSibling.previousSibling;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nmpc</span><span class="o">.</span><span class="n">stage_constraint</span><span class="o">.</span><span class="n">constraint</span> <span class="o">=</span> <span class="p">(</span><span class="n">px</span> <span class="o">-</span> <span class="n">obs_x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">py</span> <span class="o">-</span> <span class="n">obs_y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">stage_constraint</span><span class="o">.</span><span class="n">ub</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">inf</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">stage_constraint</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="n">obs_rad</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">stage_constraint</span><span class="o">.</span><span class="n">is_soft</span> <span class="o">=</span><span class="kc">True</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">stage_constraint</span><span class="o">.</span><span class="n">max_violation</span> <span class="o">=</span> <span class="mf">0.5</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>nmpc.stage_constraint.constraint = (px - obs_x) ** 2 + (py - obs_y) ** 2
+nmpc.stage_constraint.ub = ca.inf
+nmpc.stage_constraint.lb = obs_rad ** 2
+nmpc.stage_constraint.is_soft =True
+nmpc.stage_constraint.max_violation = 0.5
 
-<span class="n">nmpc</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">constraint</span> <span class="o">=</span> <span class="p">(</span><span class="n">px</span> <span class="o">-</span> <span class="n">obs_x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">py</span> <span class="o">-</span> <span class="n">obs_y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">ub</span> <span class="o">=</span> <span class="n">ca</span><span class="o">.</span><span class="n">inf</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="n">obs_rad</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">is_soft</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">terminal_constraint</span><span class="o">.</span><span class="n">max_violation</span> <span class="o">=</span> <span class="mf">0.5</span>
+nmpc.terminal_constraint.constraint = (px - obs_x) ** 2 + (py - obs_y) ** 2
+nmpc.terminal_constraint.ub = ca.inf
+nmpc.terminal_constraint.lb = obs_rad ** 2
+nmpc.terminal_constraint.is_soft = True
+nmpc.terminal_constraint.max_violation = 0.5
 
-<span class="n">nmpc</span><span class="o">.</span><span class="n">set_initial_guess</span><span class="p">(</span><span class="n">x_guess</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">u_guess</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="n">nmpc</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;print_level&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">})</span>
+nmpc.set_initial_guess(x_guess=x0, u_guess=[0, 0])
+nmpc.setup(options={&#39;print_level&#39;:0})
 <br/></pre></div>
 </div>
 </div>
@@ -1116,35 +1117,35 @@ var element = document.currentScript.previousSibling.previousSibling;
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">):</span>
-    <span class="n">u</span> <span class="o">=</span> <span class="n">nmpc</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
-    <span class="n">x0</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;xf&#39;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>for i in range(n_steps):
+    u = nmpc.optimize(x0)
+    model.simulate(u=u)
+    x0 = model.solution[&#39;xf&#39;]
 <br/></pre></div>
 </div>
 </div>
-<div class="section" id="id2">
+<section id="id2">
 <h3>Results<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">y_range</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">x_range</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="n">y_axis_label</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">x_axis_label</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;F1 racing with obstacl.&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plot = figure(y_range=(10, 50), x_range=(10, 50), y_axis_label=&#39;y&#39;, x_axis_label=&#39;x&#39;, title=&quot;F1 racing with obstacl.&quot;)
 
-<span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_path</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_path</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
-<span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_path</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_path</span><span class="p">,</span> <span class="n">line_dash</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+plot.line(x=x_path, y=y_path, alpha=0.8, color=&#39;grey&#39;, line_width=80)
+plot.line(x=x_path, y=y_path, line_dash=&#39;dashed&#39;, color=&#39;white&#39;)
 
-<span class="n">plot</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;px&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="s1">&#39;py&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
-          <span class="n">line_width</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">legend_label</span><span class="o">=</span><span class="s1">&#39;position&#39;</span><span class="p">)</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">obs_x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">obs_y</span><span class="p">)</span>
-<span class="n">glyph</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">glyph</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">obs_rad</span> <span class="o">/</span> <span class="mi">2</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">fill_alpha</span> <span class="o">=</span> <span class="mf">0.9</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">fill_color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">line_color</span> <span class="o">=</span> <span class="s2">&quot;firebrick&quot;</span>
-<span class="n">glyph</span><span class="o">.</span><span class="n">line_width</span> <span class="o">=</span> <span class="mi">2</span>
+plot.line(x=np.array(model.solution[&#39;px&#39;]).squeeze(), y=np.array(model.solution[&#39;py&#39;]).squeeze(), color=&#39;red&#39;,
+          line_width=3, legend_label=&#39;position&#39;)
+r = plot.circle(x=obs_x, y=obs_y)
+glyph = r.glyph
+glyph.radius = obs_rad / 2
+glyph.fill_alpha = 0.9
+glyph.fill_color = &#39;black&#39;
+glyph.line_color = &quot;firebrick&quot;
+glyph.line_width = 2
 
-<span class="n">show</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+show(plot)
 <br/></pre></div>
 </div>
 </div>
@@ -1189,9 +1190,9 @@ var element = document.currentScript.previousSibling.previousSibling;
 })(window);
 </script></div>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>

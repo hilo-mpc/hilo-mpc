@@ -243,9 +243,9 @@
                 <span class="n">min_val</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;min_val&#39;</span><span class="p">)</span>
                 <span class="n">max_val</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_val&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">min_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">min_val</span> <span class="o">=</span> <span class="o">-.</span><span class="mi">05</span>
+                    <span class="n">min_val</span> <span class="o">=</span> <span class="o">-</span><span class="mf">.05</span>
                 <span class="k">if</span> <span class="n">max_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">max_val</span> <span class="o">=</span> <span class="o">.</span><span class="mi">05</span>
+                    <span class="n">max_val</span> <span class="o">=</span> <span class="mf">.05</span>
                 <span class="n">initializer</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;uniform&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="n">min_val</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="n">max_val</span><span class="p">}}</span>
             <span class="k">elif</span> <span class="n">initializer</span> <span class="o">==</span> <span class="s1">&#39;normal&#39;</span><span class="p">:</span>
                 <span class="n">mean</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span>
@@ -253,7 +253,7 @@
                 <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">mean</span> <span class="o">=</span> <span class="mf">0.</span>
                 <span class="k">if</span> <span class="n">std</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">std</span> <span class="o">=</span> <span class="o">.</span><span class="mi">05</span>
+                    <span class="n">std</span> <span class="o">=</span> <span class="mf">.05</span>
                 <span class="n">initializer</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;normal&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="n">mean</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">:</span> <span class="n">std</span><span class="p">}}</span>
             <span class="k">elif</span> <span class="n">initializer</span> <span class="o">==</span> <span class="s1">&#39;constant&#39;</span><span class="p">:</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;val&#39;</span><span class="p">)</span>
@@ -317,10 +317,10 @@
             <span class="k">elif</span> <span class="n">initializer</span> <span class="o">==</span> <span class="s1">&#39;sparse&#39;</span><span class="p">:</span>
                 <span class="n">sparsity</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sparsity&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">sparsity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">sparsity</span> <span class="o">=</span> <span class="o">.</span><span class="mi">1</span>
+                    <span class="n">sparsity</span> <span class="o">=</span> <span class="mf">.1</span>
                 <span class="n">std</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;std&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">std</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">std</span> <span class="o">=</span> <span class="o">.</span><span class="mi">01</span>
+                    <span class="n">std</span> <span class="o">=</span> <span class="mf">.01</span>
                 <span class="n">initializer</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sparse&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;sparsity&#39;</span><span class="p">:</span> <span class="n">sparsity</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">:</span> <span class="n">std</span><span class="p">}}</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Initializer not recognized&quot;</span><span class="p">)</span>
@@ -398,15 +398,15 @@
 
             <span class="k">if</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">activation</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_layers</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between supplied nodes list of length </span><span class="si">{n_layers}</span><span class="s2"> &quot;</span>
-                                     <span class="sa">f</span><span class="s2">&quot;and supplied activation function list of length {len(activation)}&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between supplied nodes list of length </span><span class="si">{</span><span class="n">n_layers</span><span class="si">}</span><span class="s2"> &quot;</span>
+                                     <span class="sa">f</span><span class="s2">&quot;and supplied activation function list of length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">activation</span> <span class="o">=</span> <span class="n">n_layers</span> <span class="o">*</span> <span class="p">[</span><span class="n">activation</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">initializer</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">initializer</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_layers</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between supplied nodes list of length </span><span class="si">{n_layers}</span><span class="s2"> &quot;</span>
-                                     <span class="sa">f</span><span class="s2">&quot;and supplied initializer list of length {len(initializer)}&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between supplied nodes list of length </span><span class="si">{</span><span class="n">n_layers</span><span class="si">}</span><span class="s2"> &quot;</span>
+                                     <span class="sa">f</span><span class="s2">&quot;and supplied initializer list of length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">initializer</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">initializer</span> <span class="o">=</span> <span class="n">n_layers</span> <span class="o">*</span> <span class="p">[</span><span class="n">initializer</span><span class="p">]</span>
 
@@ -419,10 +419,10 @@
                 <span class="k">if</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">dropout</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">where</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;before&#39;</span><span class="p">,</span> <span class="s1">&#39;after&#39;</span><span class="p">]:</span>
                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_layers</span><span class="p">:</span>
-                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between supplied nodes list of length </span><span class="si">{n_layers}</span><span class="s2"> &quot;</span>
-                                             <span class="sa">f</span><span class="s2">&quot;and supplied dropout list of length {len(dropout)}&quot;</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between supplied nodes list of length </span><span class="si">{</span><span class="n">n_layers</span><span class="si">}</span><span class="s2"> &quot;</span>
+                                             <span class="sa">f</span><span class="s2">&quot;and supplied dropout list of length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong keyword argument &#39;</span><span class="si">{where}</span><span class="s2">&#39; for keyword &#39;where&#39;&quot;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong keyword argument &#39;</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2">&#39; for keyword &#39;where&#39;&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">dropout</span> <span class="o">=</span> <span class="n">n_layers</span> <span class="o">*</span> <span class="p">[</span><span class="n">dropout</span><span class="p">]</span>
 
@@ -444,11 +444,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">activation</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between supplied nodes and supplied activation function list of &quot;</span>
-                                 <span class="sa">f</span><span class="s2">&quot;length {len(activation)}&quot;</span><span class="p">)</span>
+                                 <span class="sa">f</span><span class="s2">&quot;length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">initializer</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between supplied nodes and supplied initializer list of length &quot;</span>
-                                 <span class="sa">f</span><span class="s2">&quot;{len(initializer)}&quot;</span><span class="p">)</span>
+                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">initializer</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">dropout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">where</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -458,7 +458,7 @@
 
                 <span class="k">if</span> <span class="n">is_list_like</span><span class="p">(</span><span class="n">dropout</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dimension mismatch between supplied nodes and supplied activation function list&quot;</span>
-                                     <span class="sa">f</span><span class="s2">&quot; of length {len(dropout)}&quot;</span><span class="p">)</span>
+                                     <span class="sa">f</span><span class="s2">&quot; of length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">where</span> <span class="o">==</span> <span class="s1">&#39;after&#39;</span><span class="p">:</span>
                     <span class="k">return</span> <span class="p">[</span><span class="n">Dense</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
@@ -467,7 +467,7 @@
                     <span class="k">return</span> <span class="p">[</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">),</span>
                             <span class="n">Dense</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong keyword argument &#39;</span><span class="si">{where}</span><span class="s2">&#39; for keyword &#39;where&#39;&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrong keyword argument &#39;</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2">&#39; for keyword &#39;where&#39;&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">Dense</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 

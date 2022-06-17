@@ -5,7 +5,8 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Control module &mdash; HILO-MPC 1.0 documentation</title>
@@ -132,6 +133,11 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#linear-model-predictive-control">Linear Model Predictive Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Time-varying parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solvers">Solvers</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="machinelearnings.html">Machine learning module</a></li>
@@ -207,7 +213,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="control-module">
+  <section id="control-module">
 <h1>Control module<a class="headerlink" href="#control-module" title="Permalink to this headline">¶</a></h1>
 <p>This section describes the most important tools of the Control module with examples. For a more detailed
 description of the methods refer to <a class="reference internal" href="../api/controllers.html#controller-automodel"><span class="std std-ref">the API</span></a>.</p>
@@ -215,7 +221,7 @@ description of the methods refer to <a class="reference internal" href="../api/c
 <ul class="simple">
 <li><p>Model Predictive Control (NMPC)</p></li>
 </ul>
-<div class="section" id="nonlinear-model-predictive-control">
+<section id="nonlinear-model-predictive-control">
 <h2>Nonlinear Model Predictive Control<a class="headerlink" href="#nonlinear-model-predictive-control" title="Permalink to this headline">¶</a></h2>
 <p>The class NMPC implements the Model Predictive Controller. To setup an MPC properly you need <em>at least</em> to define</p>
 <ul class="simple">
@@ -223,7 +229,7 @@ description of the methods refer to <a class="reference internal" href="../api/c
 <li><p>An objective function.</p></li>
 </ul>
 <p>In the next following two paragraphs we give more details on these two mandatory settings.</p>
-<div class="section" id="prediction-and-control-horizon">
+<section id="prediction-and-control-horizon">
 <h3>Prediction and control horizon<a class="headerlink" href="#prediction-and-control-horizon" title="Permalink to this headline">¶</a></h3>
 <p>If you only <code class="code docutils literal notranslate"><span class="pre">horizon</span></code> then Neo will assume that control and prediction horizon are the same. To set a control horizon
 different than the prediction horizon use <code class="code docutils literal notranslate"><span class="pre">prediction_horizon</span></code> and <code class="code docutils literal notranslate"><span class="pre">control_horizon</span></code> separately for example:</p>
@@ -232,8 +238,8 @@ different than the prediction horizon use <code class="code docutils literal not
 <span class="n">nmpc</span><span class="o">.</span><span class="n">prediction_horizon</span> <span class="o">=</span> <span class="mi">10</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="objective-function">
+</section>
+<section id="objective-function">
 <h3>Objective function<a class="headerlink" href="#objective-function" title="Permalink to this headline">¶</a></h3>
 <p>Neo offers a flexible way for constructing the objective function.
 This can be set using any combination of these methods:</p>
@@ -327,7 +333,7 @@ follow a sinusoidal path using path following MPC.</p>
 </div>
 <p>Note how <span class="math notranslate nohighlight">\(a\)</span> wants to follow a path,:math:<cite>b</cite> a time-varying trajectory and <span class="math notranslate nohighlight">\(c\)</span> a constant reference!
 You can do that, sure… but if that makes sense for your problem is up to you to decide!</p>
-<div class="section" id="discrete-vs-continuous-objective-function">
+<section id="discrete-vs-continuous-objective-function">
 <h4>Discrete vs continuous objective function<a class="headerlink" href="#discrete-vs-continuous-objective-function" title="Permalink to this headline">¶</a></h4>
 <p>Both discrete and continuous objective are possible. If the model used is discrete time, then by default the objective
 function is discrete i.e.</p>
@@ -340,9 +346,9 @@ function is discrete i.e.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nmpc</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;objective_function&#39;</span><span class="p">:</span> <span class="s1">&#39;discrete&#39;</span><span class="p">})</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="time-varying-parameters">
+</section>
+</section>
+<section id="time-varying-parameters">
 <h3>Time-varying parameters<a class="headerlink" href="#time-varying-parameters" title="Permalink to this headline">¶</a></h3>
 <p>Time-varying parameters are model parameters which are not constant in time. For example they could model the effect
 of a certain disturbance on the system dynamics. If the prediction of these values are known, you can pass these to
@@ -381,8 +387,8 @@ this case you can give only the value of a period.</p>
 <p>You can pass the dictionary with the values either in <code class="code docutils literal notranslate"><span class="pre">set_time_varying_parameters</span></code> or directly to the parameter
 <code class="code docutils literal notranslate"><span class="pre">tvp</span></code> in the <code class="code docutils literal notranslate"><span class="pre">optimize</span></code> method. This allows you, if necessary, to change the values of the parameters directly
 in the control loop.</p>
-</div>
-<div class="section" id="trajectory-tracking-problem">
+</section>
+<section id="trajectory-tracking-problem">
 <h3>Trajectory tracking problem<a class="headerlink" href="#trajectory-tracking-problem" title="Permalink to this headline">¶</a></h3>
 <p>The trajectory tracking problem can be formulated easily.
 Refer to <span class="xref std std-ref">theoretical background</span> for the theoretical background and to the following
@@ -393,7 +399,7 @@ examples:</p>
 <p>There are two ways to define a trajectory tracking problem. If you have a time varying function that describes the
 time-varying reference you can pass it directly to the problem. If instead you have only the values of the references
 but not the function you can pass the data directly.</p>
-<div class="section" id="available-reference-function">
+<section id="available-reference-function">
 <h4>Available reference function<a class="headerlink" href="#available-reference-function" title="Permalink to this headline">¶</a></h4>
 <p>If the function is available proceed as follows:</p>
 <ol class="arabic simple">
@@ -420,8 +426,8 @@ but not the function you can pass the data directly.</p>
 <p>This works even your system is discrete-time. The toolbox will automatically evaluate the function at the
 discretization points.</p>
 </div>
-</div>
-<div class="section" id="only-values-of-the-references-are-available">
+</section>
+<section id="only-values-of-the-references-are-available">
 <h4>Only values of the references are available<a class="headerlink" href="#only-values-of-the-references-are-available" title="Permalink to this headline">¶</a></h4>
 <p>Alternatively, you can pass the values directly in this case you need to just put the flag <code class="code docutils literal notranslate"><span class="pre">trajectory_tracking=True</span></code>
 as follows:</p>
@@ -470,9 +476,9 @@ horizon. This can be usefull for step-wise change in references. For example the
 </div>
 <p>runs the system <code class="code docutils literal notranslate"><span class="pre">model</span></code> for 100 steps with references 2 and 1, and successively
 100 steps with references 1 and 2for <code class="code docutils literal notranslate"><span class="pre">x</span></code> and <code class="code docutils literal notranslate"><span class="pre">y</span></code> respectively.</p>
-</div>
-</div>
-<div class="section" id="path-following-problem">
+</section>
+</section>
+<section id="path-following-problem">
 <h3>Path following problem<a class="headerlink" href="#path-following-problem" title="Permalink to this headline">¶</a></h3>
 <p>HILO-MPC allows you do quickly define path-following problems.
 Here we go into the details of what you can do to setup a path-following problem.
@@ -548,8 +554,8 @@ as many times you want. For example</p>
                                    <span class="n">path_following</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="advanced-constraints">
+</section>
+<section id="advanced-constraints">
 <h3>Advanced constraints<a class="headerlink" href="#advanced-constraints" title="Permalink to this headline">¶</a></h3>
 <p>Unless you are using the single-shooting method for the MPC predictions, HILO-MPC optimizes over the states and inputs at every
 sampling time [here link to integration methods].
@@ -563,12 +569,12 @@ sampling time.</p>
     <span class="k">return</span> <span class="n">constraint</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="debugging-the-nmpc">
+</section>
+<section id="debugging-the-nmpc">
 <h3>Debugging the NMPC<a class="headerlink" href="#debugging-the-nmpc" title="Permalink to this headline">¶</a></h3>
 <p>Sometimes is useful to visualize the single iterations of the optimizer and the the values of the constraints at every
 point of the prediction horizon. At the moment, the debugger works with <cite>ipopt</cite>.</p>
-<div class="section" id="ipopt-debugger-beta">
+<section id="ipopt-debugger-beta">
 <h4>IPOPT debugger (beta)<a class="headerlink" href="#ipopt-debugger-beta" title="Permalink to this headline">¶</a></h4>
 <p>To enter the debugging mode it is enough to pass <code class="code docutils literal notranslate"><span class="pre">options={ipopt_debugger:True}</span></code> when setting up the MPC as follows</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mpc</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ipopt_debugger&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
@@ -587,10 +593,50 @@ A quick way to visualize the results is with the method <code class="code docuti
 <p>At the moment the <code class="code docutils literal notranslate"><span class="pre">plot_iteration</span></code> method works only with <a class="reference external" href="https://bokeh.org/">bokeh</a>.</p>
 </div>
 <p>To visualize the states, pass <code class="code docutils literal notranslate"><span class="pre">plot_states=</span> <span class="pre">True</span></code>. Note that if optimizer performs many iterations, the plots could take quite a while to load.</p>
+</section>
+</section>
+</section>
+<section id="linear-model-predictive-control">
+<h2>Linear Model Predictive Control<a class="headerlink" href="#linear-model-predictive-control" title="Permalink to this headline">¶</a></h2>
+<p>The linear model predictive control class solves the following problem</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\min_{\mathbf{u}} \sum_{i=0}^{N-1} \left( x^T_i Q x_i +  u^T_i R u_i \right) + x^T_N P x_N \\
+x_{i+1} = Ax_i + Bu_i\, \quad x_0 = \hat{x}(t_0)\\
+x_{\text{lb}} \leq x \leq x_{\text{ub}} \\
+u_{\text{lb}} \leq u \leq u_{\text{ub}} \\
+\forall i \in [1,...,N]\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{u} = [u_0^T,u_1^T,...,u_{N-1}^T]\)</span>. Note that it uses discrete-time linear systems with box constraints.
+The problem is reformulated as a quadratic programming problem</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\min_{\mathbf{z}} \mathbf{z} ^T H \mathbf{z}  + q\mathbf{z}  + f \\
+A_{\text{eq}} \mathbf{z} = b_{\text{eq}} \\
+A_{\text{d}} \mathbf{z} \leq b_\text{d}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{z} = [\mathbf{x}^T, \mathbf{u}^T]^T\)</span> and <span class="math notranslate nohighlight">\(\mathbf{x} = [x_0^T,x_1^T,...,x_{N}^T]^T\)</span> using a sparse approach.</p>
+<section id="id2">
+<h3>Time-varying parameters<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Time-varying can be defined exactly in the same way of the NMPC (<a class="reference internal" href="#tvp-nmpc"><span class="std std-ref">see section</span></a>).</p>
+</section>
+<section id="solvers">
+<h3>Solvers<a class="headerlink" href="#solvers" title="Permalink to this headline">¶</a></h3>
+<p>To solve the LMPC, the it is possible to use any of the solvers supported by CasADi.
+The default solver is <cite>qpoasis</cite>, which is dispatched with CasADi. Other solvers are: <a class="reference external" href="https://www.gurobi.com/">gurobi</a>,
+<a class="reference external" href="https://www.ibm.com/de-de/analytics/cplex-optimizer">cplex</a>, <a class="reference external" href="https://pages.cs.wisc.edu/~swright/ooqp/">OOQP</a>, and
+<a class="reference external" href="https://ccom.ucsd.edu/~optimizers/solvers/sqic/">SQIC</a> among others.
+See <a class="reference external" href="https://web.casadi.org/python-api/#qp">the CasADi documentation</a> for the complete list of the solver as well as the options for every solver. The solver and its options can be set when calling the setup method of the LMPC. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lmpc</span> <span class="o">=</span> <span class="n">LMPC</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="c1"># initialize the LMPC with a linear time-discrete model</span>
+<span class="c1"># ...</span>
+<span class="c1"># here sets its parameters, e.g., horizon length etc</span>
+<span class="c1"># ...</span>
+<span class="n">lmpc</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s1">&#39;qpoases&#39;</span><span class="p">,</span> <span class="n">solver_options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;sparse&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">})</span>
+</pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The can vary depending on the solver used.</p>
 </div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
