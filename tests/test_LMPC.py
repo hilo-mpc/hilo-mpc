@@ -25,34 +25,34 @@ class TestAlreadyLinearMOdels(unittest.TestCase):
         mpc = LMPC(model)
         mpc.Q = np.eye(2)
         mpc.R = 1
-        mpc.P = np.eye(2)
         mpc.horizon = 10
         mpc.set_box_constraints(x_lb=[-5, -5], x_ub=[5, 5], u_lb=[-1], u_ub=[1])
         mpc.setup()
 
-        for i in range(100):
+        for i in range(200):
             u = mpc.optimize(x0=x0)
             model.simulate(u=u)
             x0 = model.solution['x:f']
 
-        # model.solution.plot(output_file='results/test_lmpc.html')
+        model.solution.plot(output_file='results/test_lmpc.html')
 
         model.reset_solution(keep_initial_conditions=True)
+        x0 = self.x0
 
         nmpc = NMPC(model)
         nmpc.horizon = 10
-        nmpc.quad_stage_cost.add_states(names=['x_0', 'x_1'], weights=[1, 1])
+        nmpc.quad_stage_cost.add_states(names=['x_0', 'x_1'], weights=[2, 2])
         nmpc.quad_stage_cost.add_inputs(names=['u'], weights=[1])
         nmpc.set_initial_guess(x_guess=x0, u_guess=[0])
         nmpc.set_box_constraints(x_lb=[-5, -5], x_ub=[5, 5], u_lb=[-1], u_ub=[1])
         nmpc.setup()
 
-        for i in range(10):
+        for i in range(200):
             u = nmpc.optimize(x0=x0)
             model.simulate(u=u)
             x0 = model.solution['x:f']
 
-        # model.solution.plot(output_file='results/test_mpc.html')
+        model.solution.plot(output_file='results/test_mpc.html')
 
 
 class TestLinearizedModel(unittest.TestCase):

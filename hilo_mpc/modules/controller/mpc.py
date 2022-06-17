@@ -2102,6 +2102,15 @@ class LMPC(Controller, DynamicOptimization):
         #         self._time_varying_parameters_horizon[tvp_counter, :] = value[0:self._prediction_horizon]
         #         tvp_counter += 1
 
+    def _save_references(self):
+        x_ref = ca.DM.nan(self._n_x, self.horizon)
+        u_ref = ca.DM.nan(self._n_u, self.horizon)
+        x_ref = ca.repmat(ca.DM.zeros(self._n_x).T, self.horizon).T
+        u_ref = ca.repmat(ca.DM.zeros(self._n_u).T, self.horizon).T
+
+        self.solution.add('u_ref', u_ref)
+        self.solution.add('x_ref', x_ref)
+
     def setup(self, options=None, solver_options={}, solver='qpoases'):
         """
 
@@ -2127,8 +2136,14 @@ class LMPC(Controller, DynamicOptimization):
 
         self._populate_solution()
 
+        self._x_lb_orig = deepcopy(self._x_lb)
+        self._x_ub_orig = deepcopy(self._x_ub)
+        self._u_lb_orig = deepcopy(self._u_lb)
+        self._u_ub_orig = deepcopy(self._u_ub)
+
         # Scale problem
         self._scale_problem()
+
 
         # Predefine parameters (those are fixed and not optimized)
         param_lmpc = ca.SX.sym("tv_p", self._n_tvp, self._horizon)
@@ -2342,6 +2357,9 @@ class LMPC(Controller, DynamicOptimization):
         # Update the time clock - Useful for time-varying systems and references.
         self._time += self.sampling_interval
 
+        # Save reference (is this case always zero)
+
+        self._save_references()
         # Interation counter
         self._n_iterations += 1
 
