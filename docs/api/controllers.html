@@ -5,7 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -187,7 +187,7 @@
            <div itemprop="articleBody">
             
   <section id="controllers">
-<span id="controller-automodel"></span><h1>Controllers<a class="headerlink" href="#controllers" title="Permalink to this headline">¶</a></h1>
+<span id="controller-automodel"></span><h1>Controllers<a class="headerlink" href="#controllers" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="hilo_mpc.NMPC">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">NMPC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC" title="Permalink to this definition">¶</a></dt>
@@ -196,7 +196,7 @@
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.check_consistency">
 <span class="sig-name descname"><span class="pre">check_consistency</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.NMPC.check_consistency" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -207,7 +207,7 @@
 <span class="sig-name descname"><span class="pre">create_path_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'theta'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_pf_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_pf_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_pf_ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_pf_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.create_path_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.create_path_variable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the path following variable. This must be used for building SX expression of the path.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>string</em>) – name of the variable, default = ‘theta’</p></li>
 <li><p><strong>u_pf_lb</strong> (<em>float</em>) – lower bound on the path virtual input <span class="math notranslate nohighlight">\(vel_{lb} \leq \dot{ \theta }\)</span>, default = 0.0001</p></li>
@@ -219,7 +219,7 @@
 <li><p><strong>theta_ub</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>casadi.SX</p>
 </dd>
 </dl>
@@ -231,10 +231,10 @@
 <dd><p>Returns reference values at a given time. If works for path following, trajectory tracking and reference
 tracking problems. For the reference tracking problem it returns always a (constant) reference.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>time</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -245,7 +245,7 @@ tracking problems. For the reference tracking problem it returns always a (const
 <span class="sig-name descname"><span class="pre">get_time_variable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.get_time_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.get_time_variable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Useful for trajectory tacking</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -255,7 +255,7 @@ tracking problems. For the reference tracking problem it returns always a (const
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.is_setup">
 <span class="sig-name descname"><span class="pre">is_setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.NMPC.is_setup" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -265,10 +265,10 @@ tracking problems. For the reference tracking problem it returns always a (const
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.minimize_final_time">
 <span class="sig-name descname"><span class="pre">minimize_final_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.minimize_final_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.minimize_final_time" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>weight</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -279,7 +279,7 @@ tracking problems. For the reference tracking problem it returns always a (const
 <span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tvp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.optimize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solves the MPC problem</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x0</strong> (<em>list</em><em> or </em><em>casadi DM</em>) – current system state</p></li>
 <li><p><strong>cp</strong> (<em>list</em><em> or </em><em>casadi DM</em><em>, </em><em>optional</em>) – constant system parameters (these will be assumed constant along the prediction horizon)</p></li>
@@ -294,7 +294,7 @@ will be the solution with the minimum objective function (default 0)</p></li>
 False, also the initial state is optimized.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>u_opt: first piece of optimal control sequence</p>
 </dd>
 </dl>
@@ -307,13 +307,13 @@ False, also the initial state is optimized.</p></li>
 At the moment it is working only with Bokeh.
 Warning: if the optimizer computes a large number of iterations the plots might take a bit of time to show up.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>plot_states</strong> – if True, also the states are plotted</p></li>
 <li><p><strong>kwargs</strong> – If you pass ‘plot_last’ only the last iteration is plotted. This is to avoid very busy figures.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -324,7 +324,7 @@ Warning: if the optimizer computes a large number of iterations the plots might 
 <span class="sig-name descname"><span class="pre">plot_prediction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mpc_prediction.html'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extras</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extras_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.plot_prediction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.plot_prediction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the MPC predicted values.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>save_plot</strong> (<em>bool</em>) – if True plot will be saved under ‘plot_dir/name_file.html’ if they are declared, otherwise in
 current directory</p></li>
@@ -338,7 +338,7 @@ states/inputs.</p></li>
 <li><p><strong>format_figure</strong> (<em>python function taking a bokeh figure object as an input</em>) – python function that modifies the format of the figure</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -348,7 +348,7 @@ states/inputs.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.reset_solution">
 <span class="sig-name descname"><span class="pre">reset_solution</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.NMPC.reset_solution" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -359,7 +359,7 @@ states/inputs.</p></li>
 <span class="sig-name descname"><span class="pre">return_prediction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.return_prediction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.return_prediction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the mpc prediction.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>x_pred, u_pred, t_pred</p>
 </dd>
 </dl>
@@ -367,12 +367,12 @@ states/inputs.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.set_box_constraints">
-<span class="sig-name descname"><span class="pre">set_box_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.set_box_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.set_box_constraints" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_box_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.set_box_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.set_box_constraints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set box constraints to the model’s variables. These look like</p>
 <div class="math notranslate nohighlight">
 \[x_{lb} \leq x \leq x_{ub}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x_ub</strong> (<em>list</em><em>, </em><em>numpy array</em><em> or </em><em>CasADi DM array</em>) – upper bound on states.</p></li>
 <li><p><strong>x_lb</strong> (<em>list</em><em>, </em><em>numpy array</em><em> or </em><em>CasADi DM array</em>) – lower bound on  states</p></li>
@@ -384,7 +384,7 @@ states/inputs.</p></li>
 <li><p><strong>z_lb</strong> (<em>list</em><em>, </em><em>numpy array</em><em> or </em><em>CasADi DM array</em>) – lower bound on algebraic states</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -394,13 +394,13 @@ states/inputs.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.set_compiler">
 <span class="sig-name descname"><span class="pre">set_compiler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.NMPC.set_compiler" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>method</strong> – </p></li>
 <li><p><strong>compiler</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -416,7 +416,7 @@ states/inputs.</p></li>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fun</strong> – python function</p></li>
 <li><p><strong>lb</strong> – lower bound</p></li>
@@ -425,7 +425,7 @@ states/inputs.</p></li>
 <li><p><strong>max_violation</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -449,13 +449,13 @@ states/inputs.</p></li>
 <span class="sig-name descname"><span class="pre">set_nlp_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.NMPC.set_nlp_options" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the options that modify how the MPC problem is set</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -471,10 +471,10 @@ for quadratic programmin problems (e.g. linear MPC)
 - ‘qpoases’, ‘cplex’, ‘gurobi’, ‘oopq’, ‘sqic’, ‘nlp
 For more info refer to the CasADi documentation <a class="reference external" href="https://web.casadi.org/docs/">https://web.casadi.org/docs/</a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>solver</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -486,7 +486,7 @@ For more info refer to the CasADi documentation <a class="reference external" hr
 <dd><p>More compact way to set the quadratic cost for the MPC. Mostly left for backwards compatibility.
 To use only for set-point-tracking problems.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>states</strong> (<em>list</em>) – list of states name that will appear in the quadratic cost</p></li>
 <li><p><strong>cost_states</strong> (<em>list</em><em>, </em><em>numpy array</em><em>, or </em><em>casADi DM array</em>) – weights values that will be multiplied by the states</p></li>
@@ -496,7 +496,7 @@ To use only for set-point-tracking problems.</p>
 <li><p><strong>inputs_references</strong> (<em>list</em>) – list of inputs reference values</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -508,14 +508,14 @@ To use only for set-point-tracking problems.</p>
 <dd><p>More compact way to set the quadratic cost for the MPC. Mostly left for backwards compatibility.
 To use only for set-point-tracking problems.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>states</strong> (<em>list</em>) – list of states name that will appear in the quadratic cost</p></li>
 <li><p><strong>cost</strong> (<em>list</em><em>, </em><em>numpy array</em><em> or </em><em>CasADi DM</em>) – list of weights values that will be multiplied by the states</p></li>
 <li><p><strong>references</strong> – list of references values for the states</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -525,10 +525,10 @@ To use only for set-point-tracking problems.</p>
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.set_sampling_interval">
 <span class="sig-name descname"><span class="pre">set_sampling_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.NMPC.set_sampling_interval" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>dt</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -541,14 +541,14 @@ To use only for set-point-tracking problems.</p>
 This is important for system with where the optimization variable can have a large difference of order of magnitude.
 The scaling factors divide the respective variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x_scaling</strong> (<em>list</em>) – scaling factors for the states</p></li>
 <li><p><strong>u_scaling</strong> (<em>list</em>) – scaling of scaling factors for inputs</p></li>
 <li><p><strong>y_scaling</strong> (<em>list</em>) – scaling of scaling factors for outputs</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -569,7 +569,7 @@ These correspond to the option of the used nlp solver, for example ipopt or bonm
 <span class="sig-name descname"><span class="pre">set_stage_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_soft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_violation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'stage_constraint'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.NMPC.set_stage_constraints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Allows to add a (nonlinear) stage constraint.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stage_constraint</strong> – SX expression. It has to contain variables of the model</p></li>
 <li><p><strong>lb</strong> – Vector or list float,integer or casadi.DM. Lower bound on the constraint</p></li>
@@ -582,7 +582,7 @@ constraint in the objective function using a quadratic cost.</p></li>
 <li><p><strong>name</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -593,7 +593,7 @@ constraint in the objective function using a quadratic cost.</p></li>
 <span class="sig-name descname"><span class="pre">set_terminal_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">terminal_constraint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'terminal_constraint'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_soft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_violation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#NMPC.set_terminal_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.NMPC.set_terminal_constraints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Allows to add a (nonlinear) terminal constraint.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>terminal_constraint</strong> (<em>CasADi SX expression</em>) – It has to contain variables of the model</p></li>
 <li><p><strong>lb</strong> (<em>list of float</em><em>, </em><em>integer</em><em> or </em><em>casadi.DM.</em>) – Lower bound on the constraint</p></li>
@@ -604,7 +604,7 @@ constraint in the objective function using a quadratic cost.</p></li>
 constraint in the objective function using a quadratic cost.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -617,7 +617,7 @@ constraint in the objective function using a quadratic cost.</p></li>
 Time varying parameters are model parameters that change in time. Hence, when predicting the system dynamics,
 their value must be supplied to the model at the every sampling time.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>names</strong> (<em>list of strings</em>) – list of strings with time varying parameter names</p></li>
 <li><p><strong>values</strong> (<em>dict</em><em> (</em><em>optional</em><em>)</em>) – values of the time varying parameters. You need to pass at least a number of values as long as
@@ -625,7 +625,7 @@ the prediction horizon. Note: if the prediction goes after the last supplied val
 repeated!</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -637,14 +637,14 @@ repeated!</p></li>
 <dd><p>Sets up the corresponding optimization problem (OP) of the MPC. This must be run before attempting to solve
 the MPC.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>options</strong> (<em>dict</em>) – Options for MPC. See documentation.</p></li>
 <li><p><strong>solver_options</strong> (<em>dict</em>) – Dictionary with options for the optimizer. These options are solver specific. Refer to
 the CasADi Documentation <a class="reference external" href="https://web.casadi.org/python-api/#nlp">https://web.casadi.org/python-api/#nlp</a></p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -654,7 +654,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.compiler">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compiler</span></span><a class="headerlink" href="#hilo_mpc.NMPC.compiler" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -664,7 +664,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.control_horizon">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">control_horizon</span></span><a class="headerlink" href="#hilo_mpc.NMPC.control_horizon" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -674,7 +674,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.current_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_time</span></span><a class="headerlink" href="#hilo_mpc.NMPC.current_time" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -684,7 +684,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.display">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">display</span></span><a class="headerlink" href="#hilo_mpc.NMPC.display" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -694,7 +694,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.horizon">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horizon</span></span><a class="headerlink" href="#hilo_mpc.NMPC.horizon" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -705,10 +705,10 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#hilo_mpc.NMPC.id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identifier of the object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Identifier of the object</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>str</p>
 </dd>
 </dl>
@@ -718,7 +718,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.initial_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_time</span></span><a class="headerlink" href="#hilo_mpc.NMPC.initial_time" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -728,7 +728,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.n_iterations">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_iterations</span></span><a class="headerlink" href="#hilo_mpc.NMPC.n_iterations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -739,7 +739,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_of_path_vars</span></span><a class="headerlink" href="#hilo_mpc.NMPC.n_of_path_vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of path variables used for path following</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -749,7 +749,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.n_tvp">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_tvp</span></span><a class="headerlink" href="#hilo_mpc.NMPC.n_tvp" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -759,7 +759,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.obj_fun">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">obj_fun</span></span><a class="headerlink" href="#hilo_mpc.NMPC.obj_fun" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Objective function (MX)</p>
 </dd>
 </dl>
@@ -769,7 +769,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.obj_function_stage_cost">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">obj_function_stage_cost</span></span><a class="headerlink" href="#hilo_mpc.NMPC.obj_function_stage_cost" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -779,7 +779,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.prediction_horizon">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prediction_horizon</span></span><a class="headerlink" href="#hilo_mpc.NMPC.prediction_horizon" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -789,7 +789,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.sampling_interval">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sampling_interval</span></span><a class="headerlink" href="#hilo_mpc.NMPC.sampling_interval" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -799,7 +799,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.solution">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solution</span></span><a class="headerlink" href="#hilo_mpc.NMPC.solution" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -809,7 +809,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.time_var">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_var</span></span><a class="headerlink" href="#hilo_mpc.NMPC.time_var" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -819,7 +819,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.type">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#hilo_mpc.NMPC.type" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -829,7 +829,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.u_lb">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">u_lb</span></span><a class="headerlink" href="#hilo_mpc.NMPC.u_lb" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -839,7 +839,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.u_ub">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">u_ub</span></span><a class="headerlink" href="#hilo_mpc.NMPC.u_ub" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -849,7 +849,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.x_lb">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_lb</span></span><a class="headerlink" href="#hilo_mpc.NMPC.x_lb" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -859,7 +859,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.NMPC.x_ub">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_ub</span></span><a class="headerlink" href="#hilo_mpc.NMPC.x_ub" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -869,19 +869,92 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hilo_mpc.LMPC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">LMPC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">LMPC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bokeh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="hilo_mpc.LMPC.optimize">
 <span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tvp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.optimize" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x0</strong> – </p></li>
 <li><p><strong>tvp</strong> – </p></li>
 <li><p><strong>cp</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.LMPC.return_prediction">
+<span class="sig-name descname"><span class="pre">return_prediction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.return_prediction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.return_prediction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mpc prediction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>x_pred, u_pred, t_pred</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.LMPC.set_custom_constraints_function">
+<span class="sig-name descname"><span class="pre">set_custom_constraints_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">soft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_violation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.set_custom_constraints_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.set_custom_constraints_function" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Set a custom function that will be added as last position in the nonlinear constraints vector:</dt><dd><p>lb &lt;= fun &lt;= ub</p>
+</dd>
+<dt>This must take the entire optimization vector z and the indices of states and inputs as</dt><dd><p>fun(v, x_ind, u_ind)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fun</strong> – python function</p></li>
+<li><p><strong>lb</strong> – lower bound</p></li>
+<li><p><strong>ub</strong> – upper bound</p></li>
+<li><p><strong>soft</strong> – </p></li>
+<li><p><strong>max_violation</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.LMPC.set_initial_guess">
+<span class="sig-name descname"><span class="pre">set_initial_guess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.set_initial_guess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.set_initial_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets initial guess for the optimizer when no other information of the states or inputs are available.
+:param x_guess: optimal state guesss
+:type x_guess: list, numpy array, float or casADi DM array
+:param u_guess: optimal input guess
+:type u_guess: list, numpy array, float or casADi DM array
+:param z_guess: optimal algebraic states guess
+:type z_guess: list, numpy array, float or casADi DM array
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hilo_mpc.LMPC.set_stage_constraints">
+<span class="sig-name descname"><span class="pre">set_stage_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_soft</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_violation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'stage_constraint'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.set_stage_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.set_stage_constraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows to add a (nonlinear) stage constraint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stage_constraint</strong> – SX expression. It has to contain variables of the model</p></li>
+<li><p><strong>lb</strong> – Vector or list float,integer or casadi.DM. Lower bound on the constraint</p></li>
+<li><p><strong>ub</strong> – Vector or list float,integer or casadi.DM. Upper bound on the constraint</p></li>
+<li><p><strong>is_soft</strong> – bool: if True soft constraints are used.</p></li>
+<li><p><strong>max_violation</strong> – (optional) Vector or list float,integer or casadi.DM. Maximum violation if constraint is
+soft. If None, there is no limit on the violation of the soft constraints</p></li>
+<li><p><strong>weight</strong> – (optional) matrix of appropriate dimension. If is_soft=True it will be used to weight the soft
+constraint in the objective function using a quadratic cost.</p></li>
+<li><p><strong>name</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -889,26 +962,24 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hilo_mpc.LMPC.setup">
-<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qpoases'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.setup" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'qpoases'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/mpc.html#LMPC.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.LMPC.setup" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>options</strong> – </p></li>
 <li><p><strong>solver_options</strong> – </p></li>
-<li><p><strong>nlp_solver</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
 </dl>
+<p>:param :
+:return:</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="hilo_mpc.LMPC.prediction_horizon">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">prediction_horizon</span></span><a class="headerlink" href="#hilo_mpc.LMPC.prediction_horizon" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -921,7 +992,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">PID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_set_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_i</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proportional_on_process_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">derivative_on_process_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/pid.html#PID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PID" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class for PID controller</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>n_set_points</strong> (<em>int</em>) – </p></li>
 <li><p><strong>id</strong> (<em>str</em><em>, </em><em>optional</em>) – </p></li>
@@ -939,13 +1010,13 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/pid.html#PID.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PID.call" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -955,10 +1026,10 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.setup">
 <span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/controller/pid.html#PID.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.PID.setup" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>kwargs</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -968,7 +1039,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.derivative_gain">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derivative_gain</span></span><a class="headerlink" href="#hilo_mpc.PID.derivative_gain" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -978,7 +1049,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.derivative_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derivative_time</span></span><a class="headerlink" href="#hilo_mpc.PID.derivative_time" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -988,7 +1059,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.integral_gain">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">integral_gain</span></span><a class="headerlink" href="#hilo_mpc.PID.integral_gain" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -998,7 +1069,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.integral_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">integral_time</span></span><a class="headerlink" href="#hilo_mpc.PID.integral_time" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1008,7 +1079,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.k_d">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_d</span></span><a class="headerlink" href="#hilo_mpc.PID.k_d" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1018,7 +1089,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.k_i">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_i</span></span><a class="headerlink" href="#hilo_mpc.PID.k_i" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1028,7 +1099,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.k_p">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_p</span></span><a class="headerlink" href="#hilo_mpc.PID.k_p" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1038,7 +1109,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.proportional_gain">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proportional_gain</span></span><a class="headerlink" href="#hilo_mpc.PID.proportional_gain" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1048,7 +1119,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.s_p">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">s_p</span></span><a class="headerlink" href="#hilo_mpc.PID.s_p" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1058,7 +1129,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.set_point">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_point</span></span><a class="headerlink" href="#hilo_mpc.PID.set_point" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1068,7 +1139,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.t_d">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t_d</span></span><a class="headerlink" href="#hilo_mpc.PID.t_d" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1078,7 +1149,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
 <dt class="sig sig-object py" id="hilo_mpc.PID.t_i">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t_i</span></span><a class="headerlink" href="#hilo_mpc.PID.t_i" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1139,6 +1210,7 @@ the CasADi Documentation <a class="reference external" href="https://web.casadi.
       <script type="text/javascript" src="../_static/documentation_options.js"></script>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
       <script type="text/javascript" src="../_static/clipboard.min.js"></script>
       <script type="text/javascript" src="../_static/copybutton.js"></script>

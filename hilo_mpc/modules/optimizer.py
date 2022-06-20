@@ -928,6 +928,32 @@ class DynamicOptimization(Base):
 
         return p
 
+    def _rearrange_parameters_numeric(self, tvp, cp):
+        """
+        Takes time-varying parameters, and not time-varying parameters and rearranges them in the correct order of the
+        model parameter vector
+
+        :param tvp:
+        :param cp:
+        :return:
+        """
+        if self._n_tvp != 0:
+            p = []
+            p_names = self._model.parameter_names
+            ii_tvp = 0
+            ii_cp = 0
+            for name in p_names:
+                if name in self._time_varying_parameters:
+                    p = ca.vertcat(p, tvp[ii_tvp])
+                    ii_tvp += 1
+                else:
+                    p = ca.vertcat(p, cp[ii_cp])
+                    ii_cp += 1
+        else:
+            p = cp
+
+        return p
+
     def _print_message(self):
         """
 

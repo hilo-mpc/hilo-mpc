@@ -25,7 +25,7 @@ github:
 
 githubwin:
 	@make html
-	@Xcopy build\html\. ..\docs /Y
+	@Xcopy build\html\. ..\docs /E/Y
 
 clean-github:
 	@make clean
