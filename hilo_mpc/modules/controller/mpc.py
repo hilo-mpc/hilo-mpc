@@ -28,8 +28,11 @@ import warnings
 import casadi as ca
 import casadi.tools as catools
 import numpy as np
+from scipy.special import erfinv
 
+import hilo_mpc
 from .base import Controller
+from ..dynamic_model.dynamic_model import Model
 from ..optimizer import DynamicOptimization
 from ...util.modeling import GenericCost, QuadraticCost, GenericConstraint, continuous2discrete
 from ...util.optimizer import IpoptDebugger
@@ -549,7 +552,7 @@ class NMPC(Controller, DynamicOptimization):
         self.solution.add('u_ref', u_ref)
         self.solution.add('x_ref', x_ref)
 
-    def _save_predictions(self):
+    def _save_predictions(self, cp, tvp):
         """
         Store prediction in the solution object. Necessary for plotting.
 
@@ -557,9 +560,19 @@ class NMPC(Controller, DynamicOptimization):
         """
         # Save prediction in solution
         x_pred, u_pred, dt_pred = self.return_prediction()
+
+        if self._n_tvp > 0:
+            p = self._rearrange_parameters_numeric(self._time_varying_parameters_horizon[:, 0], cp)
+            for ii in range(1, self._prediction_horizon):
+                p = ca.horzcat(p, self._rearrange_parameters_numeric(self._time_varying_parameters_horizon[:, ii], cp))
+        else:
+            p = cp
+
         # Save solution in the solution class
         self.solution.add('x', x_pred[:self._n_x, :])
         self.solution.add('u', u_pred[:self._n_u, :])
+        self.solution.add('p', p)
+
         self.solution.add('thetapfo', x_pred[self._n_x:self._n_x + self.n_of_path_vars, :])
         if dt_pred is not None:
             dt_sum = 0
@@ -827,7 +840,7 @@ class NMPC(Controller, DynamicOptimization):
             self.terminal_constraint.e_soft_value = self._nlp_solution['x'][self._e_soft_term_ind[0]]
 
         # Save predictions in the solution object. Done for plotting purposes.
-        self._save_predictions()
+        self._save_predictions(cp, tvp)
 
         # Save the references in the solution object. Done for plotting purposes.
         self._save_references(param)
@@ -1116,7 +1129,7 @@ class NMPC(Controller, DynamicOptimization):
         self.terminal_constraint.weight = weight
         self.terminal_constraint.name = name
 
-    def setup(self, options=None, solver_options=None) -> None:
+    def _setup(self, options=None, solver_options=None) -> None:
 
         """
         Sets up the corresponding optimization problem (OP) of the MPC. This must be run before attempting to solve
@@ -1772,6 +1785,20 @@ class NMPC(Controller, DynamicOptimization):
                 )
             self._solver = solver
 
+    def setup(self, options=None, solver_options=None) -> None:
+        """
+           Sets up the corresponding optimization problem (OP) of the MPC. This must be run before attempting to solve
+           the MPC.
+
+           :param options: Options for MPC. See documentation.
+           :type options: dict
+           :param solver_options: Dictionary with options for the optimizer. These options are solver specific. Refer to
+               the CasADi Documentation https://web.casadi.org/python-api/#nlp
+           :type solver_options: dict
+           :return: None
+       """
+        self._setup(options=options, solver_options=solver_options)
+
     def return_prediction(self):
         """
         Returns the mpc prediction.
@@ -2074,7 +2101,8 @@ class LMPC(Controller, DynamicOptimization):
 
         if self._Q is not None:
             if self._Q.shape != (self._n_x, self._n_x):
-                raise ValueError(f"The state matrix Q must be of dimension {(self._n_x, self._n_x)}, you have dimension {self._Q.shape}")
+                raise ValueError(
+                    f"The state matrix Q must be of dimension {(self._n_x, self._n_x)}, you have dimension {self._Q.shape}")
 
         if self._P is not None:
             if self._P.shape != (self._n_x, self._n_x):
@@ -2144,7 +2172,6 @@ class LMPC(Controller, DynamicOptimization):
         # Scale problem
         self._scale_problem()
 
-
         # Predefine parameters (those are fixed and not optimized)
         param_lmpc = ca.SX.sym("tv_p", self._n_tvp, self._horizon)
 
@@ -2158,7 +2185,7 @@ class LMPC(Controller, DynamicOptimization):
         P = self.P
 
         if Q is None:
-            Q = ca.DM.zeros(self._n_x,self._n_x)
+            Q = ca.DM.zeros(self._n_x, self._n_x)
         if P is None:
             P = ca.DM.zeros(self._n_x, self._n_x)
         if R is None:
@@ -2429,6 +2456,355 @@ class LMPC(Controller, DynamicOptimization):
     @R.setter
     def R(self, arg):
         self._R = check_and_wrap_to_DM(arg)
+
+
+class SMPC(NMPC):
+    """Class for Stochastic Nonlinear Model Predictive Control"""
+
+    def __init__(self, det_model, stoch_model, B, id=None, name=None, plot_backend=None, use_sx=True,
+                 stats=False, Kgain=None):
+
+        # Save dimension of original (stochastic) model
+        self._n_x_s = det_model.n_x
+        self._n_u_s = det_model.n_u
+        self._n_y_s = det_model.n_y
+        self._n_p_s = det_model.n_p
+        self._n_z_s = det_model.n_z
+
+        if Kgain is not None:
+            Kgain = check_and_wrap_to_DM(Kgain)
+            self._Kgain_is_set = True
+        else:
+            self._Kgain_is_set = False
+        # First transfor the problem in a deterministic problem
+        model_c, Kx, Kgain = self._create_deterministic_surrogate(det_model, stoch_model, B, Kgain=Kgain)
+        self.Kx = Kx
+        self.Kgain = Kgain
+
+        model_c.setup(dt=1)  # TODO put the dt from the solution
+
+        super().__init__(model_c, id=id, name=name, plot_backend=plot_backend, stats=stats, use_sx=use_sx)
+
+        # Initialize change constraint probability
+        self._x_ub_p = None
+        self._x_lb_p = None
+        self._u_ub_p = None
+        self._u_lb_p = None
+        self._y_ub_p = None
+        self._y_lb_p = None
+        self._z_ub_p = None
+        self._z_lb_p = None
+
+        # Initialize the original constraints
+        self.x_ub_s = ca.inf * ca.DM.ones(det_model.n_x)
+        self.x_lb_s = -ca.inf * ca.DM.ones(det_model.n_x)
+        self.u_ub_s = ca.inf * ca.DM.ones(det_model.n_u)
+        self.u_lb_s = -ca.inf * ca.DM.ones(det_model.n_u)
+        self.y_ub_s = ca.inf * ca.DM.ones(det_model.n_y)
+        self.y_lb_s = -ca.inf * ca.DM.ones(det_model.n_y)
+        self.z_ub_s = ca.inf * ca.DM.ones(det_model.n_z)
+        self.z_lb_s = -ca.inf * ca.DM.ones(det_model.n_z)
+
+        self._smpc_options = None
+        self._smpc_options_is_set = False
+
+    def _create_deterministic_surrogate(self, det_model, gps, Bw, Kgain=None):
+        """
+        Create surrogate deterministic model
+        """
+        model_c = Model(plot_backend='matplotlib', discrete=True)
+        mu_x = model_c.set_dynamical_states([f'{i}' for i in det_model.dynamical_state_names])
+        mu_u = model_c.set_inputs([f'{i}' for i in det_model.input_names])
+        mu_p = model_c.set_parameters(det_model.parameter_names)
+        if mu_p.shape == (0, 0):
+            mu_p.resize(0, 1)
+
+        if Kgain is None:
+            model_c.add_parameters([f'kgain_{i}' for i in range(det_model.n_x * det_model.n_u)])
+            Kgain = ca.reshape(model_c.p[det_model.n_p:], model_c.n_u, model_c.n_x)
+
+        jgps = []
+        mu_ds = []
+        Kd0s = []
+
+        if isinstance(gps, hilo_mpc.gp.GaussianProcess):
+            gps = [gps]
+
+        for gp in gps:
+            index = [det_model.dynamical_state_names.index(i) for i in gp.features]
+            xxx = det_model.x[index]
+            (y_pred_gp_ca, var_pred_gp_ca) = gp.predict(xxx)
+
+            # Compute jacobian of GP
+            jgp = ca.jacobian(y_pred_gp_ca, ca.vertcat(det_model.x, det_model.u))
+            jgp = ca.substitute(jgp, det_model.x, mu_x)
+            jgp = ca.substitute(jgp, det_model.u, mu_u)
+            jgp = ca.substitute(jgp, det_model.p, mu_p)
+            jgps.append(jgp)
+
+            mu_d = ca.substitute(y_pred_gp_ca, det_model.x, mu_x)
+            mu_d = ca.substitute(mu_d, det_model.u, mu_u)
+            mu_d = ca.substitute(mu_d, det_model.p, mu_p)
+            mu_ds.append(mu_d)
+
+            # Get the variance
+            Kd0 = ca.substitute(var_pred_gp_ca, det_model.x, mu_x)
+            Kd0 = ca.substitute(Kd0, det_model.u, mu_u)
+            Kd0 = ca.substitute(Kd0, det_model.p, mu_p)
+            Kd0s.append(Kd0)
+
+        mu_d = ca.vertcat(*mu_ds)
+        jgps = ca.vertcat(*jgps)
+        Kd0s = ca.diagcat(*Kd0s)
+
+        # Create new ode based on the means
+        ode = ca.substitute(det_model.ode, det_model.x, mu_x)
+        ode = ca.substitute(ode, det_model.u, mu_u)
+        ode = ca.substitute(ode, det_model.p, mu_p)
+        # Substitute the dt with the new model dt. They are the same thing but we need to do it becuse they need to be the same
+        # object
+        ode = ca.substitute(ode, det_model.dt, model_c.dt)
+        ode = ode + ca.mtimes(Bw, mu_d)
+
+        model_c.set_dynamical_equations(ode)
+
+        # Jacobian of the known part - necessary for uncertainty propagation
+        jode = ca.jacobian(det_model.ode, ca.vertcat(det_model.x, det_model.u))
+
+        # Substitute the means
+        jode = ca.substitute(jode, det_model.x, mu_x)
+        jode = ca.substitute(jode, det_model.u, mu_u)
+        jode = ca.substitute(jode, det_model.p, mu_p)
+
+        # Define variances and covariances of states inputs, unknown part and noise - x = f(x,u) + Bd(g(x,u)+w)
+        Kx = ca.SX.sym('kx', det_model.n_x, det_model.n_x)
+
+        # Add the state that describe the evolution of the states covariance matrix
+        model_c.add_dynamical_states(ca.reshape(Kx, det_model.n_x ** 2, 1))
+
+        Ku = ca.mtimes(ca.mtimes(Kgain, Kx), Kgain.T)
+        Kxu = ca.mtimes(Kx, Kgain.T)
+        Kux = Kxu.T
+
+        Kz = ca.vertcat(
+            ca.horzcat(Kx, Kxu),
+            ca.horzcat(Kux, Ku)
+        )
+
+        Kd = Kd0s + ca.mtimes(ca.mtimes(jgps, Kz), jgps.T)
+        Kzd = ca.mtimes(Kz, jgps.T)
+
+        # FIXME should I add a noise covariance matrix to Kd here?
+        bigK = ca.vertcat(
+            ca.horzcat(Kz, Kzd),
+            ca.horzcat(Kzd.T, Kd)
+        )
+
+        jodeBw = ca.horzcat(jode, Bw)
+
+        ode_c = ca.mtimes(jodeBw, ca.mtimes(bigK, jodeBw.T))
+
+        # Substitute the dt with the new model dt. They are the same thing but we need to do it becuse they need to be the same
+        # object
+        ode_c = ca.substitute(ode_c, det_model.dt, model_c.dt)
+
+        model_c.add_dynamical_equations(ca.reshape(ode_c, det_model.n_x ** 2, 1))
+
+        return model_c, Kx, Kgain
+
+    def _update_type(self) -> None:
+        """
+
+        :return:
+        """
+        self._type = 'SMPC'
+
+    def _get_chance_constraints(self):
+        # Note:
+        # I am taking the diagonal of Kx because I am assuming only box constrains. For different kind of constraints
+        # one should it id differenttly
+        if self._nlp_options['chance_constraints'] == 'prs':
+            if self._box_constraints_is_set:
+                if any([i != ca.inf for i in self._x_lb]) or any([i != ca.inf for i in self._x_ub]):
+                    # Set state chance constraints
+                    x_prob_ub = self._model.x[:self._n_x_s] + (
+                            ca.sqrt(2) * erfinv(2 * np.array(self._x_ub_p) - 1)) * ca.sqrt(
+                        ca.diag(self.Kx) + 1e-8)
+
+                    x_prob_lb = -self._model.x[:self._n_x_s] + (
+                            ca.sqrt(2) * erfinv(2 * np.array(self._x_lb_p) - 1)) * ca.sqrt(
+                        ca.diag(self.Kx) + 1e-8)
+
+                    self.stage_constraint.constraint = ca.vertcat(x_prob_ub, x_prob_lb)
+                    self.stage_constraint.ub = ca.vertcat(ca.DM(self.x_ub_s), -ca.DM(self.x_lb_s))
+                    self.stage_constraint.lb = -ca.inf * ca.DM.ones(2 * self._n_x_s)
+
+                    self.terminal_constraint.constraint = ca.vertcat(x_prob_ub, x_prob_lb)
+                    self.terminal_constraint.ub = ca.vertcat(ca.DM(self.x_ub_s), -ca.DM(self.x_lb_s))
+                    self.terminal_constraint.lb = -ca.inf * ca.DM.ones(2 * self._n_x_s)
+
+    def _sanity_check_probability_values(self, var, type):
+
+        if var is None:
+            return var
+        else:
+            var = check_and_wrap_to_list(var)
+
+            for i in var:
+                if i < 0 or i > 1:
+                    raise TypeError(
+                        f"The probabilities must be between 0 and 1. The variable time {type} has some values"
+                        f" ouside this range.")
+
+            return var
+
+    def set_box_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
+                            z_lb=None, *args, **kwargs):
+        raise TypeError(
+            "set_box_constraints is not available in stochastic MPC. Use 'set_box_chance_constraints' instead.")
+
+    def set_box_chance_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
+                                   z_lb=None, *args, **kwargs):
+        # TODO: add method's documentation
+        """
+        Set box constraints for the SMPC.
+        """
+        # The equivalent deterministic case has n_x_s + n_x_s**2 number of states. So we need to expand the bounds provided
+        # by the user
+        # TODO: this can be simplified by looping over all bounds instead of writing everything again
+        # NOTE: once issue #3 is solved, the following lines should be not necessary anymore
+        if x_ub is not None:
+            self.x_ub_s = x_ub
+            var_x_ub = np.eye(self._n_x_s)
+            var_x_ub[var_x_ub == 0] = ca.inf
+            var_x_ub[var_x_ub == 1] = ca.inf
+            var_x_ub = var_x_ub.flatten().tolist()
+            x_ub = x_ub + var_x_ub
+
+            # Get probability of constraint satisfaction
+        self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p', np.ones(self._n_x_s) * 0.954), 'x_ub')
+
+        if x_lb is not None:
+            self.x_lb_s = x_lb
+            var_x_lb = np.eye(self._n_x_s)
+            var_x_lb[var_x_lb == 0] = -ca.inf
+            var_x_lb[var_x_lb == 1] = 0
+            var_x_lb = var_x_lb.flatten().tolist()
+            x_lb = x_lb + var_x_lb
+
+            # Get probability of constraint satisfaction
+        self._x_lb_p = self._sanity_check_probability_values(kwargs.get('x_lb_p', np.ones(self._n_x_s) * 0.954), 'x_lb')
+
+        if y_ub is not None:
+            self.y_ub_s = y_ub
+            var_y_ub = np.eye(self._n_x_s)
+            var_y_ub[var_y_ub == 0] = ca.inf
+            var_y_ub[var_y_ub == 1] = ca.inf
+            var_y_ub = var_y_ub.flatten().tolist()
+            y_ub = y_ub + var_y_ub
+
+            # Get probability of constraint satisfaction
+        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_ub_p', np.ones(self._n_y_s) * 0.954), 'y_ub')
+        if y_lb is not None:
+            self.y_lb_s = y_lb
+            var_y_lb = np.eye(self._n_y_s)
+            var_y_lb[var_y_lb == 0] = -ca.inf
+            var_y_lb[var_y_lb == 1] = 0
+            var_y_lb = var_y_lb.flatten().tolist()
+            y_lb = y_lb + var_y_lb
+
+            # Get probability of constraint satisfaction
+        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_lb_p', np.ones(self._n_y_s) * 0.954), 'y_lb')
+        if z_ub is not None:
+            self.z_ub_s = z_ub
+            var_z_ub = np.eye(self._n_z_s)
+            var_z_ub[var_z_ub == 0] = ca.inf
+            var_z_ub[var_z_ub == 1] = ca.inf
+            var_z_ub = var_z_ub.flatten().tolist()
+            z_ub = z_ub + var_z_ub
+
+            # Get probability of constraint satisfaction
+        self._z_ub_p = self._sanity_check_probability_values(kwargs.get('z_ub_p', np.ones(self._n_z_s) * 0.954), 'z_ub')
+        if z_lb is not None:
+            self.z_lb_s = z_lb
+            var_z_lb = np.eye(self._n_x_s)
+            var_z_lb[var_z_lb == 0] = -ca.inf
+            var_z_lb[var_z_lb == 1] = 0
+            var_z_lb = var_z_lb.flatten().tolist()
+            z_lb = z_lb + var_z_lb
+
+            # Get probability of constraint satisfaction
+        self._z_lb_p = self._sanity_check_probability_values(kwargs.get('z_lb_p', np.ones(self._n_z_s) * 0.954), 'z_lb')
+
+        # Note: the deterministic MPC problem takes the bounds also for the covariance elements since the model is
+        # expanded by the covariance elements
+        super(SMPC, self).set_box_constraints(x_ub=x_ub, x_lb=x_lb, u_ub=u_ub, u_lb=u_lb, y_ub=y_ub, y_lb=y_lb,
+                                              z_ub=z_ub,
+                                              z_lb=z_lb)
+
+    def set_custom_constraints_function(self, fun=None, lb=None, ub=None, soft=False, max_violation=ca.inf):
+        raise NotImplementedError(
+            f"{self.set_custom_constraints_function.__name__} is not yet implemented for {self._type} class. ")
+
+    def set_stage_constraints(self, stage_constraint=None, lb=None, ub=None, is_soft=False, max_violation=ca.inf,
+                              weight=None, name='stage_constraint'):
+        raise NotImplementedError(
+            f"{self.set_stage_constraints.__name__} is not yet implemented for {self._type} class. ")
+
+    def set_terminal_constraints(self, stage_constraint=None, lb=None, ub=None, is_soft=False, max_violation=ca.inf,
+                                 weight=None, name='stage_constraint'):
+        raise NotImplementedError(
+            f"{self.set_terminal_constraints.__name__} is not yet implemented for {self._type} class. ")
+
+    def setup(self, options=None, solver_options=None) -> None:
+
+        self.set_nlp_options(options)
+
+        self._get_chance_constraints()
+
+        Kx = self.Kx[0:self._n_x_s, 0:self._n_x_s]
+        Ku = self.Kgain @ Kx @ self.Kgain.T
+        Q = self.quad_stage_cost.Q[0:self._n_x_s, 0:self._n_x_s]
+        R = self.quad_stage_cost.R
+        # Add covariance component in the objective function
+        self.stage_cost.cost = ca.trace(Q @ Kx) + ca.trace(R @ Ku)
+        # Setup equivalent deterministic problem
+        self._setup(options=options, solver_options=solver_options)
+
+    def optimize(self, x0, cp=None, tvp=None, v0=None, runs=0, fix_x0=True, **kwargs):
+
+        cov_x0 = kwargs.get('cov_x0', None)
+        if cov_x0 is None:
+            raise ValueError("To solve the SMPC you need to provide an intial condition for state covariance values. "
+                             "Please pass a 'cov_x0' as well.")
+
+        if self._Kgain_is_set is False:
+            Kgain = kwargs.get('Kgain', None)
+            if Kgain is None:
+                raise ValueError("It looks like you have not passed the gain of the ancillary controller yet. "
+                                 "Please provide a 'Kgain' to the optimize method.")
+            else:
+                Kgain = check_and_wrap_to_DM(Kgain)
+                kgain = ca.reshape(Kgain, self._n_x_s * self._n_u_s, 1)
+                if cp is not None:
+                    cp = ca.vertcat(cp, kgain)
+                else:
+                    cp = kgain
+
+        x0 = check_and_wrap_to_DM(x0)
+        cov_x0 = check_and_wrap_to_DM(cov_x0)
+        cov_x0 = ca.reshape(cov_x0, self._n_x_s ** 2, 1)
+        x0 = ca.vertcat(x0, cov_x0)
+        super().optimize(x0, cp=cp, tvp=tvp, v0=v0, runs=runs, fix_x0=fix_x0, **kwargs)
+
+    def plot_prediction(self, save_plot=False, plot_dir=None, name_file='mpc_prediction.html', show_plot=True,
+                        extras=None, extras_names=None, title=None, format_figure=None, **kwargs):
+
+        # I need to tell the NMPC how many stochastic states there are
+        kwargs['n_x_s'] = self._n_x_s
+        super().plot_prediction(save_plot=save_plot, plot_dir=plot_dir, name_file=name_file, show_plot=show_plot,
+                                extras=extras, extras_names=extras_names, title=title, format_figure=format_figure,
+                                **kwargs)
 
 
 __all__ = [

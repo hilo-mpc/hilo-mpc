@@ -458,6 +458,50 @@ A quick way to visualize the results is with the method :code:`plot_iterations`
 
 To visualize the states, pass :code:`plot_states= True`. Note that if optimizer performs many iterations, the plots could take quite a while to load.
 
+-------------------------------------------
+Stochastic Model Predictive Control (Beta)
+-------------------------------------------
+The stochastic MPC is implemented in the class SMPC. At the moment, the current SMPC formulations are implemented.
+
+Taylor approximation with additive uncertainty
+----------------------------------------------
+This considers discrete-time nonlinear systems of the following form
+
+.. math::
+
+    \begin{equation}
+    x_{k+1} = f(x_k,u_k) + B \left(g(x_k,u_k) + w_k\right),
+    \end{equation}
+
+where :math:`g(x_k,u_k)` is uncertain function and :math:`w_k \sim \mathcal{N}(\mu_w,\Sigma_w)` is random distributed
+noise. In the current implementation, the function :math:`g(x_k,u_k)` can be a Gaussian process. The stochastic MPC
+problem reads
+
+.. math::
+
+    \begin{align}
+            &\!\max_{\Pi(x)}&\qquad& \mathbb{E} \left( \sum_{k=0}^{N-1} l(x_k,u_k) + e(x_N)\right),\\
+            &\text{s.t.}&&x_{k+1}=f(x_k,u_k) + B \left(d(x_k,u_k) + w \right), \\
+            &&& u_k = \pi(x_k), \quad x_0=x(k),  \\
+            &&& \text{Pr} \left(x_{k+1} \in \mathcal{X}\right)\geq p^x, \\
+            &&&\text{Pr} \left(u_k \in \mathcal{U}\right) \geq p^u.
+    \end{align}
+
+
+The previous problem is infinite dimensional hence in general intractable. Following the similar steps as in
+:cite:`Hewing2017`, the problem is reformulated as follows
+
+.. math::
+
+    \begin{align}
+        &\!\max_{\mu^u}&\,\ & \mathbb{E} \left( \sum_{k=0}^{N-1} l(x_k,u_k) + e(x_N)\right) \\
+        &\text{s.t.}&&\mu^x_{k+1}=f(\mu^x_k,\mu^u_k) + B \mu_k^d, \\
+        &&& \Sigma_{k+1}^x = \left[ \nabla f(\mu_i^x,\mu_i^u), B\right] \Sigma_i \left[ \nabla f(\mu_i^x,\mu_i^u), B\right]^{T}, \\
+        &&& \mu_{k+1}^x \in \bar{\mathcal{X}}(\Sigma^x_{k+1}), \,\  \mu_k^u \in \bar{\mathcal{U}}(\Sigma^x_k),\\
+        &&& \mu_0^x =x(k),\,\  \Sigma_{0}^x = \Sigma^x(k),
+    \end{align}
+
+To see how the SMPC can be used, refer to the example [here put example].
 
 -----------------------------------
 Linear Model Predictive Control
@@ -508,3 +552,5 @@ See `the CasADi documentation <https://web.casadi.org/python-api/#qp>`_ for the 
 .. note::
 
     The options can vary depending on the solver used.
+
+.. bibliography::
