@@ -100,6 +100,14 @@ get_plot_backend = plotting.get_plot_backend
 set_plot_backend = plotting.set_plot_backend
 
 
+try:
+    from . import _version
+
+    __version__ = _version.version
+except ImportError:
+    __version__ = '0.0.0+unknown'
+
+
 __all__ = [
     'Model',
     'NMPC',
