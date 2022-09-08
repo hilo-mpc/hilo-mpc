@@ -485,6 +485,22 @@ class _PyTorchWrapper:
                 for k in range(len(self._metrics)):
                     self._writer.add_scalar('test_metric_' + str(k + 1), test_metric[k], epoch)
 
+    @property
+    def module(self) -> Module:
+        """
+
+        :return:
+        """
+        return self._module
+
+    @property
+    def train_loader(self) -> Optional[DataLoader]:
+        """
+
+        :return:
+        """
+        return self._train_loader
+
     def train(
             self,
             data,
