@@ -573,6 +573,89 @@ class ArtificialNeuralNetwork(LearningBase):
             self._net.close_tensorboard()
 
 
+class BayesianNeuralNetwork(ArtificialNeuralNetwork):
+    """Bayesian neural network class"""
+    def __init__(self, approximation, features, labels, id=None, name=None, **kwargs):
+        """Constructor method"""
+        approximation = approximation.lower()
+        if approximation == 'laplace':
+            kwargs['backend'] = 'laplace-torch'
+
+        super().__init__(features, labels, id=id, name=name, **kwargs)
+
+        likelihood = kwargs.get('likelihood')
+        if likelihood is None:
+            likelihood = 'regression'
+        self._likelihood = likelihood
+
+        subset_of_weights = kwargs.get('subset_of_weights')
+        if subset_of_weights is None:
+            subset_of_weights = 'all'
+        self._subset_of_weights = subset_of_weights
+
+        hessian_structure = kwargs.get('hessian_structure')
+        if hessian_structure is None:
+            hessian_structure = 'full'
+        self._hessian_structure = hessian_structure
+
+    def _parse_options(self, **kwargs) -> dict:
+        """
+
+        :param kwargs:
+        :return:
+        """
+        options = super()._parse_options(**kwargs)
+
+        subset_of_weights = kwargs.get('subset_of_weights')
+        if subset_of_weights is None:
+            subset_of_weights = self._subset_of_weights
+        else:
+            self._subset_of_weights = subset_of_weights
+
+        hessian_structure = kwargs.get('hessian_structure')
+        if hessian_structure is None:
+            hessian_structure = self._hessian_structure
+        else:
+            self._hessian_structure = hessian_structure
+
+        options['likelihood'] = self._likelihood
+        options['subset_of_weights'] = subset_of_weights
+        options['hessian_structure'] = hessian_structure
+
+        return options
+
+    def build_graph(self, weights=None, bias=None):
+        """
+
+        :param weights:
+        :param bias:
+        :return:
+        """
+        x = ca.SX.sym('x', self._n_features)
+        weights, bias = self._net.get_weights_and_bias()
+
+        weights_sym = [ca.SX.sym(f'weights_{k}', *w.shape) for k, w in enumerate(weights)]
+        bias_sym = [ca.SX.sym(f'bias_{k}', *b.shape) for k, b in enumerate(bias)]
+
+        parameters = [ca.vertcat(w[:], b[:]) for (w, b) in zip(weights_sym, bias_sym)]
+        parameters = ca.vertcat(*parameters)
+
+        f_mu = net_to_casadi_graph({'weights': weights_sym, 'bias': bias_sym}, x, self._layers,
+                                   input_scaling=self._scaler_x)
+        J_sym = ca.Function('J', [x, *weights_sym, *bias_sym], [ca.gradient(f_mu(x), parameters)])
+        J = J_sym(x, *weights, *bias)
+
+        mean = f_mu(x, *weights, *bias)[0]
+        var = J @ self._net.module.posterior_covariance.detach().cpu().numpy() @ J.T
+        if self._scaler_y is not None:
+            mean *= self._scaler_y.scale_
+            mean += self._scaler_y.mean_
+            var *= self._scaler_y.var_
+
+        self._function = ca.Function('neural_network', [x], [mean, var], ['features'], ['label_mean', 'label_variance'])
+
+
 __all__ = [
-    'ArtificialNeuralNetwork'
+    'ArtificialNeuralNetwork',
+    'BayesianNeuralNetwork'
 ]
