@@ -138,6 +138,12 @@ def _get_learning_backend(backend):
                                f" needs to be higher or equal to '{_TENSORFLOW_VERSION[0]}' and lower than "
                                f"'{_TENSORFLOW_VERSION[1]}'")
         import hilo_mpc.plugins.tensorflow as module
+    elif backend == 'laplace-torch':
+        try:
+            import laplace
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError("Backend 'laplace' is not installed")
+        import hilo_mpc.plugins.laplace_torch as module
     elif backend in ['sklearn', 'scikit-learn']:
         try:
             import sklearn
