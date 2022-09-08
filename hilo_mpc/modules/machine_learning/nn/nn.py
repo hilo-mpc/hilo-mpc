@@ -162,6 +162,68 @@ class ArtificialNeuralNetwork(LearningBase):
                     if label not in data_set.columns:
                         raise ValueError(f"Label {label} does not exist in the supplied data set")
 
+    def _parse_options(self, **kwargs) -> dict:
+        """
+
+        :param kwargs:
+        :return:
+        """
+        loss = kwargs.get('loss')
+        if loss is None:
+            loss = self._loss
+        else:
+            self._loss = loss
+
+        optimizer = kwargs.get('optimizer')
+        if optimizer is None:
+            optimizer = self._optimizer
+        else:
+            self._optimizer = optimizer
+
+        metric = kwargs.get('metric')
+        if metric is None:
+            metric = self._metric
+        else:
+            self._metric = metric
+
+        show_tensorboard = kwargs.get('show_tensorboard')
+        if show_tensorboard is None:
+            show_tensorboard = False
+            save_tensorboard = kwargs.get('save_tensorboard')
+            if save_tensorboard is None:
+                save_tensorboard = False
+        else:
+            if show_tensorboard:
+                save_tensorboard = True
+            else:
+                save_tensorboard = kwargs.get('save_tensorboard')
+                if save_tensorboard is None:
+                    save_tensorboard = False
+        tensorboard_log_dir = kwargs.get('tensorboard_log_dir')
+        if save_tensorboard:
+            tensorboard = LearningVisualizationManager('tensorboard').setup(log_dir=tensorboard_log_dir)
+        else:
+            tensorboard = None
+        if show_tensorboard:
+            browser = kwargs.get('browser')
+            if browser is None:
+                browser = 'chrome'
+        else:
+            browser = None
+
+        device = kwargs.get('device')
+
+        return {
+            'seed': self._seed,
+            'learning_rate': self._learning_rate,
+            'loss': loss,
+            'optimizer': optimizer,
+            'metric': metric,
+            'tensorboard': tensorboard,
+            'browser': browser,
+            'device': device
+        }
+
     @LearningBase.features.setter
     def features(self, arg):
         self._features = arg
@@ -408,62 +470,8 @@ class ArtificialNeuralNetwork(LearningBase):
         :param kwargs:
         :return:
         """
-        loss = kwargs.get('loss')
-        if loss is None:
-            loss = self._loss
-        else:
-            self._loss = loss
-
-        optimizer = kwargs.get('optimizer')
-        if optimizer is None:
-            optimizer = self._optimizer
-        else:
-            self._optimizer = optimizer
-
-        metric = kwargs.get('metric')
-        if metric is None:
-            metric = self._metric
-        else:
-            self._metric = metric
-
-        show_tensorboard = kwargs.get('show_tensorboard')
-        if show_tensorboard is None:
-            show_tensorboard = False
-            save_tensorboard = kwargs.get('save_tensorboard')
-            if save_tensorboard is None:
-                save_tensorboard = False
-        else:
-            if show_tensorboard:
-                save_tensorboard = True
-            else:
-                save_tensorboard = kwargs.get('save_tensorboard')
-                if save_tensorboard is None:
-                    save_tensorboard = False
-        tensorboard_log_dir = kwargs.get('tensorboard_log_dir')
-        if save_tensorboard:
-            tensorboard = LearningVisualizationManager('tensorboard').setup(log_dir=tensorboard_log_dir)
-        else:
-            tensorboard = None
-        if show_tensorboard:
-            browser = kwargs.get('browser')
-            if browser is None:
-                browser = 'chrome'
-        else:
-            browser = None
-
-        device = kwargs.get('device')
-
         properties = [self._n_features, self._n_labels, self._layers]
-        options = {
-            'seed': self._seed,
-            'learning_rate': self._learning_rate,
-            'loss': loss,
-            'optimizer': optimizer,
-            'metric': metric,
-            'tensorboard': tensorboard,
-            'browser': browser,
-            'device': device
-        }
+        options = self._parse_options(**kwargs)
 
         self._net = self._backend.setup('MLP', *properties, **options)
 
