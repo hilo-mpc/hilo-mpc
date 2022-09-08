@@ -64,6 +64,8 @@ Dense = layer.Dense
 Dropout = layer.Dropout
 ArtificialNeuralNetwork = nn.ArtificialNeuralNetwork
 ANN = ArtificialNeuralNetwork
+BayesianNeuralNetwork = nn.BayesianNeuralNetwork
+BNN = BayesianNeuralNetwork
 Mean = mean.Mean
 ConstantMean = mean.ConstantMean
 ZeroMean = mean.ZeroMean
@@ -132,6 +134,8 @@ __all__ = [
     'Dropout',
     'ArtificialNeuralNetwork',
     'ANN',
+    'BayesianNeuralNetwork',
+    'BNN',
     'Mean',
     'ConstantMean',
     'ZeroMean',
