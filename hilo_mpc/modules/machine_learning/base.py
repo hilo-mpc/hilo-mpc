@@ -84,8 +84,8 @@ class LearningBase(Base):
         :return:
         """
         if isinstance(train_backend, str):
-            backend = train_backend.lower()
-            available_backends = ['pytorch', 'tensorflow']
+            backend = train_backend.lower().replace('_', '-')
+            available_backends = ['pytorch', 'tensorflow', 'laplace-torch']
             if backend in available_backends:
                 self._backend = LearningManager(backend)
             else:
