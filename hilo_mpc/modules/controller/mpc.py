@@ -1611,7 +1611,7 @@ class NMPC(Controller, DynamicOptimization):
             time = param_npl_mpc['time']
             for ii in range(self._prediction_horizon):
                 x_ii = x[ii, 0]
-                if ii <= self._control_horizon:
+                if ii < self._control_horizon:
                     u_ii = u[ii, 0]
                     if ii >= 1:
                         u_old0 = [u_ii[jj] for jj in self.quad_stage_cost._ind_input_changes]
