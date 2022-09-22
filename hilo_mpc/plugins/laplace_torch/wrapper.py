@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 
-from laplace import Laplace
+from laplace import Laplace, ParametricLaplace
 import torch
 from torch.optim import Adam
 
@@ -46,6 +46,14 @@ class _LaplaceWrapper:
         self._module = Laplace(net.module, likelihood, subset_of_weights=subset_of_weights,
                                hessian_structure=hessian_structure)
         self._net = net
+
+    @property
+    def module(self) -> ParametricLaplace:
+        """
+
+        :return:
+        """
+        return self._module
 
     def train(
             self,
