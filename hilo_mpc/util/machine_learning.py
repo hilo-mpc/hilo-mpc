@@ -535,8 +535,20 @@ def net_to_casadi_graph(net, x, layers, **kwargs):
     if isinstance(net, dict):
         weights = net['weights']
         bias = net['bias']
+        symbolic = net.get('symbolic')
+        if symbolic is None:
+            symbolic = False
     else:
         weights, bias = net.get_weights_and_bias()
+        symbolic = False
+
+    add_fun_in = []
+    add_fun_in_str = []
+    if symbolic:
+        add_fun_in.extend(weights)
+        add_fun_in.extend(bias)
+        add_fun_in_str.extend(
+            ["weights_" + str(k) for k in range(len(weights))] + ["bias_" + str(k) for k in range(len(bias))])
 
     if input_scaling is not None:
         h -= input_scaling.mean_
@@ -572,7 +584,7 @@ def net_to_casadi_graph(net, x, layers, **kwargs):
             ct += 1
 
     return ca.Function('neural_network',
-                       [x],
+                       [x] + add_fun_in,
                        graph,
-                       ["features"],
+                       ["features"] + add_fun_in_str,
                        ["labels"] + hidden)
