@@ -637,12 +637,13 @@ class BayesianNeuralNetwork(ArtificialNeuralNetwork):
         weights_sym = [ca.SX.sym(f'weights_{k}', *w.shape) for k, w in enumerate(weights)]
         bias_sym = [ca.SX.sym(f'bias_{k}', *b.shape) for k, b in enumerate(bias)]
 
-        parameters = [ca.vertcat(w[:], b[:]) for (w, b) in zip(weights_sym, bias_sym)]
-        parameters = ca.vertcat(*parameters)
+        parameters = [ca.horzcat(ca.reshape(w, 1, -1), ca.reshape(b, 1, -1)) for (w, b) in zip(weights_sym, bias_sym)]
+        parameters = ca.horzcat(*parameters)
 
-        f_mu = net_to_casadi_graph({'weights': weights_sym, 'bias': bias_sym}, x, self._layers,
+        f_mu = net_to_casadi_graph({'weights': weights_sym, 'bias': bias_sym, 'symbolic': True}, x, self._layers,
                                    input_scaling=self._scaler_x)
-        J_sym = ca.Function('J', [x, *weights_sym, *bias_sym], [ca.gradient(f_mu(x), parameters)])
+        J_sym = ca.Function('J', [x, *weights_sym, *bias_sym],
+                            [ca.gradient(f_mu(x, *weights_sym, *bias_sym)[0], parameters)])
         J = J_sym(x, *weights, *bias)
 
         mean = f_mu(x, *weights, *bias)[0]
