@@ -598,6 +598,16 @@ class BayesianNeuralNetwork(ArtificialNeuralNetwork):
             hessian_structure = 'full'
         self._hessian_structure = hessian_structure
 
+        hyperparameter_learning_rate = kwargs.get('hyperparameter_learning_rate')
+        if hyperparameter_learning_rate is None:
+            hyperparameter_learning_rate = .1
+        self._hyperparameter_learning_rate = hyperparameter_learning_rate
+
+        hyperparameter_steps = kwargs.get('hyperparameter_steps')
+        if hyperparameter_steps is None:
+            hyperparameter_steps = 100
+        self._hyperparameter_steps = hyperparameter_steps
+
     def _parse_options(self, **kwargs) -> dict:
         """
 
@@ -621,6 +631,8 @@ class BayesianNeuralNetwork(ArtificialNeuralNetwork):
         options['likelihood'] = self._likelihood
         options['subset_of_weights'] = subset_of_weights
         options['hessian_structure'] = hessian_structure
+        options['hyperparameter_learning_rate'] = self._hyperparameter_learning_rate
+        options['hyperparameter_steps'] = self._hyperparameter_steps
 
         return options
 
