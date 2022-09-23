@@ -43,6 +43,19 @@ class _LaplaceWrapper:
         if hessian_structure is None:
             hessian_structure = 'full'
 
+        hyp_lr = kwargs.get('hyperparameter_learning_rate')
+        if hyp_lr is None:
+            hyp_lr = .1
+        log_prior, log_sigma = torch.ones(1, requires_grad=True), torch.ones(1, requires_grad=True)
+        self._hyper_optimizer = Adam([log_prior, log_sigma], lr=hyp_lr)
+        self._log_prior = log_prior
+        self._log_sigma = log_sigma
+
+        hyp_steps = kwargs.get('hyperparameter_steps')
+        if hyp_steps is None:
+            hyp_steps = 100
+        self._hyp_steps = hyp_steps
+
         self._module = Laplace(net.module, likelihood, subset_of_weights=subset_of_weights,
                                hessian_structure=hessian_structure)
         self._net = net
@@ -77,17 +90,14 @@ class _LaplaceWrapper:
         :return:
         """
         self._net.train(data, validation_data, batch_size, epochs, verbose, patience, shuffle)
-
         self._module.fit(self._net.train_loader)
-        log_prior, log_sigma = torch.ones(1, requires_grad=True), torch.ones(1, requires_grad=True)
-        hyper_optimizer = Adam([log_prior, log_sigma], lr=1e-1)
 
-        for _ in range(epochs):
-            hyper_optimizer.zero_grad()
-            neg_marg_lik = -self._module.log_marginal_likelihood(prior_precision=log_prior.exp(),
-                                                                 sigma_noise=log_sigma.exp())
+        for _ in range(self._hyp_steps):
+            self._hyper_optimizer.zero_grad()
+            neg_marg_lik = -self._module.log_marginal_likelihood(prior_precision=self._log_prior.exp(),
+                                                                 sigma_noise=self._log_sigma.exp())
             neg_marg_lik.backward()
-            hyper_optimizer.step()
+            self._hyper_optimizer.step()
 
     def evaluate(self, data=None, batch_size=None, epoch=1, verbose=1):
         """
