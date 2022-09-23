@@ -667,6 +667,16 @@ class BayesianNeuralNetwork(ArtificialNeuralNetwork):
 
         self._function = ca.Function('neural_network', [x], [mean, var], ['features'], ['label_mean', 'label_variance'])
 
+    def predict(self, X_query):
+        """
+
+        :param X_query:
+        :return:
+        """
+        mean, var = self._function(X_query)
+        var += self._net.module.sigma_noise.detach().cpu().numpy() ** 2 * self._scaler_y.var_
+        return mean, var
+
 
 __all__ = [
     'ArtificialNeuralNetwork',
