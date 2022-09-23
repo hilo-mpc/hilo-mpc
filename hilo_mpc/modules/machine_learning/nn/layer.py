@@ -294,6 +294,18 @@ class Layer:
         """
         return Dropout(rate, parent=parent)
 
+    @staticmethod
+    def probabilistic(nodes, weight='gamma', parent=None, **kwargs):
+        """
+
+        :param nodes:
+        :param weight:
+        :param parent:
+        :param kwargs:
+        :return:
+        """
+        return Probabilistic(nodes, weight=weight, parent=parent, **kwargs)
+
 
 class Dense(Layer):
     """Dense layer"""
@@ -349,6 +361,15 @@ class Dropout(Layer):
         :return:
         """
         print("Initialization is not required for Dropout layers")
+
+
+class Probabilistic(Layer):
+    """Probabilistic layer --- to be used in Bayesian neural networks where the approximation is set to probabilistic
+        backpropagation (pbp)
+    """
+    def __init__(self, nodes, weight='gamma', parent=None, **kwargs):
+        """Constructor method"""
+        super().__init__(nodes, activation='probabilistic_relu', initializer=weight, parent=parent, **kwargs)
 
 
 __all__ = [
