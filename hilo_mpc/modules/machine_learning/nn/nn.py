@@ -573,14 +573,37 @@ class ArtificialNeuralNetwork(LearningBase):
             self._net.close_tensorboard()
 
 
-class BayesianNeuralNetwork(ArtificialNeuralNetwork):
+class BayesianNeuralNetwork:
     """Bayesian neural network class"""
-    def __init__(self, approximation, features, labels, id=None, name=None, **kwargs):
-        """Constructor method"""
-        approximation = approximation.lower()
-        if approximation == 'laplace':
+    def __new__(cls, *args, **kwargs):
+        """Creator method"""
+        if args:
+            approximation = args[0]
+            args = args[1:]
+        else:
+            if kwargs:
+                approximation = kwargs.pop('approximation', None)
+            else:
+                approximation = None
+        if approximation is None:
+            raise ValueError("No approximation method for the Bayesian neural network was specified. "
+                             "Choose either 'laplace' or 'pbp'!")
+        approximation_lower = approximation.lower()
+        if approximation_lower not in ['laplace', 'pbp']:
+            raise ValueError(
+                f"Approximation method '{approximation}' for Bayesian neural networks not recognized or not implemented"
+            )
+        elif approximation_lower == 'laplace':
             kwargs['backend'] = 'laplace-torch'
+            return _LaplaceApproximation(*args, **kwargs)
+        elif approximation_lower == 'pbp':
+            return _PBPApproximation(*args, **kwargs)
 
+
+class _LaplaceApproximation(ArtificialNeuralNetwork):
+    """Bayesian neural network with Laplace approximation"""
+    def __init__(self, features, labels, id=None, name=None, **kwargs):
+        """Constructor method"""
         super().__init__(features, labels, id=id, name=name, **kwargs)
 
         likelihood = kwargs.get('likelihood')
