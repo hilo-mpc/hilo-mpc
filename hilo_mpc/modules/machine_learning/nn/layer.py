@@ -23,6 +23,7 @@
 
 import warnings
 
+from ....util.machine_learning import Hyperparameter
 from ....util.util import is_list_like
 
 
@@ -367,13 +368,31 @@ class Probabilistic(Layer):
     """Probabilistic layer --- to be used in Bayesian neural networks where the approximation is set to probabilistic
         backpropagation (pbp)
     """
-    def __init__(self, nodes, weight='gamma', parent=None, **kwargs):
+    def __init__(self, nodes, hyperprior=None, parent=None, **kwargs):
         """Constructor method"""
-        super().__init__(nodes, activation='probabilistic_relu', initializer=weight, parent=parent, **kwargs)
+        super().__init__(nodes, activation='probabilistic_relu', initializer=hyperprior, parent=parent, **kwargs)
+
+        self._type = 'probabilistic'
+
+    def _set_initializer(self, initializer, **kwargs):
+        """
+
+        :param initializer:
+        :param kwargs:
+        :return:
+        """
+        if initializer is None:
+            initializer = 'gamma'
+        hyper_kwargs = {'prior': initializer}
+        hyperprior_parameters = kwargs.get('hyperprior_parameters')
+        if hyperprior_parameters is not None:
+            hyper_kwargs['prior_parameters'] = hyperprior_parameters
+        self._initializer = Hyperparameter('Probabilistic.weight', **hyper_kwargs)
 
 
 __all__ = [
     'Layer',
     'Dense',
-    'Dropout'
+    'Dropout',
+    'Probabilistic'
 ]
