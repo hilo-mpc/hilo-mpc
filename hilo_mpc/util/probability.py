@@ -130,7 +130,7 @@ class Gamma(Distribution):
         alpha = ca.SX.sym('alpha')
         beta = ca.SX.sym('beta')
 
-        pdf = beta * alpha / gamma(alpha) * y ** (alpha - 1) * ca.exp(-beta * y)
+        pdf = beta ** alpha / gamma(alpha) * y ** (alpha - 1) * ca.exp(-beta * y)
 
         self._function = ca.Function('pdf', [y, alpha, beta], [pdf])
 
