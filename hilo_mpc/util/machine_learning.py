@@ -274,6 +274,8 @@ class Parameter(Object):
             prior = Prior.students_t(**parameters)
         elif id_ == 'delta':
             prior = Prior.delta()
+        elif id_ == 'gamma':
+            prior = Prior.gamma(**parameters)
         else:
             raise ValueError(f"Prior '{name}' not recognized")
 
