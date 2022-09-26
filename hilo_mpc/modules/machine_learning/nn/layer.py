@@ -23,7 +23,7 @@
 
 import warnings
 
-from ....util.machine_learning import Hyperparameter
+from ....util.machine_learning import Hyperparameter, Parameter
 from ....util.util import is_list_like
 
 
@@ -364,7 +364,7 @@ class Dropout(Layer):
         print("Initialization is not required for Dropout layers")
 
 
-class Probabilistic(Layer):
+class Probabilistic(Dense):
     """Probabilistic layer --- to be used in Bayesian neural networks where the approximation is set to probabilistic
         backpropagation (pbp)
     """
@@ -388,6 +388,16 @@ class Probabilistic(Layer):
         if hyperprior_parameters is not None:
             hyper_kwargs['prior_parameters'] = hyperprior_parameters
         self._initializer = Hyperparameter('Probabilistic.weight', **hyper_kwargs)
+
+    @property
+    def initializer(self):
+        """
+
+        :return:
+        """
+        if isinstance(self._initializer, Parameter):
+            return self._initializer
+        return None
 
 
 __all__ = [
