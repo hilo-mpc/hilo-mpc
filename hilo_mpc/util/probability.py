@@ -233,6 +233,18 @@ class Prior(metaclass=ABCMeta):
         """
         return DeltaPrior()
 
+    @staticmethod
+    def gamma(
+            shape: Optional[Union[Numeric, Sequence[Numeric]]] = None,
+            rate: Optional[Union[Numeric, Sequence[Numeric]]] = None,
+            scale: Optional[Union[Numeric, Sequence[Numeric]]] = None
+    ) -> Pr:
+        """
+
+        :return:
+        """
+        return GammaPrior(shape=shape, rate=rate, scale=scale)
+
 
 class _MeanVariancePrior(Prior):
     """"""
@@ -354,10 +366,95 @@ class DeltaPrior(Prior):
         pass
 
 
+class GammaPrior(Prior):
+    """"""
+    def __init__(
+            self,
+            shape: Optional[Union[Numeric, Sequence[Numeric]]] = None,
+            rate: Optional[Union[Numeric, Sequence[Numeric]]] = None,
+            scale: Optional[Union[Numeric, Sequence[Numeric]]] = None
+    ) -> None:
+        """Constructor method"""
+        super().__init__('Gamma')
+
+        self._shape = shape
+        if rate is not None and scale is not None:
+            raise ValueError("Please only supply 'rate' or 'scale' for the Gamma prior, not both")
+        elif rate is None and scale is not None:
+            rate = 1. / scale
+        self._rate = rate
+
+    def _get_parameter_values(self) -> (Union[Numeric, Sequence[Numeric]], ...):
+        """
+
+        :return:
+        """
+        return self._shape, self._rate
+
+    @property
+    def shape(self) -> Optional[Numeric]:
+        """
+
+        :return:
+        """
+        return self._shape
+
+    @shape.setter
+    def shape(self, value: Numeric) -> None:
+        self._shape = self._check_dimensionality(value, 'shape')
+
+    @property
+    def rate(self) -> Optional[Numeric]:
+        """
+
+        :return:
+        """
+        return self._rate
+
+    @rate.setter
+    def rate(self, value: Numeric) -> None:
+        self._rate = self._check_dimensionality(value, 'rate')
+
+    @property
+    def scale(self) -> Optional[Numeric]:
+        """
+
+        :return:
+        """
+        if self._rate is not None:
+            return 1. / self._rate
+        return None
+
+    @scale.setter
+    def scale(self, value: Numeric) -> None:
+        self._rate = self._check_dimensionality(1. / value, 'rate')
+
+    @property
+    def mean(self) -> Optional[Numeric]:
+        """
+
+        :return:
+        """
+        if self._shape is not None and self._rate is not None:
+            return self._shape / self._rate
+        return None
+
+    @property
+    def variance(self) -> Optional[Numeric]:
+        """
+
+        :return:
+        """
+        if self._shape is not None and self._rate is not None:
+            return self._shape / self._rate ** 2
+        return None
+
+
 __all__ = [
     'Prior',
     'GaussianPrior',
     'LaplacePrior',
     'StudentsTPrior',
-    'DeltaPrior'
+    'DeltaPrior',
+    'GammaPrior'
 ]
