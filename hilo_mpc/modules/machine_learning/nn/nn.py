@@ -731,6 +731,7 @@ class _PBPApproximation(LearningBase):
         self._train_data = (None, None)
         self._validate_data = (None, None)
         self._test_data = (None, None)
+        self._pandas_version_checked = False
 
     _check_data_sets = ArtificialNeuralNetwork._check_data_sets
 
@@ -742,6 +743,8 @@ class _PBPApproximation(LearningBase):
 
     add_data_set = ArtificialNeuralNetwork.add_data_set
 
+    prepare_data_set = ArtificialNeuralNetwork.prepare_data_set
+
     def setup(self, **kwargs):
         """
 
@@ -752,12 +755,103 @@ class _PBPApproximation(LearningBase):
 
         self._net = _ProbabilisticMLP(*properties)
 
+    def train(self, epochs: int, verbose: int = 1):
+        """"""
+        if not self._data_sets:
+            raise RuntimeError("No data set to train on was supplied. Please add a data set by using the 'add_data_set'"
+                               " method.")
+
+        self.prepare_data_set(shuffle=False)
+
+        self._net.train(self._train_data, epochs, verbose)
+
+
+class _DataSet:
+    """"""
+    def __init__(self, x_data, y_data):
+        """Constructor method"""
+        self.features = x_data
+        self.labels = y_data
+
+    def __len__(self):
+        """Length method"""
+        return len(self.features)
+
+    def __getitem__(self, item):
+        """Item getter method"""
+        return self.features[item, :], self.labels[item, :]
+
 
 class _ProbabilisticMLP:
     """"""
     def __init__(self, n_features, n_labels, layers):
         """Constructor method"""
-        hidden, activation = _process_layers(n_features, n_labels, layers)
+        hidden, activation = _process_probabilistic_layers(n_features, n_labels, layers)
+        self._hidden = hidden
+        self._activation = activation
+        self._n_layers = len(layers)
+        self._nodes = (n_features, ) + tuple(layer.nodes for layer in layers) + (n_labels, )
+
+        self._train_loader = None
+        self._permutations = None
+
+    def _assumed_density_filtering(self, x, y):
+        """"""
+
+    @staticmethod
+    def _get_data_loader(data):
+        """"""
+        data_loader = _DataSet(data[0], data[1])
+        return data_loader
+
+    def _preprocessing(self, data, epochs):
+        """"""
+        self._train_loader = self._get_data_loader(data)
+        batches = len(self._train_loader)
+        self._permutations = (np.random.choice(range(batches), batches, replace=False) for _ in range(epochs))
+
+    def _train(self, permutation):
+        """"""
+        for k in permutation:
+            self._assumed_density_filtering(*self._train_loader[k])
+
+    def train(self, data, epochs, verbose):
+        """"""
+        self._preprocessing(data, epochs)
+
+        for epoch, permutation in enumerate(self._permutations):
+            if verbose > 0:
+                print(f"Epoch {epoch + 1}/{epochs}")
+
+            self._train(permutation)
+
+
+def _process_probabilistic_layers(n_features, n_labels, layers):
+    """
+
+    :param n_features:
+    :param n_labels:
+    :param layers:
+    :return:
+    """
+    n_inputs = n_features
+    hidden = []
+    activation = []
+    for k, layer in enumerate(layers):
+        if layer.initializer.prior.mean is None or layer.initializer.prior.variance is None:
+            layer.initializer.prior.shape = 6.
+            layer.initializer.prior.rate = 6.
+        x = ca.SX.sym('x', n_inputs)
+        layer_ = ca.Function(f'layer_{k}', [x], [x])
+        hidden.append(layer_)
+        n_inputs = layer.nodes
+    layer = Probabilistic(n_inputs)
+    layer.initializer.prior.shape = 6.
+    layer.initializer.prior.rate = 6.
+    x = ca.SX.sym('x', n_inputs)
+    layer_ = ca.Function(f'layer_{k}', [x], [x])
+    hidden.append(layer_)
+    return hidden, activation
 
 
 __all__ = [
