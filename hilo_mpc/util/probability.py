@@ -26,7 +26,7 @@ from typing import Any, Optional, Sequence, TypeVar, Union
 
 import casadi as ca
 import numpy as np
-from scipy.special import gammaln
+from scipy.special import gamma, gammaln
 
 
 Numeric = Union[int, float]
@@ -37,6 +37,7 @@ class Distribution(metaclass=ABCMeta):
     """"""
     def __init__(self):
         """Constructor method"""
+        self._function = None
         self._log_function = None
         self._initialize()
 
@@ -116,6 +117,22 @@ class StudentsT(Distribution):
         self._log_function = ca.Function('log_pdf',
                                          [y, mu, var, nu],
                                          [log_pdf])
+
+
+class Gamma(Distribution):
+    """"""
+    def _initialize(self) -> None:
+        """
+
+        :return:
+        """
+        y = ca.SX.sym('y')
+        alpha = ca.SX.sym('alpha')
+        beta = ca.SX.sym('beta')
+
+        pdf = beta * alpha / gamma(alpha) * y ** (alpha - 1) * ca.exp(-beta * y)
+
+        self._function = ca.Function('pdf', [y, alpha, beta], [pdf])
 
 
 class Prior(metaclass=ABCMeta):
