@@ -27,10 +27,11 @@ import warnings
 import casadi as ca
 import numpy as np
 
+from .layer import Probabilistic
 from ..base import LearningBase
 from ....plugins.plugins import LearningManager, LearningVisualizationManager, check_version
 from ....util.data import DataSet
-from ....util.machine_learning import net_to_casadi_graph
+from ....util.machine_learning import Hyperparameter, net_to_casadi_graph
 from ....util.util import is_list_like
 
 
@@ -136,6 +137,8 @@ class ArtificialNeuralNetwork(LearningBase):
         :param data_sets:
         :return:
         """
+        # TODO: Check whether migration to LearningBase class makes sense, since _PBPApproximation also needs this
+        #  method
         if data_sets is None:
             data_sets = self._data_sets
 
@@ -699,6 +702,62 @@ class _LaplaceApproximation(ArtificialNeuralNetwork):
         mean, var = self._function(X_query)
         var += self._net.module.sigma_noise.detach().cpu().numpy() ** 2 * self._scaler_y.var_
         return mean, var
+
+
+class _PBPApproximation(LearningBase):
+    """"""
+    def __init__(self, features, labels, hyperprior=None, id=None, name=None, **kwargs):
+        """Constructor method"""
+        super().__init__(features, labels, id=id, name=name)
+
+        self._layers = []
+
+        if hyperprior is None:
+            hyperprior = 'gamma'
+        hyper_kwargs = {'prior': hyperprior}
+        hyperprior_parameters = kwargs.get('hyperprior_parameters')
+        if hyperprior_parameters is not None:
+            hyper_kwargs['prior_parameters'] = hyperprior_parameters
+        self.noise_variance = Hyperparameter('PBP.noise_variance', **hyper_kwargs)
+
+        self._data_sets = []
+
+        self._net = None
+
+        self._check_data_sets()
+
+        self._scaler_x = None
+        self._scaler_y = None
+        self._train_data = (None, None)
+        self._validate_data = (None, None)
+        self._test_data = (None, None)
+
+    _check_data_sets = ArtificialNeuralNetwork._check_data_sets
+
+    depth = ArtificialNeuralNetwork.depth
+
+    shape = ArtificialNeuralNetwork.shape
+
+    add_layers = ArtificialNeuralNetwork.add_layers
+
+    add_data_set = ArtificialNeuralNetwork.add_data_set
+
+    def setup(self, **kwargs):
+        """
+
+        :param kwargs:
+        :return:
+        """
+        properties = [self._n_features, self._n_labels, self._layers]
+
+        self._net = _ProbabilisticMLP(*properties)
+
+
+class _ProbabilisticMLP:
+    """"""
+    def __init__(self, n_features, n_labels, layers):
+        """Constructor method"""
+        hidden, activation = _process_layers(n_features, n_labels, layers)
 
 
 __all__ = [
