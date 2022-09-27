@@ -23,6 +23,8 @@
 
 import warnings
 
+import casadi as ca
+
 from ....util.machine_learning import Hyperparameter, Parameter
 from ....util.util import is_list_like
 
@@ -368,9 +370,9 @@ class Probabilistic(Dense):
     """Probabilistic layer --- to be used in Bayesian neural networks where the approximation is set to probabilistic
         backpropagation (pbp)
     """
-    def __init__(self, nodes, hyperprior=None, parent=None, **kwargs):
+    def __init__(self, nodes, activation='probabilistic_relu', hyperprior=None, parent=None, **kwargs):
         """Constructor method"""
-        super().__init__(nodes, activation='probabilistic_relu', initializer=hyperprior, parent=parent, **kwargs)
+        super().__init__(nodes, activation=activation, initializer=hyperprior, parent=parent, **kwargs)
 
         self._type = 'probabilistic'
 
@@ -398,6 +400,36 @@ class Probabilistic(Dense):
         if isinstance(self._initializer, Parameter):
             return self._initializer
         return None
+
+    def forward(self, x_mean, x_var, w_mean=None, w_var=None):
+        """
+
+        :param x_mean:
+        :param x_var:
+        :param w_mean:
+        :param w_var:
+        :return:
+        """
+        n_inputs = x_mean.size1()
+        x_mean_plus_bias = ca.vertcat(x_mean, ca.SX.ones(1))  # equation 17
+        x_var_plus_bias = ca.vertcat(x_var, ca.SX.zeros(1))  # equation 17
+
+        if w_mean is None:
+            pass
+        else:
+            # Add weights for bias term
+            w_mean = ca.horzcat(w_mean, ca.SX.sym('b_mean', self._nodes))
+        if w_var is None:
+            pass
+        else:
+            # Add weights for bias term
+            w_var = ca.horzcat(w_var, ca.SX.sym('b_var', self._nodes))
+
+        # Linear propagation of Gaussian distribution (equations 13 and 14)
+        mean = w_mean @ x_mean_plus_bias / ca.sqrt(n_inputs)
+        var = (w_var @ x_var_plus_bias + w_mean ** 2 @ x_var_plus_bias + w_var @ x_mean_plus_bias ** 2) / n_inputs
+
+        return ca.Function('layer', [x_mean, x_var, w_mean, w_var], [mean, var])
 
 
 __all__ = [
