@@ -31,7 +31,7 @@ from .layer import Probabilistic
 from ..base import LearningBase
 from ....plugins.plugins import LearningManager, LearningVisualizationManager, check_version
 from ....util.data import DataSet
-from ....util.machine_learning import Hyperparameter, net_to_casadi_graph
+from ....util.machine_learning import Activation, Hyperparameter, net_to_casadi_graph
 from ....util.util import is_list_like
 
 
@@ -700,7 +700,10 @@ class _LaplaceApproximation(ArtificialNeuralNetwork):
         :return:
         """
         mean, var = self._function(X_query)
-        var += self._net.module.sigma_noise.detach().cpu().numpy() ** 2 * self._scaler_y.var_
+        if self._scaler_y is not None:
+            var += self._net.module.sigma_noise.detach().cpu().numpy() ** 2 * self._scaler_y.var_
+        else:
+            var += self._net.module.sigma_noise.detach().cpu().numpy() ** 2
         return mean, var
 
 
@@ -764,6 +767,12 @@ class _PBPApproximation(LearningBase):
         self.prepare_data_set(shuffle=False)
 
         self._net.train(self._train_data, epochs, verbose)
+
+    def predict(self, X_query):
+        """"""
+        mean, var = self._function(X_query)
+        var += self.noise_variance.prior.rate / (self.noise_variance.prior.shape - 1.)
+        return mean, var
 
 
 class _DataSet:
@@ -837,20 +846,21 @@ def _process_probabilistic_layers(n_features, n_labels, layers):
     n_inputs = n_features
     hidden = []
     activation = []
-    for k, layer in enumerate(layers):
+    output_layer = Probabilistic(n_labels, activation='linear')
+    for k, layer in enumerate(layers + [output_layer]):
+        if k > 0:
+            n_inputs = layers[k - 1].nodes
         if layer.initializer.prior.mean is None or layer.initializer.prior.variance is None:
             layer.initializer.prior.shape = 6.
             layer.initializer.prior.rate = 6.
-        x = ca.SX.sym('x', n_inputs)
-        layer_ = ca.Function(f'layer_{k}', [x], [x])
-        hidden.append(layer_)
-        n_inputs = layer.nodes
-    layer = Probabilistic(n_inputs)
-    layer.initializer.prior.shape = 6.
-    layer.initializer.prior.rate = 6.
-    x = ca.SX.sym('x', n_inputs)
-    layer_ = ca.Function(f'layer_{k}', [x], [x])
-    hidden.append(layer_)
+        x_mean = ca.SX.sym('x_mean', n_inputs)
+        x_var = ca.SX.sym('x_var', n_inputs)
+        w_mean = ca.SX.sym('w_mean', layer.nodes, n_inputs)
+        w_var = ca.SX.sym('w_var', layer.nodes, n_inputs)
+        hidden.append(layer.forward(x_mean, x_var, w_mean=w_mean, w_var=w_var))
+        if layer.activation == 'probabilistic_relu':
+            args = [x_mean, x_var]
+        activation.append(ca.Function(layer.activation, args, [Activation(layer.activation)(*args)]))
     return hidden, activation
 
 
