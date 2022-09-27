@@ -59,7 +59,8 @@ class Activation:
             'softplus': self.soft_plus,
             'softmax': self.soft_max,
             'linear': self.linear,
-            'scale': self.scale
+            'scale': self.scale,
+            'probabilistic_relu': self.probabilistic_rectifier
         }[self._name]
 
     @staticmethod
@@ -116,6 +117,21 @@ class Activation:
         :return:
         """
         return 1 / (1 - x)
+
+    @staticmethod
+    def probabilistic_rectifier(mean, var, prior='gaussian'):
+        """
+
+        :param mean:
+        :param var:
+        :param prior:
+        :return:
+        """
+        if prior == 'gaussian':
+            prior = Prior.gaussian(mean=0., variance=1.)
+
+        alpha = mean / ca.sqrt(var)
+        phi = prior(alpha)
 
 
 def register_hyperparameters(obj: ML, ids: Sequence[str]):
