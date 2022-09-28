@@ -25,7 +25,7 @@ import warnings
 
 import casadi as ca
 
-from ....util.machine_learning import Hyperparameter, Parameter
+from ....util.probability import Prior
 from ....util.util import is_list_like
 
 
@@ -370,9 +370,11 @@ class Probabilistic(Dense):
     """Probabilistic layer --- to be used in Bayesian neural networks where the approximation is set to probabilistic
         backpropagation (pbp)
     """
-    def __init__(self, nodes, activation='probabilistic_relu', hyperprior=None, parent=None, **kwargs):
+    def __init__(self, nodes, activation='probabilistic_relu', parent=None, **kwargs):
         """Constructor method"""
-        super().__init__(nodes, activation=activation, initializer=hyperprior, parent=parent, **kwargs)
+        if not activation.startswith('probabilistic_'):
+            activation = 'probabilistic_' + activation
+        super().__init__(nodes, activation=activation, parent=parent, **kwargs)
 
         self._type = 'probabilistic'
 
@@ -383,13 +385,7 @@ class Probabilistic(Dense):
         :param kwargs:
         :return:
         """
-        if initializer is None:
-            initializer = 'gamma'
-        hyper_kwargs = {'prior': initializer}
-        hyperprior_parameters = kwargs.get('hyperprior_parameters')
-        if hyperprior_parameters is not None:
-            hyper_kwargs['prior_parameters'] = hyperprior_parameters
-        self._initializer = Hyperparameter('Probabilistic.weight', **hyper_kwargs)
+        pass
 
     @property
     def initializer(self):
@@ -397,7 +393,7 @@ class Probabilistic(Dense):
 
         :return:
         """
-        if isinstance(self._initializer, Parameter):
+        if isinstance(self._initializer, Prior):
             return self._initializer
         return None
 
@@ -430,6 +426,13 @@ class Probabilistic(Dense):
         var = (w_var @ x_var_plus_bias + w_mean ** 2 @ x_var_plus_bias + w_var @ x_mean_plus_bias ** 2) / n_inputs
 
         return ca.Function('layer', [x_mean, x_var, w_mean, w_var], [mean, var])
+
+    def initialize_weights(self, n_inputs):
+        """
+
+        :param n_inputs:
+        :return:
+        """
 
 
 __all__ = [
