@@ -22,7 +22,7 @@
 #
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Optional, Sequence, TypeVar, Union
+from typing import Any, Optional, Sequence, Tuple, TypeVar, Union
 
 import casadi as ca
 import numpy as np
@@ -343,8 +343,17 @@ class Prior(metaclass=ABCMeta):
 
     cdf = cumulative_distribution_function
 
+    @abstractmethod
+    def sample(self, shape: Union[int, Tuple[int, int]]) -> Optional[Union[ca.SX, ca.MX, ca.DM]]:
+        """
 
-class _MeanVariancePrior(Prior):
+        :param shape:
+        :return:
+        """
+        pass
+
+
+class _MeanVariancePrior(Prior, metaclass=ABCMeta):
     """"""
     def __init__(
             self,
@@ -400,7 +409,17 @@ class GaussianPrior(_MeanVariancePrior):
         """Constructor method"""
         super().__init__('Gaussian', mean=mean, variance=variance)
 
-        self._pdf = Gaussian()
+        self._distribution = Gaussian()
+
+    def sample(self, shape: Union[int, Tuple[int, int]]) -> Optional[Union[ca.SX, ca.MX, ca.DM]]:
+        """
+
+        :param shape:
+        :return:
+        """
+        if self._mean is not None and self._variance is not None:
+            return self._mean + np.sqrt(self._variance) * np.random.randn(*shape)
+        return None
 
 
 class LaplacePrior(_MeanVariancePrior):
@@ -413,7 +432,15 @@ class LaplacePrior(_MeanVariancePrior):
         """Constructor method"""
         super().__init__('Laplace', mean=mean, variance=variance)
 
-        self._pdf = Laplace()
+        self._distribution = Laplace()
+
+    def sample(self, shape: Union[int, Tuple[int, int]]) -> Optional[Union[ca.SX, ca.MX, ca.DM]]:
+        """
+
+        :param shape:
+        :return:
+        """
+        return None
 
 
 class StudentsTPrior(_MeanVariancePrior):
@@ -449,6 +476,14 @@ class StudentsTPrior(_MeanVariancePrior):
     def nu(self, value: Numeric) -> None:
         self._nu = self._check_dimensionality(value, 'nu')
 
+    def sample(self, shape: Union[int, Tuple[int, int]]) -> Optional[Union[ca.SX, ca.MX, ca.DM]]:
+        """
+
+        :param shape:
+        :return:
+        """
+        return None
+
 
 class DeltaPrior(Prior):
     """"""
@@ -459,6 +494,14 @@ class DeltaPrior(Prior):
     def _get_parameter_values(self) -> (Union[Numeric, Sequence[Numeric]], ...):
         """
 
+        :return:
+        """
+        pass
+
+    def sample(self, shape: Union[int, Tuple[int, int]]) -> Optional[Union[ca.SX, ca.MX, ca.DM]]:
+        """
+
+        :param shape:
         :return:
         """
         pass
@@ -547,6 +590,14 @@ class GammaPrior(Prior):
         """
         if self._shape is not None and self._rate is not None:
             return self._shape / self._rate ** 2
+        return None
+
+    def sample(self, shape: Union[int, Tuple[int, int]]) -> Optional[Union[ca.SX, ca.MX, ca.DM]]:
+        """
+
+        :param shape:
+        :return:
+        """
         return None
 
 
