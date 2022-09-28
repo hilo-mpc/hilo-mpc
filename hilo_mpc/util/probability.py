@@ -428,7 +428,7 @@ class StudentsTPrior(_MeanVariancePrior):
         super().__init__('Students_T', mean=mean, variance=variance)
 
         self._nu = self._check_dimensionality(nu, 'nu')
-        self._pdf = StudentsT()
+        self._distribution = StudentsT()
 
     def _get_parameter_values(self) -> (Union[Numeric, Sequence[Numeric]], ...):
         """
@@ -481,6 +481,8 @@ class GammaPrior(Prior):
         elif rate is None and scale is not None:
             rate = 1. / scale
         self._rate = rate
+
+        self._distribution = Gamma()
 
     def _get_parameter_values(self) -> (Union[Numeric, Sequence[Numeric]], ...):
         """
