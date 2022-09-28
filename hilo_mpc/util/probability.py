@@ -191,10 +191,23 @@ class Gamma(Distribution):
         y = ca.SX.sym('y')
         alpha = ca.SX.sym('alpha')
         beta = ca.SX.sym('beta')
+        gamma_alpha = ca.SX.sym('gamma_alpha')
 
-        pdf = beta ** alpha / gamma(alpha) * y ** (alpha - 1) * ca.exp(-beta * y)
+        pdf = beta ** alpha / gamma_alpha * y ** (alpha - 1) * ca.exp(-beta * y)
 
-        self._pdf_function = ca.Function('pdf', [y, alpha, beta], [pdf])
+        self._pdf_function = ca.Function('pdf', [y, alpha, beta, gamma_alpha], [pdf])
+
+    def probability_density_function(self, *args, log: bool = False) -> Union[ca.SX, ca.MX, ca.DM]:
+        """
+
+        :param args:
+        :param log:
+        :return:
+        """
+        alpha = args[1]
+        if not log:
+            gamma_alpha = gamma(alpha)
+            return self._pdf_function(*args, gamma_alpha)
 
 
 class Prior(metaclass=ABCMeta):
