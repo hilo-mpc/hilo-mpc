@@ -60,7 +60,8 @@ class Activation:
             'softmax': self.soft_max,
             'linear': self.linear,
             'scale': self.scale,
-            'probabilistic_relu': self.probabilistic_rectifier
+            'probabilistic_relu': self.probabilistic_rectifier,
+            'probabilistic_linear': self.probabilistic_linear
         }[self._name]
 
     @staticmethod
@@ -131,7 +132,26 @@ class Activation:
             prior = Prior.gaussian(mean=0., variance=1.)
 
         alpha = mean / ca.sqrt(var)
-        phi = prior(alpha)
+        phi = prior.pdf(-alpha)
+        Phi = prior.cdf(alpha)
+        gamma = phi / Phi
+        v_prime = mean + ca.sqrt(var) * gamma
+
+        # Mean and variance after ReLU
+        mean = Phi * v_prime  # equation 15
+        var = mean * v_prime * prior.cdf(-alpha) + Phi * var * (1. - gamma * (gamma + alpha))  # equation 16
+
+        return mean, var
+
+    @staticmethod
+    def probabilistic_linear(mean, var):
+        """
+
+        :param mean:
+        :param var:
+        :return:
+        """
+        return mean, var
 
 
 def register_hyperparameters(obj: ML, ids: Sequence[str]):
