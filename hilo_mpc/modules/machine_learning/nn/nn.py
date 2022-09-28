@@ -32,6 +32,7 @@ from ..base import LearningBase
 from ....plugins.plugins import LearningManager, LearningVisualizationManager, check_version
 from ....util.data import DataSet
 from ....util.machine_learning import Activation, Hyperparameter, net_to_casadi_graph
+from ....util.probability import Gaussian, GaussianPrior
 from ....util.util import is_list_like
 
 
@@ -717,11 +718,27 @@ class _PBPApproximation(LearningBase):
 
         if hyperprior is None:
             hyperprior = 'gamma'
-        hyper_kwargs = {'prior': hyperprior}
         hyperprior_parameters = kwargs.get('hyperprior_parameters')
+
+        if is_list_like(hyperprior):
+            hyper_kwargs = {'prior': hyperprior[0]}
+        else:
+            hyper_kwargs = {'prior': hyperprior}
         if hyperprior_parameters is not None:
-            hyper_kwargs['prior_parameters'] = hyperprior_parameters
+            hyper_kwargs['prior_parameters'] = hyperprior_parameters.get('noise_variance')
         self.noise_variance = Hyperparameter('PBP.noise_variance', **hyper_kwargs)
+
+        if is_list_like(hyperprior):
+            hyper_kwargs = {'prior': hyperprior[1]}
+        if hyperprior_parameters is not None:
+            hyper_kwargs['prior_parameters'] = hyperprior_parameters.get('weights')
+        # TODO: See test_means.py
+        # else:
+        #     hyper_kwargs['prior_parameters'] = {'shape': 6., 'rate': 6.}
+        self._weights = Hyperparameter('PBP.weights', **hyper_kwargs)
+        if hyperprior_parameters is None and hyper_kwargs.get('prior_parameters') is None:
+            self._weights.prior.shape = 6.
+            self._weights.prior.rate = 6.
 
         self._data_sets = []
 
@@ -754,7 +771,7 @@ class _PBPApproximation(LearningBase):
         :param kwargs:
         :return:
         """
-        properties = [self._n_features, self._n_labels, self._layers]
+        properties = [self._n_features, self._n_labels, self._layers, self.noise_variance.prior, self._weights.prior]
 
         self._net = _ProbabilisticMLP(*properties)
 
@@ -793,19 +810,20 @@ class _DataSet:
 
 class _ProbabilisticMLP:
     """"""
-    def __init__(self, n_features, n_labels, layers):
+    def __init__(self, n_features, n_labels, layers, noise_variance_prior, weight_prior):
         """Constructor method"""
-        hidden, activation = _process_probabilistic_layers(n_features, n_labels, layers)
+        hidden, activation = _process_probabilistic_layers(n_features, n_labels, layers, weight_prior)
         self._hidden = hidden
         self._activation = activation
         self._n_layers = len(layers)
         self._nodes = (n_features, ) + tuple(layer.nodes for layer in layers) + (n_labels, )
 
+        self._initialize_weights(symbolic=True)
+        self._generate_normalizer_and_gradients(n_features, n_labels)
+
         self._train_loader = None
         self._permutations = None
-
-    def _assumed_density_filtering(self, x, y):
-        """"""
+        self._noise_variance_prior = noise_variance_prior
 
     @staticmethod
     def _get_data_loader(data):
@@ -813,16 +831,130 @@ class _ProbabilisticMLP:
         data_loader = _DataSet(data[0], data[1])
         return data_loader
 
+    @staticmethod
+    def _remove_invalid_updates(new_mean, old_mean, new_var, old_var):
+        """
+
+        :param new_mean:
+        :param old_mean:
+        :param new_var:
+        :param old_var:
+        :return:
+        """
+        idx1 = np.where(new_var <= 1e-100)
+        idx2 = np.where(np.logical_or(np.isnan(new_mean), np.isnan(new_var)))
+        idx = (np.concatenate((idx1[0], idx2[0])), np.concatenate((idx1[1], idx2[1])))
+
+        if idx[0].size > 0:
+            new_mean[idx] = old_mean[idx]
+            new_var[idx] = old_var[idx]
+
+        return new_mean, new_var
+
+    def _assumed_density_filtering(self, x, y):
+        """"""
+        alpha = self._noise_variance_prior.shape
+        beta = self._noise_variance_prior.rate
+
+        Z = self._normalizer(x, y, alpha, beta, *[w for weight in self._weights for w in weight])
+        logZ, logZ1, logZ2 = Z[:3]
+
+        self._noise_variance_prior.shape = float(1. / (np.exp(logZ + logZ2 - 2. * logZ1) * (alpha + 1.) / alpha - 1.))
+        self._noise_variance_prior.rate = float(
+            1. / (np.exp(logZ2 - logZ1) * (alpha + 1.) / beta - np.exp(logZ1 - logZ) * alpha / beta))
+
+        new_weights = []
+        for k, weight in enumerate(self._weights):
+            mean = weight[0]
+            var = weight[1]
+            mean += var * Z[2 * k + 3]
+            var -= var ** 2. * (Z[2 * k + 3] ** 2. - 2. * Z[2 * k + 4])
+            mean, var = self._remove_invalid_updates(mean.full(), weight[0], var.full(), weight[1])
+            new_weights.append((mean, var))
+
+        self._weights = new_weights
+
+    def _initialize_weights(self, symbolic=False):
+        """
+
+        :param symbolic:
+        :return:
+        """
+        if symbolic:
+            self._weights = [(ca.SX.sym(f'w_mean_{k}', self._nodes[k + 1], self._nodes[k] + 1),
+                              ca.SX.sym(f'w_var_{k}', self._nodes[k + 1], self._nodes[k] + 1)) for k in
+                             range(self._n_layers + 1)]
+        else:
+            self._weights = [(GaussianPrior(mean=0., variance=1. / (self._nodes[k] + 1)).sample(
+                (self._nodes[k + 1], self._nodes[k] + 1)),
+                              self._noise_variance_prior.rate / (self._noise_variance_prior.shape - 1.) * np.ones(
+                                  (self._nodes[k + 1], self._nodes[k] + 1))) for k in range(self._n_layers + 1)]
+
+    def _generate_normalizer_and_gradients(self, n_inputs, n_outputs):
+        """
+
+        :param n_inputs:
+        :param n_outputs:
+        :return:
+        """
+        x = ca.SX.sym('x', n_inputs)
+        y = ca.SX.sym('y', n_outputs)
+
+        mean, var = self.forward(x)
+        alpha = ca.SX.sym('alpha')
+        beta = ca.SX.sym('beta')
+
+        Z = Gaussian()
+        logZ = Z.pdf(y, mean, var + beta / (alpha - 1), log=True)
+        logZ1 = Z.pdf(y, mean, var + beta / alpha, log=True)
+        logZ2 = Z.pdf(y, mean, var + beta / (alpha + 1), log=True)
+
+        normalizer_in = [x, y, alpha, beta]
+        normalizer_out = [logZ, logZ1, logZ2]
+        for weight in self._weights:
+            normalizer_in.append(weight[0])  # mean
+            normalizer_in.append(weight[1])  # variance
+            normalizer_out.append(ca.gradient(logZ, weight[0]))  # gradient w.r.t. mean
+            normalizer_out.append(ca.gradient(logZ, weight[1]))  # gradient w.r.t. variance
+
+        self._normalizer = ca.Function('normalizer', normalizer_in, normalizer_out)
+
     def _preprocessing(self, data, epochs):
         """"""
         self._train_loader = self._get_data_loader(data)
+        self._initialize_weights()
         batches = len(self._train_loader)
         self._permutations = (np.random.choice(range(batches), batches, replace=False) for _ in range(epochs))
 
-    def _train(self, permutation):
+    def _train(self, permutation, verbose):
         """"""
-        for k in permutation:
+        batches = permutation.size
+        for idx, k in np.ndenumerate(permutation):
             self._assumed_density_filtering(*self._train_loader[k])
+            if verbose == 1:
+                _progress_bar(idx[0] + 1, batches, 30, "=", "\r")
+
+        if verbose == 1:
+            print()
+
+        if verbose == 2:
+            _one_line_per_epoch(batches)
+
+        self._expectation_propagation_updates()
+
+    def forward(self, mean):
+        """
+
+        :param mean:
+        :return:
+        """
+        var = ca.SX.zeros(mean.shape)
+        for k in range(self._n_layers + 1):
+            mean, var = self._hidden[k](mean, var, *self._weights[k])
+            if self._activation[k] is not None:
+                mean, var = self._activation[k](mean, var)
+
+        return mean, var
 
     def train(self, data, epochs, verbose):
         """"""
@@ -832,36 +964,64 @@ class _ProbabilisticMLP:
             if verbose > 0:
                 print(f"Epoch {epoch + 1}/{epochs}")
 
-            self._train(permutation)
+            self._train(permutation, verbose)
 
 
-def _process_probabilistic_layers(n_features, n_labels, layers):
+def _process_probabilistic_layers(n_features, n_labels, layers, prior):
     """
 
     :param n_features:
     :param n_labels:
     :param layers:
+    :param prior:
     :return:
     """
     n_inputs = n_features
     hidden = []
     activation = []
-    output_layer = Probabilistic(n_labels, activation='linear')
+    output_layer = Probabilistic(n_labels)
+    output_layer.activation = None
+    x_mean = ca.SX.sym('x_mean', n_inputs)
+    x_var = ca.SX.sym('x_var', n_inputs)
     for k, layer in enumerate(layers + [output_layer]):
-        if k > 0:
-            n_inputs = layers[k - 1].nodes
-        if layer.initializer.prior.mean is None or layer.initializer.prior.variance is None:
-            layer.initializer.prior.shape = 6.
-            layer.initializer.prior.rate = 6.
-        x_mean = ca.SX.sym('x_mean', n_inputs)
-        x_var = ca.SX.sym('x_var', n_inputs)
+        layer.initializer = prior
         w_mean = ca.SX.sym('w_mean', layer.nodes, n_inputs)
         w_var = ca.SX.sym('w_var', layer.nodes, n_inputs)
         hidden.append(layer.forward(x_mean, x_var, w_mean=w_mean, w_var=w_var))
-        if layer.activation == 'probabilistic_relu':
-            args = [x_mean, x_var]
-        activation.append(ca.Function(layer.activation, args, [Activation(layer.activation)(*args)]))
+        n_inputs = layer.nodes
+        x_mean = ca.SX.sym('x_mean', n_inputs)
+        x_var = ca.SX.sym('x_var', n_inputs)
+        if layer.activation is not None:
+            activation.append(
+                ca.Function(layer.activation, [x_mean, x_var], Activation(layer.activation)(x_mean, x_var)))
+        else:
+            activation.append(None)
     return hidden, activation
+
+
+def _progress_bar(iteration, total, length, fill, print_end):
+    """
+
+    :param iteration:
+    :param total:
+    :param length:
+    :param fill:
+    :param print_end:
+    :return:
+    """
+    filled_length = int(length * iteration // total)
+    unfilled_length = length - filled_length
+    bar = fill * filled_length + ">" * bool(unfilled_length) + "." * (unfilled_length - 1)
+    print(f"\r{iteration}/{total} [{bar}]", end=print_end)
+
+
+def _one_line_per_epoch(total):
+    """
+
+    :param total:
+    :return:
+    """
+    print(f"{total}/{total}")
 
 
 __all__ = [
