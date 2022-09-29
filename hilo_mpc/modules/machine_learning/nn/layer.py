@@ -26,7 +26,7 @@ import warnings
 import casadi as ca
 import numpy as np
 
-from ....util.probability import GaussianPrior
+from ....util.probability import Prior
 from ....util.util import is_list_like
 
 
@@ -372,13 +372,14 @@ class Probabilistic(Dense):
     """Probabilistic layer --- to be used in Bayesian neural networks where the approximation is set to probabilistic
         backpropagation (pbp)
     """
-    def __init__(self, nodes, activation='probabilistic_relu', initializer=None, parent=None, **kwargs):
+    def __init__(self, nodes, activation='probabilistic_relu', prior=None, initializer=None, parent=None, **kwargs):
         """Constructor method"""
         if not activation.startswith('probabilistic_'):
             activation = 'probabilistic_' + activation
         super().__init__(nodes, activation=activation, initializer=initializer, parent=parent, **kwargs)
 
         self._type = 'probabilistic'
+        self._prior = prior
 
     def _set_initializer(self, initializer, **kwargs):
         """
@@ -388,20 +389,30 @@ class Probabilistic(Dense):
         :return:
         """
         if initializer is not None:
-            def _initializer(n_inputs):
-                """
+            initializer = initializer.lower().replace(' ', '_')
+            if self._prior is not None and self._prior.shape is not None and self._prior.rate is not None:
+                if initializer == 'default':
+                    def _initializer(n_inputs):
+                        """
 
-                :param n_inputs:
-                :return:
-                """
-                mean = GaussianPrior(mean=0., variance=1. / (n_inputs + 1)).sample((self._nodes, n_inputs + 1))
-                var = initializer.rate / (initializer.shape - 1.) * np.ones((self._nodes, n_inputs + 1))
+                        :param n_inputs:
+                        :return:
+                        """
+                        mean = Prior.gaussian(mean=0., variance=1. / (n_inputs + 1)).sample((self._nodes, n_inputs + 1))
+                        var = self._prior.rate / (self._prior.shape - 1.) * np.ones((self._nodes, n_inputs + 1))
 
-                return mean, var
+                        return mean, var
 
-            self._initializer = _initializer
-        else:
-            self._initializer = initializer
+                    initializer = _initializer
+                else:
+                    raise ValueError("Initializer not recognized")
+            else:
+                # TODO: Maybe differentiate between the 2 possibilities here and show different warnings
+                warnings.warn(
+                    "Prior of the weights of the probabilistic layer hasn't been set yet or was not set up correctly. "
+                    "No weight initializer was set."
+                )
+        self._initializer = initializer
 
     @property
     def initializer(self):
@@ -412,6 +423,22 @@ class Probabilistic(Dense):
         if callable(self._initializer):
             return self._initializer
         return None
+
+    @property
+    def prior(self):
+        """
+
+        :return:
+        """
+        return self._prior
+
+    @prior.setter
+    def prior(self, arg):
+        if isinstance(arg, Prior):
+            self._prior = arg
+            self.set_initializer('default')
+        else:
+            raise ValueError("Argument not recognized. Argument must be an object of the Prior classes.")
 
     def forward(self, x_mean, x_var, w_mean=None, w_var=None):
         """
@@ -450,6 +477,9 @@ class Probabilistic(Dense):
         :return:
         """
         return self._initializer(n_inputs)
+
+    def refine_prior(self):
+        """"""
 
 
 __all__ = [
