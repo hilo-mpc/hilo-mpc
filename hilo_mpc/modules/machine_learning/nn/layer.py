@@ -24,8 +24,9 @@
 import warnings
 
 import casadi as ca
+import numpy as np
 
-from ....util.probability import Prior
+from ....util.probability import GaussianPrior
 from ....util.util import is_list_like
 
 
@@ -298,16 +299,17 @@ class Layer:
         return Dropout(rate, parent=parent)
 
     @staticmethod
-    def probabilistic(nodes, weight='gamma', parent=None, **kwargs):
+    def probabilistic(nodes, activation='probabilistic_relu', initializer=None, parent=None, **kwargs):
         """
 
         :param nodes:
-        :param weight:
+        :param activation:
+        :param initializer:
         :param parent:
         :param kwargs:
         :return:
         """
-        return Probabilistic(nodes, weight=weight, parent=parent, **kwargs)
+        return Probabilistic(nodes, activation=activation, initializer=initializer, parent=parent, **kwargs)
 
 
 class Dense(Layer):
@@ -370,11 +372,11 @@ class Probabilistic(Dense):
     """Probabilistic layer --- to be used in Bayesian neural networks where the approximation is set to probabilistic
         backpropagation (pbp)
     """
-    def __init__(self, nodes, activation='probabilistic_relu', parent=None, **kwargs):
+    def __init__(self, nodes, activation='probabilistic_relu', initializer=None, parent=None, **kwargs):
         """Constructor method"""
         if not activation.startswith('probabilistic_'):
             activation = 'probabilistic_' + activation
-        super().__init__(nodes, activation=activation, parent=parent, **kwargs)
+        super().__init__(nodes, activation=activation, initializer=initializer, parent=parent, **kwargs)
 
         self._type = 'probabilistic'
 
@@ -385,7 +387,21 @@ class Probabilistic(Dense):
         :param kwargs:
         :return:
         """
-        pass
+        if initializer is not None:
+            def _initializer(n_inputs):
+                """
+
+                :param n_inputs:
+                :return:
+                """
+                mean = GaussianPrior(mean=0., variance=1. / (n_inputs + 1)).sample((self._nodes, n_inputs + 1))
+                var = initializer.rate / (initializer.shape - 1.) * np.ones((self._nodes, n_inputs + 1))
+
+                return mean, var
+
+            self._initializer = _initializer
+        else:
+            self._initializer = initializer
 
     @property
     def initializer(self):
@@ -393,7 +409,7 @@ class Probabilistic(Dense):
 
         :return:
         """
-        if isinstance(self._initializer, Prior):
+        if callable(self._initializer):
             return self._initializer
         return None
 
@@ -433,6 +449,7 @@ class Probabilistic(Dense):
         :param n_inputs:
         :return:
         """
+        return self._initializer(n_inputs)
 
 
 __all__ = [
