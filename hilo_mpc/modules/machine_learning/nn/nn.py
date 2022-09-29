@@ -753,6 +753,10 @@ class _PBPApproximation(LearningBase):
         self._test_data = (None, None)
         self._pandas_version_checked = False
 
+    _check_scaler = staticmethod(ArtificialNeuralNetwork._check_scaler)
+
+    _set_scaling = staticmethod(ArtificialNeuralNetwork._set_scaling)
+
     _check_data_sets = ArtificialNeuralNetwork._check_data_sets
 
     depth = ArtificialNeuralNetwork.depth
@@ -765,7 +769,13 @@ class _PBPApproximation(LearningBase):
 
     prepare_data_set = ArtificialNeuralNetwork.prepare_data_set
 
-    def setup(self, **kwargs):
+    set_input_scaling = ArtificialNeuralNetwork.set_input_scaling
+
+    set_output_scaling = ArtificialNeuralNetwork.set_output_scaling
+
+    set_scaling = ArtificialNeuralNetwork.set_scaling
+
+    def setup(self, **kwargs) -> None:
         """
 
         :param kwargs:
@@ -775,13 +785,19 @@ class _PBPApproximation(LearningBase):
 
         self._net = _ProbabilisticMLP(*properties)
 
-    def train(self, epochs: int, verbose: int = 1):
+    def train(
+            self,
+            epochs: int,
+            verbose: int = 1,
+            scale_data: bool = False,
+            scaler: Optional[Union[str, Callable]] = None
+    ) -> None:
         """"""
         if not self._data_sets:
             raise RuntimeError("No data set to train on was supplied. Please add a data set by using the 'add_data_set'"
                                " method.")
 
-        self.prepare_data_set(shuffle=False)
+        self.prepare_data_set(scale_data=scale_data, scaler=scaler, shuffle=False)
 
         self._net.train(self._train_data, epochs, verbose)
 
