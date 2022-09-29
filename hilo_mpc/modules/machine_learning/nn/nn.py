@@ -828,10 +828,12 @@ class _ProbabilisticMLP:
     """"""
     def __init__(self, n_features, n_labels, layers, noise_variance_prior, weight_prior):
         """Constructor method"""
-        hidden, activation, initializer = _process_probabilistic_layers(n_features, n_labels, layers, weight_prior)
+        hidden, activation, initializer, ep_update = _process_probabilistic_layers(n_features, n_labels, layers,
+                                                                                   weight_prior)
         self._hidden = hidden
         self._activation = activation
         self._initializer = initializer
+        self._ep_update = ep_update
         self._n_layers = len(layers)
         self._nodes = (n_features, ) + tuple(layer.nodes for layer in layers) + (n_labels, )
 
@@ -890,6 +892,14 @@ class _ProbabilisticMLP:
             new_weights.append((mean, var))
 
         self._weights = new_weights
+
+    def _expectation_propagation_updates(self):
+        """
+
+        :return:
+        """
+        for ep_update in self._ep_update:
+            ep_update()
 
     def _initialize_weights(self, symbolic=False):
         """
@@ -994,12 +1004,13 @@ def _process_probabilistic_layers(n_features, n_labels, layers, prior):
     hidden = []
     activation = []
     initializer = []
+    ep_update = []
     output_layer = Probabilistic(n_labels)
     output_layer.activation = None
     x_mean = ca.SX.sym('x_mean', n_inputs)
     x_var = ca.SX.sym('x_var', n_inputs)
     for k, layer in enumerate(layers + [output_layer]):
-        layer.set_initializer(prior)
+        layer.prior = prior
         w_mean = ca.SX.sym('w_mean', layer.nodes, n_inputs)
         w_var = ca.SX.sym('w_var', layer.nodes, n_inputs)
         hidden.append(layer.forward(x_mean, x_var, w_mean=w_mean, w_var=w_var))
@@ -1011,8 +1022,9 @@ def _process_probabilistic_layers(n_features, n_labels, layers, prior):
                 ca.Function(layer.activation, [x_mean, x_var], Activation(layer.activation)(x_mean, x_var)))
         else:
             activation.append(None)
-        initializer.append(layer.initializer)
-    return hidden, activation, initializer
+        initializer.append(layer.initialize_weights)
+        ep_update.append(layer.refine_prior)
+    return hidden, activation, initializer, ep_update
 
 
 def _progress_bar(iteration, total, length, fill, print_end):
