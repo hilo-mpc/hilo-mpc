@@ -812,9 +812,10 @@ class _ProbabilisticMLP:
     """"""
     def __init__(self, n_features, n_labels, layers, noise_variance_prior, weight_prior):
         """Constructor method"""
-        hidden, activation = _process_probabilistic_layers(n_features, n_labels, layers, weight_prior)
+        hidden, activation, initializer = _process_probabilistic_layers(n_features, n_labels, layers, weight_prior)
         self._hidden = hidden
         self._activation = activation
+        self._initializer = initializer
         self._n_layers = len(layers)
         self._nodes = (n_features, ) + tuple(layer.nodes for layer in layers) + (n_labels, )
 
@@ -885,10 +886,7 @@ class _ProbabilisticMLP:
                               ca.SX.sym(f'w_var_{k}', self._nodes[k + 1], self._nodes[k] + 1)) for k in
                              range(self._n_layers + 1)]
         else:
-            self._weights = [(GaussianPrior(mean=0., variance=1. / (self._nodes[k] + 1)).sample(
-                (self._nodes[k + 1], self._nodes[k] + 1)),
-                              self._noise_variance_prior.rate / (self._noise_variance_prior.shape - 1.) * np.ones(
-                                  (self._nodes[k + 1], self._nodes[k] + 1))) for k in range(self._n_layers + 1)]
+            self._weights = [self._initializer[k](self._nodes[k]) for k in range(self._n_layers + 1)]
 
     def _generate_normalizer_and_gradients(self, n_inputs, n_outputs):
         """
@@ -979,12 +977,13 @@ def _process_probabilistic_layers(n_features, n_labels, layers, prior):
     n_inputs = n_features
     hidden = []
     activation = []
+    initializer = []
     output_layer = Probabilistic(n_labels)
     output_layer.activation = None
     x_mean = ca.SX.sym('x_mean', n_inputs)
     x_var = ca.SX.sym('x_var', n_inputs)
     for k, layer in enumerate(layers + [output_layer]):
-        layer.initializer = prior
+        layer.set_initializer(prior)
         w_mean = ca.SX.sym('w_mean', layer.nodes, n_inputs)
         w_var = ca.SX.sym('w_var', layer.nodes, n_inputs)
         hidden.append(layer.forward(x_mean, x_var, w_mean=w_mean, w_var=w_var))
@@ -996,7 +995,8 @@ def _process_probabilistic_layers(n_features, n_labels, layers, prior):
                 ca.Function(layer.activation, [x_mean, x_var], Activation(layer.activation)(x_mean, x_var)))
         else:
             activation.append(None)
-    return hidden, activation
+        initializer.append(layer.initializer)
+    return hidden, activation, initializer
 
 
 def _progress_bar(iteration, total, length, fill, print_end):
