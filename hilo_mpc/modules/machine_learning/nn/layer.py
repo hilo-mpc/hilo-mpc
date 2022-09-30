@@ -21,12 +21,13 @@
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
 
+from itertools import product
 import warnings
 
 import casadi as ca
 import numpy as np
 
-from ....util.probability import Prior
+from ....util.probability import Gaussian, Prior
 from ....util.util import is_list_like
 
 
@@ -380,6 +381,10 @@ class Probabilistic(Dense):
 
         self._type = 'probabilistic'
         self._prior = prior
+        self._mean_tilde_over_var_tilde = None
+        self._var_tilde_inverted = None
+        self._alpha_tilde = None
+        self._beta_tilde = None
 
     def _set_initializer(self, initializer, **kwargs):
         """
@@ -400,6 +405,11 @@ class Probabilistic(Dense):
                         """
                         mean = Prior.gaussian(mean=0., variance=1. / (n_inputs + 1)).sample((self._nodes, n_inputs + 1))
                         var = self._prior.rate / (self._prior.shape - 1.) * np.ones((self._nodes, n_inputs + 1))
+
+                        self._mean_tilde_over_var_tilde = np.zeros((self._nodes, n_inputs + 1))
+                        self._var_tilde_inverted = 1. / var
+                        self._alpha_tilde = np.zeros((self._nodes, n_inputs + 1))
+                        self._beta_tilde = np.zeros((self._nodes, n_inputs + 1))
 
                         return mean, var
 
@@ -476,10 +486,56 @@ class Probabilistic(Dense):
         :param n_inputs:
         :return:
         """
+        if self._initializer is None:
+            raise RuntimeError("Initializer not set. Weights could not be initialized.")
         return self._initializer(n_inputs)
 
-    def refine_prior(self):
-        """"""
+    def refine_prior(self, mean, var):
+        """
+
+        :param mean:
+        :param var:
+        :return:
+        """
+        n_outputs, n_inputs = mean.shape
+        Z = Gaussian()
+        for i, j in product(range(n_outputs), range(n_inputs)):
+            var_inverted = 1. / var[i, j]
+            mean_over_var = mean[i, j] / var[i, j]
+            alpha = self._prior.shape
+            beta = self._prior.rate
+
+            var_cavity_inverted = var_inverted - self._var_tilde_inverted[i, j]
+            mean_cavity_over_var_cavity = mean_over_var - self._mean_tilde_over_var_tilde[i, j]
+            var_cavity = 1. / var_cavity_inverted
+            mean_cavity = mean_cavity_over_var_cavity * var_cavity
+
+            alpha_cavity = alpha - self._alpha_tilde[i, j] + 1.
+            beta_cavity = beta - self._beta_tilde[i, j]
+
+            if 0. < var_cavity < 1e6 and alpha_cavity > 1. and beta_cavity > 0.:
+                logZ = Z.pdf(0., mean_cavity, var_cavity + beta_cavity / (alpha_cavity - 1.), log=True)
+                logZ1 = Z.pdf(0., mean_cavity, var_cavity + beta_cavity / alpha_cavity, log=True)
+                logZ2 = Z.pdf(0., mean_cavity, var_cavity + beta_cavity / (alpha_cavity + 1.), log=True)
+                dlogZdm = -mean_cavity / (var_cavity + beta_cavity / (alpha_cavity - 1.))
+                dlogZdv = .5 * mean_cavity ** 2. / var_cavity ** 2. - np.pi / var_cavity
+
+                mean[i, j] = mean_cavity + var_cavity * dlogZdm
+                var[i, j] = var_cavity - var_cavity ** 2. * (dlogZdm ** 2. - 2. * dlogZdv)
+
+                alpha = float(1. / (np.exp(logZ + logZ2 - 2. * logZ1) * (alpha_cavity + 1.) / alpha_cavity - 1.))
+                beta = float(1. / (np.exp(logZ2 - logZ1) * (alpha_cavity + 1.) / beta_cavity - np.exp(
+                    logZ1 - logZ) * alpha_cavity / beta_cavity))
+                self._prior.shape = alpha
+                self._prior.rate = beta
+
+                self._var_tilde_inverted[i, j] = var_inverted - var_cavity_inverted
+                self._mean_tilde_over_var_tilde[i, j] = mean_over_var - mean_cavity_over_var_cavity
+
+                self._alpha_tilde[i, j] = alpha - alpha_cavity + 1.
+                self._beta_tilde[i, j] = beta - beta_cavity
+
+        return mean, var
 
 
 __all__ = [
