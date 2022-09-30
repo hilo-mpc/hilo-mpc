@@ -878,6 +878,9 @@ class _ProbabilisticMLP:
         Z = self._normalizer(x, y, alpha, beta, *[w for weight in self._weights for w in weight])
         logZ, logZ1, logZ2 = Z[:3]
 
+        if np.isnan(logZ):
+            print()
+
         self._noise_variance_prior.shape = float(1. / (np.exp(logZ + logZ2 - 2. * logZ1) * (alpha + 1.) / alpha - 1.))
         self._noise_variance_prior.rate = float(
             1. / (np.exp(logZ2 - logZ1) * (alpha + 1.) / beta - np.exp(logZ1 - logZ) * alpha / beta))
@@ -898,8 +901,9 @@ class _ProbabilisticMLP:
 
         :return:
         """
-        for ep_update in self._ep_update:
-            ep_update()
+        for k, ep_update in enumerate(self._ep_update):
+            mean, var = ep_update(*self._weights[k])
+            self._weights[k] = (mean, var)
 
     def _initialize_weights(self, symbolic=False):
         """
@@ -929,9 +933,9 @@ class _ProbabilisticMLP:
         beta = ca.SX.sym('beta')
 
         Z = Gaussian()
-        logZ = Z.pdf(y, mean, var + beta / (alpha - 1), log=True)
+        logZ = Z.pdf(y, mean, var + beta / (alpha - 1.), log=True)
         logZ1 = Z.pdf(y, mean, var + beta / alpha, log=True)
-        logZ2 = Z.pdf(y, mean, var + beta / (alpha + 1), log=True)
+        logZ2 = Z.pdf(y, mean, var + beta / (alpha + 1.), log=True)
 
         normalizer_in = [x, y, alpha, beta]
         normalizer_out = [logZ, logZ1, logZ2]
