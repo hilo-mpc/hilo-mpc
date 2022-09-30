@@ -136,8 +136,9 @@ class Activation:
         Phi = prior.cdf(alpha)
         gamma = phi / Phi
         gamma_robust = -alpha - 1. / alpha + 2. / alpha ** 3.
-        gamma *= (1. + ca.sign(alpha + 30.)) / 2.
-        gamma += gamma_robust * (1. - ca.sign(alpha + 30.)) / 2.
+        # gamma *= (1. + ca.sign(alpha + 5.)) / 2.
+        # gamma += gamma_robust * (1. - ca.sign(alpha + 5.)) / 2.
+        gamma = ca.if_else(alpha >= -5., gamma, gamma_robust)
         v_prime = mean + ca.sqrt(var) * gamma
 
         # Mean and variance after ReLU
