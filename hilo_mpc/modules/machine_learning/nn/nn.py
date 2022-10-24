@@ -727,6 +727,9 @@ class _PBPApproximation(LearningBase):
         if hyperprior_parameters is not None:
             hyper_kwargs['prior_parameters'] = hyperprior_parameters.get('noise_variance')
         self.noise_variance = Hyperparameter('PBP.noise_variance', **hyper_kwargs)
+        if hyperprior_parameters is None and hyper_kwargs.get('prior_parameters') is None:
+            self.noise_variance.prior.shape = 6.
+            self.noise_variance.prior.rate = 6.
 
         if is_list_like(hyperprior):
             hyper_kwargs = {'prior': hyperprior[1]}
@@ -775,6 +778,27 @@ class _PBPApproximation(LearningBase):
 
     set_scaling = ArtificialNeuralNetwork.set_scaling
 
+    def build_graph(self, weights=None, bias=None):
+        """
+
+        :param weights:
+        :param bias:
+        :return:
+        """
+        x = ca.SX.sym('x', self._n_features)
+        h = x
+        if self._scaler_x is not None:
+            h -= self._scaler_x.mean_
+            h /= self._scaler_x.scale_
+
+        mean, var = self._net.forward(h)
+        if self._scaler_y is not None:
+            mean *= self._scaler_y.scale_
+            mean += self._scaler_y.mean_
+            var *= self._scaler_y.var_
+
+        self._function = ca.Function('neural_network', [x], [mean, var], ['features'], ['label_mean', 'label_variance'])
+
     def setup(self, **kwargs) -> None:
         """
 
@@ -790,21 +814,28 @@ class _PBPApproximation(LearningBase):
             epochs: int,
             verbose: int = 1,
             scale_data: bool = False,
-            scaler: Optional[Union[str, Callable]] = None
+            scaler: Optional[Union[str, Callable]] = None,
+            scaler_backend: Optional[str] = None
     ) -> None:
         """"""
         if not self._data_sets:
             raise RuntimeError("No data set to train on was supplied. Please add a data set by using the 'add_data_set'"
                                " method.")
 
-        self.prepare_data_set(scale_data=scale_data, scaler=scaler, shuffle=False)
+        self.prepare_data_set(scale_data=scale_data, scaler=scaler, scaler_backend=scaler_backend, shuffle=False)
 
         self._net.train(self._train_data, epochs, verbose)
 
-    def predict(self, X_query):
+        self.build_graph()
+
+    def predict(self, X_query, noise_free=False):
         """"""
         mean, var = self._function(X_query)
-        var += self.noise_variance.prior.rate / (self.noise_variance.prior.shape - 1.)
+        if not noise_free:
+            if self._scaler_y is not None:
+                var += (self.noise_variance.prior.rate / (self.noise_variance.prior.shape - 1.)) * self._scaler_y.var_
+            else:
+                var += self.noise_variance.prior.rate / (self.noise_variance.prior.shape - 1.)
         return mean, var
 
 
