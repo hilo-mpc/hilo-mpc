@@ -510,15 +510,16 @@ class Probabilistic(Dense):
             var_cavity = 1. / var_cavity_inverted
             mean_cavity = mean_cavity_over_var_cavity * var_cavity
 
-            alpha_cavity = alpha - self._alpha_tilde[i, j] + 1.
-            beta_cavity = beta - self._beta_tilde[i, j]
+            alpha_cavity = alpha - self._alpha_tilde[i, j]
+            beta_cavity = beta + self._beta_tilde[i, j]
 
             if 0. < var_cavity < 1e6 and alpha_cavity > 1. and beta_cavity > 0.:
                 logZ = Z.pdf(0., mean_cavity, var_cavity + beta_cavity / (alpha_cavity - 1.), log=True)
                 logZ1 = Z.pdf(0., mean_cavity, var_cavity + beta_cavity / alpha_cavity, log=True)
                 logZ2 = Z.pdf(0., mean_cavity, var_cavity + beta_cavity / (alpha_cavity + 1.), log=True)
                 dlogZdm = -mean_cavity / (var_cavity + beta_cavity / (alpha_cavity - 1.))
-                dlogZdv = .5 * mean_cavity ** 2. / var_cavity ** 2. - np.pi / var_cavity
+                dlogZdv = .5 * mean_cavity ** 2. / (var_cavity + beta_cavity / (alpha_cavity - 1.)) ** 2. - .5 / (
+                            var_cavity + beta_cavity / (alpha_cavity - 1.))
 
                 mean[i, j] = mean_cavity + var_cavity * dlogZdm
                 var[i, j] = var_cavity - var_cavity ** 2. * (dlogZdm ** 2. - 2. * dlogZdv)
@@ -526,14 +527,15 @@ class Probabilistic(Dense):
                 alpha = float(1. / (np.exp(logZ + logZ2 - 2. * logZ1) * (alpha_cavity + 1.) / alpha_cavity - 1.))
                 beta = float(1. / (np.exp(logZ2 - logZ1) * (alpha_cavity + 1.) / beta_cavity - np.exp(
                     logZ1 - logZ) * alpha_cavity / beta_cavity))
+
+                self._var_tilde_inverted[i, j] = 1. / var[i, j] - var_cavity_inverted
+                self._mean_tilde_over_var_tilde[i, j] = mean[i, j] / var[i, j] - mean_cavity_over_var_cavity
+
+                self._alpha_tilde[i, j] += alpha - self._prior.shape
+                self._beta_tilde[i, j] = self._prior.rate - beta
+
                 self._prior.shape = alpha
                 self._prior.rate = beta
-
-                self._var_tilde_inverted[i, j] = var_inverted - var_cavity_inverted
-                self._mean_tilde_over_var_tilde[i, j] = mean_over_var - mean_cavity_over_var_cavity
-
-                self._alpha_tilde[i, j] = alpha - alpha_cavity + 1.
-                self._beta_tilde[i, j] = beta - beta_cavity
 
         return mean, var
 
