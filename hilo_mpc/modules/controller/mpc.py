@@ -2807,6 +2807,64 @@ class SMPC(NMPC):
                                 **kwargs)
 
 
+class SMPCUKF(NMPC):
+    "This Class implement the Stochastic MPC with uncented transformation develped in ... "
+    # TODO: put citations
+    def __int__(self, model, id=None, name=None, plot_backend=None, use_sx=True, stats=False):
+        self._plot_backend = plot_backend
+        if not model.discrete:
+            raise TypeError("SMPUKF works only with discrete-time models. Discreteze the model first.")
+        super().__init__(model, id=id, name=name, plot_backend=plot_backend, stats=stats, use_sx=use_sx)
+
+    def set_covariance_matrices(self, sigma_par, sigma_w, sigma_v, sigma_x):
+        self.sigma_par = sigma_par
+        self.sigma_w = sigma_w
+        self.sigma_v = sigma_v
+        self.sigma_x = sigma_x
+
+    def _initialize_UKF(self):
+
+
+        model_c = Model(plot_backend=self._plot_backend, discrete=True)
+        sigma_points_names  = []
+        for i in range(self.nx_aug):
+            [f'{i}' for i in self.model.dynamical_state_names]
+        mu_x = model_c.set_dynamical_states()
+        mu_u = model_c.set_inputs([f'{i}' for i in self.model.input_names])
+        mu_p = model_c.set_parameters(self.model.parameter_names)
+        if mu_p.shape == (0, 0):
+            mu_p.resize(0, 1)
+
+        if Kgain is None:
+            model_c.add_parameters([f'kgain_{i}' for i in range(det_model.n_x * det_model.n_u)])
+            Kgain = ca.reshape(model_c.p[det_model.n_p:], model_c.n_u, model_c.n_x)
+
+
+        # TODO add these in the options
+        # Unscented Kalman filter specifications
+        self.alpha = 0.4  # alpha
+        self.beta = 2.  # beta
+        self.kappa = 1.  # kappa
+
+        # TODO: for the moment all the parameters are assumed to be unknown. But we should give the choice
+        self.nx_aug = self.model.n_x + self.model.p
+        self.W_m = np.zeros(2 * self.nx_aug + 1)
+        self.W_c = np.zeros(2 * self.nx_aug + 1)
+        self.lambda_ukf = self.alpha ** 2 * (self.nx_aug + self.kappa) - self.nx_aug
+        self.W_m[0] = (self.lambda_ukf / (self.nx_aug + self.lambda_ukf))
+        self.W_c[0] = (self.lambda_ukf / (self.nx_aug + self.lambda_ukf)) + (1 - self.alpha ** 2 + self.beta)
+        for i in range(1, 2 * self.nx_aug + 1):
+            self.W_m[i] = 1. / (2 * (self.nx_aug + self.lambda_ukf))
+            self.W_c[i] = 1. / (2 * (self.nx_aug + self.lambda_ukf))
+        scaling_factor = self.nx_aug + self.lambda_ukf
+        sqrt_scaling_factor = ca.sqrt(self.nx_aug + self.lambda_ukf)
+
+        self.sqrt_CovP = ca.chol(CovP)
+        self.sqrt_Sigma_w = ca.chol(Sigma_w)
+        self.sqrt_Sigma_v = ca.chol(Sigma_v)
+
+
+
 __all__ = [
     'NMPC',
     'LMPC'
