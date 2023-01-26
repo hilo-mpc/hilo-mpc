@@ -1,7 +1,7 @@
 import unittest
 import casadi as ca
 import numpy as np
-from hilo_mpc import Model, SMPC, GP
+from hilo_mpc import Model, SMPC, GP, SMPCUKF
 import scipy
 
 class TestIO(unittest.TestCase):
@@ -243,6 +243,50 @@ class TestMIMOSystem(unittest.TestCase):
         scl = SimpleControlLoop(model, lqr)
         scl.run(20)
         scl.plot()
+
+
+
+class TestUKF(unittest.TestCase):
+
+    def test_initialization_ukf(self):
+        model = Model(plot_backend='bokeh')
+        # Constants
+        M = 5.
+        m = 1.
+        l = 1.
+        g = 9.81
+
+        # States and algebraic variables
+        x = model.set_dynamical_states(['x', 'v', 'theta', 'omega'])
+        model.set_measurements(['yx', 'yv', 'ytheta', 'tomega'])
+        model.set_measurement_equations([x[0], x[1], x[2], x[3]])
+        h= model.set_parameters(['h'])
+        # y = model.set_algebraic_variables(['y'])
+        v = x[1]
+        theta = x[2]
+        omega = x[3]
+        # Inputs
+        F = model.set_inputs('F')
+
+        # ODE
+        dx = v
+        dv = 1. / (M + m - m * ca.cos(theta)) * (m * g * ca.sin(theta) - m * l * ca.sin(theta) * omega ** 2 + F)
+        dtheta = omega
+        domega = 1. / l * (dv * ca.cos(theta) + g * ca.sin(theta))
+
+        model.set_equations(ode=[dx, dv, dtheta, domega])
+
+        # Initial conditions
+        x0 = [2.5, 0., 0.1, 0.]
+        z0 = ca.sqrt(3.) / 2.
+        u0 = 0.
+
+        # Create model and run simulation
+        dt = .1
+        model.discretize(method='rk4', inplace=True)
+        model.setup(dt=dt)
+        smpc = SMPCUKF(model, plot_backend='bokeh')
+
 
 if __name__ == '__main__':
     unittest.main()

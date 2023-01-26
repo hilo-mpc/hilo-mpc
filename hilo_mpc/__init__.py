@@ -44,6 +44,7 @@ Model = dyn_mod.Model
 NMPC = mpc.NMPC
 LMPC = mpc.LMPC
 SMPC = mpc.SMPC
+SMPCUKF = mpc.SMPCUKF
 OptimalControlProblem = ocp.OptimalControlProblem
 OCP = OptimalControlProblem
 LinearQuadraticRegulator = lqr.LinearQuadraticRegulator
