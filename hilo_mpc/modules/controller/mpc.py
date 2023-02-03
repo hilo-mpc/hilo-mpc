@@ -2842,11 +2842,15 @@ class SMPCUKF(NMPC):
 
         self._robust_horizon = None
         self._setup_parameters()
+
+
         # dt = model.solution._dt
         # model_new = self._setup_predict()
         # model_new.setup(dt=dt)
         super().__init__(model, id=id, name=name, plot_backend=plot_backend, stats=stats, use_sx=use_sx)
-
+        # This overrites teh definition on in the __init__ of the parent class
+        self._n_x = self._model.n_x * (2* self.n_L + 1)
+        self._n_p = self._model.n_p * (2* self.n_L + 1)
     def _check_parameter_bounds(self, param: str, value: Union[int, float]) -> None:
         """
 
@@ -3907,9 +3911,7 @@ class SMPCUKF(NMPC):
         problem['sigma_x'] = sigma_x
         problem['sigma_p'] = sigma_p
 
-        # This overrites teh definition on in the __init__ of the parent class
-        self._n_x = problem['x'].shape[0]
-        self._n_p = problem['p'].shape[0]
+
         return problem
 
     def _get_nlp_parameters(self, cp, tvp, **kwargs):
@@ -4342,6 +4344,98 @@ class SMPCUKF(NMPC):
 
         return list(itertools.chain.from_iterable(C_lb)), list(itertools.chain.from_iterable(C_ub))
 
+    def set_box_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
+                            z_lb=None):
+        """
+        Set box constraints to the model's variables. These look like
+
+        .. math::
+                                    x_{lb} \leq x \leq x_{ub}
+
+        :param x_ub: upper bound on states.
+        :type x_ub: list, numpy array or CasADi DM array
+        :param x_lb: lower bound on  states
+        :type x_lb: list, numpy array or CasADi DM array
+        :param u_ub: upper bound on inputs
+        :type u_ub: list, numpy array or CasADi DM array
+        :param u_lb: lower bound on inputs
+        :type u_lb: list, numpy array or CasADi DM array
+        :param y_ub: upper bound on measurements
+        :type y_ub: list, numpy array or CasADi DM array
+        :param y_lb: lower bound on measurements
+        :type y_lb: list, numpy array or CasADi DM array
+        :param z_ub: upper bound on algebraic states
+        :type z_ub: list, numpy array or CasADi DM array
+        :param z_lb: lower bound on algebraic states
+        :type z_lb: list, numpy array or CasADi DM array
+        :return:
+        """
+        if x_ub is not None:
+            x_ub = deepcopy(x_ub)
+            x_ub = check_and_wrap_to_list(x_ub)
+            if len(x_ub) != self._n_x:
+                raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
+            self._x_ub = x_ub
+        else:
+            self._x_ub = self._model.n_x * [ca.inf]
+
+        if x_lb is not None:
+            x_lb = deepcopy(x_lb)
+            x_lb = check_and_wrap_to_list(x_lb)
+            if len(x_lb) != self._n_x:
+                raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
+            self._x_lb = x_lb
+        else:
+            self._x_lb = self._model.n_x * [-ca.inf]
+
+        # Input constraints
+        if u_ub is not None:
+            u_ub = deepcopy(u_ub)
+            u_ub = check_and_wrap_to_list(u_ub)
+            if len(u_ub) != self._n_u:
+                raise TypeError(f"The model has {self._n_u} inputs. You need to pass the same number of bounds.")
+            self._u_ub = u_ub
+        else:
+            self._u_ub = self._model.n_u * [ca.inf]
+
+        if u_lb is not None:
+            u_lb = deepcopy(u_lb)
+            u_lb = check_and_wrap_to_list(u_lb)
+            if len(u_lb) != self._n_u:
+                raise TypeError(f"The model has {self._n_u} inputs. You need to pass the same number of bounds.")
+            self._u_lb = u_lb
+        else:
+            self._u_lb = self._model.n_u * [-ca.inf]
+
+        # Algebraic constraints
+        if z_ub is not None:
+            z_ub = deepcopy(z_ub)
+            z_ub = check_and_wrap_to_list(z_ub)
+            if len(z_ub) != self._n_z:
+                raise TypeError(f"The model has {self._n_z} algebraic states. You need to pass the same number of "
+                                f"bounds.")
+            self._z_ub = z_ub
+        else:
+            self._z_ub = self._model.n_z * [ca.inf]
+
+        if z_lb is not None:
+            z_lb = deepcopy(z_lb)
+            z_lb = check_and_wrap_to_list(z_lb)
+            if len(z_lb) != self._n_z:
+                raise TypeError(f"The model has {self._n_z} algebraic states. You need to pass the same number of "
+                                f"bounds.")
+            self._z_lb = z_lb
+        else:
+            self._z_lb = self._model.n_z * [-ca.inf]
+
+        if y_lb is not None or y_ub is not None:
+            # Measurement box constraints can be added by an extra stage and terminal constraint (possibly nonlinear)
+            self.set_stage_constraints(stage_constraint=self._model.meas, ub=deepcopy(y_ub), lb=deepcopy(y_lb),
+                                       name='measurement_constraint')
+            self.set_terminal_constraints(terminal_constraint=self._model.meas, ub=deepcopy(y_ub), lb=deepcopy(y_lb),
+                                          name='measurement_constraint')
+
+        self._box_constraints_is_set = True
 
 __all__ = [
     'NMPC',

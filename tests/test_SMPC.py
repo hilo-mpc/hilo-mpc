@@ -253,22 +253,29 @@ class TestMIMOSystem(unittest.TestCase):
 
 class TestUKF(unittest.TestCase):
 
+    def initial_condition_covariances(self,model):
+        C = np.diag(np.ones(model.n_x) * 1e-6).tolist()
+        return list(itertools.chain.from_iterable(C))
+
+    def bounds_covariances(self,model, v_ub, cv_lb=-1e6, cv_ub=1e6):
+        C_lb = np.ones((model.n_x, model.n_x)) * cv_lb
+        np.fill_diagonal(C_lb, 0)
+
+        C_ub = np.ones((model.n_x, model.n_x)) * cv_ub
+        np.fill_diagonal(C_ub, v_ub)
+
+        C_lb = C_lb.tolist()
+        C_ub = C_ub.tolist()
+
+        return list(itertools.chain.from_iterable(C_lb)), list(itertools.chain.from_iterable(C_ub))
+
+    def get_mean_sigma_points(self,model, smpc):
+        xp_mean = {}
+        for state in model.dynamical_state_names:
+            xp_mean[state] = np.average(smpc.solution[state].toarray(), weights=smpc._weights[0, :], axis=0)
+        return xp_mean
+
     def test_initialization_ukf(self):
-        def initial_condition_covariances(model):
-            C = np.diag(np.ones(model.n_x) * 1e-6).tolist()
-            return list(itertools.chain.from_iterable(C))
-
-        def bounds_covariances(model, v_ub, cv_lb=-1e6, cv_ub=1e6):
-            C_lb = np.ones((model.n_x, model.n_x)) * cv_lb
-            np.fill_diagonal(C_lb, 0)
-
-            C_ub = np.ones((model.n_x, model.n_x)) * cv_ub
-            np.fill_diagonal(C_ub, v_ub)
-
-            C_lb = C_lb.tolist()
-            C_ub = C_ub.tolist()
-
-            return list(itertools.chain.from_iterable(C_lb)), list(itertools.chain.from_iterable(C_ub))
 
         model = Model(plot_backend='bokeh')
         # Constants
@@ -295,7 +302,7 @@ class TestUKF(unittest.TestCase):
         model.set_dynamical_equations([dd1, dd2, dd3, dd4])
 
         # Initial conditions
-        x0 = [1, 0, 1, 0]
+        x0 = [1, 0, 2, 0]
         u0 = [0., 0.]
 
         # Create model and run simulation
@@ -310,52 +317,133 @@ class TestUKF(unittest.TestCase):
         u0 = [0., 0.]
 
         # lower and upper bounds
-        x_lb_c, x_ub_c = bounds_covariances(model, [1e6, 1e6, 1e6, 1e6])
+        x_lb_c, x_ub_c = self.bounds_covariances(model, [1e6, 1e6, 1e6, 1e6])
         # Create model and run simulation
 
-        smpc = SMPCUKF(model, plot_backend='bokeh',alpha=0.9)
+        smpc = SMPCUKF(model, plot_backend='bokeh', alpha=0.9)
         smpc.quad_stage_cost.add_states(names=['px', 'py'], ref=[2, 2], weights=[10, 5])
         smpc.quad_terminal_cost.add_states(names=['px', 'py'], ref=[2, 2], weights=[10, 5])
         smpc.quad_stage_cost.add_inputs(names=['Fx', 'Fy'], weights=[4, 4])
         smpc.horizon = 20
-        smpc.robust_horizon = 2
-        smpc.covariance_states = np.eye(model.n_x)*0.001
-        smpc.covariance_states_noise = np.eye(model.n_x)*0.00001
-        smpc.covariance_parameters = np.eye(model.n_p)*0.001
+        smpc.robust_horizon = 3
+        smpc.covariance_states = np.eye(model.n_x) * 0.001
+        smpc.covariance_states_noise = np.eye(model.n_x) * 0.00001
+        smpc.covariance_parameters = np.eye(model.n_p) * 0.001
         # smpc.set_box_constraints(x_ub=x_ub_c + [10, 10, 10, 10] * (2 * 5 + 1),
         #                          x_lb=x_lb_c + [-10, -10, -10, -10] * (2 * 5 + 1))
         # smpc.set_initial_guess(x_guess=x0_new, u_guess=u0)
-        smpc.setup(solver_options={'ipopt.print_level': 5}, options={'integration_method':'rk4'})
+        smpc.setup(solver_options={'ipopt.print_level': 5}, options={'integration_method': 'rk4'})
 
         smpc.optimize(x0=x0_new, cp=[5])
         # smpc.plot_iterations(plot_last=True)
         # Get the sigma
-        sigma_pred = np.zeros((model.n_x,model.n_x, smpc.robust_horizon))
+        sigma_pred = np.zeros((model.n_x, model.n_x, smpc.robust_horizon))
         for ii in range(smpc.robust_horizon):
-            sigma_pred[:,:, ii] = np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape((model.n_x,model.n_x)) @ np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape((model.n_x,model.n_x)).T
-
+            sigma_pred[:, :, ii] = np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape(
+                (model.n_x, model.n_x)) @ np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape(
+                (model.n_x, model.n_x)).T
 
         # Extend sigma with the last sigma until the prediciton horizon
-        sigma_pred = np.concatenate((sigma_pred, np.dstack([sigma_pred[:,:,-1] for i in range(smpc.prediction_horizon+1-smpc.robust_horizon)])),axis=2)
-        # sx_init = [0] * model.n_x
-        # for i in range(model.n_x):
+        sigma_pred = np.concatenate((sigma_pred, np.dstack(
+            [sigma_pred[:, :, -1] for i in range(smpc.prediction_horizon + 1 - smpc.robust_horizon)])), axis=2)
+        x_mean = self.get_mean_sigma_points(model, smpc)
 
-        # smpc.solution['sx00']
-        #
-        #
         p_states = []
-        color_list = ['blue', 'green', 'magenta','red']
+        color_list = ['blue', 'green', 'magenta', 'red']
         for k, state in enumerate(model.dynamical_state_names):
             p = figure(background_fill_color='#fafafa')
 
             p.varea(smpc.solution['t'].toarray().squeeze(),
-                    smpc.solution[state][0,:].toarray().squeeze() - np.sqrt(sigma_pred[k,k,:].squeeze()),
-                    smpc.solution[state][0,:].toarray().squeeze() + np.sqrt(sigma_pred[k,k,:].squeeze()),
+                    x_mean[state] - np.sqrt(sigma_pred[k, k, :].squeeze()),
+                    x_mean[state] + np.sqrt(sigma_pred[k, k, :].squeeze()),
                     fill_alpha=0.5, fill_color=color_list[k], legend_label=state)
-            p.line(smpc.solution['t'].toarray().squeeze(),smpc.solution['px'][0,:].toarray().squeeze(), legend_label=state,
+            p.line(smpc.solution['t'].toarray().squeeze(), x_mean[state],
+                   legend_label=state,
                    line_color=color_list[k])
             p_states.append(p)
-        grid = gridplot([[p_states[0], p_states[1]], [p_states[2], None]])
+        grid = gridplot([[p_states[0], p_states[1]], [p_states[2], p_states[3]]])
+        show(grid)
+
+    def test_bio(self):
+        theta0 = [0.08, 0.4, 0.04, 0.2]
+        Cglu = 50
+        dt = 6
+        x0 = [2.5, 0., 0.1, 0.]
+        model = Model(name='simple_bio', plot_backend='bokeh')
+        x = model.set_dynamical_states(['Glu', 'Bio', 'Lac', 'V'])
+        u = model.set_inputs(['Fglu'])
+        theta = model.set_parameters(['v_max', 'km', 'v_maxl', 'km_l'])
+        v_max = theta[0]
+        km = theta[1]
+        v_maxl = theta[2]
+        kml = theta[3]
+        glu = x[0]
+        bio = x[1]
+        lac = x[2]
+        v = x[3]
+
+        r = (v_max * glu) / (km + glu)
+        rl = (v_maxl * glu) / (kml + glu)
+        dbio = r * bio - u / v * bio
+        dglc = -r * bio - rl * bio + u / v * (Cglu - glu)
+        dlac = rl * bio - u / v * lac
+        dv = u
+
+        model.set_dynamical_equations([dglc, dbio, dlac, dv])
+        model.discretize(method='rk4', inplace=True)
+        model.setup(dt=dt)
+        model.set_initial_conditions(x0=x0)
+
+        # Initial conditions
+        x0_new = x0 * (2 * model.n_x + 1)
+        u0 = [0.]
+
+        # lower and upper bounds
+        x_lb_c, x_ub_c = self.bounds_covariances(model, [1e6, 1e6, 1e6, 1e6])
+        # Create model and run simulation
+
+        smpc = SMPCUKF(model, plot_backend='bokeh', alpha=0.9)
+        smpc.quad_stage_cost.add_states(names=['Lac'], weights=[-10])
+        smpc.quad_terminal_cost.add_states(names=['Lac'], weights=[-10])
+        smpc.quad_stage_cost.add_inputs(names=['Fglu'], weights=[4])
+        smpc.horizon = 10
+        smpc.robust_horizon = 3
+        smpc.covariance_states = np.eye(model.n_x) * 0.001
+        smpc.covariance_states_noise = np.eye(model.n_x) * 0.00001
+        smpc.covariance_parameters = np.eye(model.n_p) * 0.001
+        # smpc.set_box_constraints(x_ub=[10, 10, 10, 10] ,
+        #                          x_lb=[1e-6, 1e-6, 1e-6, 1e-6])
+        # smpc.set_initial_guess(x_guess=x0_new, u_guess=u0)
+        smpc.setup(solver_options={'ipopt.print_level': 5}, options={'integration_method': 'rk4'})
+
+        smpc.optimize(x0=x0_new, cp=theta0)
+        # smpc.plot_iterations(plot_last=True)
+        # Get the sigma
+        sigma_pred = np.zeros((model.n_x, model.n_x, smpc.robust_horizon))
+        for ii in range(smpc.robust_horizon):
+            sigma_pred[:, :, ii] = np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape(
+                (model.n_x, model.n_x)) @ np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape(
+                (model.n_x, model.n_x)).T
+
+        # Extend sigma with the last sigma until the prediciton horizon
+        sigma_pred = np.concatenate((sigma_pred, np.dstack(
+            [sigma_pred[:, :, -1] for i in range(smpc.prediction_horizon + 1 - smpc.robust_horizon)])), axis=2)
+        x_mean = self.get_mean_sigma_points(model, smpc)
+
+        p_states = []
+        color_list = ['blue', 'green', 'magenta', 'red']
+        for k, state in enumerate(model.dynamical_state_names):
+            p = figure(background_fill_color='#fafafa')
+
+            p.varea(smpc.solution['t'].toarray().squeeze(),
+                    x_mean[state] - np.sqrt(sigma_pred[k, k, :].squeeze()),
+                    x_mean[state] + np.sqrt(sigma_pred[k, k, :].squeeze()),
+                    fill_alpha=0.5, fill_color=color_list[k], legend_label=state)
+            p.line(smpc.solution['t'].toarray().squeeze(), x_mean[state],
+                   legend_label=state,
+                   line_color=color_list[k])
+            p_states.append(p)
+        grid = gridplot([[p_states[0], p_states[1]], [p_states[2], p_states[3]]])
         show(grid)
 
 
