@@ -274,7 +274,7 @@ class TestUKF(unittest.TestCase):
         # Constants
 
         # States and algebraic variables
-        xx = model.set_dynamical_states(['x', 'vx', 'y', 'vy'])
+        xx = model.set_dynamical_states(['px', 'vx', 'py', 'vy'])
         model.set_measurements(['y_x', 'y_vx', 'y_y', 'y_vy'])
         model.set_measurement_equations([xx[0], xx[1], xx[2], xx[3]])
         M = model.set_parameters(['M'])
@@ -304,19 +304,20 @@ class TestUKF(unittest.TestCase):
         model.setup(dt=dt)
 
         # Initial conditions
-        x0c = initial_condition_covariances(model)
-        # x0_new = x0c + x0 * (2 * 5 + 1)
-        x0_new = x0
+        # x0c = initial_condition_covariances(model)
+        x0_new = x0 * (2 * 5 + 1)
+        # x0_new = x0
         u0 = [0., 0.]
 
         # lower and upper bounds
         x_lb_c, x_ub_c = bounds_covariances(model, [1e6, 1e6, 1e6, 1e6])
         # Create model and run simulation
 
-        smpc = SMPCUKF(model, plot_backend='bokeh')
-        smpc.quad_stage_cost.add_states(names=['x', 'y'], ref=[1, 1], weights=[10, 5])
+        smpc = SMPCUKF(model, plot_backend='bokeh',alpha=0.9)
+        smpc.quad_stage_cost.add_states(names=['px', 'py'], ref=[2, 2], weights=[10, 5])
+        smpc.quad_terminal_cost.add_states(names=['px', 'py'], ref=[2, 2], weights=[10, 5])
         smpc.quad_stage_cost.add_inputs(names=['Fx', 'Fy'], weights=[4, 4])
-        smpc.horizon = 10
+        smpc.horizon = 20
         smpc.robust_horizon = 2
         smpc.covariance_states = np.eye(model.n_x)*0.001
         smpc.covariance_states_noise = np.eye(model.n_x)*0.00001
@@ -324,26 +325,34 @@ class TestUKF(unittest.TestCase):
         # smpc.set_box_constraints(x_ub=x_ub_c + [10, 10, 10, 10] * (2 * 5 + 1),
         #                          x_lb=x_lb_c + [-10, -10, -10, -10] * (2 * 5 + 1))
         # smpc.set_initial_guess(x_guess=x0_new, u_guess=u0)
-        smpc.setup(solver_options={'ipopt.print_level': 5}, options={'integration_method','rk4'})
+        smpc.setup(solver_options={'ipopt.print_level': 5}, options={'integration_method':'rk4'})
 
-        sx_init = [0] * model.n_x
         smpc.optimize(x0=x0_new, cp=[5])
+        # smpc.plot_iterations(plot_last=True)
+        # Get the sigma
+        sigma_pred = np.zeros((model.n_x,model.n_x, smpc.robust_horizon))
+        for ii in range(smpc.robust_horizon):
+            sigma_pred[:,:, ii] = np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape((model.n_x,model.n_x)) @ np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape((model.n_x,model.n_x)).T
 
+
+        # Extend sigma with the last sigma until the prediciton horizon
+        sigma_pred = np.concatenate((sigma_pred, np.dstack([sigma_pred[:,:,-1] for i in range(smpc.prediction_horizon+1-smpc.robust_horizon)])),axis=2)
+        # sx_init = [0] * model.n_x
         # for i in range(model.n_x):
 
-        smpc.solution['sx00']
-
-
+        # smpc.solution['sx00']
+        #
+        #
         p_states = []
         color_list = ['blue', 'green', 'magenta','red']
         for k, state in enumerate(model.dynamical_state_names):
             p = figure(background_fill_color='#fafafa')
 
             p.varea(smpc.solution['t'].toarray().squeeze(),
-                    smpc.solution[state].toarray().squeeze() - smpc.solution[f'sx{k}{k}'].toarray().squeeze(),
-                    smpc.solution[state].toarray().squeeze() + smpc.solution[f'sx{k}{k}'].toarray().squeeze(),
+                    smpc.solution[state][0,:].toarray().squeeze() - np.sqrt(sigma_pred[k,k,:].squeeze()),
+                    smpc.solution[state][0,:].toarray().squeeze() + np.sqrt(sigma_pred[k,k,:].squeeze()),
                     fill_alpha=0.5, fill_color=color_list[k], legend_label=state)
-            p.line(smpc.solution['t'].toarray().squeeze(),smpc.solution['x'].toarray().squeeze(), legend_label=state,
+            p.line(smpc.solution['t'].toarray().squeeze(),smpc.solution['px'][0,:].toarray().squeeze(), legend_label=state,
                    line_color=color_list[k])
             p_states.append(p)
         grid = gridplot([[p_states[0], p_states[1]], [p_states[2], None]])

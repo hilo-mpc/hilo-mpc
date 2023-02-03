@@ -3454,8 +3454,8 @@ class SMPCUKF(NMPC):
                 n_v += self._prediction_horizon
 
             # **UKF**
-            n_v += self._n_x ** 2 * self.robust_horizon  # adds the standard deviation as variable
-            n_v += (2 * self.n_L + 1) * (self.prediction_horizon + 1)  # adds the sigma points as opt variable
+            n_v += self._model.n_x ** 2 * self.robust_horizon  # adds the standard deviation as variable
+            n_v += self.n_L * (self.prediction_horizon + 1)  # adds the sigma points as opt variable
             # ****
             if self._use_sx:
                 v = ca.SX.sym('v', n_v)
@@ -3571,14 +3571,10 @@ class SMPCUKF(NMPC):
             for ii in range(self.robust_horizon):
                 sigma_x[ii, 0] = v[offset:offset + model.n_x ** 2]
                 sigma_ind.append([j for j in range(offset, offset + model.n_x ** 2)])
+                c_lb, c_ub = self._get_bounds_covariances()
+                v_lb[offset:offset + self._model.n_x**2] = c_lb
+                v_ub[offset:offset + self._model.n_x**2] = c_ub
                 offset += model.n_x ** 2
-
-            sigma_points = np.resize(np.array([], dtype=type), (self.prediction_horizon + 1, 1))
-            sigma_points_ind = []
-            for ii in range(self.prediction_horizon + 1):
-                sigma_points[ii, 0] = v[offset:offset + (2 * self.n_L + 1)]
-                sigma_points_ind.append([j for j in range(offset, offset + (2 * self.n_L + 1))])
-                offset += 2 * self.n_L + 1
             # ****
 
             # Create an entry for every reference
@@ -3686,16 +3682,33 @@ class SMPCUKF(NMPC):
                     else:
                         u_old0 = u_old
 
-                # **UKF**
-                if ii == 0:
-                    sigma_ii = sigma_x0
-                elif 1 <= ii < self.robust_horizon:
-                    sigma_ii = sigma_x[ii, 0].reshape((self._model.n_x, self._model.n_x))
-                # ****
-
                 p_ii = self._rearrange_parameters(tv_p[:, ii], c_p)
                 tv_ref_sc_ii = tv_ref_sc[:, ii]
                 dt_ii = _dt[ii]
+
+                # **UKF**
+                # Add the constraints of the UKF
+                X = self._get_sigma_points(x_ii, p_ii)
+                xp_mean = self._get_mean_sigma_points(X)
+
+                if ii == 0:
+                    sigma_ii = sigma_x0
+                elif 1 <= ii <= self.robust_horizon:
+                    sigma_ii = sigma_x[ii-1, 0].reshape((self._model.n_x, self._model.n_x))
+                    foo1 = ca.horzcat(*X) - xp_mean
+                    residual = ca.mtimes(foo1, ca.diag(ca.sqrt(ca.fabs(self._weights[1, :]))))
+                    foo2 = ca.horzcat(residual[0:self._model.n_x, 1:], sigma_w).T
+                    foo3 = ca.qr(foo2)[1]
+
+                    if self._weights[1, 0] < 0:
+                        sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '-')
+                    else:
+                        sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '+')
+
+                    g.append(sigma_x_new.reshape((-1, 1)) - sigma_ii.reshape((-1, 1)))
+                    g_lb.append([0] * self._model.n_x ** 2)
+                    g_ub.append([0] * self._model.n_x ** 2)
+                # ****
 
                 if self._nlp_options['integration_method'] in ['idas', 'cvodes']:
                     sol = int_dynamics_fun(x0=ca.vertcat(x_ii, zp[ii, 0]),
@@ -3735,10 +3748,13 @@ class SMPCUKF(NMPC):
                 if self._lag_term_flag:
                     if self._nlp_options['integration_method'] == 'discrete' or \
                             self._nlp_options['objective_function'] == 'discrete':
-                        quad = self._lag_term_fun(time, x_ii, u_ii, zp[ii, 0], p_ii, tv_ref_sc_ii, u_old0)
+                        quad = self._lag_term_fun(time, xp_mean[0:self._model.n_x], u_ii, zp[ii, 0], p_ii, tv_ref_sc_ii,
+                                                  u_old0)
                     J += quad
                 if self._may_term_flag and ii == self._prediction_horizon - 1:
-                    J += self._may_term_fun(time + dt_ii, x_ii_1, tv_ref_tc)
+                    X_1 = self._get_sigma_points(x_ii_1, p_ii)
+                    xp_mean_1 = self._get_mean_sigma_points(X_1)
+                    J += self._may_term_fun(time + dt_ii, xp_mean_1[0:self._model.n_x], tv_ref_tc)
                 if self.terminal_constraint.is_set and ii == self._prediction_horizon - 1:
                     if self.terminal_constraint.is_soft:
                         residual = self._terminal_constraints_fun(time, x_ii, zp[ii, 0], p_ii, e_soft_term)
@@ -3786,36 +3802,6 @@ class SMPCUKF(NMPC):
                 # update time in the horizon
                 time += dt_ii
 
-                # ** UKF **
-                # Add the constraints of the UKF
-                sigma = ca.diagcat(sigma_ii, sigma_p)
-                xp = ca.vertcat(x_ii, p_ii)
-                X = [xp]
-                for kk in range(self.n_L):
-                    X.append(xp + self._gamma * sigma[:, kk])
-                for kk in range(self.n_L):
-                    X.append(xp - self._gamma * sigma[:, kk])
-
-                x_mean = ca.SX(0)
-                for kk in range(2 * self.n_L + 1):
-                    x_mean += self._weights[0, kk] * X[kk]
-
-                foo1 = ca.horzcat(*X) - x_mean
-                residual = ca.mtimes(foo1, ca.diag(ca.sqrt(ca.fabs(self._weights[1, :]))))
-                foo2 = ca.horzcat(residual[0:self._model.n_x, 1:], sigma_w).T
-                foo3 = ca.qr(foo2)[1]
-
-                if self._weights[1, 0] < 0:
-                    sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '-')
-                else:
-                    sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '+')
-
-                g.append(sigma_x_new.reshape((-1, 1)) - sigma_ii.reshape((-1, 1)))
-                g_lb.append([0] * self._model.n_x ** 2)
-                g_ub.append([0] * self._model.n_x ** 2)
-
-                # ****
-
             if self._custom_constraint_flag:
                 if self._custom_constraint_is_soft_flag:
                     W = np.diag([10000] * self._custom_constraint_size)
@@ -3850,6 +3836,7 @@ class SMPCUKF(NMPC):
             self._v_ub = ca.DM(v_ub)
             self._u_ind = u_ind
             self._x_ind = x_ind
+            self._sigma_ind = sigma_ind
             self._dt_ind = t_ind
             self._J = J
             self._v = v
@@ -3977,6 +3964,165 @@ class SMPCUKF(NMPC):
 
         return param
 
+    def _get_sigma_points(self, x_ii, p_ii):
+        X = []
+        counter = 0
+        for i in range(2 * self.n_L + 1):
+            X.append(ca.vertcat(x_ii[counter:counter + self._model.n_x], p_ii))
+            counter += self._model.n_x
+
+        return X
+
+    def _get_mean_sigma_points(self, X):
+        xp_mean = ca.SX(0)
+        for kk in range(2 * self.n_L + 1):
+            xp_mean += self._weights[0, kk] * X[kk]
+
+        return xp_mean
+
+    def _populate_solution(self):
+        """
+
+        :return:
+        """
+        names = ['t']
+        vector = {
+            't': {
+                'values_or_names': self._model._t.names,
+                'description': self._model._t.description,
+                'labels': self._model._t.labels,
+                'units': self._model._t.units,
+                'shape': (1, 0),
+                'data_format': ca.DM
+            }
+        }
+        if self._model_orig._x.names:
+            names += ['x']
+            vector['x'] = {
+                'values_or_names': self._model_orig._x.names * (self.n_L * 2 + 1),
+                'description': self._model_orig._x.description * (self.n_L * 2 + 1),
+                'labels': self._model_orig._x.labels * (self.n_L * 2 + 1),
+                'units': self._model_orig._x.units * (self.n_L * 2 + 1),
+                'shape': (self._model_orig._n_x * (self.n_L * 2 + 1), 0),
+                'data_format': ca.DM
+            }
+        if self._model_orig._y.names:
+            names += ['y']
+            vector['y'] = {
+                'values_or_names': self._model_orig._y.names,
+                'description': self._model_orig._y.description,
+                'labels': self._model_orig._y.labels,
+                'units': self._model_orig._y.units,
+                'shape': (self._model_orig._n_y, 0),
+                'data_format': ca.DM
+            }
+        if self._model_orig._z.names:
+            names += ['z']
+            vector['z'] = {
+                'values_or_names': self._model_orig._z.names,
+                'description': self._model_orig._z.description,
+                'labels': self._model_orig._z.labels,
+                'units': self._model_orig._z.units,
+                'shape': (self._model_orig._n_z, 0),
+                'data_format': ca.DM
+            }
+        if self._model_orig._u.names:
+            names += ['u']
+            vector['u'] = {
+                'values_or_names': self._model_orig._u.names,
+                'description': self._model_orig._u.description,
+                'labels': self._model_orig._u.labels,
+                'units': self._model_orig._u.units,
+                'shape': (self._model_orig._n_u, 0),
+                'data_format': ca.DM
+            }
+        if self._model_orig._p.names:
+            names += ['p']
+            vector['p'] = {
+                'values_or_names': self._model_orig._p.names,
+                'description': self._model_orig._p.description,
+                'labels': self._model_orig._p.labels,
+                'units': self._model_orig._p.units,
+                'shape': (self._model_orig._n_p, 0),
+                'data_format': ca.DM
+            }
+        if self._model_orig._n_q > 0:
+            names += ['q']
+            vector['q'] = {
+                'values_or_names': 'q',
+                'shape': (self._model_orig._n_q, 0),
+                'data_format': ca.DM
+            }
+
+        if hasattr(self, 'type') and self.type == 'NMPC':
+            names += [f'thetapfo']
+            vector[f'thetapfo'] = {
+                'values_or_names': [f'thetapfo{i + 1}' for i in range(self.n_of_path_vars)],
+                'description': [f'theta p.f. num. {i + 1}' for i in range(self.n_of_path_vars)],
+                'shape': (self.n_of_path_vars, 0),
+                'data_format': ca.DM
+            }
+
+        if self._stats:
+            names += ['extime']
+            vector['extime'] = {
+                'values_or_names': 'extime',
+                'units': 'seconds',
+                'shape': (1, 0),
+                'data_format': ca.DM
+            }
+            names += ['niterations']
+            vector['niterations'] = {
+                'values_or_names': 'niterations',
+                'shape': (1, 0),
+                'data_format': ca.DM
+            }
+            names += ['solvstatus']
+            vector['solvstatus'] = {
+                'values_or_names': 'solvstatus',
+                'shape': (1, 0),
+                'data_format': ca.DM
+            }
+        self._solution.setup(*names, **vector)
+
+    def _save_references(self, param):
+        """
+        Saves references into the solution object. For plotting purposes
+
+        :return:
+        """
+        # Save current reference. Used for plotting purposes
+        x_ref = ca.DM.nan(self._model_orig.n_x * (2 * self.n_L + 1), self.prediction_horizon)
+        u_ref = ca.DM.nan(self._model_orig.n_u, self.control_horizon)
+        if self.quad_stage_cost._has_trajectory_following:
+            for i, name in enumerate(self._model_orig.dynamical_state_names):
+                if f'{name}_sr' in param.keys():
+                    x_ref[i, :] = param[f'{name}_sr']
+            for i, name in enumerate(self._model_orig.input_names):
+                if f'{name}_sr' in param.keys():
+                    u_ref[i, :] = param[f'{name}_sr']
+            for traj in self.quad_stage_cost._trajectories_list:
+                if traj['traj_fun'] is not None:
+                    if traj['type'] == 'states':
+                        x_ref[traj['ind'], :] = traj['traj_fun'](self.solution['t'][0:self.prediction_horizon])
+                    elif traj['type'] == 'inputs':
+                        u_ref[traj['ind'], :] = traj['traj_fun'](self.solution['t'][0:self.control_horizon])
+
+        for ref in self.quad_stage_cost._references_list:
+            if ref['type'] == 'states':
+                x_ref[ref['ind'], :] = ca.repmat(ca.DM(ref['ref']).T, self.prediction_horizon).T
+            elif ref['type'] == 'inputs':
+                u_ref[ref['ind'], :] = ca.repmat(ca.DM(ref['ref']).T, self.control_horizon).T
+
+        for path in self.quad_stage_cost._paths_list:
+            if path['type'] == 'states':
+                x_ref[path['ind'], :] = path['path_fun'](self.solution['thetapfo'][:, :self.prediction_horizon])
+            elif path['type'] == 'inputs':
+                u_ref[path['ind'], :] = path['path_fun'](self.solution['thetapfo'][:, :self.control_horizon])
+
+        self.solution.add('u_ref', u_ref)
+        self.solution.add('x_ref', x_ref)
+
     @property
     def robust_horizon(self):
         """
@@ -4031,6 +4177,170 @@ class SMPCUKF(NMPC):
     def covariance_parameters(self, arg):
         arg = check_and_wrap_to_DM(arg)
         self._covariance_parameters = arg
+
+    def optimize(self, x0, cp=None, tvp=None, v0=None, runs=0, fix_x0=True, **kwargs):
+
+        """
+        Solves the MPC problem
+
+        :param x0: current system state
+        :type x0: list or casadi DM
+        :param cp: constant system parameters (these will be assumed constant along the prediction horizon)
+        :type cp: list or casadi DM, optional
+        :param tvp: time-varying system parameters (these can change during prediction horizon, entire parameter
+            history must be passed in)
+        :type tvp: dict, optional
+        :param v0: initial guess of the optimal vector
+        :type v0: list or casadi DM, optional
+        :param runs: number of optimizations to run. If different from zero will run very optimization will perturb the
+            initial guess v0 randomly.
+            ACHTUNG: This could cause problems with the integrators or give something outside constraints. The output
+            will be the solution with the minimum objective function (default 0)
+        :type runs: int
+        :param fix_x0: If True, the first state is fixed as the measured states. This is the classic MPC approach. If
+            False, also the initial state is optimized.
+        :type fix_x0: bool
+        :return: u_opt: first piece of optimal control sequence
+        """
+
+        # TODO: use more of the parent class methods.
+        """
+        I had to fix the dimensions of the boundaries so I had to modify this method and overwrite the one of the parent
+        class. We should use as much things from th parent class as possible. 
+        """
+        if not self._nlp_setup_done:
+            raise ValueError("Howdy! You need to setup the MPC before optimizing. Run .setup() on the MPC object.")
+
+        # Check the constant parameters
+        if self._model.n_p - self._n_tvp != 0:
+            if cp is not None:
+                cp = check_and_wrap_to_DM(cp)
+
+            if cp is None or cp.size1() != self._model.n_p - self._n_tvp:
+                raise ValueError(
+                    f"The model has {self._model.n_p - self._n_tvp} constant parameter(s): "
+                    f"{self._model.parameter_names}. You must pass me the value of these before running the "
+                    f"optimization to the 'cp' parameter."
+                )
+        else:
+            if cp is not None:
+                warnings.warn("You are passing a parameter vector in the optimizer, but the model has no defined "
+                              "parameters. I am ignoring the vector.")
+
+        if self._nlp_options['ipopt_debugger']:
+            # Reset the solution of the debugger before next optimization
+            self.debugger.reset_solution()
+        # Check the state
+        x0 = check_and_wrap_to_DM(x0)
+
+        if x0.shape[0] != self._n_x:
+            raise ValueError(
+                f"We have an issue mate, the x0 you supplied has dimension {x0.shape[0]} but the model has {self._n_x} "
+                f"states."
+            )
+        if fix_x0 is True:
+            # Force the initial state to be the measured state.
+            # Note that the path following problem modifies the model dimensions,
+            # so only the first n_x positions need to be forced where n_x is state number of the original problem
+            self._v_lb[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x] * (2 * self.n_L + 1))
+            self._v_ub[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x] * (2 * self.n_L + 1))
+        else:
+            x0_lb = kwargs.get('x0_lb', self._x_lb)
+            x0_ub = kwargs.get('x0_ub', self._x_ub)
+            self._v_lb[self._x_ind[0][0:self._n_x]] = x0_lb / ca.DM(self._x_scaling[0:self._n_x] * (2 * self.n_L + 1))
+            self._v_ub[self._x_ind[0][0:self._n_x]] = x0_ub / ca.DM(self._x_scaling[0:self._n_x] * (2 * self.n_L + 1))
+
+        # Check and prepare parameters
+        param = self._get_nlp_parameters(cp, tvp, **kwargs)
+
+        if v0 is None:
+            v0 = self._v0
+
+        if self._stats:
+            start = time.time()
+
+        # Compute the MPC
+        u_opt = self._optimize(v0, runs, param)
+
+        # Get the status of the solver
+        self._solver_status_wrapper()
+
+        # Print output
+        self._print_message()
+
+        # Reset the solution
+        self.reset_solution()
+
+        # Populate solution with new results
+        if self._stats:
+            elapsed_time = time.time() - start
+            self.solution.add('extime', elapsed_time)
+            self.solution.add('niterations', self._n_iterations)
+            self.solution.add('solvstatus', self._solver_status_code)
+
+        if self.stage_constraint.is_set and self.stage_constraint.is_soft:
+            self.stage_constraint.e_soft_value = self._nlp_solution['x'][self._e_soft_stage_ind[0]]
+
+        if self.terminal_constraint.is_set and self.terminal_constraint.is_soft:
+            self.terminal_constraint.e_soft_value = self._nlp_solution['x'][self._e_soft_term_ind[0]]
+
+        # Save predictions in the solution object. Done for plotting purposes.
+        self._save_predictions(cp, tvp)
+
+        # Save the references in the solution object. Done for plotting purposes.
+        self._save_references(param)
+
+        # Update the time clock - Useful for time-varying systems and references.
+        self._time += self.sampling_interval
+
+        # Interation counter
+        self._n_iterations += 1
+
+        # Extract first input from the optimal sequence
+        uopt = u_opt[0:self._n_u] * self._u_scaling[0:self._n_u]
+        return uopt
+
+    def return_prediction(self):
+        """
+        Returns the mpc prediction.
+
+        :return: x_pred, u_pred, t_pred
+        """
+
+        if self._nlp_solution is not None:
+            x_pred = np.zeros((self._model.n_x * (2 * self.n_L + 1), self._prediction_horizon + 1))
+            u_pred = np.zeros((self._model.n_u, self._control_horizon))
+            dt_pred = np.zeros(self._prediction_horizon)
+            for ii in range(self._prediction_horizon + 1):
+                x_pred[:, ii] = np.asarray(self._nlp_solution['x'][self._x_ind[ii]]).squeeze() * (
+                            self._x_scaling * (2 * self.n_L + 1))
+            for ii in range(self._control_horizon):
+                u_pred[:, ii] = np.asarray(self._nlp_solution['x'][self._u_ind[ii]]).squeeze() * self._u_scaling
+            if len(self._dt_ind) > 0:
+                for ii in range(self._prediction_horizon):
+                    dt_pred[ii] = np.asarray(self._nlp_solution['x'][self._dt_ind[ii]]).squeeze()
+            else:
+                dt_pred = None
+            return x_pred, u_pred, dt_pred
+
+        else:
+            warnings.warn("There is still no mpc solution available. Run mpc.optimize() to get one.")
+            return None, None, None
+
+    def _get_bounds_covariances(self, cv_lb=-1e6, cv_ub=1e6):
+
+        v_ub = [1e6] * self._model.n_x
+
+        C_lb = np.ones((self._model.n_x, self._model.n_x)) * cv_lb
+        np.fill_diagonal(C_lb, 0)
+
+        C_ub = np.ones((self._model.n_x, self._model.n_x)) * cv_ub
+        np.fill_diagonal(C_ub, v_ub)
+
+        C_lb = C_lb.tolist()
+        C_ub = C_ub.tolist()
+
+        return list(itertools.chain.from_iterable(C_lb)), list(itertools.chain.from_iterable(C_ub))
 
 
 __all__ = [
