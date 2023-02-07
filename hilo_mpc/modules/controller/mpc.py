@@ -2843,14 +2843,14 @@ class SMPCUKF(NMPC):
         self._robust_horizon = None
         self._setup_parameters()
 
-
         # dt = model.solution._dt
         # model_new = self._setup_predict()
         # model_new.setup(dt=dt)
         super().__init__(model, id=id, name=name, plot_backend=plot_backend, stats=stats, use_sx=use_sx)
         # This overrites teh definition on in the __init__ of the parent class
-        self._n_x = self._model.n_x * (2* self.n_L + 1)
-        self._n_p = self._model.n_p * (2* self.n_L + 1)
+        self._n_x = self._model.n_x * (2 * self.n_L + 1)
+        self._n_p = self._model.n_p * (2 * self.n_L + 1)
+
     def _check_parameter_bounds(self, param: str, value: Union[int, float]) -> None:
         """
 
@@ -2868,210 +2868,6 @@ class SMPCUKF(NMPC):
             if value < 0:
                 raise ValueError(f"The parameter kappa needs to be greater or equal to 0. Supplied kappa is {value}.")
             self._kappa = value
-
-    def _setup_predict_old(self):
-
-        # sigma_x_sqrt = ca.SX.sym('Sx', (self._model.n_x, self._model.n_x))
-        # sigma_p_sqrt = ca.SX.sym('Sp', (self._model.n_p, self._model.n_p))
-
-        model_c = Model(plot_backend=self._plot_backend, discrete=True)
-
-        # Counter of new model's states and parameters
-        counter_x = 0
-        counter_p = 0
-        # Add inputs
-        u = model_c.set_inputs(self._model.input_names)
-        if u.shape == (0, 0):
-            u.resize(0, 1)
-
-        # Add model parameters as a mean parameters values
-        p = model_c.set_parameters(self._model.parameter_names)
-        # Fix dimentions in case the model has no u or p
-        if p.shape == (0, 0):
-            p.resize(0, 1)
-
-        # add rhs for parameters (they are treated as states)
-        ode = deepcopy(self._model.ode)
-
-        # Add the root of the state covariance as model state
-        names = self._create_list_of_matrices_entries(self._model.n_x, 'sx')
-        model_c.add_dynamical_states(names)
-        sigma_x_sqrt = model_c.x[counter_x:counter_x + len(names)].reshape((self._model.n_x, self._model.n_x)).T
-        counter_x += len(names)
-
-        # Add the sigma of the parameters as a model parameter
-        names = self._create_list_of_matrices_entries(self._model.n_p, 'sp')
-        model_c.add_parameters(names)
-        # Extract the covariance matrix of the parameters from the parameter vector
-        sigma_p_sqrt = model_c.p[counter_p:counter_p + len(names)].reshape((self._model.n_p, self._model.n_p)).T
-        counter_p += len(names)
-
-        # Add teh sigma of the state noise as model parameter
-        names = self._create_list_of_matrices_entries(self._model.n_x, 'sw')
-        model_c.add_parameters(names)
-        # Extract the covariance matrix of the parameters from the parameter vector
-        sigma_w_sqrt = model_c.p[counter_p:counter_p + len(names)].reshape((self._model.n_x, self._model.n_x)).T
-        counter_p += len(names)
-
-        sigma_sqrt = ca.diagcat(sigma_x_sqrt, sigma_p_sqrt)
-
-        # Create sigma points and create new ode
-        ode_tot = []
-        sigma_points_names = [f'{j}' for j in self._model.dynamical_state_names]
-        model_c.add_dynamical_states(sigma_points_names)
-        # Substitute sigma points to ode function. Remember the new model is augmented with the parameters
-        x = model_c.x[counter_x: counter_x + self._model.n_x]
-        xp = ca.vertcat(model_c.x[counter_x:counter_x + self._model.n_x], p)
-        counter_x += self._model.n_x
-        ode_sub = ca.substitute(ode, ca.vertcat(self._model.x, self._model.p), xp)
-        ode_tot.append(ode_sub)
-        # Append the first sigma point
-        X = [ca.vertcat(x, p)]
-
-        for i in range(self.n_L):
-            sigma_points_names = [f'{j}_{i}' for j in self._model.dynamical_state_names]
-            model_c.add_dynamical_states(sigma_points_names)
-            xp = ca.vertcat(model_c.x[counter_x:counter_x + self._model.n_x], p)
-            ode_sub = ca.substitute(ode, ca.vertcat(self._model.x, self._model.p), xp + self._gamma * sigma_sqrt[:, i])
-            ode_tot.append(ode_sub)
-            counter_x += self._model.n_x
-            X.append(xp)
-
-        for i in range(self.n_L):
-            sigma_points_names = [f'{j}_{i}' for j in self._model.dynamical_state_names]
-            model_c.add_dynamical_states(sigma_points_names)
-            xp = ca.vertcat(model_c.x[counter_x:counter_x + self._model.n_x], p)
-            ode_sub = ca.substitute(ode, ca.vertcat(self._model.x, self._model.p), xp - self._gamma * sigma_sqrt[:, i])
-            ode_tot.append(ode_sub)
-            counter_x += self._model.n_x
-            X.append(xp)
-
-        x_mean = ca.SX(0)
-        for k in range(2 * self.n_L + 1):
-            x_mean += self._weights[0, k] * X[k]
-
-        foo1 = ca.horzcat(*X) - x_mean
-        residual = ca.mtimes(foo1, ca.diag(ca.sqrt(ca.fabs(self._weights[1, :]))))
-        foo2 = ca.horzcat(residual[0:self._model.n_x, 1:], sigma_w_sqrt).T
-        foo3 = ca.qr(foo2)[1]
-
-        if self._weights[1, 0] < 0:
-            sigma_x = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '-')
-        else:
-            sigma_x = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '+')
-
-        # Add rhs of the sigmas
-        ode_tot = [sigma_x.reshape((self._model.n_x ** 2, 1))] + ode_tot
-        ode_tot = ca.vertcat(*ode_tot)
-        ode_tot = ca.substitute(ode_tot, self._model.u, u)
-        ode_tot = ca.substitute(ode_tot, self._model.dt, model_c.dt)
-        ode_sub = ca.substitute(ode_tot, self._model.p, p)
-
-        model_c.add_dynamical_equations(ode_tot)
-
-        return model_c
-
-    def _setup_predict(self):
-
-        # sigma_x_sqrt = ca.SX.sym('Sx', (self._model.n_x, self._model.n_x))
-        # sigma_p_sqrt = ca.SX.sym('Sp', (self._model.n_p, self._model.n_p))
-
-        model_c = Model(plot_backend=self._plot_backend, discrete=True)
-
-        # Counter of new model's states and parameters
-        counter_x = 0
-        counter_p = 0
-        # Add inputs
-        u = model_c.set_inputs(self._model.input_names)
-        if u.shape == (0, 0):
-            u.resize(0, 1)
-
-        # Add model parameters as a mean parameters values
-        p = model_c.set_parameters(self._model.parameter_names)
-        # Fix dimentions in case the model has no u or p
-        if p.shape == (0, 0):
-            p.resize(0, 1)
-
-        # add rhs for parameters (they are treated as states)
-        ode = deepcopy(self._model.ode)
-
-        # Add the root of the state covariance as model state
-        names = self._create_list_of_matrices_entries(self._model.n_x, 'sx')
-        model_c.add_dynamical_states(names)
-        sigma_x_sqrt = model_c.x[counter_x:counter_x + len(names)].reshape((self._model.n_x, self._model.n_x)).T
-        counter_x += len(names)
-
-        # Add the sigma of the parameters as a model parameter
-        names = self._create_list_of_matrices_entries(self._model.n_p, 'sp')
-        model_c.add_parameters(names)
-        # Extract the covariance matrix of the parameters from the parameter vector
-        sigma_p_sqrt = model_c.p[counter_p:counter_p + len(names)].reshape((self._model.n_p, self._model.n_p)).T
-        counter_p += len(names)
-
-        # Add teh sigma of the state noise as model parameter
-        names = self._create_list_of_matrices_entries(self._model.n_x, 'sw')
-        model_c.add_parameters(names)
-        # Extract the covariance matrix of the parameters from the parameter vector
-        sigma_w_sqrt = model_c.p[counter_p:counter_p + len(names)].reshape((self._model.n_x, self._model.n_x)).T
-        counter_p += len(names)
-
-        sigma_sqrt = ca.diagcat(sigma_x_sqrt, sigma_p_sqrt)
-
-        # Create sigma points and create new ode
-        ode_tot = []
-        sigma_points_names = [f'{j}' for j in self._model.dynamical_state_names]
-        model_c.add_dynamical_states(sigma_points_names)
-        # Substitute sigma points to ode function. Remember the new model is augmented with the parameters
-        x = model_c.x[counter_x: counter_x + self._model.n_x]
-        xp = ca.vertcat(model_c.x[counter_x:counter_x + self._model.n_x], p)
-        counter_x += self._model.n_x
-        ode_sub = ca.substitute(ode, ca.vertcat(self._model.x, self._model.p), xp)
-        ode_tot.append(ode_sub)
-        # Append the first sigma point
-        X = [ca.vertcat(x, p)]
-
-        for i in range(self.n_L):
-            sigma_points_names = [f'{j}_{i}' for j in self._model.dynamical_state_names]
-            model_c.add_dynamical_states(sigma_points_names)
-            xp = ca.vertcat(model_c.x[counter_x:counter_x + self._model.n_x], p)
-            ode_sub = ca.substitute(ode, ca.vertcat(self._model.x, self._model.p), xp + self._gamma * sigma_sqrt[:, i])
-            ode_tot.append(ode_sub)
-            counter_x += self._model.n_x
-            X.append(xp)
-
-        for i in range(self.n_L):
-            sigma_points_names = [f'{j}_{i}' for j in self._model.dynamical_state_names]
-            model_c.add_dynamical_states(sigma_points_names)
-            xp = ca.vertcat(model_c.x[counter_x:counter_x + self._model.n_x], p)
-            ode_sub = ca.substitute(ode, ca.vertcat(self._model.x, self._model.p), xp - self._gamma * sigma_sqrt[:, i])
-            ode_tot.append(ode_sub)
-            counter_x += self._model.n_x
-            X.append(xp)
-
-        x_mean = ca.SX(0)
-        for k in range(2 * self.n_L + 1):
-            x_mean += self._weights[0, k] * X[k]
-
-        foo1 = ca.horzcat(*X) - x_mean
-        residual = ca.mtimes(foo1, ca.diag(ca.sqrt(ca.fabs(self._weights[1, :]))))
-        foo2 = ca.horzcat(residual[0:self._model.n_x, 1:], sigma_w_sqrt).T
-        foo3 = ca.qr(foo2)[1]
-
-        if self._weights[1, 0] < 0:
-            sigma_x = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '-')
-        else:
-            sigma_x = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '+')
-
-        # Add rhs of the sigmas
-        ode_tot = [sigma_x.reshape((self._model.n_x ** 2, 1))] + ode_tot
-        ode_tot = ca.vertcat(*ode_tot)
-        ode_tot = ca.substitute(ode_tot, self._model.u, u)
-        ode_tot = ca.substitute(ode_tot, self._model.dt, model_c.dt)
-        ode_sub = ca.substitute(ode_tot, self._model.p, p)
-
-        model_c.add_dynamical_equations(ode_tot)
-
-        return model_c
 
     def _cholupdate(self, R1, x1, sign1):
         # Taken from https://github.com/Eric-Bradford/UKF-SNMPC
@@ -3138,13 +2934,19 @@ class SMPCUKF(NMPC):
         # The parts added are flagged with **UKF**
         if not self._scaling_is_set:
             self.set_scaling()
+        # ** UKF **
+        # Add sigma points to scaling of the states
+        self._x_scaling = self._x_scaling * (2 * self.n_L + 1)
+        # ****
         if not self._time_varying_parameters_is_set:
             self.set_time_varying_parameters()
         if not self._box_constraints_is_set:
             self.set_box_constraints()
         if not self._initial_guess_is_set:
             self.set_initial_guess()
-
+        # ** UKF **
+        self._x_guess = self._x_guess * (2 * self.n_L + 1)
+        # ****
         if not self._nlp_options_is_set:
             self.set_nlp_options(options)
         if not self._solver_options_is_set:
@@ -3216,7 +3018,8 @@ class SMPCUKF(NMPC):
                                'dynamics_multiple_shooting': [],
                                'nonlin_stag_const': [],
                                'nonlin_term_const': [],
-                               'time_const.': []}
+                               'time_const.': [],
+                               'probabilistic_box_constraints':[]}
 
         if self._nlp_setup_done is False:
             model = self._model
@@ -3479,9 +3282,9 @@ class SMPCUKF(NMPC):
             for ii in range(self._prediction_horizon + 1):
                 x[ii, 0] = v[offset:offset + self._n_x]
                 x_ind.append([j for j in range(offset, offset + self._n_x)])
-                v_guess[offset:offset + self._n_x] = self._x_guess * (2 * self.n_L + 1)
-                v_lb[offset:offset + self._n_x] = self._x_lb * (2 * self.n_L + 1)
-                v_ub[offset:offset + self._n_x] = self._x_ub * (2 * self.n_L + 1)
+                v_guess[offset:offset + self._n_x] = self._x_guess
+                v_lb[offset:offset + self._n_x] = self._x_lb
+                v_ub[offset:offset + self._n_x] = self._x_ub
                 if self._mixed_integer_flag:
                     self._discrete_variables_bool.extend([False] * self._n_x)
                 offset += self._n_x
@@ -3570,322 +3373,342 @@ class SMPCUKF(NMPC):
                 offset += self._custom_constraint_size
 
             # **UFK**
-            sigma_x = np.resize(np.array([], dtype=type), (self.robust_horizon, 1))
+            # Note: it is robust_horizon - 1 because the first sigma is fixed (as parameter)
+            sigma_x = np.resize(np.array([], dtype=type), (self.robust_horizon - 1, 1))
             sigma_ind = []
-            for ii in range(self.robust_horizon):
+            # First
+            sigma_x[0, 0] = v[offset:offset + model.n_x ** 2]
+            sigma_ind.append([j for j in range(offset, offset + model.n_x ** 2)])
+            c_lb, c_ub = self._get_bounds_covariances()
+            v_lb[offset:offset + self._model.n_x ** 2] = c_lb
+            v_ub[offset:offset + self._model.n_x ** 2] = c_ub
+            offset += model.n_x ** 2
+
+            for ii in range(1, self.robust_horizon - 1):
                 sigma_x[ii, 0] = v[offset:offset + model.n_x ** 2]
                 sigma_ind.append([j for j in range(offset, offset + model.n_x ** 2)])
                 c_lb, c_ub = self._get_bounds_covariances()
-                v_lb[offset:offset + self._model.n_x**2] = c_lb
-                v_ub[offset:offset + self._model.n_x**2] = c_ub
+                v_lb[offset:offset + self._model.n_x ** 2] = c_lb
+                v_ub[offset:offset + self._model.n_x ** 2] = c_ub
                 offset += model.n_x ** 2
+        # ****
+
+        # Create an entry for every reference
+        tv_stage_ref_list = []
+        for ii in range(len(self.quad_stage_cost._trajectories_list)):
+            for name in self.quad_stage_cost._trajectories_list[ii]['names']:
+                if not isinstance(self.quad_stage_cost._trajectories_list[ii]['ref'], ca.SX) and not isinstance(
+                        self.quad_stage_cost._trajectories_list[ii]['ref'], ca.MX):
+                    tv_stage_ref_list.append(catools.entry(name + '_sr', shape=(1, self._prediction_horizon)))
+
+        tv_term_ref_list = []
+        for ii in range(len(self.quad_terminal_cost._trajectories_list)):
+            for name in self.quad_terminal_cost._trajectories_list[ii]['names']:
+                if not isinstance(self.quad_terminal_cost._trajectories_list[ii]['ref'], ca.SX) and not isinstance(
+                        self.quad_terminal_cost._trajectories_list[ii]['ref'], ca.MX):
+                    tv_term_ref_list.append(catools.entry(name + '_tr', shape=1))
+
+        # Predefine parameters (those are fixed and not optimized)
+        if self._use_sx:
+            param_npl_mpc = catools.struct_symSX(
+                [catools.entry("tv_p", shape=(self._n_tvp, self._prediction_horizon)),
+                 catools.entry("c_p", shape=model.n_p - self._n_tvp),
+                 catools.entry('u_old',
+                               shape=len(self.quad_stage_cost._ind_input_changes)),
+                 catools.entry('dt', shape=self._prediction_horizon),
+                 catools.entry('sigma_p', shape=(model.n_p, model.n_p)),
+                 catools.entry('sigma_w', shape=(model.n_x, model.n_x)),
+                 catools.entry('sigma_x0', shape=(model.n_x, model.n_x)),
+                 catools.entry('time', shape=1)] +
+                tv_term_ref_list + tv_stage_ref_list)
+        else:
+            param_npl_mpc = catools.struct_symMX(
+                [catools.entry("tv_p", shape=(self._n_tvp, self._prediction_horizon)),
+                 catools.entry("c_p", shape=model.n_p - self._n_tvp),
+                 catools.entry('u_old',
+                               shape=len(self.quad_stage_cost._ind_input_changes)),
+                 catools.entry('dt', shape=self._prediction_horizon),
+                 catools.entry('sigma_p', shape=(model.n_p, model.n_p)),
+                 catools.entry('sigma_w', shape=(model.n_x, model.n_x)),
+                 catools.entry('sigma_x0', shape=(model.n_x, model.n_x)),
+                 catools.entry('time', shape=1)] +
+                tv_term_ref_list + tv_stage_ref_list)
+
+        tv_p = param_npl_mpc['tv_p']
+        c_p = param_npl_mpc['c_p']
+        u_old = param_npl_mpc['u_old']
+        sigma_p = param_npl_mpc['sigma_p']
+        sigma_w = param_npl_mpc['sigma_w']
+        sigma_x0 = param_npl_mpc['sigma_x0']
+
+        # Concat all the time-varying trajectories
+        tv_ref_sc = []
+        for ii in range(len(self.quad_stage_cost._trajectories_list)):
+            for name in self.quad_stage_cost._trajectories_list[ii]['names']:
+                if self.quad_stage_cost._trajectories_list[ii]['ref'] is None:
+                    tv_ref_sc.append(param_npl_mpc[name + '_sr'])
+        if len(tv_ref_sc) > 0:
+            tv_ref_sc = ca.vertcat(*tv_ref_sc)
+        else:
+            if self._use_sx:
+                tv_ref_sc = ca.SX.sym('bla', (0, self._prediction_horizon))
+            else:
+                tv_ref_sc = ca.MX.sym('bla', (0, self._prediction_horizon))
+
+        tv_ref_tc = []
+        for ii in range(len(self.quad_terminal_cost._trajectories_list)):
+            for name in self.quad_terminal_cost._trajectories_list[ii]['names']:
+                if self.quad_terminal_cost._trajectories_list[ii]['ref'] is None:
+                    tv_ref_tc.append(param_npl_mpc[name + '_tr'])
+        if len(tv_ref_tc) > 0:
+            tv_ref_tc = ca.vertcat(*tv_ref_tc)
+        else:
+            if self._use_sx:
+                tv_ref_tc = ca.SX.sym('bla', 0)
+            else:
+                tv_ref_tc = ca.MX.sym('bla', 0)
+
+        t_ind = []
+        if self._minimize_final_time_flag is False:
+            _dt = param_npl_mpc['dt']
+        else:
+            _dt = v[offset:offset + self.prediction_horizon]
+            t_ind = [j for j in range(offset, offset + self.prediction_horizon)]
+            v_lb[offset:offset + self.prediction_horizon] = np.zeros(self.prediction_horizon)
+            v_ub[offset:offset + self.prediction_horizon] = ca.inf * np.ones(self.prediction_horizon)
+            v_guess[offset:offset + self.prediction_horizon] = self._sampling_interval * np.ones(
+                self.prediction_horizon)
+            offset += self.prediction_horizon
+
+        # Constraint function for the NLP
+        g = []
+        g_lb = []
+        g_ub = []
+        J = 0
+        ind_g = 0
+        # get the current sampling time
+        time = param_npl_mpc['time']
+        for ii in range(self._prediction_horizon):
+            x_ii = x[ii, 0]
+            if ii < self._control_horizon:
+                u_ii = u[ii, 0]
+                if ii >= 1:
+                    u_old0 = [u_ii[jj] for jj in self.quad_stage_cost._ind_input_changes]
+                    u_old0 = ca.vertcat(*u_old0)
+                else:
+                    u_old0 = u_old
+
+            p_ii = self._rearrange_parameters(tv_p[:, ii], c_p)
+            tv_ref_sc_ii = tv_ref_sc[:, ii]
+            dt_ii = _dt[ii]
+
+            # **UKF**
+            # Add the constraints of the UKF
+            X = self._get_sigma_points(x_ii, p_ii)
+            xp_mean = self._get_mean_sigma_points(X)
+
+            if ii == 0:
+                sigma_ii = sigma_x0
+            elif 1 <= ii <= self.robust_horizon - 1:
+                sigma_ii = sigma_x[ii - 1, 0].reshape((self._model.n_x, self._model.n_x))
+                foo1 = ca.horzcat(*X) - xp_mean
+                residual = ca.mtimes(foo1, ca.diag(ca.sqrt(ca.fabs(self._weights[1, :]))))
+                foo2 = ca.horzcat(residual[0:self._model.n_x, 1:], sigma_w).T
+                foo3 = ca.qr(foo2)[1]
+
+                if self._weights[1, 0] < 0:
+                    sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '-')
+                else:
+                    sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '+')
+
+                g.append(sigma_x_new.reshape((-1, 1)) - sigma_ii.reshape((-1, 1)))
+                g_lb.append([0] * self._model.n_x ** 2)
+                g_ub.append([0] * self._model.n_x ** 2)
+                ind_g += self._model.n_x ** 2
+
+            # g, g_lb, g_ub, ind_g = self._get_chance_constraints(xp_mean[0:self._model.n_x], sigma_ii @ sigma_ii.T, g,
+            #                                                     g_lb, g_ub, ind_g)
             # ****
 
-            # Create an entry for every reference
-            tv_stage_ref_list = []
-            for ii in range(len(self.quad_stage_cost._trajectories_list)):
-                for name in self.quad_stage_cost._trajectories_list[ii]['names']:
-                    if not isinstance(self.quad_stage_cost._trajectories_list[ii]['ref'], ca.SX) and not isinstance(
-                            self.quad_stage_cost._trajectories_list[ii]['ref'], ca.MX):
-                        tv_stage_ref_list.append(catools.entry(name + '_sr', shape=(1, self._prediction_horizon)))
-
-            tv_term_ref_list = []
-            for ii in range(len(self.quad_terminal_cost._trajectories_list)):
-                for name in self.quad_terminal_cost._trajectories_list[ii]['names']:
-                    if not isinstance(self.quad_terminal_cost._trajectories_list[ii]['ref'], ca.SX) and not isinstance(
-                            self.quad_terminal_cost._trajectories_list[ii]['ref'], ca.MX):
-                        tv_term_ref_list.append(catools.entry(name + '_tr', shape=1))
-
-            # Predefine parameters (those are fixed and not optimized)
-            if self._use_sx:
-                param_npl_mpc = catools.struct_symSX(
-                    [catools.entry("tv_p", shape=(self._n_tvp, self._prediction_horizon)),
-                     catools.entry("c_p", shape=model.n_p - self._n_tvp),
-                     catools.entry('u_old',
-                                   shape=len(self.quad_stage_cost._ind_input_changes)),
-                     catools.entry('dt', shape=self._prediction_horizon),
-                     catools.entry('sigma_p', shape=(model.n_p, model.n_p)),
-                     catools.entry('sigma_w', shape=(model.n_x, model.n_x)),
-                     catools.entry('sigma_x0', shape=(model.n_x, model.n_x)),
-                     catools.entry('time', shape=1)] +
-                    tv_term_ref_list + tv_stage_ref_list)
-            else:
-                param_npl_mpc = catools.struct_symMX(
-                    [catools.entry("tv_p", shape=(self._n_tvp, self._prediction_horizon)),
-                     catools.entry("c_p", shape=model.n_p - self._n_tvp),
-                     catools.entry('u_old',
-                                   shape=len(self.quad_stage_cost._ind_input_changes)),
-                     catools.entry('dt', shape=self._prediction_horizon),
-                     catools.entry('sigma_p', shape=(model.n_p, model.n_p)),
-                     catools.entry('sigma_w', shape=(model.n_x, model.n_x)),
-                     catools.entry('sigma_x0', shape=(model.n_x, model.n_x)),
-                     catools.entry('time', shape=1)] +
-                    tv_term_ref_list + tv_stage_ref_list)
-
-            tv_p = param_npl_mpc['tv_p']
-            c_p = param_npl_mpc['c_p']
-            u_old = param_npl_mpc['u_old']
-            sigma_p = param_npl_mpc['sigma_p']
-            sigma_w = param_npl_mpc['sigma_w']
-            sigma_x0 = param_npl_mpc['sigma_x0']
-
-            # Concat all the time-varying trajectories
-            tv_ref_sc = []
-            for ii in range(len(self.quad_stage_cost._trajectories_list)):
-                for name in self.quad_stage_cost._trajectories_list[ii]['names']:
-                    if self.quad_stage_cost._trajectories_list[ii]['ref'] is None:
-                        tv_ref_sc.append(param_npl_mpc[name + '_sr'])
-            if len(tv_ref_sc) > 0:
-                tv_ref_sc = ca.vertcat(*tv_ref_sc)
-            else:
-                if self._use_sx:
-                    tv_ref_sc = ca.SX.sym('bla', (0, self._prediction_horizon))
-                else:
-                    tv_ref_sc = ca.MX.sym('bla', (0, self._prediction_horizon))
-
-            tv_ref_tc = []
-            for ii in range(len(self.quad_terminal_cost._trajectories_list)):
-                for name in self.quad_terminal_cost._trajectories_list[ii]['names']:
-                    if self.quad_terminal_cost._trajectories_list[ii]['ref'] is None:
-                        tv_ref_tc.append(param_npl_mpc[name + '_tr'])
-            if len(tv_ref_tc) > 0:
-                tv_ref_tc = ca.vertcat(*tv_ref_tc)
-            else:
-                if self._use_sx:
-                    tv_ref_tc = ca.SX.sym('bla', 0)
-                else:
-                    tv_ref_tc = ca.MX.sym('bla', 0)
-
-            t_ind = []
-            if self._minimize_final_time_flag is False:
-                _dt = param_npl_mpc['dt']
-            else:
-                _dt = v[offset:offset + self.prediction_horizon]
-                t_ind = [j for j in range(offset, offset + self.prediction_horizon)]
-                v_lb[offset:offset + self.prediction_horizon] = np.zeros(self.prediction_horizon)
-                v_ub[offset:offset + self.prediction_horizon] = ca.inf * np.ones(self.prediction_horizon)
-                v_guess[offset:offset + self.prediction_horizon] = self._sampling_interval * np.ones(
-                    self.prediction_horizon)
-                offset += self.prediction_horizon
-
-            # Constraint function for the NLP
-            g = []
-            g_lb = []
-            g_ub = []
-            J = 0
-            ind_g = 0
-            # get the current sampling time
-            time = param_npl_mpc['time']
-            for ii in range(self._prediction_horizon):
-                x_ii = x[ii, 0]
-                if ii < self._control_horizon:
-                    u_ii = u[ii, 0]
-                    if ii >= 1:
-                        u_old0 = [u_ii[jj] for jj in self.quad_stage_cost._ind_input_changes]
-                        u_old0 = ca.vertcat(*u_old0)
-                    else:
-                        u_old0 = u_old
-
-                p_ii = self._rearrange_parameters(tv_p[:, ii], c_p)
-                tv_ref_sc_ii = tv_ref_sc[:, ii]
-                dt_ii = _dt[ii]
-
-                # **UKF**
-                # Add the constraints of the UKF
-                X = self._get_sigma_points(x_ii, p_ii)
-                xp_mean = self._get_mean_sigma_points(X)
-
-                if ii == 0:
-                    sigma_ii = sigma_x0
-                elif 1 <= ii <= self.robust_horizon:
-                    sigma_ii = sigma_x[ii-1, 0].reshape((self._model.n_x, self._model.n_x))
-                    foo1 = ca.horzcat(*X) - xp_mean
-                    residual = ca.mtimes(foo1, ca.diag(ca.sqrt(ca.fabs(self._weights[1, :]))))
-                    foo2 = ca.horzcat(residual[0:self._model.n_x, 1:], sigma_w).T
-                    foo3 = ca.qr(foo2)[1]
-
-                    if self._weights[1, 0] < 0:
-                        sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '-')
-                    else:
-                        sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '+')
-
-                    g.append(sigma_x_new.reshape((-1, 1)) - sigma_ii.reshape((-1, 1)))
-                    g_lb.append([0] * self._model.n_x ** 2)
-                    g_ub.append([0] * self._model.n_x ** 2)
-                # ****
-
-                if self._nlp_options['integration_method'] in ['idas', 'cvodes']:
-                    sol = int_dynamics_fun(x0=ca.vertcat(x_ii, zp[ii, 0]),
-                                           p=ca.vertcat(u_ii, p_ii, u_old0, tv_ref_sc_ii, dt_ii))
-                    x_ii_1 = sol['xf']
-                    quad = sol['qf']
-                elif self._nlp_options['integration_method'] in ['rk4', 'rk']:
-                    [alg, x_ii_1, quad] = int_dynamics_fun(
-                        time, dt_ii, x_ii, u_ii, zp[ii, 0], p_ii, tv_ref_sc_ii, sigma_ii, sigma_p, e_soft_stage, u_old0)
-                    g.append(alg)
-                    g_lb.append(np.zeros(alg.size1()))
-                    g_ub.append(np.zeros(alg.size1()))
-                    if self._nlp_options['ipopt_debugger']:
-                        self._g_indices['dynamics_collocation'].append([ind_g, ind_g + alg.size1()])
-                        ind_g += alg.size1()
-                elif self._nlp_options['integration_method'] == 'collocation':
-                    [g_coll, x_ii_1, quad] = int_dynamics_fun(
-                        time, dt_ii, ip[ii, 0], x_ii, u_ii, zp[ii, 0], p_ii, e_soft_stage, tv_ref_sc_ii, u_old0)
-                    g.append(g_coll)
-                    g_lb.extend(gk_col_lb)
-                    g_ub.extend(gk_col_ub)
-                    if self._nlp_options['ipopt_debugger']:
-                        self._g_indices['dynamics_collocation'].append([ind_g, ind_g + g_coll.size1()])
-                        ind_g += g_coll.size1()
-                elif self._nlp_options['integration_method'] == 'discrete':
-                    x_ii_1 = int_dynamics_fun(time, dt_ii, x_ii, u_ii, zp[ii, 0], p_ii, sigma_ii, sigma_p)
-
-                g.append(x[ii + 1, 0] - x_ii_1)
-                g_lb.append(np.zeros(self._n_x))
-                g_ub.append(np.zeros(self._n_x))
+            if self._nlp_options['integration_method'] in ['idas', 'cvodes']:
+                sol = int_dynamics_fun(x0=ca.vertcat(x_ii, zp[ii, 0]),
+                                       p=ca.vertcat(u_ii, p_ii, u_old0, tv_ref_sc_ii, dt_ii))
+                x_ii_1 = sol['xf']
+                quad = sol['qf']
+            elif self._nlp_options['integration_method'] in ['rk4', 'rk']:
+                [alg, x_ii_1, quad] = int_dynamics_fun(
+                    time, dt_ii, x_ii, u_ii, zp[ii, 0], p_ii, tv_ref_sc_ii, sigma_ii, sigma_p, e_soft_stage, u_old0)
+                g.append(alg)
+                g_lb.append(np.zeros(alg.size1()))
+                g_ub.append(np.zeros(alg.size1()))
                 if self._nlp_options['ipopt_debugger']:
-                    self._g_indices['dynamics_multiple_shooting'].append([ind_g, ind_g + x_ii_1.shape[0]])
-                    ind_g += x_ii_1.size1()
+                    self._g_indices['dynamics_collocation'].append([ind_g, ind_g + alg.size1()])
+                    ind_g += alg.size1()
+            elif self._nlp_options['integration_method'] == 'collocation':
+                [g_coll, x_ii_1, quad] = int_dynamics_fun(
+                    time, dt_ii, ip[ii, 0], x_ii, u_ii, zp[ii, 0], p_ii, e_soft_stage, tv_ref_sc_ii, u_old0)
+                g.append(g_coll)
+                g_lb.extend(gk_col_lb)
+                g_ub.extend(gk_col_ub)
+                if self._nlp_options['ipopt_debugger']:
+                    self._g_indices['dynamics_collocation'].append([ind_g, ind_g + g_coll.size1()])
+                    ind_g += g_coll.size1()
+            elif self._nlp_options['integration_method'] == 'discrete':
+                x_ii_1 = int_dynamics_fun(time, dt_ii, x_ii, u_ii, zp[ii, 0], p_ii, sigma_ii, sigma_p)
 
-                # Add lagrange term
-                # TODO check if call is necessary
-                if self._lag_term_flag:
-                    if self._nlp_options['integration_method'] == 'discrete' or \
-                            self._nlp_options['objective_function'] == 'discrete':
-                        quad = self._lag_term_fun(time, xp_mean[0:self._model.n_x], u_ii, zp[ii, 0], p_ii, tv_ref_sc_ii,
-                                                  u_old0)
-                    J += quad
-                if self._may_term_flag and ii == self._prediction_horizon - 1:
-                    X_1 = self._get_sigma_points(x_ii_1, p_ii)
-                    xp_mean_1 = self._get_mean_sigma_points(X_1)
-                    J += self._may_term_fun(time + dt_ii, xp_mean_1[0:self._model.n_x], tv_ref_tc)
-                if self.terminal_constraint.is_set and ii == self._prediction_horizon - 1:
-                    if self.terminal_constraint.is_soft:
-                        residual = self._terminal_constraints_fun(time, x_ii, zp[ii, 0], p_ii, e_soft_term)
-                        J += self.terminal_constraint.cost(e_soft_term)
-                        g.append(residual)
-                        g_lb.append([-ca.inf] * self.terminal_constraint.size * 2)
-                        g_ub.append([ub for ub in self.terminal_constraint.ub])
-                        g_ub.append([-lb for lb in self.terminal_constraint.lb])
-                        if self._nlp_options['ipopt_debugger']:
-                            self._g_indices['nonlin_term_const'].append(
-                                [ind_g, ind_g + self.terminal_constraint.size * 2])
-                            ind_g += self.terminal_constraint.size * 2
-                    else:
-                        residual = self._terminal_constraints_fun(time, x_ii_1, zp[ii, 0], p_ii)
-                        g.append(residual)
-                        g_lb.append(self.terminal_constraint.lb)
-                        g_ub.append(self.terminal_constraint.ub)
-                        if self._nlp_options['ipopt_debugger']:
-                            self._g_indices['nonlin_term_const'].append(
-                                [ind_g, ind_g + residual.size1()])
-                            ind_g += residual.size1()
-
-                if self.stage_constraint.is_set:
-                    if self.stage_constraint.is_soft:
-                        residual = self._stage_constraints_fun(time, x_ii, u_ii, zp[ii, 0], p_ii, e_soft_stage)
-                        J += self.stage_constraint.cost(e_soft_stage)
-                        g.append(residual)
-                        g_lb.append([-ca.inf] * self.stage_constraint.size * 2)
-                        g_ub.append([ub for ub in self.stage_constraint.ub])
-                        g_ub.append([-lb for lb in self.stage_constraint.lb])
-                        if self._nlp_options['ipopt_debugger']:
-                            self._g_indices['nonlin_stag_const'].append(
-                                [ind_g, ind_g + residual.size1()])
-                            ind_g += residual.size1()
-                    else:
-                        residual = self._stage_constraints_fun(time, x_ii, u_ii, zp[ii, 0], p_ii)
-                        g.append(residual)
-                        g_lb.append(self.stage_constraint.lb)
-                        g_ub.append(self.stage_constraint.ub)
-                        if self._nlp_options['ipopt_debugger']:
-                            self._g_indices['nonlin_stag_const'].append(
-                                [ind_g, ind_g + residual.size1()])
-                            ind_g += residual.size1()
-
-                # update time in the horizon
-                time += dt_ii
-
-            if self._custom_constraint_flag:
-                if self._custom_constraint_is_soft_flag:
-                    W = np.diag([10000] * self._custom_constraint_size)
-                    J += ca.mtimes(e_cus.T, ca.mtimes(W, e_cus))
-                    g.append(self._custom_constraint_fun(v, x_ind, u_ind) - e_cus)
-                    g_lb.append([-ca.inf] * self._custom_constraint_size)
-                    g_ub.append(self._custom_constraint_fun_ub)
-
-                    g.append(self._custom_constraint_fun(v, x_ind, u_ind) + e_cus)
-                    g_lb.append(self._custom_constraint_fun_lb)
-                    g_ub.append([ca.inf] * self._custom_constraint_size)
-                else:
-                    g.append(self._custom_constraint_fun(v, x_ind, u_ind))
-                    g_lb.append(self._custom_constraint_fun_lb)
-                    g_ub.append(self._custom_constraint_fun_ub)
-
-            if self._minimize_final_time_flag:
-                # Force all the sampling time to be equal
-                for kkk in range(self.prediction_horizon - 1):
-                    g.append(_dt[kkk] - _dt[kkk + 1])
-                    g_lb.append(0)
-                    g_ub.append(0)
-
-                # Add the time to the objective function
-                J += ca.sum1(_dt) * self._minimize_final_time_weight
-
-            g = ca.vertcat(*g)
-            self._g_lb = ca.DM(ca.vertcat(*g_lb))
-            self._g_ub = ca.DM(ca.vertcat(*g_ub))
-            self._v0 = ca.DM(v_guess)
-            self._v_lb = ca.DM(v_lb)
-            self._v_ub = ca.DM(v_ub)
-            self._u_ind = u_ind
-            self._x_ind = x_ind
-            self._sigma_ind = sigma_ind
-            self._dt_ind = t_ind
-            self._J = J
-            self._v = v
-            self._param_npl_mpc = param_npl_mpc
-            self._g = g
-            self._nlp_setup_done = True
-            self._n_v = n_v
-
+            g.append(x[ii + 1, 0] - x_ii_1)
+            g_lb.append(np.zeros(self._n_x))
+            g_ub.append(np.zeros(self._n_x))
             if self._nlp_options['ipopt_debugger']:
-                # Adds the callback debugger.
-                debugger = IpoptDebugger('ipopt_debugger', self._n_v, self._g.shape[0], 0, 0, self._x_ind, self._u_ind)
-                self.debugger = debugger
-                self._nlp_opts.update({'iteration_callback': debugger})
+                self._g_indices['dynamics_multiple_shooting'].append([ind_g, ind_g + x_ii_1.shape[0]])
+                ind_g += x_ii_1.size1()
 
-            nlp_dict = {'f': self._J, 'x': self._v, 'p': self._param_npl_mpc, 'g': self._g}
-            if self._solver_name in self._solver_name_list_nlp:
-                solver = ca.nlpsol('solver', self._solver_name, nlp_dict, self._nlp_opts)
-            elif self._solver_name in self._solver_name_list_qp:
-                solver = ca.qpsol('solver', self._solver_name, nlp_dict, self._nlp_opts)
+            # Add lagrange term
+            # TODO check if call is necessary
+            if self._lag_term_flag:
+                if self._nlp_options['integration_method'] == 'discrete' or \
+                        self._nlp_options['objective_function'] == 'discrete':
+                    quad = self._lag_term_fun(time, xp_mean[0:self._model.n_x], u_ii, zp[ii, 0], p_ii, tv_ref_sc_ii,
+                                              u_old0)
+                J += quad
+            if self._may_term_flag and ii == self._prediction_horizon - 1:
+                X_1 = self._get_sigma_points(x_ii_1, p_ii)
+                xp_mean_1 = self._get_mean_sigma_points(X_1)
+                J += self._may_term_fun(time + dt_ii, xp_mean_1[0:self._model.n_x], tv_ref_tc)
+            if self.terminal_constraint.is_set and ii == self._prediction_horizon - 1:
+                if self.terminal_constraint.is_soft:
+                    residual = self._terminal_constraints_fun(time, x_ii, zp[ii, 0], p_ii, e_soft_term)
+                    J += self.terminal_constraint.cost(e_soft_term)
+                    g.append(residual)
+                    g_lb.append([-ca.inf] * self.terminal_constraint.size * 2)
+                    g_ub.append([ub for ub in self.terminal_constraint.ub])
+                    g_ub.append([-lb for lb in self.terminal_constraint.lb])
+                    if self._nlp_options['ipopt_debugger']:
+                        self._g_indices['nonlin_term_const'].append(
+                            [ind_g, ind_g + self.terminal_constraint.size * 2])
+                        ind_g += self.terminal_constraint.size * 2
+                else:
+                    residual = self._terminal_constraints_fun(time, x_ii_1, zp[ii, 0], p_ii)
+                    g.append(residual)
+                    g_lb.append(self.terminal_constraint.lb)
+                    g_ub.append(self.terminal_constraint.ub)
+                    if self._nlp_options['ipopt_debugger']:
+                        self._g_indices['nonlin_term_const'].append(
+                            [ind_g, ind_g + residual.size1()])
+                        ind_g += residual.size1()
+
+            if self.stage_constraint.is_set:
+                if self.stage_constraint.is_soft:
+                    residual = self._stage_constraints_fun(time, x_ii, u_ii, zp[ii, 0], p_ii, e_soft_stage)
+                    J += self.stage_constraint.cost(e_soft_stage)
+                    g.append(residual)
+                    g_lb.append([-ca.inf] * self.stage_constraint.size * 2)
+                    g_ub.append([ub for ub in self.stage_constraint.ub])
+                    g_ub.append([-lb for lb in self.stage_constraint.lb])
+                    if self._nlp_options['ipopt_debugger']:
+                        self._g_indices['nonlin_stag_const'].append(
+                            [ind_g, ind_g + residual.size1()])
+                        ind_g += residual.size1()
+                else:
+                    residual = self._stage_constraints_fun(time, x_ii, u_ii, zp[ii, 0], p_ii)
+                    g.append(residual)
+                    g_lb.append(self.stage_constraint.lb)
+                    g_ub.append(self.stage_constraint.ub)
+                    if self._nlp_options['ipopt_debugger']:
+                        self._g_indices['nonlin_stag_const'].append(
+                            [ind_g, ind_g + residual.size1()])
+                        ind_g += residual.size1()
+
+            # update time in the horizon
+            time += dt_ii
+
+        if self._custom_constraint_flag:
+            if self._custom_constraint_is_soft_flag:
+                W = np.diag([10000] * self._custom_constraint_size)
+                J += ca.mtimes(e_cus.T, ca.mtimes(W, e_cus))
+                g.append(self._custom_constraint_fun(v, x_ind, u_ind) - e_cus)
+                g_lb.append([-ca.inf] * self._custom_constraint_size)
+                g_ub.append(self._custom_constraint_fun_ub)
+
+                g.append(self._custom_constraint_fun(v, x_ind, u_ind) + e_cus)
+                g_lb.append(self._custom_constraint_fun_lb)
+                g_ub.append([ca.inf] * self._custom_constraint_size)
             else:
-                raise ValueError(
-                    f"The solver {self._solver_name} does no exist. The possible solver are {self._solver_name_list}."
-                )
-            self._solver = solver
+                g.append(self._custom_constraint_fun(v, x_ind, u_ind))
+                g_lb.append(self._custom_constraint_fun_lb)
+                g_ub.append(self._custom_constraint_fun_ub)
+
+        if self._minimize_final_time_flag:
+            # Force all the sampling time to be equal
+            for kkk in range(self.prediction_horizon - 1):
+                g.append(_dt[kkk] - _dt[kkk + 1])
+                g_lb.append(0)
+                g_ub.append(0)
+
+            # Add the time to the objective function
+            J += ca.sum1(_dt) * self._minimize_final_time_weight
+
+        g = ca.vertcat(*g)
+        self._g_lb = ca.DM(ca.vertcat(*g_lb))
+        self._g_ub = ca.DM(ca.vertcat(*g_ub))
+        self._v0 = ca.DM(v_guess)
+        self._v_lb = ca.DM(v_lb)
+        self._v_ub = ca.DM(v_ub)
+        self._u_ind = u_ind
+        self._x_ind = x_ind
+        self._sigma_ind = sigma_ind
+        self._dt_ind = t_ind
+        self._J = J
+        self._v = v
+        self._param_npl_mpc = param_npl_mpc
+        self._g = g
+        self._nlp_setup_done = True
+        self._n_v = n_v
+
+        if self._nlp_options['ipopt_debugger']:
+            # Adds the callback debugger.
+            debugger = IpoptDebugger('ipopt_debugger', self._n_v, self._g.shape[0], 0, 0, self._x_ind, self._u_ind)
+            self.debugger = debugger
+            self._nlp_opts.update({'iteration_callback': debugger})
+
+        nlp_dict = {'f': self._J, 'x': self._v, 'p': self._param_npl_mpc, 'g': self._g}
+        if self._solver_name in self._solver_name_list_nlp:
+            solver = ca.nlpsol('solver', self._solver_name, nlp_dict, self._nlp_opts)
+        elif self._solver_name in self._solver_name_list_qp:
+            solver = ca.qpsol('solver', self._solver_name, nlp_dict, self._nlp_opts)
+        else:
+            raise ValueError(
+                f"The solver {self._solver_name} does no exist. The possible solver are {self._solver_name_list}."
+            )
+        self._solver = solver
 
     def _transform_model(self, problem):
         # transform the model by adding the sigma points
         sigma_x = ca.SX.sym('sx', (self._model.n_x, self._model.n_x))
         sigma_p = ca.SX.sym('sp', (self._model.n_p, self._model.n_p))
         sigma = ca.diagcat(sigma_x, sigma_p)
+        a = 1e-6
 
-        ode = deepcopy(problem['ode'])
+        def logtransform(x, a):
+            return ca.log(x - a)
+
         x = deepcopy(problem['x'])
-        p = deepcopy(problem['p'])
+        #        x_tilde = logtransform(x,a)
+        ode = deepcopy(problem['ode'])
+        #        ode = ca.substitute(ode, x,x_tilde)
+        #        ode = 1 / (x_tilde - a) * ode
+        p_ii = deepcopy(problem['p'])
         for i in range(self.n_L):
             # Create new variables for sigma points
             x_ii = ca.SX.sym(f'x{i}', self._model.n_x)
-            p_ii = ca.SX.sym(f'p{i}', self._model.n_p)
+            # p_ii = ca.SX.sym(f'p{i}', self._model.n_p)
 
             # Save new variables
             problem['x'] = ca.vertcat(problem['x'], x_ii)
-            problem['p'] = ca.vertcat(problem['p'], p_ii)
+            # problem['p'] = ca.vertcat(problem['p'], p_ii)
 
             ode_new = ca.substitute(ode, x, x_ii)
-            ode_new = ca.substitute(ode, p, p_ii)
+            # ode_new = ca.substitute(ode, p, p_ii)
 
             xp = ca.vertcat(x_ii, p_ii)
 
@@ -3894,14 +3717,14 @@ class SMPCUKF(NMPC):
 
         for i in range(self.n_L):
             x_ii = ca.SX.sym(f'x{self.n_L + i}', self._model.n_x)
-            p_ii = ca.SX.sym(f'p{self.n_L + i}', self._model.n_p)
+            # p_ii = ca.SX.sym(f'p{self.n_L + i}', self._model.n_p)
 
             # Save new variables
             problem['x'] = ca.vertcat(problem['x'], x_ii)
-            problem['p'] = ca.vertcat(problem['p'], p_ii)
+            # problem['p'] = ca.vertcat(problem['p'], p_ii)
 
             ode_new = ca.substitute(ode, x, x_ii)
-            ode_new = ca.substitute(ode, p, p_ii)
+            # ode_new = ca.substitute(ode, p, p_ii)
 
             xp = ca.vertcat(x_ii, p_ii)
 
@@ -3910,7 +3733,6 @@ class SMPCUKF(NMPC):
 
         problem['sigma_x'] = sigma_x
         problem['sigma_p'] = sigma_p
-
 
         return problem
 
@@ -4125,6 +3947,71 @@ class SMPCUKF(NMPC):
         self.solution.add('u_ref', u_ref)
         self.solution.add('x_ref', x_ref)
 
+    def _sanity_check_probability_values(self, var, type):
+
+        if var is None:
+            return var
+        else:
+            var = check_and_wrap_to_list(var)
+
+            for i in var:
+                if i < 0 or i > 1:
+                    raise TypeError(
+                        f"The probabilities must be between 0 and 1. The variable time {type} has some values"
+                        f" ouside this range.")
+
+            return var
+
+    def _get_chance_constraints(self, mean_x, sigma_x, g, g_lb, g_ub, ind_g):
+        # Note:
+        # I am taking the diagonal of sigma_x because I am assuming only box constrains. For different kind of constraints
+        # one should it id differenttly
+        if self._nlp_options['chance_constraints'] == 'prs':
+            if self._box_constraints_is_set:
+                if any([i != ca.inf for i in self._x_lb[0:self._model.n_x]]) or any(
+                        [i != ca.inf for i in self._x_ub[0:self._model.n_x]]):
+                    # Set state chance constraints
+                    x_prob_ub = mean_x + (
+                            ca.sqrt(2) * ca.erfinv(2 * np.array(self._x_ub[0:self._model.n_x]) - 1)) * ca.sqrt(
+                        ca.diag(sigma_x) + 1e-8)
+
+                    x_prob_lb = -mean_x + (
+                            ca.sqrt(2) * ca.erfinv(2 * np.array(self._x_lb[0:self._model.n_x]) - 1)) * ca.sqrt(
+                        ca.diag(sigma_x) + 1e-8)
+
+                    g.append(ca.vertcat(x_prob_ub, x_prob_lb))
+                    g_ub.append(ca.vertcat(ca.DM(self.x_ub[0:self._model.n_x]),
+                                           -ca.DM(self.x_lb[0:self._model.n_x])))
+                    g_lb.append(-ca.inf * ca.DM.ones(2 * self._model.n_x))
+
+                    self._g_indices['probabilistic_box_constraints'].append([ind_g, ind_g + 2 * self._model.n_x])
+                    ind_g += 2 * self._model.n_x
+                    return g, g_lb, g_ub, ind_g
+
+    def _update_type(self) -> None:
+        """
+
+        :return:
+        """
+        self._type = 'SMPCUKF'
+
+    def _scale_problem(self):
+        """
+
+        :return:
+        """
+        self._u_ub = scale_vector(self._u_ub, self._u_scaling)
+        self._u_lb = scale_vector(self._u_lb, self._u_scaling)
+        self._u_guess = scale_vector(self._u_guess, self._u_scaling)
+
+        self._x_ub = scale_vector(self._x_ub, self._x_scaling)
+        self._x_lb = scale_vector(self._x_lb, self._x_scaling)
+        self._x_guess = scale_vector(self._x_guess, self._x_scaling)
+
+        # ... ode ...
+        self._model.scale(self._u_scaling[0:self._model.n_u], id='u')
+        self._model.scale(self._x_scaling[0:self._model.n_x], id='x')
+
     @property
     def robust_horizon(self):
         """
@@ -4181,7 +4068,6 @@ class SMPCUKF(NMPC):
         self._covariance_parameters = arg
 
     def optimize(self, x0, cp=None, tvp=None, v0=None, runs=0, fix_x0=True, **kwargs):
-
         """
         Solves the MPC problem
 
@@ -4244,8 +4130,8 @@ class SMPCUKF(NMPC):
             # Force the initial state to be the measured state.
             # Note that the path following problem modifies the model dimensions,
             # so only the first n_x positions need to be forced where n_x is state number of the original problem
-            self._v_lb[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x] * (2 * self.n_L + 1))
-            self._v_ub[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x] * (2 * self.n_L + 1))
+            self._v_lb[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x])
+            self._v_ub[self._x_ind[0][0:self._n_x]] = x0 / ca.DM(self._x_scaling[0:self._n_x])
         else:
             x0_lb = kwargs.get('x0_lb', self._x_lb)
             x0_ub = kwargs.get('x0_ub', self._x_ub)
@@ -4315,7 +4201,7 @@ class SMPCUKF(NMPC):
             dt_pred = np.zeros(self._prediction_horizon)
             for ii in range(self._prediction_horizon + 1):
                 x_pred[:, ii] = np.asarray(self._nlp_solution['x'][self._x_ind[ii]]).squeeze() * (
-                            self._x_scaling * (2 * self.n_L + 1))
+                    self._x_scaling)
             for ii in range(self._control_horizon):
                 u_pred[:, ii] = np.asarray(self._nlp_solution['x'][self._u_ind[ii]]).squeeze() * self._u_scaling
             if len(self._dt_ind) > 0:
@@ -4330,7 +4216,6 @@ class SMPCUKF(NMPC):
             return None, None, None
 
     def _get_bounds_covariances(self, cv_lb=-1e6, cv_ub=1e6):
-
         v_ub = [1e6] * self._model.n_x
 
         C_lb = np.ones((self._model.n_x, self._model.n_x)) * cv_lb
@@ -4373,20 +4258,20 @@ class SMPCUKF(NMPC):
         if x_ub is not None:
             x_ub = deepcopy(x_ub)
             x_ub = check_and_wrap_to_list(x_ub)
-            if len(x_ub) != self._n_x:
-                raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
-            self._x_ub = x_ub
+            if len(x_ub) != self._model.n_x:
+                raise TypeError(f"The model has {self._model.n_x} states. You need to pass the same number of bounds.")
+            self._x_ub = x_ub + self._model.n_x * [ca.inf] * (2 * self.n_L)
         else:
-            self._x_ub = self._model.n_x * [ca.inf]
+            self._x_ub = (2 * self.n_L + 1) * self._model.n_x * [ca.inf]
 
         if x_lb is not None:
             x_lb = deepcopy(x_lb)
             x_lb = check_and_wrap_to_list(x_lb)
-            if len(x_lb) != self._n_x:
-                raise TypeError(f"The model has {self._n_x} states. You need to pass the same number of bounds.")
-            self._x_lb = x_lb
+            if len(x_lb) != self._model.n_x:
+                raise TypeError(f"The model has {self._model.n_x} states. You need to pass the same number of bounds.")
+            self._x_lb = x_lb + self._model.n_x * [-ca.inf] * (2 * self.n_L)
         else:
-            self._x_lb = self._model.n_x * [-ca.inf]
+            self._x_lb = (2 * self.n_L + 1) * self._model.n_x * [-ca.inf]
 
         # Input constraints
         if u_ub is not None:
@@ -4436,6 +4321,87 @@ class SMPCUKF(NMPC):
                                           name='measurement_constraint')
 
         self._box_constraints_is_set = True
+
+    def set_initial_guess(self, x_guess=None, u_guess=None, z_guess=None):
+        """
+        Sets initial guess for the optimizer when no other information of the states or inputs are available.
+        :param x_guess: optimal state guesss
+        :type x_guess: list, numpy array, float or casADi DM array
+        :param u_guess: optimal input guess
+        :type u_guess: list, numpy array, float or casADi DM array
+        :param z_guess: optimal algebraic states guess
+        :type z_guess: list, numpy array, float or casADi DM array
+        :return:
+        """
+        # TODO: make this nicer
+        if x_guess is not None:
+            self._x_guess = check_and_wrap_to_list(deepcopy(x_guess))
+
+            if len(self._x_guess) != self._model_orig.n_x:
+                raise ValueError(f"x_guess dimension and model state dimension do not match. Model state has dimension "
+                                 f"{self._model_orig.n_x} while x_guess has dimension {len(self._x_guess)}")
+        else:
+            self._x_guess = self._model_orig.n_x * [0]
+
+        if u_guess is not None:
+            self._u_guess = check_and_wrap_to_list(deepcopy(u_guess))
+
+            if len(self._u_guess) != self._model_orig.n_u:
+                raise ValueError(f"u_guess dimension and model u dimension do not match. Model u_guess has dimension "
+                                 f"{len(self._u_guess)} while the model input has dimension {self._model.n_u}")
+        else:
+            self._u_guess = self._model_orig.n_u * [0]
+
+        if z_guess is not None:
+            self._z_guess = check_and_wrap_to_list(deepcopy(z_guess))
+
+            if len(self._z_guess) != self._model_orig.n_z:
+                raise ValueError(f"z_guess dimension and model z dimension do not match. Model z has dimension "
+                                 f"{self._model_orig.n_z} while z_guess {len(self._z_guess)}")
+        else:
+            self._z_guess = self._model_orig.n_z * [0]
+
+        self._initial_guess_is_set = True
+
+    def set_box_chance_constraints(self, x_ub=None, x_lb=None, u_ub=None, u_lb=None, y_ub=None, y_lb=None, z_ub=None,
+                                   z_lb=None, *args, **kwargs):
+        # TODO: add method's documentation
+        # TODO: This method is similar to the one of the SMPC. Try to use a single parent method that has the common features
+        """
+        Set box constraints for the SMPC.
+        """
+        # The equivalent deterministic case has n_x_s + n_x_s**2 number of states. So we need to expand the bounds provided
+        # by the user
+        # TODO: this can be simplified by looping over all bounds instead of writing everything again
+        # NOTE: once issue #3 is solved, the following lines should be not necessary anymore
+        # Get probability of constraint satisfaction
+        self._x_ub_p = self._sanity_check_probability_values(kwargs.get('x_ub_p', np.ones(self._model.n_x) * 0.954),
+                                                             'x_ub')
+
+        # Get probability of constraint satisfaction
+        self._x_lb_p = self._sanity_check_probability_values(kwargs.get('x_lb_p', np.ones(self._model.n_x) * 0.954),
+                                                             'x_lb')
+
+        # Get probability of constraint satisfaction
+        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_ub_p', np.ones(self._model.n_y) * 0.954),
+                                                             'y_ub')
+
+        # Get probability of constraint satisfaction
+        self._y_ub_p = self._sanity_check_probability_values(kwargs.get('y_lb_p', np.ones(self._model.n_y) * 0.954),
+                                                             'y_lb')
+
+        # Get probability of constraint satisfaction
+        self._z_ub_p = self._sanity_check_probability_values(kwargs.get('z_ub_p', np.ones(self._model.n_z) * 0.954),
+                                                             'z_ub')
+
+        # Get probability of constraint satisfaction
+        self._z_lb_p = self._sanity_check_probability_values(kwargs.get('z_lb_p', np.ones(self._model.n_z) * 0.954),
+                                                             'z_lb')
+
+        # Note: the deterministic MPC problem takes the bounds also for the covariance elements since the model is
+        # expanded by the covariance elements
+        self.set_box_constraints(x_ub=x_ub, x_lb=x_lb, u_ub=u_ub, u_lb=u_lb, y_ub=y_ub, y_lb=y_lb, z_ub=z_ub, z_lb=z_lb)
+
 
 __all__ = [
     'NMPC',

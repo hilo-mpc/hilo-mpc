@@ -1417,7 +1417,7 @@ class DynamicOptimization(Base):
             'ipopt_debugger': False
         }
 
-        if self._type == 'SMPC':
+        if self._type == 'SMPC' or self._type == 'SMPCUKF':
             default_opts.update({'chance_constraints':'prs'})
 
         if self._model.discrete:
