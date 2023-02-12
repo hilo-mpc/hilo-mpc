@@ -38,7 +38,7 @@ from ..optimizer import DynamicOptimization
 from ..estimator.kf import UnscentedKalmanFilter as UKF
 from ...util.modeling import GenericCost, QuadraticCost, GenericConstraint, continuous2discrete
 from ...util.optimizer import IpoptDebugger
-from ...util.util import check_and_wrap_to_list, check_and_wrap_to_DM, scale_vector
+from ...util.util import check_and_wrap_to_list, check_and_wrap_to_DM, scale_vector, check_if_all_equal
 
 
 class NMPC(Controller, DynamicOptimization):
@@ -3019,7 +3019,8 @@ class SMPCUKF(NMPC):
                                'nonlin_stag_const': [],
                                'nonlin_term_const': [],
                                'time_const.': [],
-                               'probabilistic_box_constraints':[]}
+                               'probabilistic_box_constraints': [],
+                               'sigma_x': []}
 
         if self._nlp_setup_done is False:
             model = self._model
@@ -3509,6 +3510,7 @@ class SMPCUKF(NMPC):
 
             if ii == 0:
                 sigma_ii = sigma_x0
+
             elif 1 <= ii <= self.robust_horizon - 1:
                 sigma_ii = sigma_x[ii - 1, 0].reshape((self._model.n_x, self._model.n_x))
                 foo1 = ca.horzcat(*X) - xp_mean
@@ -3520,14 +3522,32 @@ class SMPCUKF(NMPC):
                     sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '-')
                 else:
                     sigma_x_new = self._cholupdate(foo3, residual[0:self._model.n_x, 0], '+')
+                # Add sigma constraints
+                # g.append(sigma_x_new.reshape((-1, 1)) - sigma_ii.reshape((-1, 1)))
+                # g_lb.append([0] * self._model.n_x ** 2)
+                # g_ub.append([0] * self._model.n_x ** 2)
+                # self._g_indices['sigma_x'].append([ind_g, ind_g + self._model.n_x ** 2])
+                # ind_g += self._model.n_x ** 2
+                signa_ii = sigma_x_new
+            # Add sigma points constraints. This ensure that the dynamics follows the sigma points
+            if ii > 0:
+                g.append(X[0] - xp_mean)
+                g_lb.append([0] * self.n_L)
+                g_ub.append([0] * self.n_L)
+                ind_g += self.n_L
+                for kk in range(self.n_L):
+                    g.append(X[1 + kk] - (xp_mean + self._gamma * ca.diagcat(sigma_ii, sigma_p)[:, kk]))
+                    g_lb.append([0] * self.n_L)
+                    g_ub.append([0] * self.n_L)
+                    ind_g += self.n_L
+                for kk in range(self.n_L):
+                    g.append(X[self.n_L + 1 + kk] - (xp_mean - self._gamma * ca.diagcat(sigma_ii, sigma_p)[:, kk]))
+                    g_lb.append([0] * self.n_L)
+                    g_ub.append([0] * self.n_L)
+                    ind_g += self.n_L
 
-                g.append(sigma_x_new.reshape((-1, 1)) - sigma_ii.reshape((-1, 1)))
-                g_lb.append([0] * self._model.n_x ** 2)
-                g_ub.append([0] * self._model.n_x ** 2)
-                ind_g += self._model.n_x ** 2
-
-            # g, g_lb, g_ub, ind_g = self._get_chance_constraints(xp_mean[0:self._model.n_x], sigma_ii @ sigma_ii.T, g,
-            #                                                     g_lb, g_ub, ind_g)
+            g, g_lb, g_ub, ind_g = self._get_chance_constraints(xp_mean[0:self._model.n_x], sigma_ii @ sigma_ii.T, g,
+                                                                g_lb, g_ub, ind_g)
             # ****
 
             if self._nlp_options['integration_method'] in ['idas', 'cvodes']:
@@ -3689,14 +3709,8 @@ class SMPCUKF(NMPC):
         sigma = ca.diagcat(sigma_x, sigma_p)
         a = 1e-6
 
-        def logtransform(x, a):
-            return ca.log(x - a)
-
         x = deepcopy(problem['x'])
-        #        x_tilde = logtransform(x,a)
         ode = deepcopy(problem['ode'])
-        #        ode = ca.substitute(ode, x,x_tilde)
-        #        ode = 1 / (x_tilde - a) * ode
         p_ii = deepcopy(problem['p'])
         for i in range(self.n_L):
             # Create new variables for sigma points
@@ -3712,7 +3726,7 @@ class SMPCUKF(NMPC):
 
             xp = ca.vertcat(x_ii, p_ii)
 
-            ode_new = ca.substitute(ode_new, xp, xp + self._gamma * sigma[:, i])
+            # ode_new = ca.substitute(ode_new, xp, xp + self._gamma * sigma[:, i])
             problem['ode'] = ca.vertcat(problem['ode'], ode_new)
 
         for i in range(self.n_L):
@@ -3728,7 +3742,7 @@ class SMPCUKF(NMPC):
 
             xp = ca.vertcat(x_ii, p_ii)
 
-            ode_new = ca.substitute(ode_new, xp, xp - self._gamma * sigma[:, i])
+            # ode_new = ca.substitute(ode_new, xp, xp - self._gamma * sigma[:, i])
             problem['ode'] = ca.vertcat(problem['ode'], ode_new)
 
         problem['sigma_x'] = sigma_x
@@ -3791,7 +3805,13 @@ class SMPCUKF(NMPC):
     def _get_sigma_points(self, x_ii, p_ii):
         X = []
         counter = 0
-        for i in range(2 * self.n_L + 1):
+        # TODO simplify this
+        X.append(ca.vertcat(x_ii[counter:counter + self._model.n_x], p_ii))
+        counter += self._model.n_x
+        for i in range(self.n_L):
+            X.append(ca.vertcat(x_ii[counter:counter + self._model.n_x], p_ii))
+            counter += self._model.n_x
+        for i in range(self.n_L):
             X.append(ca.vertcat(x_ii[counter:counter + self._model.n_x], p_ii))
             counter += self._model.n_x
 
@@ -3971,13 +3991,17 @@ class SMPCUKF(NMPC):
                 if any([i != ca.inf for i in self._x_lb[0:self._model.n_x]]) or any(
                         [i != ca.inf for i in self._x_ub[0:self._model.n_x]]):
                     # Set state chance constraints
-                    x_prob_ub = mean_x + (
-                            ca.sqrt(2) * ca.erfinv(2 * np.array(self._x_ub[0:self._model.n_x]) - 1)) * ca.sqrt(
-                        ca.diag(sigma_x) + 1e-8)
+                    if not check_if_all_equal(self._x_lb_p) or not check_if_all_equal(self._x_ub_p):
+                        raise NotImplementedError(
+                            "Different probability of constraint violation for different state is not yet implemented.")
 
-                    x_prob_lb = -mean_x + (
-                            ca.sqrt(2) * ca.erfinv(2 * np.array(self._x_lb[0:self._model.n_x]) - 1)) * ca.sqrt(
-                        ca.diag(sigma_x) + 1e-8)
+                    # Take the first value, anyways the all all the same
+                    beta_lb = (1 - self._x_lb_p[0]) / self._x_lb_p[0]
+                    beta_ub = (1 - self._x_ub_p[0]) / self._x_ub_p[0]
+
+                    x_prob_ub = mean_x + ca.sqrt(beta_ub * ca.sum1(ca.diag(sigma_x)) + 1e-6)
+
+                    x_prob_lb = -mean_x + ca.sqrt(beta_lb * ca.sum1(ca.diag(sigma_x)) + 1e-6)
 
                     g.append(ca.vertcat(x_prob_ub, x_prob_lb))
                     g_ub.append(ca.vertcat(ca.DM(self.x_ub[0:self._model.n_x]),
@@ -3986,7 +4010,7 @@ class SMPCUKF(NMPC):
 
                     self._g_indices['probabilistic_box_constraints'].append([ind_g, ind_g + 2 * self._model.n_x])
                     ind_g += 2 * self._model.n_x
-                    return g, g_lb, g_ub, ind_g
+        return g, g_lb, g_ub, ind_g
 
     def _update_type(self) -> None:
         """
@@ -4401,6 +4425,155 @@ class SMPCUKF(NMPC):
         # Note: the deterministic MPC problem takes the bounds also for the covariance elements since the model is
         # expanded by the covariance elements
         self.set_box_constraints(x_ub=x_ub, x_lb=x_lb, u_ub=u_ub, u_lb=u_lb, y_ub=y_ub, y_lb=y_lb, z_ub=z_ub, z_lb=z_lb)
+
+    def plot_iterations(self, plot_states=False, **kwargs):
+        """
+        This plots the states and constraints for every mpc iteration. Useful to debug.
+        At the moment it is working only with Bokeh.
+        Warning: if the optimizer computes a large number of iterations the plots might take a bit of time to show up.
+
+        :param plot_states: if True, also the states are plotted
+        :param kwargs: If you pass 'plot_last' only the last iteration is plotted. This is to avoid very busy figures.
+        :return:
+        """
+        # TODO: modify and use the plot_iteration in DynamicOptimization instead of this one
+        # TODO: expand this to matplotlib
+        # TODO: allow usage in jupyter notebook
+        # TODO: expand this to MHE
+        import itertools
+
+        from bokeh.layouts import column
+        from bokeh.models import BoxAnnotation
+        from bokeh.plotting import figure, show, gridplot
+        from bokeh.palettes import inferno  # select a palette
+        from bokeh.models import ColumnDataSource, HoverTool
+
+        if not hasattr(self, 'debugger'):
+            raise ValueError("You need to activate the debugger. Pass 'options={'ipopt_debugger': True}' in the setup "
+                             "of the NMPC.")
+
+        plot_last = kwargs.get('plot_last', False)
+        numLines = len(self.debugger.g_sols)
+
+        # Get a list of string that describes the constraint type for every element of g
+        g_desc = ["empty" for _ in range(self._g.shape[0])]
+        for key, value in self._g_indices.items():
+            for interval in value:
+                for j in range(interval[0], interval[1]):
+                    g_desc[j] = key
+
+        pg = figure(width=2000, height=1200, title='Nonlinear constraints')
+        x = np.arange(0, self._g.shape[0])
+        colors_g = itertools.cycle(inferno(numLines))
+        if plot_last:
+            TOOLTIPS = [
+                ("index", "$index"),
+                ("(g val)", "$y"),
+                ("(ub, lb)", "(@ub, @lb)"),
+                ("desc", "@desc"),
+            ]
+            y = self.debugger.g_sols[-1]
+            source = ColumnDataSource(
+                data={'x': x, 'y': y.squeeze(), 'desc': g_desc, 'ub': self._g_ub.toarray().squeeze().tolist(),
+                      'lb': self._g_lb.toarray().squeeze().tolist()})
+            r1 = pg.scatter('x', 'y', color=next(colors_g), legend_label=f'iter. {numLines}', line_width=2,
+                            source=source, size=5)
+            hover = HoverTool(renderers=[r1], tooltips=TOOLTIPS, mode='mouse')
+            pg.add_tools(hover)
+        else:
+            for m in range(numLines):
+                y = self.debugger.g_sols[m]
+                pg.scatter(x, y.squeeze(), color=next(colors_g), legend_label=f'iter. {m}', line_width=2)
+
+        # Add sections saying what is what
+        for i in range(len(self._g_indices['dynamics_collocation'])):
+            low_box = BoxAnnotation(left=self._g_indices['dynamics_collocation'][i][0],
+                                    right=self._g_indices['dynamics_collocation'][i][1],
+                                    fill_alpha=0.1, fill_color='red')
+            pg.add_layout(low_box)
+
+        for i in range(len(self._g_indices['dynamics_multiple_shooting'])):
+            low_box = BoxAnnotation(left=self._g_indices['dynamics_multiple_shooting'][i][0],
+                                    right=self._g_indices['dynamics_multiple_shooting'][i][1],
+                                    fill_alpha=0.1, fill_color='blue')
+            pg.add_layout(low_box)
+
+        for i in range(len(self._g_indices['nonlin_stag_const'])):
+            low_box = BoxAnnotation(left=self._g_indices['nonlin_stag_const'][i][0],
+                                    right=self._g_indices['nonlin_stag_const'][i][1],
+                                    fill_alpha=0.1, fill_color='green')
+            pg.add_layout(low_box)
+
+        for i in range(len(self._g_indices['nonlin_term_const'])):
+            low_box = BoxAnnotation(left=self._g_indices['nonlin_term_const'][i][0],
+                                    right=self._g_indices['nonlin_term_const'][i][1],
+                                    fill_alpha=0.1, fill_color='orange')
+            pg.add_layout(low_box)
+
+        pg.line(x, self._g_lb.toarray().squeeze().tolist(), legend_label='lower bound', color=next(colors_g),
+                line_dash='dashed')
+        pg.line(x, self._g_ub.toarray().squeeze().tolist(), legend_label='upper bound', color=next(colors_g))
+
+        plagg = figure(width=2000, height=1200, title='Lagrange multipliers nonlinear constraints')
+        x = np.arange(0, self._g.shape[0])
+        colors_lagg = itertools.cycle(inferno(numLines))
+        if plot_last:
+            y = self.debugger.lam_g_sols[-1]
+            plagg.line(x, y.squeeze(), color=next(colors_lagg), legend_label=f'iter. {numLines}')
+        else:
+            for m in range(numLines):
+                y = self.debugger.lam_g_sols[m]
+                plagg.line(x, y.squeeze(), color=next(colors_lagg), legend_label=f'iter. {m}')
+        show(column([pg, plagg]))
+
+        if plot_states:
+
+            px = []
+            for name in self._model.dynamical_state_names:
+                p = figure(width=800, height=800, title=name)
+                px.append(p)
+            colors_x = itertools.cycle(inferno(numLines))
+            if plot_last:
+                color = next(colors_x)
+                x_pred = np.zeros((self._model.n_x, self.prediction_horizon + 1))
+                u_pred = np.zeros((self._model.n_u, self.control_horizon))
+                dt_pred = np.zeros((self.prediction_horizon))
+
+                for ii in range(self.prediction_horizon + 1):
+                    x_pred[:, ii] = np.array(self.debugger.x_sols[-1])[self._x_ind[ii]] * self._x_scaling
+                for ii in range(self.control_horizon):
+                    u_pred[:, ii] = np.array(self.debugger.x_sols[-1])[self._u_ind[ii]] * self._u_scaling
+                if len(self._dt_ind) > 0:
+                    for ii in range(self.prediction_horizon):
+                        dt_pred[ii] = np.array(self.debugger.x_sols[-1])[self._dt_ind[ii]]
+                else:
+                    dt_pred = np.arange(0, (self.prediction_horizon + 1) * self._sampling_interval,
+                                        self._sampling_interval)
+
+                for k in range(self._n_x):
+                    px[k].line(dt_pred, x_pred[k, :], color=color, legend_label=f'iter. {numLines}')
+            else:
+                for m in range(numLines):
+                    color = next(colors_x)
+                    x_pred = np.zeros((self._model.n_x, self.prediction_horizon + 1))
+                    u_pred = np.zeros((self._model.n_u, self.control_horizon))
+                    dt_pred = np.zeros((self.prediction_horizon))
+
+                    for ii in range(self.prediction_horizon + 1):
+                        x_pred[:, ii] = np.array(self.debugger.x_sols[m])[self._x_ind[ii]] * self._x_scaling
+                    for ii in range(self.control_horizon):
+                        u_pred[:, ii] = np.array(self.debugger.x_sols[m])[self._u_ind[ii]] * self._u_scaling
+                    if len(self._dt_ind) > 0:
+                        for ii in range(self.prediction_horizon):
+                            dt_pred[ii] = np.array(self.debugger.x_sols[m])[self._dt_ind[ii]]
+                    else:
+                        dt_pred = np.arange(0, (self.prediction_horizon + 1) * self._sampling_interval,
+                                            self._sampling_interval)
+
+                    for k in range(self._n_x):
+                        px[k].line(dt_pred, x_pred[k, :], color=color, legend_label=f'iter. {m}')
+
+            show(gridplot(px, ncols=3))
 
 
 __all__ = [

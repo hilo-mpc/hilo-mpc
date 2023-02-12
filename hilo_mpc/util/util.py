@@ -27,7 +27,7 @@ import platform
 import sys
 from typing import Any, Callable, Optional, TypeVar, cast
 import warnings
-
+from itertools import groupby
 import casadi as ca
 import numpy as np
 from scipy.sparse import issparse
@@ -38,9 +38,7 @@ if platform.system() == 'Windows':
 elif platform.system() == 'Linux':
     from .unix import find_compiler, UNIX_COMPILERS
 
-
 Function = TypeVar('Function', bound=Callable[..., Any])
-
 
 JIT = ['jit', 'just-in-time']
 AOT = ['aot', 'ahead-of-time']
@@ -58,6 +56,7 @@ def setup_warning(function: Function) -> Function:
     :param function:
     :return:
     """
+
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
         """
@@ -70,6 +69,7 @@ def setup_warning(function: Function) -> Function:
             warnings.warn(f"{args[0].__class__.__name__} {args[0].name} was already set up. Please run the setup "
                           f"method again to apply the changes and prevent strange behavior.")
         return function(*args, **kwargs)
+
     return cast(Function, wrapper)
 
 
@@ -330,6 +330,11 @@ def check_if_square(arg):
             return True
         else:
             return False
+
+
+def check_if_all_equal(arg):
+    g = groupby(arg)
+    return next(g, True) and not next(g, False)
 
 
 def convert(obj, _type, **kwargs):

@@ -372,12 +372,19 @@ class TestUKF(unittest.TestCase):
                     new_cov[i, j] = np.exp(mean[i] + mean[j] + (cov[i, i] + cov[j, j]) / 2) * (np.exp(cov[i, j]) - 1)
 
             return new_cov
+        def inverse_transform(x,a,log_transform=False):
+            if log_transform:
+                return ca.exp(x)+a
+            else:
+                return x
+
 
         theta0 = [0.08, 0.4, 0.04, 0.2]
         Cglu = 50
         dt = 3
-        covariance_states = np.eye(4) * 0.001
-        log_transform = False
+        covariance_states = np.eye(4) * 0.0001
+        covariance_state_noise = np.eye(4) * 0.00001
+        log_transform = True
         model = Model(name='simple_bio', plot_backend='bokeh')
         x = model.set_dynamical_states(['Glu', 'Bio', 'Lac', 'V'])
         u = model.set_inputs(['Fglu'])
@@ -386,25 +393,30 @@ class TestUKF(unittest.TestCase):
         km = theta[1]
         v_maxl = theta[2]
         kml = theta[3]
+        x0 = [20.5, 5, 2, 2.]
+        a = 1e-6
+
         if log_transform:
-            a = 1e-6
-            x0 = ca.log(ca.DM([2.5, 0.1, 0.01, 1.]) - a).toarray().squeeze().tolist()
-            glu = ca.log(x[0] - a)
-            bio = ca.log(x[1] - a)
-            lac = ca.log(x[2] - a)
-            v = ca.log(x[3] - a)
+            x0 = ca.log(ca.DM(x0) - a).toarray().squeeze().tolist()
+            log_glu = x[0]
+            log_bio = x[1]
+            log_lac = x[2]
+            log_v = x[3]
 
-            r = (v_max * glu) / (km + glu)
-            rl = (v_maxl * glu) / (kml + glu)
+            r = (v_max * (ca.exp(log_glu) + a)) / (km + (ca.exp(log_glu) + a))
+            rl = (v_maxl * (ca.exp(log_glu) + a)) / (kml + (ca.exp(log_glu) + a))
 
-            dbio = 1 / (bio - a) * (r * bio - u / v * bio)
-            dglu = 1 / (glu - a) * (-r * bio - rl * bio + u / v * (Cglu - glu))
-            dlac = 1 / (lac - a) * (rl * bio - u / v * lac)
-            dv = 1 / (v - a) * u
-            covariance_states = logtransform_matrix(model, x0, covariance_states)
+            dbio = 1 / (ca.exp(log_bio)) * (r * (ca.exp(log_bio) + a) - u / (ca.exp(log_v) + a) * (ca.exp(log_bio) + a))
+            dglu = 1 / (ca.exp(log_glu)) * (
+                    -r * (ca.exp(log_bio) + a) - rl * (ca.exp(log_bio) + a) + u / (ca.exp(log_v) + a) * (
+                    Cglu - (ca.exp(log_glu) + a)))
+            dlac = 1 / (ca.exp(log_lac)) * (
+                    rl * (ca.exp(log_bio) + a) - u / (ca.exp(log_v) + a) * (ca.exp(log_lac) + a))
+            dv = 1 / (ca.exp(log_v)) * u
+            x_lb = [ca.log(1e-5 - a)] * 4
+            x_ub = [ca.log(50 - a)] * 4
         else:
-            # x0 = [2.5, 0.1, 0.01, 1.]
-            x0 = [20.5, 5, 2, 1.]
+
             glu = x[0]
             bio = x[1]
             lac = x[2]
@@ -417,40 +429,40 @@ class TestUKF(unittest.TestCase):
             dglu = -r * bio - rl * bio + u / v * (Cglu - glu)
             dlac = rl * bio - u / v * lac
             dv = u
+            x_lb = [1e-5] * 4
+            x_ub = None
 
         model.set_dynamical_equations([dglu, dbio, dlac, dv])
         model.discretize(method='rk4', inplace=True)
         model.setup(dt=dt)
-        model.set_initial_conditions(x0=x0)
 
         # Initial conditions
         x0_new = x0 * (2 * (model.n_x + model.n_p) + 1)
         u0 = [0.]
 
         # lower and upper bounds
-
         smpc = SMPCUKF(model, plot_backend='bokeh', alpha=0.9)
         smpc.quad_stage_cost.add_states(names=['Lac'], weights=[-10])
         smpc.quad_terminal_cost.add_states(names=['Lac'], weights=[-10])
         smpc.quad_stage_cost.add_inputs(names=['Fglu'], weights=[4])
-        smpc.horizon = 3
+        smpc.horizon = 6
         smpc.robust_horizon = 3
         smpc.covariance_states = covariance_states
-        smpc.covariance_states_noise = np.eye(model.n_x) * 0.00001
+        smpc.covariance_states_noise = covariance_state_noise
         smpc.covariance_parameters = np.eye(model.n_p) * 0.0001
-        # smpc.set_box_chance_constraints(x_lb=[0, 0], x_lb_p=[0.97, 0.97])
-        smpc.set_box_chance_constraints(u_ub=[0.5], u_lb=[0], x_lb=[1e-6, 1e-6, 1e-6, 1e-6])
+        smpc.set_box_chance_constraints(u_ub=[0.5], u_lb=[0], x_lb=x_lb, x_ub=x_ub)
         smpc.set_initial_guess(x_guess=x0, u_guess=u0)
-        smpc.setup(solver_options={'ipopt.print_level': 5,'ipopt.linear_solver':'ma57'},
-                   options={'integration_method': 'rk4', 'ipopt_debugger': True})
+        smpc.setup(solver_options={'ipopt.print_level': 5, 'ipopt.linear_solver': 'ma27',
+                                   'ipopt.max_iter': 5000},
+                   options={'integration_method': 'discrete', 'ipopt_debugger': True})
 
         smpc.optimize(x0=x0_new, cp=theta0)
         smpc.plot_iterations(plot_last=True)
         # Get the sigma
         sigma_pred = np.zeros((model.n_x, model.n_x, smpc.robust_horizon))
-        sigma_pred[:,:,0] = smpc.covariance_states @ smpc.covariance_states.T
-        for ii in range(smpc.robust_horizon-1):
-            sigma_pred[:, :, ii+1] = np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape(
+        sigma_pred[:, :, 0] = smpc.covariance_states @ smpc.covariance_states.T
+        for ii in range(smpc.robust_horizon - 1):
+            sigma_pred[:, :, ii + 1] = np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape(
                 (model.n_x, model.n_x)) @ np.asarray(smpc._nlp_solution['x'][smpc._sigma_ind[ii]]).reshape(
                 (model.n_x, model.n_x)).T
 
@@ -471,9 +483,9 @@ class TestUKF(unittest.TestCase):
                    legend_label=state,
                    line_color=color_list[k])
 
-            for j in range((2*smpc.n_L+1)):
-                p.line(smpc.solution['t'].toarray().squeeze(),smpc.solution[state][j,:].toarray().squeeze(),
-                       line_alpha = 0.3, line_color=color_list[k])
+            for j in range((2 * smpc.n_L + 1)):
+                p.line(smpc.solution['t'].toarray().squeeze(), smpc.solution[state][j, :].toarray().squeeze(),
+                       line_alpha=0.3, line_color=color_list[k])
             p_states.append(p)
         grid = gridplot([[p_states[0], p_states[1]], [p_states[2], p_states[3]]])
         show(grid)
