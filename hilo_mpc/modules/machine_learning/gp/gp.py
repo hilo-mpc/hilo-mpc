@@ -24,7 +24,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Callable, Dict, Optional, Sequence, Tuple, TypeVar, Union
 import warnings
 
 import casadi as ca
@@ -235,6 +235,9 @@ class GaussianProcess(LearningBase):
         self._gp_args = {}
         self._optimization_stats = {}
 
+        self._scaler_x = None
+        self._scaler_y = None
+
     def __str__(self) -> str:
         """String representation method"""
         message = "Gaussian process with \n"
@@ -375,16 +378,30 @@ class GaussianProcess(LearningBase):
         y_train_MX = ca.MX.sym('y', *shape)
         self._y_train = Data(values=value, SX=y_train_SX, MX=y_train_MX)
 
-    def set_training_data(self, X: np.ndarray, y: np.ndarray) -> None:
+    def set_training_data(
+            self,
+            X: np.ndarray,
+            y: np.ndarray,
+            scale_data: bool = False,
+            scaler: Optional[Callable] = None
+    ) -> None:
         """Sets the training matrix and its target vector
 
         :param X:
         :param y:
+        :param scale_data:
+        :param scaler:
         :return:
         """
         if self._function is not None:
             warnings.warn("Gaussian process was already executed. Use the fit_model() method again to optimize with "
                           "respect to the newly set training data.")
+
+        if scale_data and scaler is not None:
+            self._scaler_x = scaler().fit(X)
+            self._scaler_y = scaler().fit(y)
+            X = self._scaler_x.transform(X).full()
+            y = self._scaler_y.transform(y).full()
 
         new_X_shape = X.shape
         new_y_shape = y.shape
@@ -706,12 +723,21 @@ class GaussianProcess(LearningBase):
         if self._function is None:
             raise RuntimeError("The GP has not been set up yet. Please run the setup() method before predicting.")
 
+        is_numpy_array = isinstance(X_query, np.ndarray)
+
+        if self._scaler_x is not None:
+            X_query = self._scaler_x.transform(X_query)
+
         prediction = self._function(X=X_query, x0=self._gp_args['x0'], p=self._gp_args['p'])
         mean, var = prediction['mean'], prediction['variance']
+
+        if self._scaler_y is not None:
+            mean, var = self._scaler_y.retransform(mean, pred_v=var)
+
         if not noise_free:
             var += self.noise_variance.value
 
-        if isinstance(X_query, np.ndarray):
+        if is_numpy_array:
             mean = mean.full()
             var = var.full()
 
