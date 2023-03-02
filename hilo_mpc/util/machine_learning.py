@@ -120,25 +120,27 @@ class Activation:
         return 1 / (1 - x)
 
     @staticmethod
-    def probabilistic_rectifier(mean, var, prior='gaussian'):
+    def probabilistic_rectifier(mean, var, prior='gaussian', epsilon=1e-10):
         """
 
         :param mean:
         :param var:
         :param prior:
+        :param epsilon:
         :return:
         """
         if prior == 'gaussian':
             prior = Prior.gaussian(mean=0., variance=1.)
+            epsilon /= 2.
 
         alpha = mean / ca.sqrt(var)
         phi = prior.pdf(-alpha)
-        Phi = prior.cdf(alpha)
+        Phi = prior.cdf(alpha) + epsilon
         gamma = phi / Phi
-        gamma_robust = -alpha - 1. / alpha + 2. / alpha ** 3.
+        # gamma_robust = -alpha - 1. / alpha + 2. / alpha ** 3.
         # gamma *= (1. + ca.sign(alpha + 5.)) / 2.
         # gamma += gamma_robust * (1. - ca.sign(alpha + 5.)) / 2.
-        gamma = ca.if_else(alpha >= -5., gamma, gamma_robust)
+        # gamma = ca.if_else(alpha >= -5., gamma, gamma_robust)
         v_prime = mean + ca.sqrt(var) * gamma
 
         # Mean and variance after ReLU
