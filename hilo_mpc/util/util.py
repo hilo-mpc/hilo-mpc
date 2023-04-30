@@ -716,3 +716,19 @@ def who_am_i() -> str:
     :return:
     """
     return sys._getframe(1).f_code.co_name
+
+
+def clip(v,v_lb,v_ub):
+    """
+    Given a vector v, it returns the value of the vector clipped between v_lb <= v <=v_ub
+    :param v: NP array, list or ca.DM vector
+    :param v_lb: NP array, list or ca.DM vector
+    :param v_ub: NP array, list or ca.DM vector
+    :return: clipped vector v (casadi DM)
+    """
+
+    v = check_and_wrap_to_list(v)
+    v_lb = check_and_wrap_to_list(v_lb)
+    v_ub = check_and_wrap_to_list(v_ub)
+
+    return ca.DM([v_lb[i] if v[i] < v_lb[i] else v_ub[i] if v[i] > v_ub[i] else v[i] for i in range(len(v))])
