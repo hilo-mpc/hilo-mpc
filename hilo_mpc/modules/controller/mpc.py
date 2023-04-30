@@ -33,7 +33,7 @@ from .base import Controller
 from ..optimizer import DynamicOptimization
 from ...util.modeling import GenericCost, QuadraticCost, GenericConstraint, continuous2discrete
 from ...util.optimizer import IpoptDebugger
-from ...util.util import check_and_wrap_to_list, check_and_wrap_to_DM, scale_vector
+from ...util.util import check_and_wrap_to_list, check_and_wrap_to_DM, scale_vector, clip
 
 
 class NMPC(Controller, DynamicOptimization):
@@ -717,13 +717,14 @@ class NMPC(Controller, DynamicOptimization):
             v00 = v0
             for r in range(runs):
                 sol = self._solver(x0=v00, lbx=self._v_lb, ubx=self._v_ub, lbg=self._g_lb, ubg=self._g_ub, p=param)
-                if sol['f'] < f_r_better:
+                self._solver_status_wrapper()
+                if self._solver_status_code in [1,2] and sol['f'] < f_r_better:
                     f_r_better = sol['f']
                     self._nlp_solution = sol
                     u_opt = sol['x'][self._u_ind[0]]
                     if self._nlp_options['warm_start']:
                         self._v0 = sol['x']
-                v00 = v0 + v0 * (1 - 2 * np.random.rand(self._n_v)) * pert_factor
+                v00 = clip(v0 + v0 * (1 - 2 * np.random.rand(self._n_v)) * pert_factor, self._v_lb, self._v_ub)
 
         return u_opt
 
