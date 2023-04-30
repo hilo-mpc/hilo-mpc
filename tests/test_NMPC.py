@@ -134,7 +134,7 @@ class TestNMPC(TestCase):
         sol = model.solution
 
         for step in range(n_steps):
-            u = nmpc.optimize(x0, runs=3, pert_factor=0.05)
+            u = nmpc.optimize(x0, runs=3, pert_factor=0.1)
             model.simulate(u=u)
             x0 = sol['x:f']
 
