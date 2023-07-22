@@ -175,7 +175,7 @@
     "for step in range(n_steps):\n",
     "    u = nmpc.optimize(xt)\n",
     "    model.simulate(u=u)\n",
-    "    xt = sol['xf']"
+    "    xt = sol['x:f']"
    ]
   },
   {
@@ -653,7 +653,7 @@
     "for step in range(n_steps):\n",
     "    u = nmpc.optimize(xt)\n",
     "    model.simulate(u=u)\n",
-    "    xt = sol['xf']"
+    "    xt = sol['x:f']"
    ]
   },
   {

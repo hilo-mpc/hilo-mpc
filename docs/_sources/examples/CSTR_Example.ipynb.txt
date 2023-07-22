@@ -482,7 +482,7 @@
     "for step in range(n_steps):\n",
     "    u = nmpc_hybrid_model.optimize(x0_plant)\n",
     "    plant.simulate(u = u)\n",
-    "    x0_plant = solution_hybrid['xf']"
+    "    x0_plant = solution_hybrid['x:f']"
    ]
   },
   {
@@ -524,7 +524,7 @@
     "for step in range(n_steps):\n",
     "    u = nmpc_plant.optimize(x0_plant)\n",
     "    plant.simulate(u = u)\n",
-    "    x0_plant = solution_true['xf']"
+    "    x0_plant = solution_true['x:f']"
    ]
   },
   {
