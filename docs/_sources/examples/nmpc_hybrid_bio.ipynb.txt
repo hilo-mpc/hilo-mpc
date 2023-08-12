@@ -1014,7 +1014,7 @@
     "for step in range(n_steps):\n",
     "    u = nmpc.optimize(x0_plant[0:4], cp=p0)\n",
     "    plant.simulate(u=u, p = p0)\n",
-    "    x0_plant = solution_hybrid['xf']"
+    "    x0_plant = solution_hybrid['x:f']"
    ]
   },
   {

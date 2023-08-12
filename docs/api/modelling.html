@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Modelling &mdash; HILO-MPC 1.0 documentation</title>
+  <title>Modelling &mdash; HILO-MPC 1.0.1 documentation</title>
   
 
   
@@ -41,7 +42,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="HILO-MPC 1.0 documentation" href="../index.html"/>
+    <link rel="top" title="HILO-MPC 1.0.1 documentation" href="../index.html"/>
         <link rel="next" title="Observers" href="estimators.html"/>
         <link rel="prev" title="Machine Learning" href="learning.html"/> 
 
@@ -185,14 +186,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="modelling">
-<span id="modelling-autodoc"></span><h1>Modelling<a class="headerlink" href="#modelling" title="Permalink to this headline">¶</a></h1>
+  <section id="modelling">
+<span id="modelling-autodoc"></span><h1>Modelling<a class="headerlink" href="#modelling" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="hilo_mpc.Model">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'h'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/dynamic_model/dynamic_model.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class representing the dynamic model of a system over time</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> (<em>str</em><em>, </em><em>optional</em>) – The identifier of the model object. If no identifier is given, a random one will be generated.</p></li>
 <li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the model object. By default the model object has no name.</p></li>
@@ -214,14 +215,14 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_algebraic_equations">
 <span class="sig-name descname"><span class="pre">add_algebraic_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_algebraic_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>equations</strong> – </p></li>
 <li><p><strong>position</strong> – </p></li>
 <li><p><strong>check_properties</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -231,13 +232,13 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_algebraic_states">
 <span class="sig-name descname"><span class="pre">add_algebraic_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_algebraic_states" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>states</strong> – </p></li>
 <li><p><strong>position</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -247,14 +248,14 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_dynamical_equations">
 <span class="sig-name descname"><span class="pre">add_dynamical_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_dynamical_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>equations</strong> – </p></li>
 <li><p><strong>position</strong> – </p></li>
 <li><p><strong>check_properties</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -264,13 +265,13 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_dynamical_states">
 <span class="sig-name descname"><span class="pre">add_dynamical_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">states</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_dynamical_states" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>states</strong> – </p></li>
 <li><p><strong>position</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -280,13 +281,13 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_equations">
 <span class="sig-name descname"><span class="pre">add_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>equations</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -296,13 +297,13 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_inputs">
 <span class="sig-name descname"><span class="pre">add_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inputs</strong> – </p></li>
 <li><p><strong>position</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -312,14 +313,14 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_measurement_equations">
 <span class="sig-name descname"><span class="pre">add_measurement_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_measurement_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>equations</strong> – </p></li>
 <li><p><strong>position</strong> – </p></li>
 <li><p><strong>check_properties</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -329,13 +330,13 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_measurements">
 <span class="sig-name descname"><span class="pre">add_measurements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measurements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_measurements" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>measurements</strong> – </p></li>
 <li><p><strong>position</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -345,14 +346,14 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_options">
 <span class="sig-name descname"><span class="pre">add_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_options" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>opts</strong> – </p></li>
 <li><p><strong>keys</strong> – </p></li>
 <li><p><strong>values</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -362,14 +363,14 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.add_parameters">
 <span class="sig-name descname"><span class="pre">add_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.add_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parameters</strong> – </p></li>
 <li><p><strong>position</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -379,7 +380,7 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.check_consistency">
 <span class="sig-name descname"><span class="pre">check_consistency</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.check_consistency" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -389,10 +390,10 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.check_solver">
 <span class="sig-name descname"><span class="pre">check_solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solver</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.check_solver" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>solver</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -402,14 +403,14 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/dynamic_model/dynamic_model.html#Model.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Model.copy" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – </p></li>
 <li><p><strong>setup</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -421,15 +422,15 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dd><p>Discretize a continuous-time model. Implemented discretization methods are explicit Runge-Kutta and collocation
 schemes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Note</dt>
+<dt class="field-odd">Note<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">discretize()</span></code> method doesn’t require a numerical sampling time
 ‘dt’, since the discretization is executed symbolically.</p>
 </dd>
-<dt class="field-even">Note</dt>
+<dt class="field-even">Note<span class="colon">:</span></dt>
 <dd class="field-even"><p>If the model is already discrete, an according message will be displayed and the discretization attempt
 will be aborted.</p>
 </dd>
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>method</strong> (<em>str</em>) – The method used for discretization. At the moment only explicit Runge-Kutta methods and
 collocation schemes are supported. Accepted values are ‘rk4’ for the most widely known 4th order
@@ -452,7 +453,7 @@ return None, otherwise a new discretized <code class="xref py py-class docutils 
 Defaults to False.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>If argument <strong>inplace</strong> was set to True a new <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code> instance will be
 returned, otherwise None</p>
 </dd>
@@ -463,7 +464,7 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.is_linear">
 <span class="sig-name descname"><span class="pre">is_linear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.is_linear" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -473,7 +474,7 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.is_linearized">
 <span class="sig-name descname"><span class="pre">is_linearized</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.is_linearized" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -483,7 +484,7 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.is_time_variant">
 <span class="sig-name descname"><span class="pre">is_time_variant</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.is_time_variant" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -493,13 +494,13 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.linearize">
 <span class="sig-name descname"><span class="pre">linearize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/dynamic_model/dynamic_model.html#Model.linearize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Model.linearize" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – </p></li>
 <li><p><strong>trajectory</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -509,13 +510,13 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_algebraic_equations">
 <span class="sig-name descname"><span class="pre">remove_algebraic_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_algebraic_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>indices</strong> – </p></li>
 <li><p><strong>check_properties</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -525,10 +526,10 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_algebraic_states">
 <span class="sig-name descname"><span class="pre">remove_algebraic_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices_or_names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_algebraic_states" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>indices_or_names</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -538,13 +539,13 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_dynamical_equations">
 <span class="sig-name descname"><span class="pre">remove_dynamical_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_dynamical_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>indices</strong> – </p></li>
 <li><p><strong>check_properties</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -554,10 +555,10 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_dynamical_states">
 <span class="sig-name descname"><span class="pre">remove_dynamical_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices_or_names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_dynamical_states" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>indices_or_names</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -567,7 +568,7 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_equations">
 <span class="sig-name descname"><span class="pre">remove_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ode</strong> – </p></li>
 <li><p><strong>alg</strong> – </p></li>
@@ -575,7 +576,7 @@ returned, otherwise None</p>
 <li><p><strong>meas</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -585,10 +586,10 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_inputs">
 <span class="sig-name descname"><span class="pre">remove_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices_or_names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>indices_or_names</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -598,13 +599,13 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_measurement_equations">
 <span class="sig-name descname"><span class="pre">remove_measurement_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_measurement_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>indices</strong> – </p></li>
 <li><p><strong>check_properties</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -614,10 +615,10 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_measurements">
 <span class="sig-name descname"><span class="pre">remove_measurements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices_or_names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_measurements" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>indices_or_names</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -627,10 +628,10 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_options">
 <span class="sig-name descname"><span class="pre">remove_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_options" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>keys</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -640,10 +641,10 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.remove_parameters">
 <span class="sig-name descname"><span class="pre">remove_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices_or_names</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.remove_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>indices_or_names</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -653,7 +654,7 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.reset" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -663,13 +664,13 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.reset_solution">
 <span class="sig-name descname"><span class="pre">reset_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_initial_conditions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_equilibrium_point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/dynamic_model/dynamic_model.html#Model.reset_solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Model.reset_solution" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>keep_initial_conditions</strong> – </p></li>
 <li><p><strong>keep_equilibrium_point</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -679,14 +680,14 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.scale">
 <span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.scale" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>value</strong> – </p></li>
 <li><p><strong>id</strong> – </p></li>
 <li><p><strong>name</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -696,14 +697,14 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_algebraic_equations">
 <span class="sig-name descname"><span class="pre">set_algebraic_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.set_algebraic_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arg</strong> – </p></li>
 <li><p><strong>delimiter</strong> – </p></li>
 <li><p><strong>check_properties</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -713,13 +714,13 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_algebraic_states">
 <span class="sig-name descname"><span class="pre">set_algebraic_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.set_algebraic_states" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -729,14 +730,14 @@ returned, otherwise None</p>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_dynamical_equations">
 <span class="sig-name descname"><span class="pre">set_dynamical_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.set_dynamical_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arg</strong> – </p></li>
 <li><p><strong>delimiter</strong> – </p></li>
 <li><p><strong>check_properties</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -747,7 +748,7 @@ returned, otherwise None</p>
 <span class="sig-name descname"><span class="pre">set_dynamical_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.set_dynamical_states" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the dynamical state vector of the model</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – Possible combinations of how to supply arguments to this method can be taken from the table</p></li>
 <li><p><strong>description</strong> (<em>str</em><em>, </em><em>sequence of str</em><em>, </em><em>optional</em>) – Description of the single elements of the dynamical state vector. If only a single
@@ -765,18 +766,14 @@ for the plotting functionality.</p></li>
 <li><p><strong>kwargs</strong> (<em>str</em><em>, </em><em>optional</em>) – Additional keyword arguments, see table</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Differential state vector of the model as a symbolic expression</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">casadi.casadi.SX</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">casadi.casadi.MX</span></code></p>
 </dd>
 </dl>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 60%" />
-<col style="width: 40%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>args</p></th>
 <th class="head"><p>kwargs</p></th>
@@ -797,13 +794,13 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_equations">
 <span class="sig-name descname"><span class="pre">set_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.set_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>equations</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -813,14 +810,14 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_initial_conditions">
 <span class="sig-name descname"><span class="pre">set_initial_conditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/dynamic_model/dynamic_model.html#Model.set_initial_conditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Model.set_initial_conditions" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x0</strong> – </p></li>
 <li><p><strong>t0</strong> – </p></li>
 <li><p><strong>z0</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -830,10 +827,10 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_initial_parameter_values">
 <span class="sig-name descname"><span class="pre">set_initial_parameter_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/dynamic_model/dynamic_model.html#Model.set_initial_parameter_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Model.set_initial_parameter_values" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>p</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -843,13 +840,13 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_inputs">
 <span class="sig-name descname"><span class="pre">set_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.set_inputs" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -859,14 +856,14 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_measurement_equations">
 <span class="sig-name descname"><span class="pre">set_measurement_equations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.set_measurement_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>arg</strong> – </p></li>
 <li><p><strong>delimiter</strong> – </p></li>
 <li><p><strong>check_properties</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -876,13 +873,13 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_measurements">
 <span class="sig-name descname"><span class="pre">set_measurements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.set_measurements" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -892,13 +889,13 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.set_parameters">
 <span class="sig-name descname"><span class="pre">set_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.set_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -908,10 +905,10 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.setup">
 <span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/dynamic_model/dynamic_model.html#Model.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Model.setup" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>kwargs</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -921,13 +918,13 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.simulate">
 <span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/dynamic_model/dynamic_model.html#Model.simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.Model.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -937,13 +934,13 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.substitute">
 <span class="sig-name descname"><span class="pre">substitute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.substitute" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -953,10 +950,10 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.substitute_from">
 <span class="sig-name descname"><span class="pre">substitute_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hilo_mpc.Model.substitute_from" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>obj</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -966,7 +963,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.algebraic_equations">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">algebraic_equations</span></span><a class="headerlink" href="#hilo_mpc.Model.algebraic_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -976,7 +973,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.algebraic_state_description">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">algebraic_state_description</span></span><a class="headerlink" href="#hilo_mpc.Model.algebraic_state_description" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -986,7 +983,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.algebraic_state_names">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">algebraic_state_names</span></span><a class="headerlink" href="#hilo_mpc.Model.algebraic_state_names" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -996,7 +993,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.algebraic_state_units">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">algebraic_state_units</span></span><a class="headerlink" href="#hilo_mpc.Model.algebraic_state_units" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1006,7 +1003,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.algebraic_states">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">algebraic_states</span></span><a class="headerlink" href="#hilo_mpc.Model.algebraic_states" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1016,7 +1013,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.continuous">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">continuous</span></span><a class="headerlink" href="#hilo_mpc.Model.continuous" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1026,7 +1023,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.discrete">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">discrete</span></span><a class="headerlink" href="#hilo_mpc.Model.discrete" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1036,7 +1033,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.dynamical_equations">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamical_equations</span></span><a class="headerlink" href="#hilo_mpc.Model.dynamical_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1046,7 +1043,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.dynamical_state_description">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamical_state_description</span></span><a class="headerlink" href="#hilo_mpc.Model.dynamical_state_description" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1056,7 +1053,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.dynamical_state_names">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamical_state_names</span></span><a class="headerlink" href="#hilo_mpc.Model.dynamical_state_names" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1066,7 +1063,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.dynamical_state_units">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamical_state_units</span></span><a class="headerlink" href="#hilo_mpc.Model.dynamical_state_units" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1077,13 +1074,13 @@ for the plotting functionality.</p></li>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamical_states</span></span><a class="headerlink" href="#hilo_mpc.Model.dynamical_states" title="Permalink to this definition">¶</a></dt>
 <dd><p>Differential state vector of the model</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Differential state vector of the model as a symbolic expression</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">casadi.casadi.SX</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">casadi.casadi.MX</span></code></p>
 </dd>
-<dt class="field-odd">Alias</dt>
+<dt class="field-odd">Alias<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">x</span></code></p>
 </dd>
 </dl>
@@ -1093,7 +1090,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.feedthrough_matrix">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feedthrough_matrix</span></span><a class="headerlink" href="#hilo_mpc.Model.feedthrough_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1103,7 +1100,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.initial_algebraic_states">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_algebraic_states</span></span><a class="headerlink" href="#hilo_mpc.Model.initial_algebraic_states" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1113,7 +1110,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.initial_dynamical_states">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_dynamical_states</span></span><a class="headerlink" href="#hilo_mpc.Model.initial_dynamical_states" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1123,10 +1120,10 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.initial_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_time</span></span><a class="headerlink" href="#hilo_mpc.Model.initial_time" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>DM</p>
 </dd>
 </dl>
@@ -1136,7 +1133,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.input_description">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_description</span></span><a class="headerlink" href="#hilo_mpc.Model.input_description" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1146,7 +1143,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.input_matrix">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_matrix</span></span><a class="headerlink" href="#hilo_mpc.Model.input_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1156,7 +1153,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.input_names">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_names</span></span><a class="headerlink" href="#hilo_mpc.Model.input_names" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1166,7 +1163,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.input_units">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_units</span></span><a class="headerlink" href="#hilo_mpc.Model.input_units" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1176,7 +1173,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.inputs">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inputs</span></span><a class="headerlink" href="#hilo_mpc.Model.inputs" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1186,7 +1183,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.measurement_description">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measurement_description</span></span><a class="headerlink" href="#hilo_mpc.Model.measurement_description" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1196,7 +1193,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.measurement_equations">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measurement_equations</span></span><a class="headerlink" href="#hilo_mpc.Model.measurement_equations" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1206,7 +1203,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.measurement_names">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measurement_names</span></span><a class="headerlink" href="#hilo_mpc.Model.measurement_names" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1216,7 +1213,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.measurement_units">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measurement_units</span></span><a class="headerlink" href="#hilo_mpc.Model.measurement_units" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1226,7 +1223,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.measurements">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measurements</span></span><a class="headerlink" href="#hilo_mpc.Model.measurements" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1236,7 +1233,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.n_p">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_p</span></span><a class="headerlink" href="#hilo_mpc.Model.n_p" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1246,7 +1243,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.n_u">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_u</span></span><a class="headerlink" href="#hilo_mpc.Model.n_u" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1256,7 +1253,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.n_x">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_x</span></span><a class="headerlink" href="#hilo_mpc.Model.n_x" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1266,7 +1263,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.n_y">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_y</span></span><a class="headerlink" href="#hilo_mpc.Model.n_y" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1276,7 +1273,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.n_z">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_z</span></span><a class="headerlink" href="#hilo_mpc.Model.n_z" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1286,7 +1283,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.options">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">options</span></span><a class="headerlink" href="#hilo_mpc.Model.options" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1296,7 +1293,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.output_matrix">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_matrix</span></span><a class="headerlink" href="#hilo_mpc.Model.output_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1306,7 +1303,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.parameter_description">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameter_description</span></span><a class="headerlink" href="#hilo_mpc.Model.parameter_description" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1316,7 +1313,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.parameter_names">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameter_names</span></span><a class="headerlink" href="#hilo_mpc.Model.parameter_names" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1326,7 +1323,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.parameter_units">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameter_units</span></span><a class="headerlink" href="#hilo_mpc.Model.parameter_units" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1336,7 +1333,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.parameters">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><a class="headerlink" href="#hilo_mpc.Model.parameters" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1347,13 +1344,13 @@ for the plotting functionality.</p></li>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sampling_time</span></span><a class="headerlink" href="#hilo_mpc.Model.sampling_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sampling time variable of the model</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Sampling time variable of the model as a symbolic expression</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">casadi.casadi.SX</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">casadi.casadi.MX</span></code></p>
 </dd>
-<dt class="field-odd">Alias</dt>
+<dt class="field-odd">Alias<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">dt</span></code></p>
 </dd>
 </dl>
@@ -1363,7 +1360,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.solution">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solution</span></span><a class="headerlink" href="#hilo_mpc.Model.solution" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1373,7 +1370,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.solver">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solver</span></span><a class="headerlink" href="#hilo_mpc.Model.solver" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1383,7 +1380,7 @@ for the plotting functionality.</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.Model.state_matrix">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_matrix</span></span><a class="headerlink" href="#hilo_mpc.Model.state_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -1394,13 +1391,13 @@ for the plotting functionality.</p></li>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#hilo_mpc.Model.time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time variable of the model</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Time variable of the model as a symbolic expression</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">casadi.casadi.SX</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">casadi.casadi.MX</span></code></p>
 </dd>
-<dt class="field-odd">Alias</dt>
+<dt class="field-odd">Alias<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">t</span></code></p>
 </dd>
 </dl>
@@ -1408,7 +1405,7 @@ for the plotting functionality.</p></li>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -1451,7 +1448,7 @@ for the plotting functionality.</p></li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0',
+            VERSION:'1.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1461,6 +1458,7 @@ for the plotting functionality.</p></li>
       <script type="text/javascript" src="../_static/documentation_options.js"></script>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
       <script type="text/javascript" src="../_static/clipboard.min.js"></script>
       <script type="text/javascript" src="../_static/copybutton.js"></script>

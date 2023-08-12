@@ -169,6 +169,7 @@ if you have a continuous system but you want to use a discrete objective functio
     nmpc.setup(options={'objective_function': 'discrete'})
 
 
+.. _tvp_nmpc:
 Time-varying parameters
 -----------------------
 Time-varying parameters are model parameters which are not constant in time. For example they could model the effect
@@ -456,3 +457,100 @@ A quick way to visualize the results is with the method :code:`plot_iterations`
     At the moment the :code:`plot_iteration` method works only with `bokeh <https://bokeh.org/>`_.
 
 To visualize the states, pass :code:`plot_states= True`. Note that if optimizer performs many iterations, the plots could take quite a while to load.
+
+-------------------------------------------
+Stochastic Model Predictive Control (Beta)
+-------------------------------------------
+The stochastic MPC is implemented in the class SMPC. At the moment, the current SMPC formulations are implemented.
+
+Taylor approximation with additive uncertainty
+----------------------------------------------
+This considers discrete-time nonlinear systems of the following form
+
+.. math::
+
+    \begin{equation}
+    x_{k+1} = f(x_k,u_k) + B \left(g(x_k,u_k) + w_k\right),
+    \end{equation}
+
+where :math:`g(x_k,u_k)` is uncertain function and :math:`w_k \sim \mathcal{N}(\mu_w,\Sigma_w)` is random distributed
+noise. In the current implementation, the function :math:`g(x_k,u_k)` can be a Gaussian process. The stochastic MPC
+problem reads
+
+.. math::
+
+    \begin{align}
+            &\!\max_{\Pi(x)}&\qquad& \mathbb{E} \left( \sum_{k=0}^{N-1} l(x_k,u_k) + e(x_N)\right),\\
+            &\text{s.t.}&&x_{k+1}=f(x_k,u_k) + B \left(d(x_k,u_k) + w \right), \\
+            &&& u_k = \pi(x_k), \quad x_0=x(k),  \\
+            &&& \text{Pr} \left(x_{k+1} \in \mathcal{X}\right)\geq p^x, \\
+            &&&\text{Pr} \left(u_k \in \mathcal{U}\right) \geq p^u.
+    \end{align}
+
+
+The previous problem is infinite dimensional hence in general intractable. Following the similar steps as in
+:cite:`Hewing2017`, the problem is reformulated as follows
+
+.. math::
+
+    \begin{align}
+        &\!\max_{\mu^u}&\,\ & \mathbb{E} \left( \sum_{k=0}^{N-1} l(x_k,u_k) + e(x_N)\right) \\
+        &\text{s.t.}&&\mu^x_{k+1}=f(\mu^x_k,\mu^u_k) + B \mu_k^d, \\
+        &&& \Sigma_{k+1}^x = \left[ \nabla f(\mu_i^x,\mu_i^u), B\right] \Sigma_i \left[ \nabla f(\mu_i^x,\mu_i^u), B\right]^{T}, \\
+        &&& \mu_{k+1}^x \in \bar{\mathcal{X}}(\Sigma^x_{k+1}), \,\  \mu_k^u \in \bar{\mathcal{U}}(\Sigma^x_k),\\
+        &&& \mu_0^x =x(k),\,\  \Sigma_{0}^x = \Sigma^x(k),
+    \end{align}
+
+To see how the SMPC can be used, refer to the example [here put example].
+
+-----------------------------------
+Linear Model Predictive Control
+-----------------------------------
+The linear model predictive control class solves the following problem
+
+.. math::
+
+    \min_{\mathbf{u}} \sum_{i=0}^{N-1} \left( x^T_i Q x_i +  u^T_i R u_i \right) + x^T_N P x_N \\
+    x_{i+1} = Ax_i + Bu_i\, \quad x_0 = \hat{x}(t_0)\\
+    x_{\text{lb}} \leq x \leq x_{\text{ub}} \\
+    u_{\text{lb}} \leq u \leq u_{\text{ub}} \\
+    \forall i \in [1,...,N]
+
+where :math:`\mathbf{u} = [u_0^T,u_1^T,...,u_{N-1}^T]`. Note that it uses discrete-time linear systems with box constraints.
+The problem is reformulated as a quadratic programming problem
+
+.. math::
+
+    \min_{\mathbf{z}} \mathbf{z} ^T H \mathbf{z}  + q\mathbf{z}  + f \\
+    A_{\text{eq}} \mathbf{z} = b_{\text{eq}} \\
+    A_{\text{d}} \mathbf{z} \leq b_\text{d}
+
+where :math:`\mathbf{z} = [\mathbf{x}^T, \mathbf{u}^T]^T` and :math:`\mathbf{x} = [x_0^T,x_1^T,...,x_{N}^T]^T` using a sparse approach.
+
+Time-varying parameters
+------------------------
+
+Time-varying can be defined exactly in the same way of the NMPC (:ref:`see section<tvp_nmpc>`).
+
+Solvers
+--------
+
+To solve the LMPC, the it is possible to use any of the solvers supported by CasADi.
+The default solver is `qpoasis`, which is dispatched with CasADi. Other solvers are: `gurobi <https://www.gurobi.com/>`_,
+`cplex <https://www.ibm.com/de-de/analytics/cplex-optimizer>`_, `OOQP <https://pages.cs.wisc.edu/~swright/ooqp/>`_, and
+`SQIC <https://ccom.ucsd.edu/~optimizers/solvers/sqic/>`_ among others.
+See `the CasADi documentation <https://web.casadi.org/python-api/#qp>`_ for the complete list of the solver as well as the options for every solver. The solver and its options can be set when calling the setup method of the LMPC. For example:
+
+.. code-block:: python
+
+    lmpc = LMPC(model) # initialize the LMPC with a linear time-discrete model
+    # ...
+    # here sets its parameters, e.g., horizon length etc
+    # ...
+    lmpc.setup(solver='qpoases', solver_options={'sparse':True})
+
+.. note::
+
+    The options can vary depending on the solver used.
+
+.. bibliography::

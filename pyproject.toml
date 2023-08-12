@@ -1,6 +1,66 @@
 [build-system]
 requires = [
     "setuptools>=42",
+    "setuptools_scm[toml]>=6.2",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "HILO-MPC"
+description = """HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported optimal \
+control and estimation problems"""
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "LGPL-3.0"}  # file puts the whole license in the sidebar of PyPI
+authors = [
+    {name = "Johannes Pohlodek"},
+    {name = "Bruno Morabito"},
+    {name = "Christian Schlauch"},
+    {name = "Pablo Zometa"},
+    {name = "Rolf Findeisen"}
+]
+maintainers = [
+    {name = "HILO-MPC Developers"}
+]
+keywords = ["machine-learning", "neural-networks", "gaussian-processes", "hybrid-modeling", "model-based-optimization",
+    "model-predictive-control", "mpc", "trajectory-tracking-mpc", "path-following-mpc", "moving-horizon-estimation",
+    "mhe", "lqr", "pid", "kalman-filters", "particle-filters"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development"
+]
+dependencies = [
+    "casadi>=3.5",
+    "numpy<=1.19.5",
+    "scipy",
+    "prettytable"
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://www.ccps.tu-darmstadt.de/research_ccps/hilo_mpc/"
+Download = "https://github.com/hilo_mpc/hilo_mpc/releases"
+"Bug Tracker" = "https://github.com/hilo-mpc/hilo-mpc/issues"
+Documentation = "https://hilo-mpc.github.io/hilo-mpc/"
+"Source Code" = "https://github.com/hilo-mpc/hilo-mpc"
+
+[tool.setuptools]
+packages = ["hilo_mpc"]
+
+[tool.setuptools_scm]
+write_to = "hilo_mpc/_version.py"

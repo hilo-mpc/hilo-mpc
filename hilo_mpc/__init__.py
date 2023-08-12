@@ -43,6 +43,7 @@ import hilo_mpc.util.session as session
 Model = dyn_mod.Model
 NMPC = mpc.NMPC
 LMPC = mpc.LMPC
+SMPC = mpc.SMPC
 OptimalControlProblem = ocp.OptimalControlProblem
 OCP = OptimalControlProblem
 LinearQuadraticRegulator = lqr.LinearQuadraticRegulator
@@ -97,6 +98,14 @@ Session = session.Session
 
 get_plot_backend = plotting.get_plot_backend
 set_plot_backend = plotting.set_plot_backend
+
+
+try:
+    from . import _version
+
+    __version__ = _version.version
+except ImportError:
+    __version__ = '0.0.0+unknown'
 
 
 __all__ = [

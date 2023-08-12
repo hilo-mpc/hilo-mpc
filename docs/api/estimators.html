@@ -5,10 +5,11 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+  <meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Observers &mdash; HILO-MPC 1.0 documentation</title>
+  <title>Observers &mdash; HILO-MPC 1.0.1 documentation</title>
   
 
   
@@ -41,7 +42,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="HILO-MPC 1.0 documentation" href="../index.html"/>
+    <link rel="top" title="HILO-MPC 1.0.1 documentation" href="../index.html"/>
         <link rel="prev" title="Modelling" href="modelling.html"/> 
 
   
@@ -184,14 +185,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="observers">
-<span id="observer-autodoc"></span><h1>Observers<a class="headerlink" href="#observers" title="Permalink to this headline">¶</a></h1>
+  <section id="observers">
+<span id="observer-autodoc"></span><h1>Observers<a class="headerlink" href="#observers" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="hilo_mpc.MovingHorizonEstimator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">MovingHorizonEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/mhe.html#MovingHorizonEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moving Horizon Estimator (MHE) class for state and parameter estimation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>HILO-MPC Model</em>) – HILO-MPC model object that will be used in the estimator.</p></li>
 <li><p><strong>id</strong> (<em>str</em><em>, </em><em>optional</em>) – id name</p></li>
@@ -203,10 +204,6 @@
 </dl>
 <p>mhe_opts: options list</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 40%" />
-<col style="width: 60%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Opts</p></th>
 <th class="head"><p>Description</p></th>
@@ -224,13 +221,13 @@
 <dd><p>This adds measurements that will appended to the measurements history.
 At the moment it is assumed that measurements are available ata  constant time interval.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y_meas</strong> – </p></li>
 <li><p><strong>u_meas</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -241,7 +238,7 @@ At the moment it is assumed that measurements are available ata  constant time i
 <span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_arrival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_arrival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/mhe.html#MovingHorizonEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator.estimate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute MHE</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x_arrival</strong> – </p></li>
 <li><p><strong>p_arrival</strong> – </p></li>
@@ -253,7 +250,7 @@ The output will be the solution with the minimum objective function (default 0)<
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>u_opt: first piece of optimal control sequence</p>
 </dd>
 </dl>
@@ -263,7 +260,7 @@ The output will be the solution with the minimum objective function (default 0)<
 <dt class="sig sig-object py" id="hilo_mpc.MovingHorizonEstimator.plot_mhe_estimation">
 <span class="sig-name descname"><span class="pre">plot_mhe_estimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mhe_estimation.html'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extras</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extras_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/mhe.html#MovingHorizonEstimator.plot_mhe_estimation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator.plot_mhe_estimation" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>save_plot</strong> – if True plot will be saved under ‘plot_dir/name_file.html’ if they are declared, otherwise in
 current directory</p></li>
@@ -277,7 +274,7 @@ states/inputs</p></li>
 <li><p><strong>format_figure</strong> – python function that modifies the format of the figure</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -287,7 +284,7 @@ states/inputs</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.MovingHorizonEstimator.return_mhe_estimation">
 <span class="sig-name descname"><span class="pre">return_mhe_estimation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/mhe.html#MovingHorizonEstimator.return_mhe_estimation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator.return_mhe_estimation" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -297,14 +294,14 @@ states/inputs</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.MovingHorizonEstimator.set_aux_nonlinear_constraints">
 <span class="sig-name descname"><span class="pre">set_aux_nonlinear_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aux_nl_const</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/mhe.html#MovingHorizonEstimator.set_aux_nonlinear_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator.set_aux_nonlinear_constraints" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>aux_nl_const</strong> – </p></li>
 <li><p><strong>ub</strong> – </p></li>
 <li><p><strong>lb</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -314,7 +311,7 @@ states/inputs</p></li>
 <dt class="sig sig-object py" id="hilo_mpc.MovingHorizonEstimator.set_box_constraints">
 <span class="sig-name descname"><span class="pre">set_box_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_ub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_lb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/mhe.html#MovingHorizonEstimator.set_box_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator.set_box_constraints" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x_ub</strong> – </p></li>
 <li><p><strong>x_lb</strong> – </p></li>
@@ -326,7 +323,7 @@ states/inputs</p></li>
 <li><p><strong>z_lb</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -337,7 +334,7 @@ states/inputs</p></li>
 <span class="sig-name descname"><span class="pre">set_initial_guess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/mhe.html#MovingHorizonEstimator.set_initial_guess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator.set_initial_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets initial guess for the optimizer when no other information of the states or inputs are available.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x_guess</strong> – list of optimal dynamical state guess</p></li>
 <li><p><strong>w_guess</strong> – list of optimal input guess</p></li>
@@ -345,7 +342,7 @@ states/inputs</p></li>
 <li><p><strong>z_guess</strong> – list of optimal algebraic state guess</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -356,13 +353,13 @@ states/inputs</p></li>
 <span class="sig-name descname"><span class="pre">set_nlp_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/mhe.html#MovingHorizonEstimator.set_nlp_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator.set_nlp_options" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the options that modify how the mpc problem is set</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -374,7 +371,7 @@ states/inputs</p></li>
 <dd><p>Scales the states and input. This is important for systems with large difference of order of magnitude in
 states and inputs.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x_scaling</strong> – list of scaling factors</p></li>
 <li><p><strong>w_scaling</strong> – list of scaling factors</p></li>
@@ -382,7 +379,7 @@ states and inputs.</p>
 <li><p><strong>u_scaling</strong> – list of scaling factors</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -394,10 +391,10 @@ states and inputs.</p>
 <dd><p>Sets the time-varying parameters for the estimator.
 The estimator will expect these as an input at every iteration</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>time_varying_parameters</strong> – list of strings with time varying parameter names</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -407,7 +404,7 @@ The estimator will expect these as an input at every iteration</p>
 <dt class="sig sig-object py" id="hilo_mpc.MovingHorizonEstimator.setup">
 <span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlp_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ipopt'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/mhe.html#MovingHorizonEstimator.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator.setup" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -417,7 +414,7 @@ The estimator will expect these as an input at every iteration</p>
 <dt class="sig sig-object py" id="hilo_mpc.MovingHorizonEstimator.has_state_noise">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_state_noise</span></span><a class="headerlink" href="#hilo_mpc.MovingHorizonEstimator.has_state_noise" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -430,7 +427,7 @@ The estimator will expect these as an input at every iteration</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">KalmanFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">square_root_form</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/kf.html#KalmanFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.KalmanFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Kalman filter (KF) class for state estimation (parameter estimation will follow soon)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> – </p></li>
 <li><p><strong>id</strong> – The identifier of the KF object. If no identifier is given, a random one will be generated.</p></li>
@@ -447,7 +444,7 @@ library is selected, i.e. no plots can be generated.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="hilo_mpc.KF">
 <span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">KF</span></span><a class="headerlink" href="#hilo_mpc.KF" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#hilo_mpc.KalmanFilter" title="hilo_mpc.modules.estimator.kf.KalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">hilo_mpc.modules.estimator.kf.KalmanFilter</span></code></a></p>
+<dd><p>alias of <a class="reference internal" href="#hilo_mpc.KalmanFilter" title="hilo_mpc.modules.estimator.kf.KalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">KalmanFilter</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
@@ -455,7 +452,7 @@ library is selected, i.e. no plots can be generated.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">ExtendedKalmanFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">square_root_form</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/kf.html#ExtendedKalmanFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ExtendedKalmanFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extended Kalman filter (EKF) class for state estimation (parameter estimation will follow soon)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> – </p></li>
 <li><p><strong>id</strong> – The identifier of the EKF object. If no identifier is given, a random one will be generated.</p></li>
@@ -467,7 +464,7 @@ library is selected, i.e. no plots can be generated.</p>
 <li><p><strong>square_root_form</strong> – Not used at the moment (will be implemented in the future)</p></li>
 </ul>
 </dd>
-<dt class="field-even">Note</dt>
+<dt class="field-even">Note<span class="colon">:</span></dt>
 <dd class="field-even"><p>The same methods and properties as for the <a class="reference internal" href="#hilo_mpc.KalmanFilter" title="hilo_mpc.KalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Kalman</span> <span class="pre">filter</span></code></a> apply</p>
 </dd>
 </dl>
@@ -476,7 +473,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="hilo_mpc.EKF">
 <span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">EKF</span></span><a class="headerlink" href="#hilo_mpc.EKF" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#hilo_mpc.ExtendedKalmanFilter" title="hilo_mpc.modules.estimator.kf.ExtendedKalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">hilo_mpc.modules.estimator.kf.ExtendedKalmanFilter</span></code></a></p>
+<dd><p>alias of <a class="reference internal" href="#hilo_mpc.ExtendedKalmanFilter" title="hilo_mpc.modules.estimator.kf.ExtendedKalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtendedKalmanFilter</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
@@ -484,7 +481,7 @@ library is selected, i.e. no plots can be generated.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">UnscentedKalmanFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">square_root_form</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/kf.html#UnscentedKalmanFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.UnscentedKalmanFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unscented Kalman filter (UKF) class for state estimation (parameter estimation will follow soon)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> – </p></li>
 <li><p><strong>id</strong> – The identifier of the UKF object. If no identifier is given, a random one will be generated.</p></li>
@@ -504,7 +501,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.UnscentedKalmanFilter.alpha">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#hilo_mpc.UnscentedKalmanFilter.alpha" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -514,7 +511,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.UnscentedKalmanFilter.beta">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">beta</span></span><a class="headerlink" href="#hilo_mpc.UnscentedKalmanFilter.beta" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -524,7 +521,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.UnscentedKalmanFilter.kappa">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kappa</span></span><a class="headerlink" href="#hilo_mpc.UnscentedKalmanFilter.kappa" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -535,7 +532,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="hilo_mpc.UKF">
 <span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">UKF</span></span><a class="headerlink" href="#hilo_mpc.UKF" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#hilo_mpc.UnscentedKalmanFilter" title="hilo_mpc.modules.estimator.kf.UnscentedKalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">hilo_mpc.modules.estimator.kf.UnscentedKalmanFilter</span></code></a></p>
+<dd><p>alias of <a class="reference internal" href="#hilo_mpc.UnscentedKalmanFilter" title="hilo_mpc.modules.estimator.kf.UnscentedKalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnscentedKalmanFilter</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
@@ -543,7 +540,7 @@ library is selected, i.e. no plots can be generated.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">ParticleFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roughening</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_editing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/pf.html#ParticleFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ParticleFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Particle filter (PF) class for state estimation</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> – </p></li>
 <li><p><strong>id</strong> – The identifier of the PF object. If no identifier is given, a random one will be generated.</p></li>
@@ -563,13 +560,13 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.ParticleFilter.estimate">
 <span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/pf.html#ParticleFilter.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ParticleFilter.estimate" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – </p></li>
 <li><p><strong>kwargs</strong> – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -579,10 +576,10 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.ParticleFilter.setup">
 <span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hilo_mpc/modules/estimator/pf.html#ParticleFilter.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hilo_mpc.ParticleFilter.setup" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>kwargs</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
 </dd>
 </dl>
@@ -592,7 +589,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.ParticleFilter.n_samples">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_samples</span></span><a class="headerlink" href="#hilo_mpc.ParticleFilter.n_samples" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -602,7 +599,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.ParticleFilter.pdf">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pdf</span></span><a class="headerlink" href="#hilo_mpc.ParticleFilter.pdf" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -612,7 +609,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.ParticleFilter.probability_density_function">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">probability_density_function</span></span><a class="headerlink" href="#hilo_mpc.ParticleFilter.probability_density_function" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -622,7 +619,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.ParticleFilter.sample_size">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_size</span></span><a class="headerlink" href="#hilo_mpc.ParticleFilter.sample_size" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -632,7 +629,7 @@ library is selected, i.e. no plots can be generated.</p>
 <dt class="sig sig-object py" id="hilo_mpc.ParticleFilter.variant">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variant</span></span><a class="headerlink" href="#hilo_mpc.ParticleFilter.variant" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p>
 </dd>
 </dl>
@@ -643,10 +640,10 @@ library is selected, i.e. no plots can be generated.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="hilo_mpc.PF">
 <span class="sig-prename descclassname"><span class="pre">hilo_mpc.</span></span><span class="sig-name descname"><span class="pre">PF</span></span><a class="headerlink" href="#hilo_mpc.PF" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#hilo_mpc.ParticleFilter" title="hilo_mpc.modules.estimator.pf.ParticleFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">hilo_mpc.modules.estimator.pf.ParticleFilter</span></code></a></p>
+<dd><p>alias of <a class="reference internal" href="#hilo_mpc.ParticleFilter" title="hilo_mpc.modules.estimator.pf.ParticleFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleFilter</span></code></a></p>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
@@ -687,7 +684,7 @@ library is selected, i.e. no plots can be generated.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.0',
+            VERSION:'1.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -697,6 +694,7 @@ library is selected, i.e. no plots can be generated.</p>
       <script type="text/javascript" src="../_static/documentation_options.js"></script>
       <script type="text/javascript" src="../_static/jquery.js"></script>
       <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
       <script type="text/javascript" src="../_static/doctools.js"></script>
       <script type="text/javascript" src="../_static/clipboard.min.js"></script>
       <script type="text/javascript" src="../_static/copybutton.js"></script>

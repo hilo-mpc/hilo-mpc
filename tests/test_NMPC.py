@@ -1,3 +1,4 @@
+import unittest
 from unittest import TestCase, skip
 
 import casadi as ca
@@ -1678,8 +1679,7 @@ class TestTrajectoryPathFollowingMPC(TestCase):
         n_steps = 1
         model.set_initial_conditions(x0=x0)
 
-
-        self.assertRaises(TypeError, nmpc.optimize,x0=x0, ref_sc=[1,1], ref_tc=[0,1])
+        self.assertRaises(TypeError, nmpc.optimize, x0=x0, ref_sc=[1, 1], ref_tc=[0, 1])
 
     def test_tt_v19(self):
         """
@@ -1703,7 +1703,6 @@ class TestTrajectoryPathFollowingMPC(TestCase):
 
         model.set_initial_conditions(x0=x0)
 
-
         def path(theta):
             return np.sin(theta), np.sin(2 * theta)
 
@@ -1716,7 +1715,8 @@ class TestTrajectoryPathFollowingMPC(TestCase):
             y_traj.append(y_p)
             t0 += self.dt
 
-        self.assertRaises(AssertionError, nmpc.optimize,x0=x0,  ref_sc={'x': x_traj, 'y': y_traj}, ref_tc={'x': x_traj, 'y': y_traj})
+        self.assertRaises(AssertionError, nmpc.optimize, x0=x0, ref_sc={'x': x_traj, 'y': y_traj},
+                          ref_tc={'x': x_traj, 'y': y_traj})
 
     def test_tt_v20(self):
         """
@@ -1740,7 +1740,6 @@ class TestTrajectoryPathFollowingMPC(TestCase):
 
         model.set_initial_conditions(x0=x0)
 
-
         def path(theta):
             return np.sin(theta), np.sin(2 * theta)
 
@@ -1753,7 +1752,8 @@ class TestTrajectoryPathFollowingMPC(TestCase):
             y_traj.append(y_p)
             t0 += self.dt
 
-        self.assertRaises(ValueError, nmpc.optimize,x0=x0,  ref_sc={'x': x_traj, 'y': y_traj}, ref_tc={'x': x_traj, 'y': y_traj})
+        self.assertRaises(ValueError, nmpc.optimize, x0=x0, ref_sc={'x': x_traj, 'y': y_traj},
+                          ref_tc={'x': x_traj, 'y': y_traj})
 
     def test_vr_1(self):
         """
@@ -1960,7 +1960,7 @@ class TestDAE(TestCase):
         nmpc.quad_stage_cost.add_states(names=['v', 'theta'], ref=[0, 0], weights=[10, 5])
         nmpc.quad_stage_cost.add_inputs(names='F', weights=0.1)
         nmpc.horizon = 25
-        nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10], z_lb=-100,z_ub=100)
+        nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10], z_lb=-100, z_ub=100)
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
         nmpc.set_nlp_options({'integration_method': 'rk4'})
         nmpc.setup()
@@ -2906,3 +2906,55 @@ class TestTimeVaryingWeights(TestCase):
         # model.solution.plot()
         #
         # nmpc.solution.to_mat('t', 'x', 'extime', 'niterations', 'solvstatus', file_name='results/test.mat')
+
+
+class TestPlotSolution(unittest.TestCase):
+
+    def setUp(self) -> None:
+        model = Model(plot_backend='bokeh')
+
+        states = model.set_dynamical_states(['px', 'py', 'v', 'phi'])
+        inputs = model.set_inputs(['a', 'delta'])
+        parameters = model.set_parameters(['lr', 'lf'])
+
+        # Unwrap states
+        v = states[2]
+        phi = states[3]
+
+        # Unwrap states
+        a = inputs[0]
+        delta = inputs[1]
+
+        # Unwrap Parameters
+        lr = parameters[0]
+        lf = parameters[1]
+
+        beta = ca.arctan(lr / (lr + lf) * ca.tan(delta))
+
+        # ODE
+        dpx = v * ca.cos(phi + beta)
+        dpy = v * ca.sin(phi + beta)
+        dv = a
+        dphi = v / lr * ca.sin(beta)
+
+        model.set_dynamical_equations([dpx, dpy, dv, dphi])
+
+        dt = 0.05
+        model.setup(dt=dt)
+        self.model = model
+        self.x0 = [1, 1, 1, 1]
+        lr0 = 1.4  # [m]
+        lf0 = 1.8  # [m]
+        self.p0 = [lr0, lf0]
+
+    def test_plot(self):
+        model = self.model
+
+        nmpc = NMPC(model,plot_backend='bokeh')
+        nmpc.horizon = 10
+        nmpc.quad_stage_cost.add_states(names=['px', 'py', 'v'], weights=[1, 1, 1])
+        nmpc.quad_stage_cost.add_inputs(names=['a', 'delta'], weights=[1,1])
+        nmpc.set_initial_guess(x_guess=self.x0, u_guess=[0, 0])
+        nmpc.setup()
+        nmpc.optimize(x0=self.x0, cp=self.p0)
+        nmpc.solution.plot()

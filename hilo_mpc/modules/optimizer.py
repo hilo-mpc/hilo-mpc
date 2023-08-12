@@ -36,12 +36,10 @@ from .dynamic_model.dynamic_model import Model
 from ..util.optimizer import SciPyOptimizer as scisol
 from ..util.util import check_and_wrap_to_list, check_if_list_of_string, dump_clean, generate_c_code, who_am_i, JIT
 
-
 Numeric = Union[int, float]
 NumArray = Union[Sequence[Numeric], np.ndarray]
 ArrayLike = Union[list, tuple, dict, NumArray, ca.DM, Vector]
 Symbolic = TypeVar('Symbolic', ca.SX, ca.MX)
-
 
 SCIPY_OPTIMIZERS = ['CG', 'BFGS', 'Newton-CG', 'Nelder-Mead', 'L-BFGS-B', 'Powell']
 
@@ -61,6 +59,7 @@ class Optimizer(Base, metaclass=ABCMeta):
     :param plot_backend:
     :type plot_backend:
     """
+
     # TODO: Getters and setter for boxed constraints, inequality constraints and equality constraints
     # TODO: Remove methods
     # TODO: Add methods
@@ -710,6 +709,7 @@ class LinearProgram(Optimizer):
     :param plot_backend:
     :type plot_backend:
     """
+
     def __init__(
             self,
             id: Optional[str] = None,
@@ -784,6 +784,7 @@ class NonlinearProgram(Optimizer):
     :param plot_backend:
     :type plot_backend:
     """
+
     def __init__(
             self,
             id: Optional[str] = None,
@@ -845,6 +846,7 @@ class NonlinearProgram(Optimizer):
 
 class DynamicOptimization(Base):
     """Base class for all MPC and MHE"""
+
     def __init__(self, model, id=None, name=None, plot_backend=None, stats=False, use_sx=True):
         """Constructor method"""
         super().__init__(id=id, name=name)
@@ -911,6 +913,32 @@ class DynamicOptimization(Base):
         """
         if self._n_tvp != 0:
             p = ca.MX.sym('p', 0)
+            p_names = self._model.parameter_names
+            ii_tvp = 0
+            ii_cp = 0
+            for name in p_names:
+                if name in self._time_varying_parameters:
+                    p = ca.vertcat(p, tvp[ii_tvp])
+                    ii_tvp += 1
+                else:
+                    p = ca.vertcat(p, cp[ii_cp])
+                    ii_cp += 1
+        else:
+            p = cp
+
+        return p
+
+    def _rearrange_parameters_numeric(self, tvp, cp):
+        """
+        Takes time-varying parameters, and not time-varying parameters and rearranges them in the correct order of the
+        model parameter vector
+
+        :param tvp:
+        :param cp:
+        :return:
+        """
+        if self._n_tvp != 0:
+            p = []
             p_names = self._model.parameter_names
             ii_tvp = 0
             ii_cp = 0
@@ -1026,8 +1054,8 @@ class DynamicOptimization(Base):
         if hasattr(self, 'type') and self.type == 'NMPC':
             names += [f'thetapfo']
             vector[f'thetapfo'] = {
-                'values_or_names': [f'thetapfo{i+1}' for i in range(self.n_of_path_vars)],
-                'description': [f'theta p.f. num. {i+1}' for i in range(self.n_of_path_vars)],
+                'values_or_names': [f'thetapfo{i + 1}' for i in range(self.n_of_path_vars)],
+                'description': [f'theta p.f. num. {i + 1}' for i in range(self.n_of_path_vars)],
                 'shape': (self.n_of_path_vars, 0),
                 'data_format': ca.DM
             }
@@ -1376,7 +1404,8 @@ class DynamicOptimization(Base):
         possible_choices['print_level'] = [0, 1]
         possible_choices['ipopt_debugger'] = [True, False]
 
-        option_list = list(possible_choices.keys())
+        if self._type == 'SMPC':
+            possible_choices['chance_constraints'] = ['prs']
 
         default_opts = {
             'integration_method': 'collocation',
@@ -1388,11 +1417,15 @@ class DynamicOptimization(Base):
             'ipopt_debugger': False
         }
 
+        if self._type == 'SMPC':
+            default_opts.update({'chance_constraints':'prs'})
+
         if self._model.discrete:
             default_opts.update({'objective_function': 'discrete'})
         else:
             default_opts.update({'objective_function': 'continuous'})
 
+        option_list = list(default_opts.keys())
         opts = {}
         if len(args) != 0:
             if isinstance(args[0], dict):
