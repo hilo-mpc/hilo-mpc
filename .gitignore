@@ -137,3 +137,5 @@ hilo_mpc/_version.py
 
 # Private stuff
 private
+# Added the data needed to run the examples that go into the documentation. These data are stored in the example repo.
+/hilo_mpc/library/data/
