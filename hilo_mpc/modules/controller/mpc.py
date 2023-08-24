@@ -3505,17 +3505,15 @@ class SMPCUKF(NMPC):
 
             # **UKF**
             # Add the constraints of the UKF
-            X = self._get_sigma_points(x_ii, p_ii)
-            xp_mean = self._get_mean_sigma_points(X)
 
             if ii == 0:
                 sigma_ii = sigma_x0
-
             elif 1 <= ii <= self.robust_horizon - 1:
                 sigma_ii = sigma_x[ii - 1, 0].reshape((self._model.n_x, self._model.n_x))
-                foo1 = ca.horzcat(*X) - xp_mean
-                residual = ca.mtimes(foo1, ca.diag(ca.sqrt(ca.fabs(self._weights[1, :]))))
-                foo2 = ca.horzcat(residual[0:self._model.n_x, 1:], sigma_w).T
+                # X = self._get_sigma_points(x_ii, p_ii, sigma_ii, sigma_p)
+                # x_mean = self._get_mean_sigma_points(X)
+                residual = ca.horzcat(*X)[0:self._model.n_x,:] - x_mean
+                foo2 = ca.horzcat(residual[0:self._model.n_x, 1:] * ca.sqrt(ca.fabs(self._weights[1, 1])), sigma_w).T
                 foo3 = ca.qr(foo2)[1]
 
                 if self._weights[1, 0] < 0:
@@ -3528,27 +3526,11 @@ class SMPCUKF(NMPC):
                 # g_ub.append([0] * self._model.n_x ** 2)
                 # self._g_indices['sigma_x'].append([ind_g, ind_g + self._model.n_x ** 2])
                 # ind_g += self._model.n_x ** 2
-                signa_ii = sigma_x_new
-            # Add sigma points constraints. This ensure that the dynamics follows the sigma points
-            if ii > 0:
-                g.append(X[0] - xp_mean)
-                g_lb.append([0] * self.n_L)
-                g_ub.append([0] * self.n_L)
-                ind_g += self.n_L
-                for kk in range(self.n_L):
-                    g.append(X[1 + kk] - (xp_mean + self._gamma * ca.diagcat(sigma_ii, sigma_p)[:, kk]))
-                    g_lb.append([0] * self.n_L)
-                    g_ub.append([0] * self.n_L)
-                    ind_g += self.n_L
-                for kk in range(self.n_L):
-                    g.append(X[self.n_L + 1 + kk] - (xp_mean - self._gamma * ca.diagcat(sigma_ii, sigma_p)[:, kk]))
-                    g_lb.append([0] * self.n_L)
-                    g_ub.append([0] * self.n_L)
-                    ind_g += self.n_L
-
-            g, g_lb, g_ub, ind_g = self._get_chance_constraints(xp_mean[0:self._model.n_x], sigma_ii @ sigma_ii.T, g,
-                                                                g_lb, g_ub, ind_g)
-            # ****
+                sigma_ii = sigma_x_new
+            if ii>0:
+                g, g_lb, g_ub, ind_g = self._get_chance_constraints(x_mean, sigma_ii @ sigma_ii.T, g,
+                                                                    g_lb, g_ub, ind_g)
+                # ****
 
             if self._nlp_options['integration_method'] in ['idas', 'cvodes']:
                 sol = int_dynamics_fun(x0=ca.vertcat(x_ii, zp[ii, 0]),
@@ -3576,7 +3558,15 @@ class SMPCUKF(NMPC):
             elif self._nlp_options['integration_method'] == 'discrete':
                 x_ii_1 = int_dynamics_fun(time, dt_ii, x_ii, u_ii, zp[ii, 0], p_ii, sigma_ii, sigma_p)
 
-            g.append(x[ii + 1, 0] - x_ii_1)
+            # Get sigma points after integration (10b)
+            if ii < self.robust_horizon - 1:
+                sigma_ii_1 = sigma_x[ii, 0].reshape((self._model.n_x, self._model.n_x))
+            else:
+                sigma_ii_1 = sigma_ii
+
+            X = self._get_sigma_points(x_ii_1, p_ii, sigma_ii_1, sigma_p)
+            x_mean = self._get_mean_sigma_points(X)
+            g.append(x[ii + 1, 0] - ca.repmat(x_mean, 2 * self.n_L + 1))
             g_lb.append(np.zeros(self._n_x))
             g_ub.append(np.zeros(self._n_x))
             if self._nlp_options['ipopt_debugger']:
@@ -3588,16 +3578,14 @@ class SMPCUKF(NMPC):
             if self._lag_term_flag:
                 if self._nlp_options['integration_method'] == 'discrete' or \
                         self._nlp_options['objective_function'] == 'discrete':
-                    quad = self._lag_term_fun(time, xp_mean[0:self._model.n_x], u_ii, zp[ii, 0], p_ii, tv_ref_sc_ii,
+                    quad = self._lag_term_fun(time, x_mean, u_ii, zp[ii, 0], p_ii, tv_ref_sc_ii,
                                               u_old0)
                 J += quad
             if self._may_term_flag and ii == self._prediction_horizon - 1:
-                X_1 = self._get_sigma_points(x_ii_1, p_ii)
-                xp_mean_1 = self._get_mean_sigma_points(X_1)
-                J += self._may_term_fun(time + dt_ii, xp_mean_1[0:self._model.n_x], tv_ref_tc)
+                J += self._may_term_fun(time + dt_ii, x_mean, tv_ref_tc)
             if self.terminal_constraint.is_set and ii == self._prediction_horizon - 1:
                 if self.terminal_constraint.is_soft:
-                    residual = self._terminal_constraints_fun(time, x_ii, zp[ii, 0], p_ii, e_soft_term)
+                    residual = self._terminal_constraints_fun(time, x_mean_1, zp[ii, 0], p_ii, e_soft_term)
                     J += self.terminal_constraint.cost(e_soft_term)
                     g.append(residual)
                     g_lb.append([-ca.inf] * self.terminal_constraint.size * 2)
@@ -3608,7 +3596,7 @@ class SMPCUKF(NMPC):
                             [ind_g, ind_g + self.terminal_constraint.size * 2])
                         ind_g += self.terminal_constraint.size * 2
                 else:
-                    residual = self._terminal_constraints_fun(time, x_ii_1, zp[ii, 0], p_ii)
+                    residual = self._terminal_constraints_fun(time, x_mean_1, zp[ii, 0], p_ii)
                     g.append(residual)
                     g_lb.append(self.terminal_constraint.lb)
                     g_ub.append(self.terminal_constraint.ub)
@@ -3619,7 +3607,7 @@ class SMPCUKF(NMPC):
 
             if self.stage_constraint.is_set:
                 if self.stage_constraint.is_soft:
-                    residual = self._stage_constraints_fun(time, x_ii, u_ii, zp[ii, 0], p_ii, e_soft_stage)
+                    residual = self._stage_constraints_fun(time, x_mean, u_ii, zp[ii, 0], p_ii, e_soft_stage)
                     J += self.stage_constraint.cost(e_soft_stage)
                     g.append(residual)
                     g_lb.append([-ca.inf] * self.stage_constraint.size * 2)
@@ -3630,7 +3618,7 @@ class SMPCUKF(NMPC):
                             [ind_g, ind_g + residual.size1()])
                         ind_g += residual.size1()
                 else:
-                    residual = self._stage_constraints_fun(time, x_ii, u_ii, zp[ii, 0], p_ii)
+                    residual = self._stage_constraints_fun(time, x_mean, u_ii, zp[ii, 0], p_ii)
                     g.append(residual)
                     g_lb.append(self.stage_constraint.lb)
                     g_ub.append(self.stage_constraint.ub)
@@ -3726,7 +3714,7 @@ class SMPCUKF(NMPC):
 
             xp = ca.vertcat(x_ii, p_ii)
 
-            # ode_new = ca.substitute(ode_new, xp, xp + self._gamma * sigma[:, i])
+            ode_new = ca.substitute(ode_new, xp, xp + self._gamma * sigma[:, i])
             problem['ode'] = ca.vertcat(problem['ode'], ode_new)
 
         for i in range(self.n_L):
@@ -3742,7 +3730,7 @@ class SMPCUKF(NMPC):
 
             xp = ca.vertcat(x_ii, p_ii)
 
-            # ode_new = ca.substitute(ode_new, xp, xp - self._gamma * sigma[:, i])
+            ode_new = ca.substitute(ode_new, xp, xp - self._gamma * sigma[:, i])
             problem['ode'] = ca.vertcat(problem['ode'], ode_new)
 
         problem['sigma_x'] = sigma_x
@@ -3802,27 +3790,28 @@ class SMPCUKF(NMPC):
 
         return param
 
-    def _get_sigma_points(self, x_ii, p_ii):
+    def _get_sigma_points(self, x_ii, p_ii, sigma_x, sigma_p):
         X = []
         counter = 0
+        sigma = ca.diagcat(sigma_x, sigma_p)
         # TODO simplify this
         X.append(ca.vertcat(x_ii[counter:counter + self._model.n_x], p_ii))
         counter += self._model.n_x
         for i in range(self.n_L):
-            X.append(ca.vertcat(x_ii[counter:counter + self._model.n_x], p_ii))
+            X.append(ca.vertcat(x_ii[counter:counter + self._model.n_x], p_ii) + self._gamma * sigma[:, i])
             counter += self._model.n_x
         for i in range(self.n_L):
-            X.append(ca.vertcat(x_ii[counter:counter + self._model.n_x], p_ii))
+            X.append(ca.vertcat(x_ii[counter:counter + self._model.n_x], p_ii) - self._gamma * sigma[:, i])
             counter += self._model.n_x
 
         return X
 
     def _get_mean_sigma_points(self, X):
-        xp_mean = ca.SX(0)
+        x_mean = ca.SX(0)
         for kk in range(2 * self.n_L + 1):
-            xp_mean += self._weights[0, kk] * X[kk]
+            x_mean += self._weights[0, kk] * X[kk][0:self._model.n_x]
 
-        return xp_mean
+        return x_mean
 
     def _populate_solution(self):
         """

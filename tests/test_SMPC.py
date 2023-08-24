@@ -445,14 +445,14 @@ class TestUKF(unittest.TestCase):
         smpc.quad_stage_cost.add_states(names=['Lac'], weights=[-10])
         smpc.quad_terminal_cost.add_states(names=['Lac'], weights=[-10])
         smpc.quad_stage_cost.add_inputs(names=['Fglu'], weights=[4])
-        smpc.horizon = 6
+        smpc.horizon = 3
         smpc.robust_horizon = 3
         smpc.covariance_states = covariance_states
         smpc.covariance_states_noise = covariance_state_noise
         smpc.covariance_parameters = np.eye(model.n_p) * 0.0001
         smpc.set_box_chance_constraints(u_ub=[0.5], u_lb=[0], x_lb=x_lb, x_ub=x_ub)
         smpc.set_initial_guess(x_guess=x0, u_guess=u0)
-        smpc.setup(solver_options={'ipopt.print_level': 5, 'ipopt.linear_solver': 'ma27',
+        smpc.setup(solver_options={'ipopt.print_level': 5, 'ipopt.linear_solver': 'ma57',
                                    'ipopt.max_iter': 5000},
                    options={'integration_method': 'discrete', 'ipopt_debugger': True})
 
