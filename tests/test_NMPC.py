@@ -377,7 +377,7 @@ class TestNMPC(TestCase):
         nmpc = NMPC(model)
         nmpc.quad_stage_cost.add_states(names=['v', 'theta'], ref=[0, 0], weights=[10, 5])
         nmpc.quad_stage_cost.add_inputs(names='F', weights=0.1)
-        # nmpc.quad_stage_cost.add_inputs_change(names='F', weights=2)
+        nmpc.quad_stage_cost.add_inputs_change(names='F', weights=2)
         nmpc.horizon = 10
         nmpc.set_box_constraints(x_ub=[5, 10, 10, 10], x_lb=[-5, -10, -10, -10])
         nmpc.set_initial_guess(x_guess=x0, u_guess=u0)
