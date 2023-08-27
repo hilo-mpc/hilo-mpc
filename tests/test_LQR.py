@@ -170,7 +170,7 @@ class TestLQRMatrixSetters(TestCase):
         :return:
         """
         with self.assertRaises(ValueError) as context:
-            self.lqr.Q = np.complex(2, 1) * np.eye(3)
+            self.lqr.Q = complex(2, 1) * np.eye(3)
         self.assertEqual(str(context.exception), "LQR matrix Q needs to be real-valued")
 
     def test_q_not_symmetric(self) -> None:
@@ -215,7 +215,7 @@ class TestLQRMatrixSetters(TestCase):
         :return:
         """
         with self.assertRaises(ValueError) as context:
-            self.lqr.R = np.complex(2, 1) * np.eye(2)
+            self.lqr.R = complex(2, 1) * np.eye(2)
         self.assertEqual(str(context.exception), "LQR matrix R needs to be real-valued")
 
     def test_r_not_symmetric(self) -> None:
