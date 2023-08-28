@@ -16,7 +16,7 @@ def read(file_name):
 
 setup(
     name='HILO-MPC',
-    version='1.0.4',
+    version='1.1.0',
     description='HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported optimal '
                 'control and estimation problems',
     long_description=read('README.md'),
@@ -50,7 +50,7 @@ setup(
     platforms=['Windows', 'Linux'],
     install_requires=[
         'casadi>=3.5',
-        'numpy<=1.19.5',
+        'numpy',
         'scipy',
         'prettytable'
     ],

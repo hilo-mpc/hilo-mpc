@@ -39,7 +39,6 @@ from ...util.parsing import parse_dynamic_equations
 from ...util.util import check_if_list_of_string, convert, dump_clean, generate_c_code, is_iterable, is_list_like, \
     is_square, who_am_i, JIT
 
-
 Symbolic = TypeVar('Symbolic', ca.SX, ca.MX)
 Mod = TypeVar('Mod', bound='_Model')
 Numeric = Union[int, float]
@@ -49,6 +48,7 @@ ArrayLike = Union[list, tuple, dict, NumArray, ca.DM, Vector]
 
 class _Model(Base):
     """"""
+
     def __init__(
             self,
             id: Optional[str] = None,
@@ -489,7 +489,8 @@ class _Model(Base):
         g = M_inv[m_z, :] @ fg
         h = c @ xz + d @ u
 
-        function = ca.Function('function', [x, z, u, self._p.values, self._dt.values, self._t.values], [f, g, h])
+        function = ca.Function('function', [x, z, u, self._p.values, self._dt.values, self._t.values], [f, g, h],
+                               {"allow_free": True})
         p = ca.SX.get_free(function)
 
         return f, g, h, x, z, y, u, p
@@ -3247,6 +3248,7 @@ class Model(_Model):
         library is selected, i.e. no plots can be generated.
     :type plot_backend: str, optional
     """
+
     def __init__(
             self,
             id: Optional[str] = None,
