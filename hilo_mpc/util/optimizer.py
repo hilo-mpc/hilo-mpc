@@ -246,7 +246,7 @@ class SciPyOptimizer:
             min_kwargs['bounds'] = bounds
         min_kwargs.update(self._options)
 
-        sol = minimize(self._function, x0, **min_kwargs)
+        sol = minimize(self._function, x0.toarray().squeeze(), **min_kwargs)
 
         self._stats['status'] = sol.status
         self._stats['success'] = sol.success

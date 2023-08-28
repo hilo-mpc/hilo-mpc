@@ -604,7 +604,8 @@ class GaussianProcess(LearningBase):
         # ubw = ca.vertcat(*ubw)
         p = ca.vertcat(X_sym.T[:], y_sym.T[:], *p)
         # TODO: Check if this is actually the same as what is done for the SX variables
-        p0 = np.concatenate([self.X_train.values.flatten(), self.y_train.values.flatten(), p0])
+        _p0 = [i if not isinstance(i, ca.DM) else i.toarray().squeeze() for i in p0]
+        p0 = np.concatenate([self.X_train.values.flatten(), self.y_train.values.flatten(), _p0])
 
         self._initialize_solver()
 

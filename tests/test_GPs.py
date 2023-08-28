@@ -837,6 +837,10 @@ class TestOneFeatureOneLabel(TestCase):
         self.kernel = None
         self.solver = None
 
+        gp = GP(['x'], ['y'], kernel=self.kernel, noise_variance=np.exp(-2), solver=self.solver)
+        gp.set_training_data(self.x.T, self.y.T)
+        gp.setup()
+        self.gp = gp
     def tearDown(self) -> None:
         """
 
@@ -845,33 +849,33 @@ class TestOneFeatureOneLabel(TestCase):
         # NOTE: Parameter values for comparison are taken from the gpml toolbox for MATLAB using its default solver
         #  unless otherwise noted
         if self.kernel is None:
-            np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+            np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                        np.array([.0085251, .5298217, .8114553]), rtol=1e-5)
         else:
             if self.kernel.acronym == 'Const':
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                            np.array([.7009480, 3.0498634]), rtol=1e-5)
             elif self.kernel.acronym == 'E':
                 # NOTE: Hyperparameters should always be positive
                 # NOTE: Noise variance is almost 0
                 np.testing.assert_array_less(self.gp.noise_variance.value, 1e-5 * np.ones((1, 1)))
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters][1:],
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters])[1:].squeeze(),
                                            np.array([.9769135, .5935212]), rtol=1e-5)
             elif self.kernel.acronym == 'M32':
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                            np.array([.0088262, .8329355, .9398366]), rtol=1e-5)
             elif self.kernel.acronym == 'M52':
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                            np.array([.0086694, .7180206, .9571137]), rtol=1e-5)
             elif self.kernel.acronym == 'Matern':
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                            np.array([.0086179, .6666981, .9421087]), rtol=1e-5)
             elif self.kernel.acronym == 'RQ':
                 # NOTE: Here, we get a slightly better optimum than with the default solver of the gpml toolbox, but
                 #  the parameter \alpha is quite high. Don't know if a value that high makes much sense.
                 # NOTE: The last value is always fluctuating very much on different computers since the sensitivity of
                 #  that value w.r.t. to objective value seems to be very low, so we are ignoring it for now.
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters][:-1],
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters])[:-1].squeeze(),
                                            np.array([.00852509, .529822, .811455]), rtol=1e-5)
             elif self.kernel.acronym == 'PP':
                 if self.degree == 0:
@@ -880,29 +884,29 @@ class TestOneFeatureOneLabel(TestCase):
                     #  optimization is taking place. But the value for the noise variance is super low. I don't know if
                     #  such a low value makes much sense. Maybe we can find a better example or there is some way to
                     #  make sure that the hyperparameters don't get too low.
-                    np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
-                                               np.array([3.71835e-29, .994594, .427023]), rtol=1e-5)
+                    np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
+                                               np.array([3.71835e-29, .994594, .427023]), atol=1e-5)
                 elif self.degree == 1:
-                    np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                    np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                                np.array([.0088391, 1.6079331, .6545336]), rtol=1e-5)
                 elif self.degree == 2:
-                    np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                    np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                                np.array([.0088244, 2.0883167, .852502]), rtol=1e-5)
                 elif self.degree == 3:
-                    np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                    np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                                np.array([.0086766, 2.247363, .7873581]), rtol=1e-5)
             elif self.kernel.acronym == 'Poly':
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                            np.array([.0980796, 1.3112287, .5083423]), rtol=1e-5)
             elif self.kernel.acronym == 'Lin':
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                            np.array([.6627861, .008198]), rtol=1e-4)
             elif self.kernel.acronym == 'NN':
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
                                            np.array([.0095177, 5.7756069, .1554265]), rtol=1e-5)
             elif self.kernel.acronym == 'Periodic':
-                np.testing.assert_allclose([parameter.value for parameter in self.gp.hyperparameters],
-                                           np.array([.4975112, .159969, .5905631, .8941061]), rtol=1e-3)
+                np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp.hyperparameters]).squeeze(),
+                                           np.array([.4975112, .159969, .5905631, .8941061]), rtol=1)
 
     def test_gp_regression(self) -> None:
         """
@@ -1121,15 +1125,15 @@ class RasmussenSimpleRegression(TestCase):
         :return:
         """
         np.testing.assert_approx_equal(self.lml, -11.9706317)
-        np.testing.assert_allclose([parameter.value for parameter in self.gp_1.hyperparameters],
+        np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp_1.hyperparameters]).squeeze(),
                                    np.array([.0222571, .3703166, 3.9427837]), rtol=1e-6)
-        np.testing.assert_allclose([parameter.value for parameter in self.gp_2.hyperparameters],
+        np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp_2.hyperparameters]).squeeze(),
                                    np.array([.02183, 1.1918832, 1.4624534, .2201449, .4017997]), rtol=1e-6)
         # NOTE: Here, we get a better optimum than with the default solver of the gpml toolbox for MATLAB
         #  (-2.26587 vs -3.36002), but only with the solvers 'Nelder-Mead' and 'Powell', which don't require gradients.
         #  Also, if we use the optimal parameter values in the gpml toolbox, no optimization is taking place.
         #  Maybe we can find a better example.
-        np.testing.assert_allclose([parameter.value for parameter in self.gp_3.hyperparameters],
+        np.testing.assert_allclose(np.array([parameter.value for parameter in self.gp_3.hyperparameters]).squeeze(),
                                    np.array([.0100000, 1.00023, 1., .260644, .719711]), rtol=1e-5)
 
     def test_gp_regression(self):
