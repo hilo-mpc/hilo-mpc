@@ -23,8 +23,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Dict, Optional, Sequence, Tuple, TypeVar, Union
+from dataclasses import dataclass, field
+from typing import Dict, Optional, Sequence, Tuple, TypeVar, Union, Iterator
 import warnings
 
 import casadi as ca
@@ -57,9 +57,9 @@ Cov = TypeVar('Cov', bound=Kernel)
 @dataclass
 class Data:
     """"""
-    values: np.ndarray = np.array([[]])
-    SX: ca.SX = ca.SX()
-    MX: ca.MX = ca.MX()
+    values: np.ndarray = field(default_factory=lambda: np.array([[]]))
+    SX: ca.SX = field(default_factory=ca.SX)
+    MX: ca.MX = field(default_factory=ca.MX)
 
 
 class _GPSeries(Series):
@@ -599,12 +599,16 @@ class GaussianProcess(LearningBase):
             k += n_p
 
         w = ca.vertcat(*w)
-        w0 = ca.vertcat(*w0)
+        # Flatten all elements in w0 before vertcat (handles both scalars and arrays)
+        w0_flat = [np.asarray(val).flatten() for val in w0]
+        w0 = ca.vertcat(*w0_flat)
         # lbw = ca.vertcat(*lbw)
         # ubw = ca.vertcat(*ubw)
         p = ca.vertcat(X_sym.T[:], y_sym.T[:], *p)
         # TODO: Check if this is actually the same as what is done for the SX variables
-        p0 = np.concatenate([self.X_train.values.flatten(), self.y_train.values.flatten(), p0])
+        # Flatten all elements in p0 before concatenate (handles both scalars and arrays)
+        p0_flat = [np.asarray(val).flatten() for val in p0]
+        p0 = np.concatenate([self.X_train.values.flatten(), self.y_train.values.flatten()] + p0_flat)
 
         self._initialize_solver()
 
@@ -696,7 +700,7 @@ class GaussianProcess(LearningBase):
             warnings.warn(f"Fitting of GP didn't terminate successfully\nSolver message: {message}\n"
                           f"Try to use a different solver")
 
-    def predict(self, X_query: Array, noise_free: bool = False) -> (Array, Array):
+    def predict(self, X_query: Array, noise_free: bool = False) -> Tuple[Array, Array]:
         """
 
         :param X_query:
@@ -984,7 +988,7 @@ class GPArray:
         """Length method"""
         return self._n_gps
 
-    def __iter__(self) -> Optional[GaussianProcess]:
+    def __iter__(self) -> Iterator["GaussianProcess"]:
         """Item iteration method"""
         for k in range(self._n_gps):
             gp = self._gps[k, 0]

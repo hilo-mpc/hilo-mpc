@@ -994,7 +994,7 @@ class NMPC(Controller, DynamicOptimization):
             values.append(float(np.array(self.stage_constraint.e_soft_value).squeeze()))
 
         heading = Div(text="MPC stats", height=80, sizing_mode="stretch_width", align='center',
-                      style={'font-size': '200%'})
+                      styles={'font-size': '200%'})
         # heading fills available width
         data = dict(
             variables=variables,
@@ -1013,9 +1013,9 @@ class NMPC(Controller, DynamicOptimization):
 
         if show_plot:
             states_header = Div(text="Predicted States", height=10, sizing_mode="stretch_width", align='center',
-                                style={'font-size': '200%'})
+                                styles={'font-size': '200%'})
             inputs_header = Div(text="Predicted Inputs", height=10, sizing_mode="stretch_width", align='center',
-                                style={'font-size': '200%'})
+                                styles={'font-size': '200%'})
             layout = row(column(states_header, grid_states, inputs_header, grid_inputs), column(heading, data_table))
             show(layout)
         else:

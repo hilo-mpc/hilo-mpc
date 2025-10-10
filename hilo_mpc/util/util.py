@@ -21,11 +21,14 @@
 #   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from collections import ValuesView
+try:
+    from collections.abc import ValuesView  # Python 3.3+
+except ImportError:  # pragma: no cover - very old Python fallback
+    from collections import ValuesView  # type: ignore
 import functools
 import platform
 import sys
-from typing import Any, Callable, Optional, TypeVar, cast
+from typing import Any, Callable, Optional, TypeVar, Tuple, cast
 import warnings
 
 import casadi as ca
@@ -237,7 +240,7 @@ def check_and_wrap_to_DM(arg):
     return arg_
 
 
-def check_compiler(method: str, compiler: str) -> (Optional[str], Optional[str], Optional[str]):
+def check_compiler(method: str, compiler: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
 
     :param method:

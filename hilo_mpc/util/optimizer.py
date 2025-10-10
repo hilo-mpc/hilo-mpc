@@ -246,7 +246,9 @@ class SciPyOptimizer:
             min_kwargs['bounds'] = bounds
         min_kwargs.update(self._options)
 
-        sol = minimize(self._function, x0, **min_kwargs)
+        # Ensure x0 is 1D for scipy.optimize.minimize (required in scipy 1.11+)
+        x0_flat = np.asarray(x0).flatten()
+        sol = minimize(self._function, x0_flat, **min_kwargs)
 
         self._stats['status'] = sol.status
         self._stats['success'] = sol.success

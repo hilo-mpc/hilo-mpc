@@ -101,10 +101,19 @@ set_plot_backend = plotting.set_plot_backend
 
 
 try:
-    from . import _version
+    # Prefer resolving version from installed package metadata (works with Poetry builds)
+    try:
+        from importlib.metadata import version, PackageNotFoundError  # Python 3.8+
+    except ImportError:  # pragma: no cover - for very old Python
+        from importlib_metadata import version, PackageNotFoundError  # type: ignore
 
-    __version__ = _version.version
-except ImportError:
+    try:
+        __version__ = version("hilo-mpc")
+    except PackageNotFoundError:
+        # Fallback to setuptools_scm write-to file if present (editable installs)
+        from . import _version  # type: ignore
+        __version__ = getattr(_version, "version", '0.0.0+unknown')
+except Exception:  # pragma: no cover
     __version__ = '0.0.0+unknown'
 
 

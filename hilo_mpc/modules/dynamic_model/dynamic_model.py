@@ -489,7 +489,7 @@ class _Model(Base):
         g = M_inv[m_z, :] @ fg
         h = c @ xz + d @ u
 
-        function = ca.Function('function', [x, z, u, self._p.values, self._dt.values, self._t.values], [f, g, h])
+        function = ca.Function('function', [x, z, u, self._p.values, self._dt.values, self._t.values], [f, g, h], {'allow_free': True})
         p = ca.SX.get_free(function)
 
         return f, g, h, x, z, y, u, p

@@ -224,10 +224,24 @@ class BasePlot(metaclass=ABCMeta):
         """
         if self.subplots:
             ax = self.axes.children
+            # Convert tuple to list for consistent indexing (Bokeh 3.x compatibility)
+            if isinstance(ax, tuple):
+                ax = list(ax)
             if len(ax) == 2 and self.n_plots != 2:
-                ax = ax[1].children[k][0]
+                children = ax[1].children
+                if isinstance(children, tuple):
+                    children = list(children)
+                child_k = children[k]
+                if isinstance(child_k, tuple):
+                    child_k = list(child_k)
+                ax = child_k[0]
             elif len(ax) >= self.n_plots:
                 ax = ax[k]
+                # In Bokeh 3.x, ax[k] might itself be a tuple
+                if isinstance(ax, tuple):
+                    ax = list(ax)
+                    if len(ax) > 0:
+                        ax = ax[0]
             else:
                 raise ValueError("Number of desired plots is not equal to the number of created plots")
         else:
@@ -235,9 +249,15 @@ class BasePlot(metaclass=ABCMeta):
 
         if self.interactive:
             if not get_interactive:
-                ax = ax.children[0]
+                children = ax.children
+                if isinstance(children, tuple):
+                    children = list(children)
+                ax = children[0]
             else:
-                ax = ax.children[1]
+                children = ax.children
+                if isinstance(children, tuple):
+                    children = list(children)
+                ax = children[1]
                 return ax
 
         ax.yaxis.visible = True
@@ -419,8 +439,8 @@ class BasePlot(metaclass=ABCMeta):
                 else:
                     width = self.figsize[0]
                     height = self.figsize[1]
-                fig_kwargs['plot_width'] = width
-                fig_kwargs['plot_height'] = height
+                fig_kwargs['width'] = width
+                fig_kwargs['height'] = height
 
         # TODO: Initialize slider here already and set properties later
         if self.subplots:
@@ -1223,3 +1243,6 @@ __all__ = [
     'DashDotPlot',
     'ScatterPlot'
 ]
+
+
+
