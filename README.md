@@ -1,7 +1,7 @@
 HILO-MPC 
 ========
 
-[![python](https://img.shields.io/badge/Python-3.7%20%7C%203.8%20%7C%203.9-informational)](https://www.python.org/downloads/)
+[![python](https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-informational)](https://www.python.org/downloads/)
 [![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://hilo-mpc.github.io/hilo-mpc/)
 [![tests](https://github.com/hilo-mpc/hilo-mpc/workflows/Tests/badge.svg)](https://github.com/hilo-mpc/hilo-mpc/actions?query=workflow%3ATests)
 <!--[![codecov](https://codecov.io/gh/hilo-mpc/hilo-mpc/branch/master/graph/badge.svg?token=7U83P1M0H4)](https://codecov.io/gh/hilo-mpc/hilo-mpc)-->
@@ -52,11 +52,24 @@ A rich set of [examples](https://github.com/hilo-mpc/examples) is available, spa
 
 Installation
 ------------
-You can use pip to install HILO-MPC as follows 
+Using Poetry (recommended):
 
-```shell
+```powershell
+poetry install
+```
+
+Optional extras:
+
+- Plotting backends: `poetry install -E viz`
+- Data utilities: `poetry install -E ml`
+
+From PyPI using pip:
+
+```powershell
 pip install hilo-mpc
 ```
+
+Python support: 3.9–3.12 (aligned to current CasADi wheels). Newer versions may work once CasADi adds support.
 
 Additional Packages
 -------------------

@@ -587,8 +587,8 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
                     dae = {'x': ca.vertcat(x, z), 'p': ca.vertcat(u, p, t_ref_placeholder),
                            'ode': ca.vertcat(model.ode, model.alg)}
 
-                opts = {'abstol': 1e-10, 'reltol': 1e-10, 'tf': self._sampling_interval}
-                int_dynamics_fun = ca.integrator("integrator_ms", model.solver, dae, opts)
+                opts = {'abstol': 1e-10, 'reltol': 1e-10}
+                int_dynamics_fun = ca.integrator("integrator_ms", model.solver, dae, 0, self._sampling_interval, opts)
             else:
                 raise ValueError(f"Integration {self._nlp_options['integration_method']} not defined.")
 

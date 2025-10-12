@@ -1,31 +1,33 @@
-[build-system]
-requires = [
-    "setuptools>=42",
-    "setuptools_scm[toml]>=6.2",
-    "wheel"
-]
-build-backend = "setuptools.build_meta"
+#############################
+# Poetry project definition #
+#############################
 
-[project]
-name = "HILO-MPC"
-description = """HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported optimal \
-control and estimation problems"""
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "hilo-mpc"
+version = "1.0.4"
+description = "HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported optimal control and estimation problems"
 readme = "README.md"
-requires-python = ">=3.7"
-license = {text = "LGPL-3.0"}  # file puts the whole license in the sidebar of PyPI
+license = "LGPL-3.0"
 authors = [
-    {name = "Johannes Pohlodek"},
-    {name = "Bruno Morabito"},
-    {name = "Christian Schlauch"},
-    {name = "Pablo Zometa"},
-    {name = "Rolf Findeisen"}
+    "Johannes Pohlodek",
+    "Bruno Morabito",
+    "Christian Schlauch",
+    "Pablo Zometa",
+    "Rolf Findeisen"
 ]
-maintainers = [
-    {name = "HILO-MPC Developers"}
-]
-keywords = ["machine-learning", "neural-networks", "gaussian-processes", "hybrid-modeling", "model-based-optimization",
+maintainers = ["HILO-MPC Developers"]
+homepage = "https://www.ccps.tu-darmstadt.de/research_ccps/hilo_mpc/"
+repository = "https://github.com/hilo-mpc/hilo-mpc"
+documentation = "https://hilo-mpc.github.io/hilo-mpc/"
+keywords = [
+    "machine-learning", "neural-networks", "gaussian-processes", "hybrid-modeling", "model-based-optimization",
     "model-predictive-control", "mpc", "trajectory-tracking-mpc", "path-following-mpc", "moving-horizon-estimation",
-    "mhe", "lqr", "pid", "kalman-filters", "particle-filters"]
+    "mhe", "lqr", "pid", "kalman-filters", "particle-filters"
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -37,30 +39,44 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Education",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development"
 ]
-dependencies = [
-    "casadi>=3.5",
-    "numpy<=1.19.5",
-    "scipy",
-    "prettytable"
+packages = [
+    { include = "hilo_mpc" }
 ]
-dynamic = ["version"]
 
-[project.urls]
-Homepage = "https://www.ccps.tu-darmstadt.de/research_ccps/hilo_mpc/"
-Download = "https://github.com/hilo_mpc/hilo_mpc/releases"
+[tool.poetry.urls]
 "Bug Tracker" = "https://github.com/hilo-mpc/hilo-mpc/issues"
-Documentation = "https://hilo-mpc.github.io/hilo-mpc/"
 "Source Code" = "https://github.com/hilo-mpc/hilo-mpc"
 
-[tool.setuptools]
-packages = ["hilo_mpc"]
+[tool.poetry.dependencies]
+# Choose the latest Python compatible with the latest stable CasADi. As of 2025, CasADi 3.6.x provides wheels up to Python 3.12.
+python = ">=3.9,<3.13"
+casadi = "^3.6.5"
+numpy = "<2.0"
+scipy = "*"
+prettytable = "*"
+# Optional dependencies for extras
+scikit-learn = { version = ">=0.19.2", optional = true }
+pandas = { version = ">=1.0.0,<=1.5.1", optional = true }
+bokeh = { version = ">=2.3.0", optional = true }
+matplotlib = { version = ">=3.0.0", optional = true }
+tensorflow = { version = ">=2.3.0,<2.8.0", optional = true }
+tensorboard = { version = ">=2.3.0", optional = true }
+torch = { version = ">=1.2.0", optional = true }
+torchvision = { version = ">=0.4.0", optional = true }
 
-[tool.setuptools_scm]
-write_to = "hilo_mpc/_version.py"
+[tool.poetry.extras]
+ml = ["scikit-learn", "pandas"]
+tensorflow = ["tensorflow", "tensorboard"]
+pytorch = ["torch", "torchvision"]
+viz = ["bokeh", "matplotlib"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"

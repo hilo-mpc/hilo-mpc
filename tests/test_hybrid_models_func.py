@@ -48,8 +48,11 @@ class MyTestCase(unittest.TestCase):
 
         model.set_dynamical_equations([dX, dS, dP, dI])
         from hilo_mpc import ANN, Layer
-        df = pd.read_csv('data/learning_ecoli/complete_dataset_5_batches.csv',
-                         index_col=0).dropna()
+        import os
+        # Get the path relative to this test file
+        test_dir = os.path.dirname(__file__)
+        data_path = os.path.join(test_dir, 'data', 'learning_ecoli', 'complete_dataset_5_batches.csv')
+        df = pd.read_csv(data_path, index_col=0).dropna()
         df.head()
         # Neural network features and labels
         features = ['S', 'I']  # states of the actual model

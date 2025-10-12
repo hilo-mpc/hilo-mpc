@@ -23,7 +23,7 @@
 
 # TODO: Typing hints
 
-from typing import TypeVar
+from typing import TypeVar, Tuple
 import warnings
 
 import casadi as ca
@@ -494,7 +494,7 @@ class QuadraticCost(GenericCost):
         :return:
         """
         if self._Q is None:
-            self._Q = ca.DM(ca.jacobian(ca.jacobian(self.cost, self._model.x), self._model.x)) / 2
+            self._Q = ca.DM(ca.jacobian(ca.jacobian(self.cost, self._model.x), self._model.x))/2
         return self._Q
 
     @Q.setter
@@ -508,7 +508,7 @@ class QuadraticCost(GenericCost):
         :return:
         """
         if self._R is None:
-            self._R = ca.DM(ca.jacobian(ca.jacobian(self.cost, self._model.u), self._model.u)) / 2
+            self._R = ca.DM(ca.jacobian(ca.jacobian(self.cost, self._model.u), self._model.u))/2
         return self._R
 
     @R.setter
@@ -526,7 +526,7 @@ class QuadraticCost(GenericCost):
     @P.setter
     def P(self, arg):
         if self._P is None:
-            self._P = ca.DM(ca.jacobian(ca.jacobian(self.cost, self._model.x), self._model.x)) / 2
+            self._P = ca.DM(ca.jacobian(ca.jacobian(self.cost, self._model.x), self._model.x))/2
         self._P = arg
 
 
@@ -1093,7 +1093,7 @@ class RungeKutta:
             degree: int,
             method: str,
             h: Symbolic
-    ) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
 
         :param degree:
@@ -1162,7 +1162,7 @@ class RungeKutta:
             collocation_points = 'radau'
         n_x = x.size1()
         n_z = z.size1()
-        function = ca.Function('function', [t, x, z, u, p], [ode, alg, quad], {"allow_free": True})
+        function = ca.Function('function', [t, x, z, u, p], [ode, alg, quad], {'allow_free': True})
 
         B, C, D, T = cls._construct_polynomial_basis(degree, collocation_points, dt)  # h instead of dt
 
@@ -1233,8 +1233,8 @@ class RungeKutta:
         order = opts.get('order')
         if order is None:
             order = 1
-        dyn = ca.Function('dyn', [t, x, z, u, p], [ode, quad], {"allow_free": True})
-        alg = ca.Function('alg', [t, x, z, u, p], [alg])
+        dyn = ca.Function('dyn', [t, x, z, u, p], [ode, quad], {'allow_free': True})
+        alg = ca.Function('alg', [t, x, z, u, p], [alg], {'allow_free': True})
         butcher_tableau = opts.get('butcher_tableau', None)
         if butcher_tableau is None:
             if order == 1:
@@ -1312,3 +1312,6 @@ def continuous2discrete(problem, category='runge-kutta', **opts):
     # TODO: Maybe add inplace feature? (If inplace=False, then a new dictionary will be returned)
     if category == 'runge-kutta':
         RungeKutta.discretize(problem, **opts)
+
+
+

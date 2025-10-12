@@ -271,19 +271,16 @@ class TestParticleFilterPDF(TestCase):
         pf = self.pf
         with self.assertRaises(RuntimeError) as context:
             pf.probability_density_function = pdf
-        self.assertEqual(
-            str(context.exception),
-            "The following exception was raised\n"
-            "   TypeError: 'pdf() takes 2 positional arguments but 3 were given'."
-            "\n"
-            "Please make sure that the supplied probability density function "
-            "(pdf) has the following arguments\n"
-            "   mu - mean of the pdf (type: numpy.ndarray),\n"
-            "   sigma - covariance of the mean (type: numpy.ndarray),\n"
-            "   n - sample size (type: int),\n"
-            "and the following return value\n"
-            "   X - random sample (type: numpy.ndarray)."
-        )
+        # Check that the error message contains the key parts (Python 3.11+ includes full function path)
+        error_msg = str(context.exception)
+        self.assertIn("The following exception was raised", error_msg)
+        self.assertIn("TypeError:", error_msg)
+        self.assertIn("pdf() takes 2 positional arguments but 3 were given", error_msg)
+        self.assertIn("Please make sure that the supplied probability density function", error_msg)
+        self.assertIn("mu - mean of the pdf (type: numpy.ndarray)", error_msg)
+        self.assertIn("sigma - covariance of the mean (type: numpy.ndarray)", error_msg)
+        self.assertIn("n - sample size (type: int)", error_msg)
+        self.assertIn("X - random sample (type: numpy.ndarray)", error_msg)
 
 
 class TestParticleFilterOtherTunableParameterSetters(TestCase):
