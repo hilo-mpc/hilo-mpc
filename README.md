@@ -3,7 +3,7 @@ HILO-MPC
 
 [![python](https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-informational)](https://www.python.org/downloads/)
 [![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://hilo-mpc.github.io/hilo-mpc/)
-[![tests](https://github.com/hilo-mpc/hilo-mpc/workflows/Tests/badge.svg)](https://github.com/hilo-mpc/hilo-mpc/actions?query=workflow%3ATests)
+[![tests](https://github.com/hilo-mpc/hilo-mpc/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/hilo-mpc/hilo-mpc/actions/workflows/tests.yml)
 <!--[![codecov](https://codecov.io/gh/hilo-mpc/hilo-mpc/branch/master/graph/badge.svg?token=7U83P1M0H4)](https://codecov.io/gh/hilo-mpc/hilo-mpc)-->
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/hilo-mpc/hilo-mpc.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hilo-mpc/hilo-mpc/context:python)
 [![doi](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2203.13671-informational)](https://doi.org/10.48550/arXiv.2203.13671)
