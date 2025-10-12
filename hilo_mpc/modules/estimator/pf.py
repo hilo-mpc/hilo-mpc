@@ -156,9 +156,21 @@ class ParticleFilter(_Estimator):
         Y = ca.SX.sym('Y', n_y, n_samples)
         R = ca.SX.sym('R', (n_y, n_y))
 
-        q = self._normpdf(Y, y, ca.sqrt(R))  # Since R is usually a diagonal matrix, we can use ca.sqrt() here. We need
-        # to change this, if we have non-diagonal matrices, i.e. covariance entries.
-        q /= ca.sum2(q)
+        # Calculate element-wise normal pdf for each measurement and sample
+        # normpdf_vals will have shape (n_y, n_samples)
+        # Since R is usually a diagonal matrix, extract the diagonal and take square root to get standard deviations
+        sigma = ca.sqrt(ca.diag(R))  # Extract diagonal elements and take sqrt, shape: (n_y,)
+        normpdf_vals = self._normpdf(Y, y, sigma)
+        
+        # For multiple measurements, combine probabilities by summing log-probabilities across measurements
+        # For each sample (column), we want to multiply the probabilities across all measurements (rows)
+        # Using log space: log(p1 * p2 * ... * pn) = log(p1) + log(p2) + ... + log(pn)
+        log_likelihoods = ca.log(normpdf_vals)  # shape: (n_y, n_samples)
+        log_q = ca.sum1(log_likelihoods)  # Sum across measurements (each column), shape: (1, n_samples)
+        
+        # Convert back from log space
+        q = ca.exp(log_q - ca.mmax(log_q))  # Subtract max for numerical stability
+        q = q / ca.sum2(q)  # Normalize: divide each element by the sum of all elements
 
         self._update_function = ca.Function('likelihood',
                                             [y, Y, R],
@@ -176,11 +188,11 @@ class ParticleFilter(_Estimator):
         if self._transpose_pdf:
             X = X.T
         elif self._transpose_pdf is None:
-            if X.shape != (2, self._sample_size):
+            if X.shape != (self._n_x, self._sample_size):
                 X = X.T
-                if X.shape != (2, self._sample_size):
-                    raise ValueError(f"Dimension mismatch. Expected dimension 2x{self._sample_size}, got "
-                                     f"{X.shape[1]}x{X.shape[0]}.")
+                if X.shape != (self._n_x, self._sample_size):
+                    raise ValueError(f"Dimension mismatch. Expected dimension {self._n_x}x{self._sample_size}, got "
+                                     f"{X.shape[0]}x{X.shape[1]}.")
                 self._transpose_pdf = True
             else:
                 self._transpose_pdf = False
