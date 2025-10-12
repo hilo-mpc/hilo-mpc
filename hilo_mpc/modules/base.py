@@ -1710,7 +1710,21 @@ class RightHandSide(Equations):
 
             integrator = None
             meas_fun = None
-            function = ca.integrator(name, solver, dae, options)
+            # Extract t0, tf, grid from options for new CasADi API (use get to preserve in dict)
+            t0_val = options.get('t0', None)
+            tf_val = options.get('tf', None)
+            grid_val = options.get('grid', None)
+            
+            # Remove these from options dict as they should be passed as separate arguments
+            options_for_integrator = {k: v for k, v in options.items() if k not in ['t0', 'tf', 'grid']}
+            
+            # Call integrator with new API (t0, tf/grid as separate arguments)
+            if grid_val is not None:
+                function = ca.integrator(name, solver, dae, t0_val if t0_val is not None else 0, grid_val, options_for_integrator)
+            elif tf_val is not None:
+                function = ca.integrator(name, solver, dae, t0_val if t0_val is not None else 0, tf_val, options_for_integrator)
+            else:
+                function = ca.integrator(name, solver, dae, options_for_integrator)
 
             if not meas.is_empty():
                 if any(time_variant) and not t.is_empty():
