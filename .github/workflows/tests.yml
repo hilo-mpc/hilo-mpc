@@ -31,7 +31,7 @@ jobs:
         pip install poetry
     - name: Install dependencies with Poetry (extras needed for tests)
       run: |
-        poetry install -E viz -E ml
+        poetry install -E viz -E ml -E tensorflow
     - name: Run tests
       run: |
         poetry run pytest -q
