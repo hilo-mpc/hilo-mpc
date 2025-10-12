@@ -75,7 +75,6 @@ class ParticleFilter(_Estimator):
                 K = .2
             self._roughening_tuning_param = K
 
-        self._setup_normpdf()
         self._sample_size = 15
         self._pdf = lhsnorm
         self._transpose_pdf = None
@@ -87,14 +86,16 @@ class ParticleFilter(_Estimator):
         """
         self._type = 'particle filter'
 
-    def _setup_normpdf(self):
+    def _setup_normpdf(self, n_y, n_samples):
         """
 
+        :param n_y: Number of measurements
+        :param n_samples: Number of samples
         :return:
         """
-        x = ca.SX.sym('x')
-        mu = ca.SX.sym('mu')
-        sigma = ca.SX.sym('sigma')
+        x = ca.SX.sym('x', n_y, n_samples)
+        mu = ca.SX.sym('mu', n_y)
+        sigma = ca.SX.sym('sigma', n_y)
 
         y = ca.exp(-.5 * ((x - mu) / sigma) ** 2) / (ca.sqrt(2 * ca.pi) * sigma)
 
@@ -289,6 +290,11 @@ class ParticleFilter(_Estimator):
             self._sample_size = n_s
 
         self._propagate_particles(n_s)
+        
+        # Setup normpdf with the correct dimensions before evaluating likelihood
+        n_y = self._model.n_y
+        self._setup_normpdf(n_y, n_s)
+        
         self._evaluate_likelihood(n_s)
 
         n_x = self._model.n_x
