@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write  # Required for trusted publishing
 
 jobs:
   deploy:
@@ -36,5 +37,4 @@ jobs:
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+        attestations: true
