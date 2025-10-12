@@ -160,17 +160,20 @@ class ParticleFilter(_Estimator):
         # normpdf_vals will have shape (n_y, n_samples)
         # Since R is usually a diagonal matrix, extract the diagonal and take square root to get standard deviations
         sigma = ca.sqrt(ca.diag(R))  # Extract diagonal elements and take sqrt, shape: (n_y,)
+        # Note: Y contains the predicted measurements for each sample, y contains the actual measurements
+        # normpdf computes the likelihood of each predicted measurement given the actual measurement
         normpdf_vals = self._normpdf(Y, y, sigma)
         
         # For multiple measurements, combine probabilities by summing log-probabilities across measurements
         # For each sample (column), we want to multiply the probabilities across all measurements (rows)
         # Using log space: log(p1 * p2 * ... * pn) = log(p1) + log(p2) + ... + log(pn)
         log_likelihoods = ca.log(normpdf_vals)  # shape: (n_y, n_samples)
-        log_q = ca.sum1(log_likelihoods)  # Sum across measurements (each column), shape: (1, n_samples)
+        log_joint_likelihood = ca.sum1(log_likelihoods)  # Sum across measurements for each sample, shape: (1, n_samples)
         
-        # Convert back from log space
-        q = ca.exp(log_q - ca.mmax(log_q))  # Subtract max for numerical stability
-        q = q / ca.sum2(q)  # Normalize: divide each element by the sum of all elements
+        # Normalize using logsumexp for numerical stability
+        # logsumexp expects a column vector, so transpose first
+        log_normalization = ca.logsumexp(log_joint_likelihood.T)
+        q = ca.exp(log_joint_likelihood - log_normalization)
 
         self._update_function = ca.Function('likelihood',
                                             [y, Y, R],
