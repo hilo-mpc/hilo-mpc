@@ -87,39 +87,9 @@ packages
 
 Documentation
 -------------
-A preliminary documentation can be found [here](https://hilo-mpc.github.io/hilo-mpc/). Note that this documentation is
+The documentation can be found [here](https://hilo-mpc.github.io/hilo-mpc/). Note that this documentation is
 not complete and will be updated over time.
 
-Release Checklist
------------------
-For maintainers preparing a new release:
-
-### Pre-Release
-- [ ] Ensure all tests pass locally: `poetry run pytest tests/`
-- [ ] Verify CI passes on all Python versions (3.9-3.12)
-- [ ] Update `CHANGELOG.md` with notable changes
-- [ ] Review and merge feature branch to `master`
-
-### Version Bump
-- [ ] Decide version type: `patch` (bug fixes), `minor` (new features), or `major` (breaking changes)
-- [ ] Bump version: `poetry version [patch|minor|major]`
-- [ ] Commit version change: `git add pyproject.toml && git commit -m "chore: bump version to $(poetry version -s)"`
-
-### Tagging & Release
-- [ ] Create annotated tag: `git tag -a v$(poetry version -s) -m "Release v$(poetry version -s)"`
-- [ ] Push changes: `git push origin master`
-- [ ] Push tag: `git push origin v$(poetry version -s)` (or `git push --tags`)
-- [ ] Create GitHub Release at https://github.com/hilo-mpc/hilo-mpc/releases/new
-  - Select the pushed tag
-  - Add release title: `Release X.Y.Z`
-  - Add release notes from CHANGELOG
-  - Publish release
-
-### Post-Release
-- [ ] Verify GitHub Actions workflow completes successfully
-- [ ] Confirm package appears on PyPI: https://pypi.org/project/hilo-mpc/
-- [ ] Test installation: `pip install --upgrade hilo-mpc`
-- [ ] Update documentation if needed
 
 Citing HILO-MPC
 ---------------

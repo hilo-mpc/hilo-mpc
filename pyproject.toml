@@ -8,7 +8,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "hilo-mpc"
-version = "1.0.4"
+version = "1.1.0"
 description = "HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported optimal control and estimation problems"
 readme = "README.md"
 license = "LGPL-3.0"
