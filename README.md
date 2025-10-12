@@ -71,25 +71,56 @@ pip install hilo-mpc
 
 Python support: 3.9–3.12 (aligned to current CasADi wheels). Newer versions may work once CasADi adds support.
 
-Additional Packages
--------------------
-If you want to make use of the complete functionality of the toolbox, you may want to install one of the following 
-packages
+Optional Dependencies
+---------------------
+HILO-MPC uses a minimal core installation by default. Additional features require optional dependencies, which are kept optional to avoid forcing users to install heavy packages they may not need.
 
-| Package                                          | Version            | Usage                                          |
-|--------------------------------------------------|--------------------|------------------------------------------------|
-| [TensorFlow](https://www.tensorflow.org)         | \>=2.3.0, <2.8.0   | Training of neural networks                    |
-| [PyTorch](https://pytorch.org)                   | \>=1.2.0           | Training of neural networks                    |
-| [scikit-learn](https://scikit-learn.org/stable/) | \>=0.19.2          | Normalizing of training data                   |
-| [Bokeh](https://bokeh.org)                       | \>=2.3.0, <3.0.0   | Plotting                                       |
-| [Matplotlib](https://matplotlib.org)             | \>=3.0.0           | Plotting                                       |
-| [pandas](https://pandas.pydata.org)              | \>=1.0.0  \<=1.5.1 | Providing data for training of neural networks |
+### Installation with Extras
+
+Install specific feature sets using Poetry extras:
+
+```powershell
+# Machine learning utilities (scikit-learn, pandas)
+poetry install -E ml
+
+# Plotting backends (Bokeh, Matplotlib)
+poetry install -E viz
+
+# TensorFlow backend for neural networks
+poetry install -E tensorflow
+
+# PyTorch backend for neural networks
+poetry install -E pytorch
+
+# Install multiple extras
+poetry install -E ml -E viz -E tensorflow
+```
+
+Or with pip:
+
+```powershell
+pip install hilo-mpc[ml,viz,tensorflow]
+```
+
+### Optional Package Versions
+
+| Extra | Packages | Version Constraints | Purpose |
+|-------|----------|---------------------|---------|
+| `ml` | [scikit-learn](https://scikit-learn.org/stable/) | ≥0.19.2 | Data preprocessing and normalization |
+| | [pandas](https://pandas.pydata.org) | ≥1.0.0, ≤1.5.1 | Data handling for training |
+| `viz` | [Bokeh](https://bokeh.org) | ≥2.3.0 | Interactive plotting |
+| | [Matplotlib](https://matplotlib.org) | ≥3.0.0 | Static plotting |
+| `tensorflow` | [TensorFlow](https://www.tensorflow.org) | ≥2.8.0 | Neural network training (TensorFlow backend) |
+| | TensorBoard | ≥2.8.0 | Training visualization |
+| `pytorch` | [PyTorch](https://pytorch.org) | ≥1.2.0 | Neural network training (PyTorch backend) |
+| | TorchVision | ≥0.4.0 | PyTorch utilities |
+
+**Note:** The package will raise informative errors if you try to use features that require uninstalled optional dependencies. This design keeps the core installation lightweight while allowing users to install only what they need.
 
 Documentation
 -------------
 The documentation can be found [here](https://hilo-mpc.github.io/hilo-mpc/). Note that this documentation is
 not complete and will be updated over time.
-
 
 Citing HILO-MPC
 ---------------
