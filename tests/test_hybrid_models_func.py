@@ -62,7 +62,7 @@ class MyTestCase(unittest.TestCase):
         ann = ANN(features, labels)
         ann.add_layers(Layer.dense(10, activation='sigmoid'))
         # ann.add_layers(Layer.dropout(.2))
-        ann.setup(save_tensorboard=True, tensorboard_log_dir='./runs/ecoli')
+        ann.setup(save_tensorboard=False)  # Disabled to avoid Windows TF/PyTorch crash
 
         # Add the dataset to the trainer
         ann.add_data_set(df)

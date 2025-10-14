@@ -26,6 +26,7 @@ import warnings
 
 import casadi as ca
 import numpy as np
+import pandas as pd
 
 from ..base import LearningBase
 from ....plugins.plugins import LearningManager, LearningVisualizationManager, check_version
@@ -319,7 +320,7 @@ class ArtificialNeuralNetwork(LearningBase):
         :param shuffle:
         :return:
         """
-        data = self._data_sets[0].append(self._data_sets[1:], ignore_index=True, sort=False)
+        data = pd.concat([self._data_sets[0]] + self._data_sets[1:], ignore_index=True, sort=False)
         if isinstance(data, DataSet):
             x_data, y_data = data.raw_data
             # TODO: Make this the default in the future, so we don't have to transpose (therefore transpose for pandas

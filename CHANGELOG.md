@@ -1,6 +1,7 @@
 ## v2.0.0 - Major Release
 ### 💥 BREAKING CHANGES
 - **Dropped Python 3.9 support** - now requires Python >=3.10
+- Pandas version updated to >2.0.0
 - Minimum Python version increased due to security dependencies
 
 ### 🔒 Security Fixes
