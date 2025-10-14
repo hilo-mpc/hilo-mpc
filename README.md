@@ -107,7 +107,7 @@ pip install hilo-mpc[ml,viz,tensorflow]
 | Extra | Packages | Version Constraints | Purpose |
 |-------|----------|---------------------|---------|
 | `ml` | [scikit-learn](https://scikit-learn.org/stable/) | ≥0.19.2 | Data preprocessing and normalization |
-| | [pandas](https://pandas.pydata.org) | ≥1.0.0, ≤1.5.1 | Data handling for training |
+| | [pandas](https://pandas.pydata.org) | ≥2.0.0 | Data handling for training |
 | `viz` | [Bokeh](https://bokeh.org) | ≥2.3.0 | Interactive plotting |
 | | [Matplotlib](https://matplotlib.org) | ≥3.0.0 | Static plotting |
 | `tensorflow` | [TensorFlow](https://www.tensorflow.org) | ≥2.8.0 | Neural network training (TensorFlow backend) |

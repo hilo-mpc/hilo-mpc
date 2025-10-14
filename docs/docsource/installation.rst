@@ -82,7 +82,7 @@ Optional Package Versions
      - Data preprocessing and normalization
    * - 
      - pandas
-     - ≥1.0.0, ≤1.5.1
+     - ≥2.0.0
      - Data handling for training
    * - ``viz``
      - Bokeh
