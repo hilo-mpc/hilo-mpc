@@ -44,27 +44,6 @@ At the moment HILO-MPC supports:
 
    1. :math:`\mu\text{AO-MPC}` (code generation software for linear model predictive control)
 
-On the pipeline we have:
-
-1. Control
-
-   1. Mixed-integer linear model predictive control (work in progress)
-   2. Tube-based model predictive control (work in progress)
-   3. Multi-mode model predictive control
-
-2. Machine Learning
-
-   1. Recurrent neural networks
-   2. Physics-informed training of neural networks
-   3. Reinforcement learning
-
-3. Estimation
-
-   1. Multi-rate moving horizon estimation
-
-4. Embedded
-
-   1. SAM (solver for Al'brekht's method)
 
 
 .. toctree::
@@ -89,7 +68,7 @@ On the pipeline we have:
    examples/learn_mpc
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 1
    :caption: Modules:
 
    modules/controllers
@@ -99,7 +78,7 @@ On the pipeline we have:
 
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 1
    :caption: API:
 
    api/controllers
