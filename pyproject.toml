@@ -80,3 +80,9 @@ viz = ["bokeh", "matplotlib"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"
+tomli = "^2.3.0"
+sphinx = "<8.2"
+sphinx-theme = "^1.0"
+nbsphinx = "^0.9.7"
+sphinxcontrib-bibtex = "^2.6.5"
+sphinx-copybutton = "^0.5.2"

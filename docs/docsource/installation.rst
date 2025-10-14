@@ -1,44 +1,122 @@
 ===============
 Installation
 ===============
-HILO-MPC is distributed as a Python package. We recommend to create a new Python environment and install HILO-MPC and
-the other necessary packages there. `Here <https://docs.python.org/3/tutorial/venv.html>`_ you can find the
-instructions on how to create a virtual environment using venv.
+HILO-MPC is distributed as a Python package with support for **Python 3.9–3.12**. We recommend creating a new Python environment and installing HILO-MPC there. `Here <https://docs.python.org/3/tutorial/venv.html>`_ you can find instructions on how to create a virtual environment using venv.
+
+Installation with Poetry (Recommended)
+=======================================
+For development or when you want fine control over dependencies:
+
+.. code-block:: bash
+
+    # Clone the repository
+    git clone https://github.com/hilo-mpc/hilo-mpc.git
+    cd hilo-mpc
+    
+    # Install core package
+    poetry install
+    
+    # Install with optional extras
+    poetry install -E ml -E viz -E tensorflow
 
 Installation from PyPI
 ======================
-After activating your Python environment, run the following command in your terminal
+After activating your Python environment, run:
 
-.. code-block::
+.. code-block:: bash
 
+    # Core installation
     pip install hilo-mpc
+    
+    # With optional extras
+    pip install hilo-mpc[ml,viz,tensorflow]
 
-Hard dependencies, that is necessary packages (like CasADi or NumPy), will be installed automatically.
+Core dependencies (CasADi, NumPy, SciPy) are installed automatically.
 
-Clone from GitHub
-=================
-You can also clone the files directly from GitHub running
+Optional Dependencies
+=====================
+HILO-MPC uses a minimal core installation by default. Additional features require optional dependencies, which are kept optional to avoid forcing users to install heavy packages they may not need.
 
-.. code-block::
+Install Optional Extras
+-----------------------
 
-    git clone https://github.com/hilo-mpc/hilo-mpc.git
+**With Poetry:**
 
-Additional packages
-===================
-HILO-MPC can make use of a few Python libraries that are not automatically installed since you might not need all of
-them. If you need them for you application, please install them manually.
+.. code-block:: bash
+
+    # Machine learning utilities (scikit-learn, pandas)
+    poetry install -E ml
+    
+    # Plotting backends (Bokeh, Matplotlib)
+    poetry install -E viz
+    
+    # TensorFlow backend for neural networks
+    poetry install -E tensorflow
+    
+    # PyTorch backend for neural networks
+    poetry install -E pytorch
+    
+    # Install multiple extras
+    poetry install -E ml -E viz -E tensorflow
+
+**With pip:**
+
+.. code-block:: bash
+
+    pip install hilo-mpc[ml,viz,tensorflow,pytorch]
+
+Optional Package Versions
+-------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 15 25 15 45
+
+   * - Extra
+     - Packages
+     - Version
+     - Purpose
+   * - ``ml``
+     - scikit-learn
+     - ≥0.19.2
+     - Data preprocessing and normalization
+   * - 
+     - pandas
+     - ≥1.0.0, ≤1.5.1
+     - Data handling for training
+   * - ``viz``
+     - Bokeh
+     - ≥2.3.0
+     - Interactive plotting
+   * - 
+     - Matplotlib
+     - ≥3.0.0
+     - Static plotting
+   * - ``tensorflow``
+     - TensorFlow
+     - ≥2.8.0
+     - Neural network training (TensorFlow backend)
+   * - 
+     - TensorBoard
+     - ≥2.8.0
+     - Training visualization
+   * - ``pytorch``
+     - PyTorch
+     - ≥1.2.0
+     - Neural network training (PyTorch backend)
+   * - 
+     - TorchVision
+     - ≥0.4.0
+     - PyTorch utilities
 
 .. note::
 
-    Make sure you install the correct version of these libraries
+    The package will raise informative errors if you try to use features that require uninstalled optional dependencies. This design keeps the core installation lightweight while allowing users to install only what they need.
 
-    ============   ===============
-    Library        Version
-    ============   ===============
-    TensorFlow     >=2.3.0, <2.8.0
-    PyTorch        >=1.2.0
-    scikit-learn   >=0.19.2
-    Bokeh          >=2.3.0
-    Matplotlib     >=3.0.0
-    pandas         >=1.0.0
-    ============   ===============
+Clone from GitHub
+=================
+You can also clone the repository directly:
+
+.. code-block:: bash
+
+    git clone https://github.com/hilo-mpc/hilo-mpc.git

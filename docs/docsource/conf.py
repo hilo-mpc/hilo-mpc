@@ -12,19 +12,40 @@
 
 import os
 import sys
+from datetime import datetime
 
 import sphinx_theme
 
 sys.path.insert(0, os.path.abspath('../..'))
 
+# Auto-detect version from package
+def get_version():
+    try:
+        from importlib.metadata import version
+        return version('hilo_mpc')
+    except ImportError:
+        # Fallback for older Python versions
+        try:
+            import pkg_resources
+            return pkg_resources.get_distribution('hilo_mpc').version
+        except:
+            pass
+    except:
+        pass
+    # Final fallback - manual version
+    return '1.2.0'
+
+release = get_version()
+
 # -- Project information -----------------------------------------------------
 
 project = 'HILO-MPC'
-copyright = '2022, Johannes Pohlodek, Bruno Morabito'
+# Auto-update copyright year
+copyright = f'{datetime.now().year}, Johannes Pohlodek, Bruno Morabito'
 author = 'Johannes Pohlodek, Bruno Morabito'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.1'
+# release is set above from pyproject.toml
 
 # -- General configuration ---------------------------------------------------
 
@@ -72,8 +93,8 @@ latex_elements = {
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'stanford_theme'
-html_theme_path = [sphinx_theme.get_html_theme_path('stanford-theme')]
+html_theme = 'alabaster'  # Using built-in theme for reliability
+# html_theme_path = [sphinx_theme.get_html_theme_path('stanford-theme')]
 html_logo = "images/hilo_logo_short_2.png"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
