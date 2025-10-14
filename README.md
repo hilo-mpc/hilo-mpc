@@ -1,8 +1,8 @@
 HILO-MPC 
 ========
 
-[![python](https://img.shields.io/badge/Python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-informational)](https://www.python.org/downloads/)
-[![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://hilo-mpc.github.io/hilo-mpc/)
+[![python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-informational)](https://www.python.org/downloads/)
+[![Documentation Status](https://img.shields.io/badge/docs-latest-brightgreen)](https://hilo-mpc.github.io/hilo-mpc/)
 [![tests](https://github.com/hilo-mpc/hilo-mpc/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/hilo-mpc/hilo-mpc/actions/workflows/tests.yml)
 [![CodeQL](https://github.com/hilo-mpc/hilo-mpc/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/hilo-mpc/hilo-mpc/actions/workflows/codeql.yml)
 <!--[![codecov](https://codecov.io/gh/hilo-mpc/hilo-mpc/branch/master/graph/badge.svg?token=7U83P1M0H4)](https://codecov.io/gh/hilo-mpc/hilo-mpc)-->
@@ -69,7 +69,7 @@ From PyPI using pip:
 pip install hilo-mpc
 ```
 
-Python support: 3.9–3.12 (aligned to current CasADi wheels). Newer versions may work once CasADi adds support.
+Python support: 3.10–3.12 (aligned to current CasADi wheels). Newer versions may work once CasADi adds support.
 
 Optional Dependencies
 ---------------------

@@ -1,7 +1,7 @@
 ===============
 Installation
 ===============
-HILO-MPC is distributed as a Python package with support for **Python 3.9–3.12**. We recommend creating a new Python environment and installing HILO-MPC there. `Here <https://docs.python.org/3/tutorial/venv.html>`_ you can find instructions on how to create a virtual environment using venv.
+HILO-MPC is distributed as a Python package with support for **Python 3.10–3.12**. We recommend creating a new Python environment and installing HILO-MPC there. `Here <https://docs.python.org/3/tutorial/venv.html>`_ you can find instructions on how to create a virtual environment using venv.
 
 Installation with Poetry (Recommended)
 =======================================

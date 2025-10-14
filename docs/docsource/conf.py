@@ -41,7 +41,7 @@ release = get_version()
 
 project = 'HILO-MPC'
 # Auto-update copyright year
-copyright = f'{datetime.now().year}, Johannes Pohlodek, Bruno Morabito'
+copyright = f'{datetime.now().year}, Johannes Pohlodek, Bruno Morabito, Rolf Findeisen'
 author = 'Johannes Pohlodek, Bruno Morabito'
 
 # The full version, including alpha/beta/rc tags
