@@ -342,9 +342,15 @@ The choice of observer depends on several factors:
 ======================== =========== ================= =================== =====================
 Observer Type            System Type Computational Cost Handles Constraints Parameter Estimation
 ======================== =========== ================= =================== =====================
-Kalman Filter (KF)       Linear      Very Low          No                  Planned
-Extended KF (EKF)        Nonlinear   Low               No                  Planned
-Unscented KF (UKF)       Nonlinear   Moderate          No                  Planned
+Kalman Filter (KF)       Linear      Very Low          No                  Future
+Extended KF (EKF)        Nonlinear   Low               No                  Future
+Unscented KF (UKF)       Nonlinear   Moderate          No                  Future
 Particle Filter (PF)     Nonlinear   High              No                  Limited
 Moving Horizon Est (MHE) Any         High              Yes                 Yes
 ======================== =========== ================= =================== =====================
+
+.. note::
+
+    Parameter estimation capabilities for KF, EKF, and UKF are planned for future releases. 
+    Currently, the MHE provides full parameter estimation support, while the PF offers limited 
+    parameter estimation capabilities.
