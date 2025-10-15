@@ -27,8 +27,51 @@ to estimate states and parameters by minimizing the mismatch between predicted a
 
 For a complete example of using the MHE, see the :doc:`Chemical Reaction MHE Example <../examples/mhe_chemical_reaction>`.
 
-To set up an MHE properly you need *at least* to define:
+Mathematical formulation
+------------------------
+Here we assume to have a discrete model, but HILO-MPC can work with both continuous-time and discrete-time models.
 
+.. math::
+
+     \begin{aligned}
+         x_{k+1} &= f(x_k, u_k, w_k), \\
+         y_k &= h(x_k, u_k) + v_k
+     \end{aligned}
+
+with process noise $w_k$ and measurement noise $v_k$, the Moving Horizon Estimator at time $t$ solves an optimization
+over a sliding window of length $N$ to estimate the state trajectory $\{x_{t-N}, \ldots, x_t\}$ (and optionally parameters):
+
+.. math::
+
+    \begin{aligned}
+    \min_{x_{t-N:t},\, w_{t-N:t-1}}\; & \underbrace{(x_{t-N}-\hat{x}_{t-N})^\top P_0^{-1} (x_{t-N}-\hat{x}_{t-N})}_{\text{arrival cost}} \\
+    &+ \sum_{k=t-N}^{t-1} \underbrace{\bigl(y_k - h(x_k,u_k)\bigr)^\top R_k^{-1} \bigl(y_k - h(x_k,u_k)\bigr)}_{\text{measurement mismatch}} \\
+    &+ \sum_{k=t-N}^{t-1} \underbrace{w_k^\top Q_k^{-1} w_k}_{\text{process/state noise}} \\
+    	ext{s.t.}\quad & x_{k+1} = f(x_k, u_k, w_k),\quad k=t-N,\ldots,t-1, \\
+    & x^{\min} \le x_k \le x^{\max},\quad k=t-N,\ldots,t, \\
+    & w^{\min} \le w_k \le w^{\max},\quad k=t-N,\ldots,t-1, \\
+    & p^{\min} \le p \le p^{\max}, \quad \text{(if estimating parameters } p \text{)}, \\
+    & c(x_k, u_k, p) \le 0,\quad k=t-N,\ldots,t, \\
+    & e(x_k, u_k, p) = 0,\quad k=t-N,\ldots,t.
+    \end{aligned}
+
+- :math:`N` is the horizon length (see ``mhe.horizon``).
+- :math:`P_0` weights the arrival/prior term (see ``quad_arrival_cost.add_states(weights==...)``).
+- :math:`R_k` weights measurement residuals (see ``quad_stage_cost.add_measurements(weights=...)``).
+- :math:`Q_k` weights process or state noise (see ``quad_stage_cost.add_state_noise(weights=...)``).
+- :math:`u_k` and :math:`y_k` are the inputs and measurements provided via ``add_measurements(y_meas=..., u_meas=...)``.
+- :math:`\hat{x}_{t-N}` is the prior/arrival state supplied via ``estimate(x_arrival=...)``.
+
+The solution returns the smoothed state at the current time $x_t$ (and optionally estimates of parameters and
+noise terms), which is what ``estimate`` returns.
+
+Box constraints bound states, process/noise variables, and (optionally) parameters within user-specified limits,
+while nonlinear constraints capture general inequality and equality relations through functions :math:`c(\cdot) \le 0`
+and :math:`e(\cdot) = 0`. Parameter bounds :math:`p^{\min} \le p \le p^{\max}` apply only when parameters are
+included in the estimation.
+
+To set up an MHE properly you need *at least* to define:
+- A dynamic model
 - A horizon length using the :code:`horizon` property.
 - A stage cost function (typically using :code:`quad_stage_cost`).
 - An arrival cost function (typically using :code:`quad_arrival_cost`).
@@ -40,10 +83,11 @@ The MHE can be initialized as follows:
     from hilo_mpc import Model, MHE
 
     # Initialize MHE with a model
-    mhe = MHE(model, plot_backend='bokeh')
+    mhe = MHE(model)
 
 Required information, like e.g. the model dynamics or the sampling time, will be automatically extracted from 
 the :class:`~hilo_mpc.Model` instance.
+
 
 Horizon length
 --------------
@@ -111,6 +155,11 @@ Non-uniform sampling intervals
 -------------------------------
 The MHE supports non-uniform sampling intervals, allowing measurements to be taken at irregular time intervals.
 This is particularly useful when dealing with multi-rate sensors or event-triggered measurements.
+
+In the mathematical program, this corresponds to time steps with variable lengths $\Delta t_k$, which affect the
+discretized dynamics constraint $x_{k+1} = f_{\Delta t_k}(x_k, u_k, w_k)$. The chosen integration method
+(``options={'integration_method': ...}``) determines how $f_{\Delta t_k}(\cdot)$ is formed from the continuous-time
+model.
 
 Multi-rate measurements
 -----------------------
