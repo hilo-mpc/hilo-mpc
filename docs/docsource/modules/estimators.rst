@@ -34,12 +34,12 @@ Here we assume to have a discrete model, but HILO-MPC can work with both continu
 .. math::
 
      \begin{aligned}
-         x_{k+1} &= f(x_k, u_k, w_k), \\
+         x_{k+1} &= f(x_k, u_k,p) + w_k \\
          y_k &= h(x_k, u_k) + v_k
      \end{aligned}
 
-with process noise $w_k$ and measurement noise $v_k$, the Moving Horizon Estimator at time $t$ solves an optimization
-over a sliding window of length $N$ to estimate the state trajectory $\{x_{t-N}, \ldots, x_t\}$ (and optionally parameters):
+with process noise :math:`w_k` and measurement noise :math:`v_k`, the Moving Horizon Estimator at time :math:`t` solves an optimization
+over a sliding window of length :math:`N` to estimate the state trajectory :math:`\{x_{t-N}, \ldots, x_t\}` (and optionally parameters):
 
 .. math::
 
@@ -55,15 +55,19 @@ over a sliding window of length $N$ to estimate the state trajectory $\{x_{t-N},
     & e(x_k, u_k, p) = 0,\quad k=t-N,\ldots,t.
     \end{aligned}
 
-- :math:`N` is the horizon length (see ``mhe.horizon``).
+- :math:`N` is the horizon length (see ``horizon``).
 - :math:`P_0` weights the arrival/prior term (see ``quad_arrival_cost.add_states(weights==...)``).
 - :math:`R_k` weights measurement residuals (see ``quad_stage_cost.add_measurements(weights=...)``).
 - :math:`Q_k` weights process or state noise (see ``quad_stage_cost.add_state_noise(weights=...)``).
 - :math:`u_k` and :math:`y_k` are the inputs and measurements provided via ``add_measurements(y_meas=..., u_meas=...)``.
-- :math:`\hat{x}_{t-N}` is the prior/arrival state supplied via ``estimate(x_arrival=...)``.
+- :math:`\hat{x}_{t-N}` is the prior/arrival state supplied via ``estimate(x_arrival=...,p_arrival=...)``.
+- :math:`x^{\min}, x^{\max}, w^{\min}, w^{\max}, p^{\min}, p^{\max}` are box constraints (see ``set_box_constraints(x_lb=..., x_ub=..., w_lb=..., w_ub=..., p_lb=..., p_ub=...)``).
+- :math:`c(\cdot) \le 0` and :math:`e(\cdot) = 0` are nonlinear inequality and equality constraints (see ``stage_constraint.constraint``, ``stage_constraint.lb``, ``stage_constraint.ub``).
 
-The solution returns the smoothed state at the current time $x_t$ (and optionally estimates of parameters and
-noise terms), which is what ``estimate`` returns.
+The solution returns the smoothed state at the current time :math:`x_t` and the estimates of parameters.
+
+.. note::
+    All the parameter variables of the model are assumed to be unknown and will be estimated by the MHE. If you want to keep them constant, you can add equal lower and upper constraint, or substitute them with a actual number directly in the model.
 
 Box constraints bound states, process/noise variables, and (optionally) parameters within user-specified limits,
 while nonlinear constraints capture general inequality and equality relations through functions :math:`c(\cdot) \le 0`
@@ -143,22 +147,58 @@ and estimation is performed using :meth:`~hilo_mpc.MovingHorizonEstimator.estima
     # Estimate states once horizon is reached
     x_estimated = mhe.estimate(x_arrival=x0)
 
+Constraints
+-----------
+The MHE supports both box constraints and nonlinear constraints to enforce physical bounds and system constraints.
+
+Box constraints
+...............
+Box constraints impose simple lower and upper bounds on states, process noise, and parameters:
+
+.. code-block:: python
+
+    # Set box constraints for states
+    mhe.set_box_constraints(x_lb=[0, 0, 0], x_ub=[10, 10, 10])
+    
+    # Set constraints for states and process noise
+    mhe.set_box_constraints(x_lb=[0, 0, 0], x_ub=[10, 10, 10],
+                           w_lb=[-0.1, -0.1, -0.1], w_ub=[0.1, 0.1, 0.1])
+    
+    # Add parameter bounds when estimating parameters
+    mhe.set_box_constraints(x_lb=[0, 0, 0], x_ub=[10, 10, 10],
+                           p_lb=[0, 0], p_ub=[5, 5])
+
+Nonlinear constraints
+.....................
+Nonlinear inequality and equality constraints can be added using the :obj:`stage_constraint` property:
+
+.. code-block:: python
+
+    # Add inequality constraint: 0.1 <= Ca <= 5
+    mhe.stage_constraint.constraint = model.x[0]  # Ca
+    mhe.stage_constraint.lb = 0.1
+    mhe.stage_constraint.ub = 5
+    
+    # For equality constraints, set lb = ub
+    # For inequality constraints c(x) >= a, use lb=a and ub=ca.inf
+    # For inequality constraints c(x) <= b, use lb=-ca.inf and ub=b
+
 Setup
 -----
 Before using the MHE, it must be set up using the :meth:`~hilo_mpc.MovingHorizonEstimator.setup` method:
 
 .. code-block:: python
 
-    mhe.setup(options={'integration_method': 'collocation'})
+    mhe.setup()
 
 Non-uniform sampling intervals
 -------------------------------
 The MHE supports non-uniform sampling intervals, allowing measurements to be taken at irregular time intervals.
 This is particularly useful when dealing with multi-rate sensors or event-triggered measurements.
 
-In the mathematical program, this corresponds to time steps with variable lengths $\Delta t_k$, which affect the
-discretized dynamics constraint $x_{k+1} = f_{\Delta t_k}(x_k, u_k, w_k)$. The chosen integration method
-(``options={'integration_method': ...}``) determines how $f_{\Delta t_k}(\cdot)$ is formed from the continuous-time
+In the mathematical program, this corresponds to time steps with variable lengths :math:`\Delta t_k`, which affect the
+discretized dynamics constraint :math:`x_{k+1} = f_{\Delta t_k}(x_k, u_k, w_k)`. The chosen integration method
+(``options={'integration_method': ...}``) determines how :math:`f_{\Delta t_k}(\cdot)` is formed from the continuous-time
 model.
 
 Multi-rate measurements
