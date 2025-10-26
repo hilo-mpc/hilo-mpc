@@ -198,10 +198,7 @@ class NMPC(Controller, DynamicOptimization):
         return args
 
     def _update_type(self) -> None:
-        """
-
-        :return:
-        """
+        """Set the controller type identifier to 'NMPC'."""
         self._type = 'NMPC'
 
     def _define_cost_terms(self):
@@ -263,9 +260,9 @@ class NMPC(Controller, DynamicOptimization):
         self._model.scale(self._x_scaling, id='x')
 
     def _check_mpc_is_well_posed(self):
-        """
-
-        :return:
+        """Verify that all required MPC components are properly configured.
+        
+        :raises ValueError: If cost functions, horizons, or time-varying parameters are invalid
         """
         if self._lag_term_flag is False and self._may_term_flag is False and self._minimize_final_time_flag is False:
             raise ValueError("You need to define a cost function before setting up the mpc.")
@@ -472,14 +469,12 @@ class NMPC(Controller, DynamicOptimization):
                         )
 
     def _get_nlp_parameters(self, cp, tvp, **kwargs):
-        """
-        This arranges parameters, time-varying parameters and time-varying references in the parameters structure that
-        goes in the optimization.
-
-        :param cp:
-        :param tvp:
-        :param kwargs:
-        :return:
+        """Arrange parameters, time-varying parameters and references for NLP.
+        
+        :param cp: Constant parameters (remain fixed over horizon)
+        :param tvp: Time-varying parameters (can change at each time step)
+        :param kwargs: Additional arguments (e.g., trajectory references)
+        :return: Parameter structure for optimization solver
         """
         param = self._param_npl_mpc(0)
 
@@ -710,13 +705,13 @@ class NMPC(Controller, DynamicOptimization):
         self._box_constraints_is_set = True
 
     def _optimize(self, v0, runs, param, **kwargs):
-        """
-
-        :param v0:
-        :param runs:
-        :param param:
-        :param kwargs:
-        :return:
+        """Execute the optimization with optional multi-start strategy.
+        
+        :param v0: Initial guess for optimization variables
+        :param runs: Number of optimization runs with random perturbations (0 = single run), if runs>0 multi-start strategy is used.
+        :param param: Parameter structure for NLP
+        :param kwargs: Additional options (e.g., pert_factor for perturbation magnitude)
+        :return: Optimal input sequence (first control action)
         """
         if runs == 0:
             sol = self._solver(x0=v0, lbx=self._v_lb, ubx=self._v_ub, lbg=self._g_lb, ubg=self._g_ub, p=param)
@@ -857,10 +852,9 @@ class NMPC(Controller, DynamicOptimization):
         return uopt
 
     def minimize_final_time(self, weight=1):
-        """
-
-        :param weight:
-        :return:
+        """Enable time-optimal control by adding final time to objective.
+        
+        :param weight: Weight for final time penalty in objective function
         """
         self._minimize_final_time_flag = True
         self._minimize_final_time_weight = weight
@@ -2004,10 +1998,7 @@ class LMPC(Controller, DynamicOptimization):
         self._solver_name = 'qpoases'
 
     def _update_type(self) -> None:
-        """
-
-        :return:
-        """
+        """Set the controller type identifier to 'LMPC'."""
         self._type = 'LMPC'
 
     def _parse_tvp_parameters_values(self, tvp):
@@ -2064,10 +2055,7 @@ class LMPC(Controller, DynamicOptimization):
         self.solution.add('t', ca.DM(t_pred).T)
 
     def _scale_problem(self):
-        """
-
-        :return:
-        """
+        """Apply scaling factors to bounds and weighting matrices (Q, R, P)."""
         self._u_ub = scale_vector(self._u_ub, self._u_scaling)
         self._u_lb = scale_vector(self._u_lb, self._u_scaling)
 
@@ -2089,9 +2077,9 @@ class LMPC(Controller, DynamicOptimization):
             self.R = np.array(self._u_scaling).T * self.R * np.array(self._u_scaling).T
 
     def _check_mpc_is_well_posed(self):
-        """
-
-        :return:
+        """Verify LMPC configuration including weighting matrices and horizons.
+        
+        :raises ValueError: If weighting matrices (Q, R, P), horizons, or dimensions are invalid
         """
         if self.Q is None and self.R is None and self.P is None:
             raise ValueError("You need to define at least one of the weighting matrices before setting up the LMPC.")
@@ -2132,6 +2120,7 @@ class LMPC(Controller, DynamicOptimization):
         #         tvp_counter += 1
 
     def _save_references(self):
+        """Store reference trajectories (zeros for regulation) in solution object."""
         x_ref = ca.DM.nan(self._n_x, self.horizon)
         u_ref = ca.DM.nan(self._n_u, self.horizon)
         x_ref = ca.repmat(ca.DM.zeros(self._n_x).T, self.horizon).T
@@ -2141,12 +2130,13 @@ class LMPC(Controller, DynamicOptimization):
         self.solution.add('x_ref', x_ref)
 
     def setup(self, options=None, solver_options={}, solver='qpoases'):
-        """
-
-        :param options:
-        :param solver_options:
-        :param :
-        :return:
+        """Configure and build the LMPC quadratic program.
+        
+        Constructs QP matrices (H, g, Aeq) for linear MPC formulation.
+        
+        :param options: LMPC-specific options (currently unused)
+        :param solver_options: Solver-specific QP options
+        :param solver: QP solver name ('qpoases' or 'muaompc', default: 'qpoases')
         """
 
         self._check_mpc_is_well_posed()
@@ -2305,12 +2295,12 @@ class LMPC(Controller, DynamicOptimization):
         self._param_lmpc = param_lmpc
 
     def optimize(self, x0, tvp=None, cp=None):
-        """
-
-        :param x0:
-        :param tvp:
-        :param cp:
-        :return:
+        """Solve the LMPC quadratic program for current state.
+        
+        :param x0: Current system state
+        :param tvp: Time-varying parameter values (optional)
+        :param cp: Constant parameter values (optional)
+        :return: Optimal control input for current time step
         """
         # TODO: substitute all the values of all the variables remaining in the matrices
         if self._solver_name == 'muaompc':
@@ -2614,13 +2604,15 @@ class SMPC(NMPC):
         return model_c, Kx, Kgain
 
     def _update_type(self) -> None:
-        """
-
-        :return:
-        """
+        """Set the controller type identifier to 'SMPC'."""
         self._type = 'SMPC'
 
     def _get_chance_constraints(self):
+        """Compute tightened deterministic constraints from chance constraints.
+        
+        Uses probability-region-shaping (PRS) to transform probabilistic bounds
+        into deterministic constraints accounting for uncertainty propagation.
+        """
         # Note:
         # I am taking the diagonal of Kx because I am assuming only box constrains. For different kind of constraints
         # one should it id differenttly
@@ -2645,6 +2637,13 @@ class SMPC(NMPC):
                     self.terminal_constraint.lb = -ca.inf * ca.DM.ones(2 * self._n_x_s)
 
     def _sanity_check_probability_values(self, var, type):
+        """Validate probability values for chance constraints are in [0, 1].
+        
+        :param var: Probability values to validate
+        :param type: Constraint type identifier (for error messages)
+        :return: Validated probability values
+        :raises ValueError: If probabilities outside valid range
+        """
 
         if var is None:
             return var
