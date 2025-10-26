@@ -275,7 +275,7 @@ The Kalman filter can be initialized as follows:
     from hilo_mpc import KF
 
     # Initialize Kalman filter
-    kf = KF(model, plot_backend='bokeh')
+    kf = KF(model)
 
 Required information, like e.g. the model dynamics or the sampling time, will be automatically extracted from 
 the :class:`~hilo_mpc.Model` instance.
@@ -379,7 +379,7 @@ Initialization is similar to the standard Kalman filter:
     from hilo_mpc import EKF
 
     # Initialize Extended Kalman filter
-    ekf = EKF(model, plot_backend='bokeh')
+    ekf = EKF(model)
 
 The same methods and properties as for the :py:class:`Kalman filter <.KalmanFilter>` apply. The key difference 
 is that the EKF automatically linearizes the nonlinear model at each estimation step.
@@ -497,7 +497,7 @@ Initialization
     from hilo_mpc import UKF
 
     # Initialize Unscented Kalman filter
-    ukf = UKF(model, plot_backend='bokeh')
+    ukf = UKF(model)
 
 The UKF has additional tuning parameters that control the distribution of sigma points:
 
@@ -695,8 +695,3 @@ Particle Filter (PF)     Nonlinear   High              No                  Limit
 Moving Horizon Est (MHE) Any         High              Yes                 Yes
 ======================== =========== ================= =================== =====================
 
-.. note::
-
-    Parameter estimation capabilities for KF, EKF, and UKF are planned for future releases. 
-    Currently, the MHE provides full parameter estimation support, while the PF offers limited 
-    parameter estimation capabilities.
