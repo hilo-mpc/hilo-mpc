@@ -1,3 +1,8 @@
+## v2.0.1 - Patch Release
+### Added
+- Documentation on observer module 
+- Missing docstrings in the mhe and mpc methods
+
 ## v2.0.0 - Major Release
 ### 💥 BREAKING CHANGES
 - **Dropped Python 3.9 support** - now requires Python >=3.10
