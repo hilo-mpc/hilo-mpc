@@ -146,10 +146,7 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
         self.w_scaling = []
 
     def _update_type(self) -> None:
-        """
-
-        :return:
-        """
+        """Set the estimator type identifier to 'MHE'."""
         self._type = 'MHE'
 
     def _define_cost_terms(self):
@@ -178,11 +175,12 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
             self._arrival_term_flag = True
 
     def _check_measurements(self, y, u):
-        """
-
-        :param y:
-        :param u:
-        :return:
+        """Validate measurement dimensions and convert to lists.
+        
+        :param y: Output measurements
+        :param u: Input measurements (optional)
+        :return: Validated and wrapped measurements (y, u)
+        :raises ValueError: If measurement dimensions don't match model
         """
         y = check_and_wrap_to_list(y)
 
@@ -199,9 +197,9 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
         return y, u
 
     def _check_mhe_is_well_posed(self):
-        """
-
-        :return:
+        """Verify that all required MHE components are properly configured.
+        
+        :raises ValueError: If cost functions, horizon, or constraint dimensions are invalid
         """
         # TODO make sure all the important things are checked
         if self._stage_term_flag is False and self._arrival_term_flag is False:
@@ -223,10 +221,7 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
                              f"the model has {self._model.n_x} states")
 
     def _scale_problem(self):
-        """
-
-        :return:
-        """
+        """Apply scaling factors to bounds, guesses, and model variables."""
         self._x_ub = scale_vector(self._x_ub, self._x_scaling)
         self._x_lb = scale_vector(self._x_lb, self._x_scaling)
         self._x_guess = scale_vector(self._x_guess, self._x_scaling)
@@ -272,13 +267,14 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
             return self.quad_arrival_cost.p_guess
 
     def add_measurements(self, y_meas, u_meas=None):
-        """
-        This adds measurements that will appended to the measurements history.
-        At the moment it is assumed that measurements are available ata  constant time interval.
-
-        :param y_meas:
-        :param u_meas:
-        :return:
+        """Add new measurements to the estimation window.
+        
+        Measurements are stored in a sliding window of length equal to the horizon.
+        When the horizon is reached, the MHE is ready to estimate.
+        
+        :param y_meas: Output measurements at current time
+        :param u_meas: Input measurements at current time (optional)
+        :raises RuntimeError: If MHE has not been set up via setup()
         """
         if not self._nlp_setup_done:
             raise RuntimeError(f"You need to setup the MHE by running .setup() before running {who_am_i()}")
@@ -309,18 +305,15 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
                 self._u_history.pop(0)
 
     def estimate(self, x_arrival=None, p_arrival=None, v0=None, runs=0, **kwargs):
-        """
-        Compute MHE
-
-        :param x_arrival:
-        :param p_arrival:
-        :param v0: initial guess of the optimal vector
-        :param runs: number of optimizations to run. If different than zero will run very optimization will perturb the
-            initial guess v0 randomly.
-            ACHTUNG: this could cause problems with the integrators or give something outside constraints.
-            The output will be the solution with the minimum objective function (default 0)
-        :param kwargs:
-        :return: u_opt: first piece of optimal control sequence
+        """Solve the MHE optimization problem to estimate states and parameters.
+        
+        :param x_arrival: Prior state estimate at beginning of horizon (optional, auto-updated if None)
+        :param p_arrival: Prior parameter estimate (optional, auto-updated if None)
+        :param v0: Initial guess for optimization variables (optional)
+        :param runs: Number of optimization runs with random perturbations (default: 0 = single run, if >0 performs multistart)
+        :param kwargs: Additional options (e.g., pert_factor for perturbation magnitude)
+        :return: Tuple (x_opt, p_opt) with estimated current state and parameters (None before horizon reached)
+        :raises ValueError: If MHE has not been set up via setup()
         """
         # TODO Check the shape of p0, x0
         # TODO to test
@@ -416,9 +409,14 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
             return None, None
 
     def setup(self, options=None, nlp_opts=None, solver='ipopt'):
-        """
-
-        :return:
+        """Configure and build the MHE optimization problem.
+        
+        This method constructs the NLP formulation, sets up the solver, and prepares
+        the MHE for estimation. Must be called before estimate().
+        
+        :param options: Dictionary with NLP formulation options (integration method, collocation settings, etc.)
+        :param nlp_opts: Solver-specific options (deprecated, use solver options via set_solver_opts)
+        :param solver: Solver name ('ipopt' or 'qpsol', default: 'ipopt')
         """
         if not self._scaling_is_set:
             self.set_scaling()
@@ -791,7 +789,7 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
 
     def set_nlp_options(self, *args, **kwargs):
         """
-        Sets the options that modify how the mpc problem is set
+        Sets the options that modify how the mhe problem is set
 
         :param args:
         :param kwargs:
@@ -933,17 +931,17 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
 
     def set_box_constraints(self, x_ub=None, x_lb=None, w_ub=None, w_lb=None, p_lb=None, p_ub=None, z_ub=None,
                             z_lb=None):
-        """
-
-        :param x_ub:
-        :param x_lb:
-        :param w_ub:
-        :param w_lb:
-        :param p_lb:
-        :param p_ub:
-        :param z_ub:
-        :param z_lb:
-        :return:
+        """Set box constraints on states, noise, parameters, and algebraic variables.
+        
+        :param x_ub: Upper bounds for states (default: inf)
+        :param x_lb: Lower bounds for states (default: -inf)
+        :param w_ub: Upper bounds for state noise (default: inf)
+        :param w_lb: Lower bounds for state noise (default: -inf)
+        :param p_lb: Lower bounds for parameters (default: -inf)
+        :param p_ub: Upper bounds for parameters (default: inf)
+        :param z_ub: Upper bounds for algebraic states (default: inf)
+        :param z_lb: Lower bounds for algebraic states (default: -inf)
+        :raises TypeError: If algebraic state bounds dimension mismatch
         """
         if x_ub is not None:
             self._x_ub = check_and_wrap_to_list(x_ub)
@@ -1003,14 +1001,15 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
         self._box_constraints_is_set = True
 
     def set_initial_guess(self, x_guess=None, w_guess=None, p_guess=None, z_guess=None):
-        """
-        Sets initial guess for the optimizer when no other information of the states or inputs are available.
-
-        :param x_guess: list of optimal dynamical state guess
-        :param w_guess: list of optimal input guess
-        :param p_guess: list of optimal parameter guess
-        :param z_guess: list of optimal algebraic state guess
-        :return:
+        """Set initial guess for optimization variables.
+        
+        If not provided, guesses are computed from constraint bounds (midpoint) or set to zero.
+        
+        :param x_guess: Initial guess for states
+        :param w_guess: Initial guess for state noise (default: zeros)
+        :param p_guess: Initial guess for parameters
+        :param z_guess: Initial guess for algebraic states
+        :raises ValueError: If guess dimensions don't match model
         """
         if x_guess is not None:
             self._x_guess = check_and_wrap_to_list(x_guess)
@@ -1068,12 +1067,12 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
         self._initial_guess_is_set = True
 
     def set_aux_nonlinear_constraints(self, aux_nl_const=None, ub=None, lb=None):
-        """
-
-        :param aux_nl_const:
-        :param ub:
-        :param lb:
-        :return:
+        """Set auxiliary nonlinear constraints (deprecated, use stage_constraint instead).
+        
+        :param aux_nl_const: CasADi expression for constraint function
+        :param ub: Upper bounds for constraints
+        :param lb: Lower bounds for constraints
+        :raises ValueError: If constraint function provided without bounds or vice versa
         """
         if None not in [aux_nl_const, ub, lb]:
             self._stage_constraints = aux_nl_const
@@ -1212,9 +1211,10 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
                 save(layout)
 
     def return_mhe_estimation(self):
-        """
-
-        :return:
+        """Extract state trajectory and noise estimates from MHE solution.
+        
+        :return: Tuple (x_pred, w_pred) with state trajectory (n_x × horizon+1) and
+                 noise trajectory (n_x × horizon), or (None, None) if no solution is available
         """
         if self._nlp_solution is not None:
             x_pred = np.zeros((self._model.n_x, self._horizon + 1))
@@ -1233,14 +1233,19 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
 
     @property
     def has_state_noise(self):
-        """
-
-        :return:
+        """Check if state noise is included in the MHE formulation.
+        
+        :return: True if state noise variables are used, False otherwise
         """
         return self._state_noise_flag
 
     @has_state_noise.setter
     def has_state_noise(self, arg):
+        """Set whether to include state noise in the MHE formulation.
+        
+        :param arg: Boolean flag to enable/disable state noise estimation
+        :raises TypeError: If arg is not a boolean
+        """
         if not isinstance(arg, bool):
             raise TypeError("has_state_noise accepts True or False")
         self._state_noise_flag = arg

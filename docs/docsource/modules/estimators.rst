@@ -71,21 +71,11 @@ where :math:`\Vert z \Vert_M^2 = z^\top M z` denotes the weighted squared norm.
 - :math:`x^{\min}, x^{\max}, w^{\min}, w^{\max}, p^{\min}, p^{\max}` are box constraints (see ``set_box_constraints(x_lb=..., x_ub=..., w_lb=..., w_ub=..., p_lb=..., p_ub=...)``).
 - :math:`c(\cdot) \le 0` and :math:`e(\cdot) = 0` are nonlinear inequality and equality constraints (see ``stage_constraint.constraint``, ``stage_constraint.lb``, ``stage_constraint.ub``).
 
-The solution returns the smoothed state at the current time :math:`x_t` and the estimates of parameters.
-
+.. note::
+    You can pass either a numpy matrix or a list or numpy array to the `weights`. If you pass a list or array, a matrix of appropriate dimensions will be created internally with the array in the diagonal and zero anywhere else.
 
 .. note::
     All the parameter variables of the model are assumed to be unknown and will be estimated by the MHE. If you want to keep them constant, you can add equal lower and upper constraint, or substitute them with a actual number directly in the model.
-
-**Parameters and their HILO-MPC equivalents:**
-- :math:`N` is the horizon length → set via :code:`mhe.horizon = N`
-- :math:`P_{t-N}` is the arrival cost weight matrix → set via :code:`mhe.quad_arrival_cost.add_states(names=[...], weights=[...])`
-- :math:`Q_k` is the process noise covariance → set via :code:`mhe.quad_stage_cost.add_state_noise(names=[...], weights=[...])`
-- :math:`R_k` is the measurement noise covariance → set via :code:`mhe.quad_stage_cost.add_measurements(names=[...], weights=[...])`
-- :math:`u_k, y_k` are inputs and measurements → provided via :code:`mhe.add_measurements(y_meas=..., u_meas=...)`
-- :math:`\bar{x}_{t-N}` is the prior/arrival state → provided via :code:`mhe.estimate(x_arrival=...)`
-- :math:`\mathcal{X}, \mathcal{W}, \mathcal{P}` are box constraints → set via :code:`mhe.set_box_constraints(...)`
-- :math:`c(\cdot) \leq 0, e(\cdot) = 0` are nonlinear constraints → set via :code:`mhe.stage_constraint.add(...)`
 
 The solution of this optimization problem provides the smoothed state estimate :math:`\hat{x}_t` at the current time,
 along with estimates of parameters :math:`\hat{p}` if included in the optimization.
