@@ -61,9 +61,9 @@ casadi = "^3.6.5"
 numpy = "<2.0"
 scipy = "*"
 prettytable = "*"
+pandas = ">=2.0.0"
 # Optional dependencies for extras
 scikit-learn = { version = ">=0.19.2", optional = true }
-pandas = { version = ">=2.0.0", optional = true }
 bokeh = { version = ">=2.3.0", optional = true }
 matplotlib = { version = ">=3.0.0", optional = true }
 tensorflow = { version = ">=2.8.0", optional = true }
@@ -73,7 +73,7 @@ torch = { version = ">=1.2.0", optional = true }
 torchvision = { version = ">=0.4.0", optional = true }
 
 [tool.poetry.extras]
-ml = ["scikit-learn", "pandas"]
+ml = ["scikit-learn"]
 tensorflow = ["tensorflow", "tensorboard", "keras"]
 pytorch = ["torch", "torchvision"]
 viz = ["bokeh", "matplotlib"]
