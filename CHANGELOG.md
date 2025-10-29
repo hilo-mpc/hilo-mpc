@@ -3,6 +3,9 @@
 - Documentation on observer module 
 - Missing docstrings in the mhe and mpc methods
 
+### Changed
+- **pandas is now a required dependency** - Moved from optional to core dependencies as it's used in neural network implementation
+
 ## v2.0.0 - Major Release
 ### 💥 BREAKING CHANGES
 - **Dropped Python 3.9 support** - now requires Python >=3.10

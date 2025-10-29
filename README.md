@@ -80,7 +80,7 @@ HILO-MPC uses a minimal core installation by default. Additional features requir
 Install specific feature sets using Poetry extras:
 
 ```powershell
-# Machine learning utilities (scikit-learn, pandas)
+# Machine learning utilities (scikit-learn)
 poetry install -E ml
 
 # Plotting backends (Bokeh, Matplotlib)
@@ -107,7 +107,6 @@ pip install hilo-mpc[ml,viz,tensorflow]
 | Extra | Packages | Version Constraints | Purpose |
 |-------|----------|---------------------|---------|
 | `ml` | [scikit-learn](https://scikit-learn.org/stable/) | ≥0.19.2 | Data preprocessing and normalization |
-| | [pandas](https://pandas.pydata.org) | ≥2.0.0 | Data handling for training |
 | `viz` | [Bokeh](https://bokeh.org) | ≥2.3.0 | Interactive plotting |
 | | [Matplotlib](https://matplotlib.org) | ≥3.0.0 | Static plotting |
 | `tensorflow` | [TensorFlow](https://www.tensorflow.org) | ≥2.8.0 | Neural network training (TensorFlow backend) |
@@ -116,6 +115,8 @@ pip install hilo-mpc[ml,viz,tensorflow]
 | | TorchVision | ≥0.4.0 | PyTorch utilities |
 
 **Note:** The package will raise informative errors if you try to use features that require uninstalled optional dependencies. This design keeps the core installation lightweight while allowing users to install only what they need.
+
+**Core Dependencies:** CasADi, NumPy, SciPy, pandas, and prettytable are installed automatically with the base package.
 
 Documentation
 -------------

@@ -31,7 +31,7 @@ After activating your Python environment, run:
     # With optional extras
     pip install hilo-mpc[ml,viz,tensorflow]
 
-Core dependencies (CasADi, NumPy, SciPy) are installed automatically.
+Core dependencies (CasADi, NumPy, SciPy, pandas) are installed automatically.
 
 Optional Dependencies
 =====================
@@ -44,7 +44,7 @@ Install Optional Extras
 
 .. code-block:: bash
 
-    # Machine learning utilities (scikit-learn, pandas)
+    # Machine learning utilities (scikit-learn)
     poetry install -E ml
     
     # Plotting backends (Bokeh, Matplotlib)
@@ -80,10 +80,6 @@ Optional Package Versions
      - scikit-learn
      - ≥0.19.2
      - Data preprocessing and normalization
-   * - 
-     - pandas
-     - ≥2.0.0
-     - Data handling for training
    * - ``viz``
      - Bokeh
      - ≥2.3.0
