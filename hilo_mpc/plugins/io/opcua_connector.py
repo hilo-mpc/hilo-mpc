@@ -25,13 +25,13 @@ from __future__ import annotations
 import asyncio
 from typing import Callable, Dict, Any, Sequence, Optional, Tuple
 
-from .opcua_async import AsyncOPCUAClient, IOMapping, build_mapping_from_model
+from .opcua_async import AsyncOPCUAClient, IOMapping
 
 
 ComputeFn = Callable[[Dict[str, float]], Dict[str, float]]
 
 
-class OPCUALoop:
+class OPCUAConnector:
     """Generic, minimal OPC UA polling loop.
 
     Reads a set of aliases, calls a user-provided compute function, and writes outputs.
@@ -112,51 +112,3 @@ class OPCUALoop:
             except Exception:
                 pass
             await self.client.disconnect()
-
-    @classmethod
-    def from_model(
-        cls,
-        model: Any,
-        endpoint: str,
-        ns_idx: int,
-        base_path: str,
-        period: float,
-        read_from: Sequence[str] | str = ("y",),
-        write_from: Sequence[str] | str = ("u",),
-        write_bounds: Optional[Dict[str, Tuple[float, float]]] = None,
-        scales: Optional[Dict[str, Tuple[float, float]]] = None,
-        node_overrides: Optional[Dict[str, str]] = None,
-        include_read_names: Optional[Sequence[str]] = None,
-        include_write_names: Optional[Sequence[str]] = None,
-        reconnect_backoff: Tuple[float, float] = (0.5, 5.0),
-        safe_shutdown_zero_writes: bool = True,
-    ) -> "OPCUALoop":
-        """Convenience constructor that derives the mapping from a HILO model.
-
-        Deprecated
-        -----------
-        This helper is likely to be removed; prefer constructing an IOMapping explicitly
-        or using a project-level config. Kept for compatibility in the current branch.
-        """
-        mapping = build_mapping_from_model(
-            model=model,
-            ns_idx=ns_idx,
-            base_path=base_path,
-            read_from=read_from,
-            write_from=write_from,
-            write_bounds=write_bounds,
-            scales=scales,
-            node_overrides=node_overrides,
-            include_read_names=include_read_names,
-            include_write_names=include_write_names,
-        )
-        safe = None
-        if safe_shutdown_zero_writes:
-            safe = {k: 0.0 for k in mapping.writes.keys()}
-        return cls(
-            endpoint=endpoint,
-            mapping=mapping,
-            period=period,
-            reconnect_backoff=reconnect_backoff,
-            safe_shutdown=safe,
-        )
