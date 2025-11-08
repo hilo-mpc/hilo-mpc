@@ -1,57 +1,5 @@
 from __future__ import annotations
-"""OPC UA control loop (controller+estimator) interface similar to SimpleControlLoop.
 
-Instead of simulating a local plant model, this loop reads the current state (and
-optionally parameters/measurements) from an OPC UA server, invokes a controller (optionally an estimator)
-and writes the computed control inputs back to the server.
-
-Design goals
-------------
-- Mirror the convenience of SimpleControlLoop: automatic controller setup, flexible
-  support for MPC/OCP, PID, learning-based and generic controllers.
-- Keep plant-agnostic: we do not advance dynamics; we only exchange data with the server.
-- Allow an optional estimator object whose update/estimate/predict method is called
-  after each control action (e.g. for filtering noisy measurements).
-- Provide safe shutdown: write zeros (or user-specified values) to all control outputs
-  when the loop exits.
-
-Minimal example
----------------
-
-    mapping = IOMapping(
-        reads={
-            "theta": {"node": f"ns={ns};s=Pendulum/Angle_rad"},
-        },
-        writes={
-            "u": {"node": f"ns={ns};s=Pendulum/Torque_Nm"},
-        },
-    )
-    loop = OPCUASimpleControlLoop(
-        endpoint=endpoint,
-        mapping=mapping,
-        controller=nmpc,
-        state_aliases=["theta"],
-        control_aliases=["u"],
-        period=0.02,
-    )
-    await loop.run(max_iters=1000)
-
-Controller interface detection (similar to SimpleControlLoop):
-- MPC / OCP: must have .optimize(x, cp=None, **kwargs); we pass the current state subset and optional params.
-- ANN / learning-based: must have .predict(x) returning control vector.
-- PID controllers: must have .call(pv=x_current).
-- Generic controller: fallback to .call(x=<state>, p=<params>)
-
-Estimator (optional):
-- If has .estimate(), call it after writing control.
-- Else if has .predict(), call it.
-
-Notes
------
-- The ordering of state_aliases defines the vector passed to the controller.
-- If parameter_aliases are provided, their ordering defines cp for optimize().
-- Safe shutdown values can be overridden by passing a dict mapping control_alias to value.
-"""
 
 import asyncio
 from typing import Any, Dict, List, Optional, Sequence
@@ -60,8 +8,59 @@ from .opcua_async import AsyncOPCUAClient, IOMapping
 
 
 class OPCUASimpleControlLoop:
-    """Generic OPC UA feedback loop using an external controller and optional estimator."""
+    """OPC UA control loop (controller+estimator) interface similar to SimpleControlLoop.
 
+    Instead of simulating a local plant model, this loop reads the current state (and
+    optionally parameters/measurements) from an OPC UA server, invokes a controller (optionally an estimator)
+    and writes the computed control inputs back to the server.
+
+    Design goals
+    ------------
+    - Mirror the convenience of SimpleControlLoop: automatic controller setup, flexible
+      support for MPC/OCP, PID, learning-based and generic controllers.
+    - Keep plant-agnostic: we do not advance dynamics; we only exchange data with the server.
+    - Allow an optional estimator object whose update/estimate/predict method is called
+      after each control action (e.g. for filtering noisy measurements).
+    - Provide safe shutdown: write zeros (or user-specified values) to all control outputs
+      when the loop exits.
+
+    Minimal example
+    ---------------
+
+        mapping = IOMapping(
+            reads={
+                "theta": {"node": f"ns={ns};s=Pendulum/Angle_rad"},
+            },
+            writes={
+                "u": {"node": f"ns={ns};s=Pendulum/Torque_Nm"},
+            },
+        )
+        loop = OPCUASimpleControlLoop(
+            endpoint=endpoint,
+            mapping=mapping,
+            controller=nmpc,
+            state_aliases=["theta"],
+            control_aliases=["u"],
+            period=0.02,
+        )
+        await loop.run(max_iters=1000)
+
+    Controller interface detection (similar to SimpleControlLoop):
+    - MPC / OCP: must have .optimize(x, cp=None, **kwargs); we pass the current state subset and optional params.
+    - ANN / learning-based: must have .predict(x) returning control vector.
+    - PID controllers: must have .call(pv=x_current).
+    - Generic controller: fallback to .call(x=<state>, p=<params>)
+
+    Estimator (optional):
+    - If has .estimate(), call it after writing control.
+    - Else if has .predict(), call it.
+
+    Notes
+    -----
+    - The ordering of state_aliases defines the vector passed to the controller.
+    - If parameter_aliases are provided, their ordering defines cp for optimize().
+    - Safe shutdown values can be overridden by passing a dict mapping control_alias to value.
+    """
     def __init__(
         self,
         endpoint: str,
@@ -74,6 +73,15 @@ class OPCUASimpleControlLoop:
         period: float = 0.05,
         reconnect_backoff: tuple[float, float] = (0.5, 5.0),
         safe_shutdown: Optional[Dict[str, float]] = None,
+        # AsyncOPCUAClient connection/security options (passthrough)
+        timeout: float = 2.0,
+        security_mode: Optional[str] = None,
+        security_policy: Optional[str] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        cert_path: Optional[str] = None,
+        key_path: Optional[str] = None,
+        max_reconnect_attempts: Optional[int] = None,
     ) -> None:
         self.endpoint = endpoint
         self.mapping = mapping
@@ -83,7 +91,19 @@ class OPCUASimpleControlLoop:
         self.state_aliases = list(state_aliases or mapping.reads.keys())
         self.control_aliases = list(control_aliases or mapping.writes.keys())
         self.parameter_aliases = list(parameter_aliases or [])
-        self.client = AsyncOPCUAClient(endpoint=endpoint, mapping=mapping, reconnect_backoff=reconnect_backoff)
+        self.client = AsyncOPCUAClient(
+            endpoint=endpoint,
+            mapping=mapping,
+            timeout=timeout,
+            security_mode=security_mode,
+            security_policy=security_policy,
+            username=username,
+            password=password,
+            cert_path=cert_path,
+            key_path=key_path,
+            reconnect_backoff=reconnect_backoff,
+            max_reconnect_attempts=max_reconnect_attempts,
+        )
         self.safe_shutdown = (
             dict(safe_shutdown)
             if safe_shutdown is not None
