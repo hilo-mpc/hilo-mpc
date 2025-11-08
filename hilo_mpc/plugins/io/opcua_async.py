@@ -173,7 +173,7 @@ def build_mapping_from_model(
     Returns
     -------
     IOMapping
-        Mapping ready to use with AsyncOPCUAClient/OPCUALoop.
+        Mapping ready to use with AsyncOPCUAClient/OPCUAConnector.
 
     Notes
     -----

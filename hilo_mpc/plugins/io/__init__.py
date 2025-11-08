@@ -5,11 +5,13 @@ Currently includes an asyncio-based OPC UA client wrapper.
 """
 
 from .opcua_async import AsyncOPCUAClient, IOMapping, build_mapping_from_model
-from .opcua_loop import OPCUALoop
+from .opcua_connector import OPCUAConnector
+from .opcua_simple_control_loop import OPCUASimpleControlLoop
 
 __all__ = [
     "AsyncOPCUAClient",
     "IOMapping",
     "build_mapping_from_model",
-    "OPCUALoop",
+    "OPCUAConnector",
+    "OPCUASimpleControlLoop",
 ]
