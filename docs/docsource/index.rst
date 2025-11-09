@@ -65,6 +65,7 @@ At the moment HILO-MPC supports:
    examples/path_following_mpc
    examples/CSTR_Example
    examples/learn_mpc
+   examples/opcua_pendulum
 
 .. toctree::
    :maxdepth: 1
