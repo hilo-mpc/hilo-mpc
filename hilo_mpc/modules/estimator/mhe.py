@@ -477,7 +477,7 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
 
             if self._stage_term_flag:
                 self._stage_term_fun = ca.Function('stage_term',
-                                                   [self._w, model.x, t_ref_placeholder],
+                                                   [self._w, model.x, model.u, t_ref_placeholder],
                                                    [self._stage_term])
 
             # Check time varying parameters
@@ -738,7 +738,7 @@ class MovingHorizonEstimator(Estimator, DynamicOptimization):
                         J += self._arrival_term_fun(x_ii, p, x_arrival, p_arrival)
                 else:
                     if self._stage_term_flag:
-                        J += self._stage_term_fun(w_ii, x_ii, y_ii)
+                        J += self._stage_term_fun(w_ii, x_ii, u_ii, y_ii)
 
                 if self.stage_constraint.is_set:
                     if self.stage_constraint.is_soft:

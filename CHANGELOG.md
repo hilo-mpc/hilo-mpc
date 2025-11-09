@@ -2,14 +2,16 @@
 ### Added 
 - Two boilerplates for OPC UA connectivity. One simple and with minimum setup `OPCUASimpleControlLoop` and the other thought to have more flexibility `OPCUAConnector`
 - Tests for OPC UA Code
+### Changed
+- **pandas is now a required dependency** - Moved from optional to core dependencies as it's used in neural network implementation
+### Fixed
+- Added control inputs in the mhe stage function term. This is necessary when the measurement function contains the control input
 
 ## v2.0.1 - Patch Release
 ### Added
 - Documentation on observer module 
 - Missing docstrings in the mhe and mpc methods
 
-### Changed
-- **pandas is now a required dependency** - Moved from optional to core dependencies as it's used in neural network implementation
 
 ## v2.0.0 - Major Release
 ### 💥 BREAKING CHANGES
