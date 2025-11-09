@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Callable, Dict, Any, Sequence, Optional, Tuple
+from typing import Callable, Dict, Sequence, Optional, Tuple
 
 from .opcua_async import AsyncOPCUAClient, IOMapping
 

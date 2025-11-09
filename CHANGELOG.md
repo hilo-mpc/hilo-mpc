@@ -1,3 +1,8 @@
+## v2.1.0 - OPC UA Release
+### Added 
+- Two boilerplates for OPC UA connectivity. One simple and with minimum setup `OPCUASimpleControlLoop` and the other thought to have more flexibility `OPCUAConnector`
+- Tests for OPC UA Code
+
 ## v2.0.1 - Patch Release
 ### Added
 - Documentation on observer module 

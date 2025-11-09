@@ -4,7 +4,7 @@
 #   HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported
 #   optimal control and estimation problems
 #
-#   Copyright (c) 2021 Johannes Pohlodek, Bruno Morabito, Rolf Findeisen
+#   Copyright (c) 2025 Johannes Pohlodek, Bruno Morabito, Rolf Findeisen
 #                      All rights reserved
 #
 #   HILO-MPC is free software: you can redistribute it and/or modify
@@ -449,6 +449,7 @@ class AsyncOPCUAClient:
                 try:
                     v = (float(v) - b) / a
                 except Exception:
+                    # If scaling fails (e.g., non-numeric value), use original value
                     pass
             bounds = self._mapping.get_bounds(k)
             if bounds:

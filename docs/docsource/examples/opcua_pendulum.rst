@@ -1,6 +1,11 @@
 OPC UA Connection - Inverted pendulum example
 ==============================================
 
+.. contents:: Table of Contents
+    :local:
+    :depth: 2
+    :backlinks: none
+
 Do you want to connect HILO-MPC with actuators and sensors operating in the real world?
 HILO-MPC  comes with an integrated interface to OPC UA that let you connect to external
 devices effortlessly.
@@ -11,11 +16,16 @@ All the files used for this example can be found in our
 `example repository <https://github.com/hilo-mpc/examples>`_ in the folder `opcua_pendulum`.
 
 
-[Here put a diagram with the inverted pendulum] 
+.. figure:: ../images/opcua_pendulum.png
+    :alt: OPC UA inverted pendulum setup
+    :align: center
+    :width: 100%
+
+    Inverted pendulum connected via OPC UA: server exposes angle/torque; controller reads/writes.
 
 Pendulum simulation
 -------------------
-Let us start by startin the UPC UA server, and then the server that simulates the inverted pendulum.
+Let us begin by starting the UPC UA server, and then the server that simulates the inverted pendulum.
 
 In the example repository navigate to the folder `opcua_pendulum` and run the following commands in two separate terminal windows:
 
@@ -42,7 +52,7 @@ we will build a controller that sends the torque commands to the server.
 
 Simple control loop
 ------------------------
-HILO-MPC comes with a build-in control loop that communicates with an OPC UA server. 
+HILO-MPC comes with a built-in control loop that communicates with an OPC UA server. 
 This can be already enough for simple control tasks. If you want to have more control, 
 you can also build your own control loop using as shown in the next sections.
 
@@ -193,8 +203,8 @@ the execution flow for advanced scenarios such as:
 
 For these cases, HILO-MPC provides the ``OPCUAConnector`` class, which gives you direct access to 
 read and write operations while you manage the control loop yourself.
-The full code of the flexible loop can be found in the example repository as `opcua_pendulum_controller.py`. This files
-basically is an alternative to `opcua_pendulum_controller`
+The full code of the flexible loop can be found in the example repository as `opcua_pendulum_controller.py`. This file
+is basically an alternative to `opcua_simple_control_loop.py`, providing more flexibility for advanced use cases.
 
 Setting up the OPC UA connector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

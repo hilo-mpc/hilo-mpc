@@ -1,7 +1,30 @@
-import asyncio
+#
+#   This file is part of HILO-MPC
+#
+#   HILO-MPC is a toolbox for easy, flexible and fast development of machine-learning-supported
+#   optimal control and estimation problems
+#
+#   Copyright (c) 2025 Johannes Pohlodek, Bruno Morabito, Rolf Findeisen
+#                      All rights reserved
+#
+#   HILO-MPC is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU Lesser General Public License as
+#   published by the Free Software Foundation, either version 3
+#   of the License, or (at your option) any later version.
+#
+#   HILO-MPC is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#   GNU Lesser General Public License for more details.
+#
+#   You should have received a copy of the GNU Lesser General Public License
+#   along with HILO-MPC. If not, see <http://www.gnu.org/licenses/>.
+#
 import socket
 import unittest
-
+import numpy as np
+from hilo_mpc.plugins.io.opcua_connector import OPCUAConnector
+from hilo_mpc.plugins.io.opcua_simple_control_loop import OPCUASimpleControlLoop
 from hilo_mpc.plugins.io.opcua_async import IOMapping, AsyncOPCUAClient
 
 try:
@@ -74,7 +97,6 @@ class TestAsyncIntegration(unittest.IsolatedAsyncioTestCase):
             await client.disconnect()
 
     async def test_opcua_loop_safe_shutdown(self):
-        from hilo_mpc.plugins.io.opcua_loop import OPCUALoop
 
         mapping = IOMapping(
             reads={"y": {"node": f"ns={self.idx};s=Test/Angle"}},
@@ -82,7 +104,7 @@ class TestAsyncIntegration(unittest.IsolatedAsyncioTestCase):
         )
 
         async def runner():
-            loop = OPCUALoop(
+            loop = OPCUAConnector(
                 endpoint=self.endpoint,
                 mapping=mapping,
                 period=0.01,
@@ -100,8 +122,7 @@ class TestAsyncIntegration(unittest.IsolatedAsyncioTestCase):
         self.assertAlmostEqual(float(final_u), 0.0, places=9)
 
     async def test_simple_control_loop_dm_output(self):
-        from hilo_mpc.plugins.io.opcua_simple_control_loop import OPCUASimpleControlLoop
-        import numpy as np
+
 
         class DummyDM:
             def __init__(self, arr):
