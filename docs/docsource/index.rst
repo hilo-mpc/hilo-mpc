@@ -78,12 +78,6 @@ At the moment HILO-MPC supports:
 
 .. toctree::
    :maxdepth: 1
-   :caption: OPC-UA:
-
-   opcua
-
-.. toctree::
-   :maxdepth: 1
    :caption: API:
 
    api/controllers

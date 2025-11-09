@@ -83,6 +83,47 @@ class OPCUASimpleControlLoop:
         key_path: Optional[str] = None,
         max_reconnect_attempts: Optional[int] = None,
     ) -> None:
+        """Initialize the OPC UA control loop.
+
+        Parameters
+        ----------
+        endpoint : str
+            OPC UA server endpoint URL, e.g., "opc.tcp://127.0.0.1:4840/server/".
+        mapping : IOMapping
+            Mapping between aliases and OPC UA node IDs for reads and writes.
+        controller : Any
+            Controller object (NMPC, LMPC, OCP, PID, or machine learning model) with optimize/predict/call interface.
+        estimator : Optional[Any], (MHE, KF, UKF or machine learning model) default=None
+            Optional estimator object with estimate() or predict() methods.
+        state_aliases : Sequence[str] | None, default=None
+            List of state variable aliases to read and pass to controller. If None, uses all read aliases.
+        control_aliases : Sequence[str] | None, default=None
+            List of control variable aliases to write. If None, uses all write aliases.
+        parameter_aliases : Sequence[str] | None, default=None
+            List of parameter aliases to read and pass to controller as cp argument.
+        period : float, default=0.05
+            Control loop sampling period in seconds.
+        reconnect_backoff : tuple[float, float], default=(0.5, 5.0)
+            Exponential backoff bounds (min, max) in seconds for reconnection attempts.
+        safe_shutdown : Optional[Dict[str, float]], default=None
+            Dictionary mapping control aliases to safe shutdown values. If None, all controls set to 0.0.
+        timeout : float, default=2.0
+            Timeout in seconds for OPC UA read/write operations.
+        security_mode : Optional[str], default=None
+            OPC UA security mode: "None", "Sign", or "SignAndEncrypt".
+        security_policy : Optional[str], default=None
+            OPC UA security policy: "Basic256Sha256", "Aes128_Sha256_RsaOaep", etc.
+        username : Optional[str], default=None
+            Username for OPC UA authentication.
+        password : Optional[str], default=None
+            Password for OPC UA authentication.
+        cert_path : Optional[str], default=None
+            Path to client certificate file (DER or PEM format).
+        key_path : Optional[str], default=None
+            Path to client private key file (PEM format).
+        max_reconnect_attempts : Optional[int], default=None
+            Maximum number of consecutive reconnection attempts. If None, retry indefinitely.
+        """
         self.endpoint = endpoint
         self.mapping = mapping
         self.controller = controller
@@ -128,6 +169,13 @@ class OPCUASimpleControlLoop:
             estimator.setup()
 
     async def _read_values(self) -> Dict[str, float]:
+        """Read state and parameter values from the OPC UA server.
+
+        Returns
+        -------
+        Dict[str, float]
+            Dictionary mapping aliases to their float values. Non-numeric values are skipped.
+        """
         data = await self.client.read(self.state_aliases + self.parameter_aliases)
         out: Dict[str, float] = {}
         for k, v in data.items():
@@ -139,13 +187,57 @@ class OPCUASimpleControlLoop:
         return out
 
     def _build_vectors(self, values: Dict[str, float]) -> tuple[List[float], Optional[List[float]]]:
+        """Build state and parameter vectors from raw values dictionary.
+
+        Parameters
+        ----------
+        values : Dict[str, float]
+            Dictionary of alias-value pairs read from the server.
+
+        Returns
+        -------
+        tuple[List[float], Optional[List[float]]]
+            Tuple containing:
+            - x_vec: State vector ordered according to state_aliases
+            - cp_vec: Parameter vector ordered according to parameter_aliases, or None if no parameters
+        """
         x_vec = [values.get(a, 0.0) for a in self.state_aliases]
         cp_vec = [values.get(a, 0.0) for a in self.parameter_aliases] if self.parameter_aliases else None
         return x_vec, cp_vec
 
     def _compute_control(self, x_vec: List[float], cp_vec: Optional[List[float]]) -> List[float]:
+        """Compute control action using the controller.
+
+        Parameters
+        ----------
+        x_vec : List[float]
+            Current state vector.
+        cp_vec : Optional[List[float]]
+            Optional parameter vector for the controller.
+
+        Returns
+        -------
+        List[float]
+            Computed control action vector.
+
+        Raises
+        ------
+        RuntimeError
+            If the controller does not expose a recognized interface (optimize/predict/call).
+        """
         def _tolist(u: Any) -> List[float]:
-            """Assume controller returns CasADi DM/MX; convert via toarray() and flatten."""
+            """Assume controller returns CasADi DM/MX; convert via toarray() and flatten.
+            
+            Parameters
+            ----------
+            u : Any
+                Controller output (expected to be CasADi DM/MX or array-like).
+            
+            Returns
+            -------
+            List[float]
+                Flattened list of control values.
+            """
             arr = u.toarray()  # Expect DM/MX; if not, this will raise and reveal misuse early.
             return [float(v) for v in arr.flatten()]
 
@@ -160,6 +252,11 @@ class OPCUASimpleControlLoop:
         raise RuntimeError("Controller object does not expose optimize/predict/call interface")
 
     async def _estimator_step(self) -> None:
+        """Execute one estimator step if an estimator is configured.
+
+        Calls estimate() if available, otherwise predict(). Errors are silently caught
+        for robustness, as estimator failures should not crash the control loop.
+        """
         if not self.estimator:
             return
         try:
@@ -172,6 +269,28 @@ class OPCUASimpleControlLoop:
             pass
 
     async def run(self, max_iters: Optional[int] = None) -> None:
+        """Run the control loop asynchronously.
+
+        Executes the sense-compute-actuate cycle at the configured period until interrupted
+        or max_iters is reached. On exit, writes safe shutdown values to all control outputs.
+
+        Parameters
+        ----------
+        max_iters : Optional[int], default=None
+            Maximum number of iterations to run. If None, runs indefinitely until interrupted.
+
+        Notes
+        -----
+        The control loop performs the following steps each iteration:
+        1. Read state and parameter values from OPC UA server
+        2. Compute control action using the controller
+        3. Write control action to OPC UA server
+        4. Execute estimator step (if configured)
+        5. Sleep for the configured period
+
+        On exit (normal or via exception), safe shutdown values are written to ensure
+        the system is left in a safe state.
+        """
         await self.client.connect()
         try:
             k = 0
@@ -198,5 +317,16 @@ class OPCUASimpleControlLoop:
             await self.client.disconnect()
 
     def run_sync(self, max_iters: Optional[int] = None) -> None:
-        """Synchronous convenience wrapper around the async run method."""
+        """Synchronous convenience wrapper around the async run method.
+
+        Parameters
+        ----------
+        max_iters : Optional[int], default=None
+            Maximum number of iterations to run. If None, runs indefinitely until interrupted.
+
+        Notes
+        -----
+        This method creates a new event loop, runs the async control loop, and cleans up.
+        Use this method when calling from synchronous code. For async contexts, use run() directly.
+        """
         asyncio.run(self.run(max_iters=max_iters))
