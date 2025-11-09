@@ -1,4 +1,7 @@
-## v2.0.x (UNRELEASED)
+## v2.1.0 - OPC UA Release
+### Added 
+- Two boilerplates for OPC UA connectivity. One simple and with minimum setup `OPCUASimpleControlLoop` and the other thought to have more flexibility `OPCUAConnector`
+- Tests for OPC UA Code
 ### Changed
 - **pandas is now a required dependency** - Moved from optional to core dependencies as it's used in neural network implementation
 ### Fixed

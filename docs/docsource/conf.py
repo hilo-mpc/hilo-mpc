@@ -56,6 +56,7 @@ extensions = [
     'nbsphinx',
     'sphinxcontrib.bibtex',
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     # 'sphinx_autodoc_typehints',
     'sphinx.ext.viewcode',
     'sphinx_copybutton',
@@ -77,6 +78,15 @@ exclude_patterns = ['_build', '**.ipynb_checkpoints']
 autodoc_typehints = 'none'  # 'description'
 
 autodoc_member_order = 'groupwise'
+
+# Mock heavy/optional imports so autodoc can build API pages on minimal environments (GitHub Pages)
+autodoc_mock_imports = [
+    'casadi', 'casadi.tools',
+    'numpy', 'scipy', 'pandas', 'sklearn',
+    'tensorflow', 'keras', 'torch', 'torchvision',
+    'matplotlib', 'bokeh',
+    'asyncua',
+]
 
 # Variable for project name
 rst_epilog = f'.. |project_name| replace:: {project}'

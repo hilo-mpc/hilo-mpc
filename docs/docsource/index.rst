@@ -6,8 +6,7 @@
 HILO-MPC Documentation
 ===================================
 
-HILO-MPC is a toolbox for **easy, flexible and fast development of machine-learning-supported optimal control and
-estimation problems**.
+HILO-MPC is a toolbox for **easy, flexible and fast development of machine-learning-supported optimal control and estimation problems**. It is useful for prototyping real-world applications and for academia.
 
 This tool can leverage `TensorFlow <https://www.tensorflow.org/>`_ and `PyTorch <https://pytorch.org/>`_ to create
 machine learning models, and the `CasADi <https://web.casadi.org/>`_ framework to efficiently build control and
@@ -66,6 +65,7 @@ At the moment HILO-MPC supports:
    examples/path_following_mpc
    examples/CSTR_Example
    examples/learn_mpc
+   examples/opcua_pendulum
 
 .. toctree::
    :maxdepth: 1
@@ -75,7 +75,6 @@ At the moment HILO-MPC supports:
    modules/machinelearnings
    modules/modellings
    modules/estimators
-
 
 .. toctree::
    :maxdepth: 1
