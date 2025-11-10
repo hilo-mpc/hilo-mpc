@@ -1758,12 +1758,13 @@ class _Model(Base):
 
         :param states:
         :param position:
-        :return:
+        :return: The added dynamical state symbolic variables
         """
         # TODO: Add support for description, labels and units
-        self._add('x', states, position)
+        added_states = self._add('x', states, position)
         if not self._state_space_changed:
             self._state_space_changed = True
+        return added_states
 
     def add_measurements(self, measurements, position=None):
         """
@@ -1782,13 +1783,14 @@ class _Model(Base):
 
         :param states:
         :param position:
-        :return:
+        :return: The added algebraic state symbolic variables
         """
         # TODO: Add support for description, labels and units
         # TODO: Add self._update_solver
-        self._add('z', states, position)
+        added_states = self._add('z', states, position)
         if not self._state_space_changed:
             self._state_space_changed = True
+        return added_states
 
     def add_inputs(self, inputs, position=None):
         """

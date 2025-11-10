@@ -145,7 +145,7 @@ class Base(Object):
         :param args:
         :param position:
         :param kwargs:
-        :return:
+        :return: The added object (for Vector types, returns the symbolic variables)
         """
         # TODO: Typing hints
         if attr not in ['ode', 'alg', 'meas', 'obj', 'cons']:
@@ -166,9 +166,9 @@ class Base(Object):
                 raise TypeError(f"Wrong type {type(pointer).__name__} for supplied attribute")
             if isinstance(pointer, Vector):
                 if args is not None:
-                    pointer.add(args, **kwargs)
+                    return pointer.add(args, **kwargs)
                 else:
-                    pointer.add(attr, **kwargs)
+                    return pointer.add(attr, **kwargs)
             elif isinstance(pointer, RightHandSide):
                 if isinstance(args, (dict, RightHandSide)):
                     pointer.add(args, **kwargs)
@@ -828,10 +828,12 @@ class Vector(Container):
         :param description:
         :param labels:
         :param units:
-        :return:
+        :return: The added symbolic variables
         """
         # TODO: Implement skip functionality
+        added_values = None
         if isinstance(obj, Vector):
+            added_values = obj.values
             if axis == 0:
                 self._values = ca.vertcat(self._values, obj.values)
                 self._update_names()
@@ -845,6 +847,7 @@ class Vector(Container):
                 raise IndexError("Argument 'axis' is out of bounds for array of dimension 2")
         else:
             other = convert(obj, self._fx)
+            added_values = other
             if axis == 0:
                 self._values = ca.vertcat(self._values, other)
                 self._update_names()
@@ -951,6 +954,7 @@ class Vector(Container):
 
         self._update_shape(None)
         self._update_parent()
+        return added_values
 
     def clear(self) -> None:
         """
