@@ -1,3 +1,12 @@
+## v2.1.1 - Dependency Maintenance
+### Changed
+- Updated multiple dependencies to latest compatible minor versions
+- Refreshed `poetry.lock` with latest package versions
+### Dependencies
+- **urllib3**: bumped to 2.6.3 (from 2.5.0) for security and compatibility
+- **pillow**: bumped to 12.1.1 (from 11.3.0) for latest features and fixes
+- **nbconvert, protobuf, pandas, scipy, and others**: updated to latest compatible versions
+
 ## v2.1.0 - OPC UA Release
 ### Added 
 - Two boilerplates for OPC UA connectivity. One simple and with minimum setup `OPCUASimpleControlLoop` and the other thought to have more flexibility `OPCUAConnector`
