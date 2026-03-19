@@ -251,8 +251,10 @@ class TestANNTrainingAndPrediction(unittest.TestCase):
         ann.build_graph()
         # Test that the function can be called with a sample input
         x_test = ca.DM([0.5, -0.3])
+        # _function returns a tuple of CasADi DMs: (labels, hidden_layer_1, ...)
         result = ann._function(x_test)
-        self.assertEqual(result.size1(), 1)
+        labels = result[0]
+        self.assertEqual(labels.size1(), 1)
 
 
 if __name__ == '__main__':
