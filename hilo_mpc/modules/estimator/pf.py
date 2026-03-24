@@ -413,7 +413,11 @@ class ParticleFilter(_Estimator):
 
             # Roughening
             if self._roughening:
-                dx = np.max(X, axis=1) - np.min(X, axis=1)
+                X_np = np.asarray(X.full(), dtype=float)
+                dx = np.max(X_np, axis=1) - np.min(X_np, axis=1)
+                # Replace NaN (invalid particles) and zeros (collapsed particles) so the
+                # roughening covariance is always positive-definite.
+                dx = np.maximum(np.nan_to_num(dx, nan=0.0), np.finfo(float).eps)
                 dx = self._pdf(np.zeros(self._n_x), self._roughening_tuning_param * np.diag(dx) *
                                self._sample_size ** (-1 / self._n_x), self._sample_size)
                 if self._transpose_pdf:
