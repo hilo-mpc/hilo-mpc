@@ -670,11 +670,13 @@ class Optimizer(Base, metaclass=ABCMeta):
         p = kwargs.get('p')
         if p is not None:
             self._solution.add('p', p)
-        elif self._solution.get_by_id('p').is_empty():
-            warnings.warn(f"No parameter values supplied. Setting them to 0. Execute "
-                          f"{self.__class__.__name__}.set_parameter_values(p) or supply them as a keyword argument to "
-                          f"{self.__class__.__name__}.solve(...) to set different parameter values.")
-            self.set_parameter_values(self._n_p * [0.])
+        elif self._n_p > 0:
+            p_val = self._solution.get_by_id('p')
+            if p_val is None or p_val.is_empty():
+                warnings.warn(f"No parameter values supplied. Setting them to 0. Execute "
+                              f"{self.__class__.__name__}.set_parameter_values(p) or supply them as a keyword argument to "
+                              f"{self.__class__.__name__}.solve(...) to set different parameter values.")
+                self.set_parameter_values(self._n_p * [0.])
 
         args = self._solution.get_function_args()
         args['lbx'] = self._lbx.values

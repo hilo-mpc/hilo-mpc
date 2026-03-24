@@ -68,9 +68,7 @@ class TestNonlinearProgram(unittest.TestCase):
         nlp.objective = x[0] ** 2 + x[1] ** 2
         nlp.setup()
         nlp.set_initial_guess(x0=[1., 1.])
-        # p=[] is required when no parameters are defined due to a known library
-        # limitation: solve() calls get_by_id('p').is_empty() which fails on None
-        nlp.solve(p=[])
+        nlp.solve()
         # Solution is stored as (n_x, n_iterations) matrix; last column is optimal
         sol = nlp.solution.get_by_id('x')[:, -1]
         np.testing.assert_allclose(float(sol[0]), 0., atol=1e-4)
@@ -95,7 +93,7 @@ class TestNonlinearProgram(unittest.TestCase):
         nlp.objective = nlp.decision_variables[0]
         nlp.setup()
         nlp.set_initial_guess(x0=[5.])
-        nlp.solve(p=[])
+        nlp.solve()
         sol = nlp.solution.get_by_id('x')[:, -1]
         np.testing.assert_allclose(float(sol[0]), 2., atol=1e-4)
 
@@ -170,8 +168,7 @@ class TestLinearProgram(unittest.TestCase):
         x = lp.set_decision_variables('x', 'y', lower_bound=1.)
         lp.objective = x[0] + x[1]
         lp.setup()
-        # p=[] is required when no parameters are defined (library limitation)
-        lp.solve(p=[])
+        lp.solve()
         # Solution is stored as (n_x, n_iterations) matrix; last column is optimal
         sol = lp.solution.get_by_id('x')[:, -1]
         np.testing.assert_allclose(float(sol[0]), 1., atol=1e-4)
