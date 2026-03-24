@@ -770,6 +770,32 @@ class LinearProgram(Optimizer):
 class QuadraticProgram(LinearProgram):
     """"""
 
+    def __init__(
+            self,
+            id: Optional[str] = None,
+            name: Optional[str] = None,
+            solver: Optional[str] = None,
+            solver_options: Optional[dict[str, Union[str, Numeric]]] = None,
+            plot_backend: Optional[str] = None
+    ) -> None:
+        """Constructor method"""
+        if solver is None:
+            # 'clp' (inherited LP default) only handles linear objectives;
+            # 'osqp' supports quadratic objectives natively.
+            solver = 'osqp'
+        super().__init__(id=id, name=name, solver=solver, solver_options=solver_options, plot_backend=plot_backend)
+
+    def setup(self, **kwargs):
+        """
+        Set up the QP. Unlike LP, quadratic objectives are allowed.
+
+        :param kwargs:
+        :return:
+        """
+        # Skip LP's linearity check so that quadratic objectives are accepted;
+        # ca.qpsol with osqp handles them natively.
+        Optimizer.setup(self, interface=ca.qpsol, **kwargs)
+
 
 class NonlinearProgram(Optimizer):
     """

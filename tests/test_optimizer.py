@@ -201,13 +201,7 @@ class TestLinearProgram(unittest.TestCase):
 
 
 class TestQuadraticProgram(unittest.TestCase):
-    """Tests for QuadraticProgram (QP)
-
-    Note: QP in HILO-MPC inherits from LinearProgram and uses the same
-    linearity check. Quadratic objectives (x^2) cause QP.setup() to raise a
-    RuntimeError. This is a known limitation; the tests below verify the
-    current behaviour.
-    """
+    """Tests for QuadraticProgram (QP)"""
 
     def test_qp_initialization(self):
         """QP can be instantiated"""
@@ -221,19 +215,30 @@ class TestQuadraticProgram(unittest.TestCase):
         self.assertEqual(qp.n_x, 2)
 
     def test_qp_linear_objective_setup_succeeds(self):
-        """QP with a linear objective sets up without error (same as LP)"""
+        """QP with a linear objective sets up without error"""
         qp = QP()
         x = qp.set_decision_variables('x', 'y', lower_bound=1.)
-        qp.objective = x[0] + x[1]   # linear
+        qp.objective = x[0] + x[1]
         qp.setup()
 
-    def test_qp_quadratic_objective_raises(self):
-        """QP raises RuntimeError for a quadratic objective (known limitation)"""
+    def test_qp_quadratic_objective_setup_succeeds(self):
+        """QP with a quadratic objective sets up without error"""
         qp = QP()
-        x = qp.set_decision_variables('x', 'y', lower_bound=1.)
+        x = qp.set_decision_variables('x', 'y')
         qp.objective = 0.5 * (x[0] ** 2 + x[1] ** 2)
-        with self.assertRaises(RuntimeError):
-            qp.setup()
+        qp.setup()  # must not raise
+
+    def test_qp_solve_quadratic(self):
+        """QP minimizes 0.5*(x^2 + y^2) — optimal solution is (0, 0)"""
+        qp = QP()
+        x = qp.set_decision_variables('x', 'y')
+        qp.objective = 0.5 * (x[0] ** 2 + x[1] ** 2)
+        qp.setup()
+        qp.set_initial_guess(x0=[1., 1.])
+        qp.solve()
+        sol = qp.solution.get_by_id('x')[:, -1]
+        np.testing.assert_allclose(float(sol[0]), 0., atol=1e-4)
+        np.testing.assert_allclose(float(sol[1]), 0., atol=1e-4)
 
     def test_qp_solve_linear(self):
         """QP solves a linear minimization problem correctly"""
@@ -241,7 +246,7 @@ class TestQuadraticProgram(unittest.TestCase):
         x = qp.set_decision_variables('x', 'y', lower_bound=1.)
         qp.objective = x[0] + x[1]
         qp.setup()
-        qp.solve(p=[])
+        qp.solve()
         sol = qp.solution.get_by_id('x')[:, -1]
         np.testing.assert_allclose(float(sol[0]), 1., atol=1e-4)
         np.testing.assert_allclose(float(sol[1]), 1., atol=1e-4)
