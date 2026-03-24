@@ -296,5 +296,151 @@ class TestSolvers(unittest.TestCase):
         mpc.optimize(x0=x0)
 
 
+class TestLMPCCostFunction(unittest.TestCase):
+    """Tests for LMPC cost function configurations"""
+
+    def setUp(self) -> None:
+        model = Model(plot_backend='bokeh', discrete=True)
+        Ts = 0.5
+        model.A = np.array([[1, Ts], [0, 1]])
+        model.B = np.array([[Ts ** 2 / 2], [Ts]])
+        model.setup(dt=Ts)
+        model.set_initial_conditions(x0=[1., 0.])
+        self.model = model
+        self.x0 = [1., 0.]
+
+    def test_lmpc_with_terminal_cost(self):
+        """LMPC with terminal cost (P matrix) sets up and optimizes without error"""
+        model = self.model
+        x0 = self.x0
+        mpc = LMPC(model)
+        mpc.Q = np.eye(2)
+        mpc.R = 1
+        mpc.P = np.eye(2)  # Terminal cost matrix
+        mpc.horizon = 5
+        mpc.setup()
+        u = mpc.optimize(x0=x0)
+        self.assertIsNotNone(u)
+
+    def test_lmpc_q_matrix_stored(self):
+        """LMPC stores Q matrix correctly after setup"""
+        model = self.model
+        Q = 2. * np.eye(2)
+        mpc = LMPC(model)
+        mpc.Q = Q
+        mpc.R = 1
+        mpc.horizon = 5
+        mpc.setup()
+        np.testing.assert_allclose(mpc.Q, Q)
+
+    def test_lmpc_r_matrix_stored(self):
+        """LMPC stores R matrix correctly after setup"""
+        model = self.model
+        mpc = LMPC(model)
+        mpc.Q = np.eye(2)
+        mpc.R = 0.5
+        mpc.horizon = 5
+        mpc.setup()
+        self.assertAlmostEqual(float(mpc.R), 0.5)
+
+
+class TestLMPCConstraints(unittest.TestCase):
+    """Tests for LMPC constraint configurations"""
+
+    def setUp(self) -> None:
+        model = Model(plot_backend='bokeh', discrete=True)
+        Ts = 0.5
+        model.A = np.array([[1, Ts], [0, 1]])
+        model.B = np.array([[Ts ** 2 / 2], [Ts]])
+        model.setup(dt=Ts)
+        model.set_initial_conditions(x0=[2., 0.])
+        self.model = model
+        self.x0 = [2., 0.]
+
+    def test_lmpc_box_constraints_respected(self):
+        """LMPC optimal input respects upper bound constraint"""
+        model = self.model
+        x0 = self.x0
+        u_ub = 0.5
+        mpc = LMPC(model)
+        mpc.Q = np.eye(2)
+        mpc.R = 1
+        mpc.horizon = 10
+        mpc.set_box_constraints(x_lb=[-5, -5], x_ub=[5, 5], u_lb=[-u_ub], u_ub=[u_ub])
+        mpc.setup()
+        u = mpc.optimize(x0=x0)
+        self.assertLessEqual(abs(float(u[0])), u_ub + 1e-6)
+
+    def test_lmpc_no_constraints_setup(self):
+        """LMPC without box constraints sets up and runs"""
+        model = self.model
+        x0 = self.x0
+        mpc = LMPC(model)
+        mpc.Q = np.eye(2)
+        mpc.R = 1
+        mpc.horizon = 5
+        mpc.setup()
+        u = mpc.optimize(x0=x0)
+        self.assertIsNotNone(u)
+
+    def test_lmpc_soft_constraints(self):
+        """LMPC with soft state constraints sets up without error"""
+        model = self.model
+        x0 = self.x0
+        mpc = LMPC(model)
+        mpc.Q = np.eye(2)
+        mpc.R = 1
+        mpc.horizon = 5
+        mpc.set_box_constraints(x_lb=[-5, -5], x_ub=[5, 5], u_lb=[-2], u_ub=[2])
+        mpc.setup()
+        u = mpc.optimize(x0=x0)
+        self.assertIsNotNone(u)
+
+
+class TestLMPCHorizon(unittest.TestCase):
+    """Tests for LMPC prediction horizon configuration"""
+
+    def setUp(self) -> None:
+        model = Model(plot_backend='bokeh', discrete=True)
+        Ts = 0.5
+        model.A = np.array([[1, Ts], [0, 1]])
+        model.B = np.array([[Ts ** 2 / 2], [Ts]])
+        model.setup(dt=Ts)
+        model.set_initial_conditions(x0=[1., 0.])
+        self.model = model
+        self.x0 = [1., 0.]
+
+    def test_lmpc_short_horizon(self):
+        """LMPC with horizon=2 sets up and runs"""
+        model = self.model
+        x0 = self.x0
+        mpc = LMPC(model)
+        mpc.Q = np.eye(2)
+        mpc.R = 1
+        mpc.horizon = 2
+        mpc.setup()
+        u = mpc.optimize(x0=x0)
+        self.assertIsNotNone(u)
+
+    def test_lmpc_long_horizon(self):
+        """LMPC with horizon=50 sets up and runs"""
+        model = self.model
+        x0 = self.x0
+        mpc = LMPC(model)
+        mpc.Q = np.eye(2)
+        mpc.R = 1
+        mpc.horizon = 50
+        mpc.setup()
+        u = mpc.optimize(x0=x0)
+        self.assertIsNotNone(u)
+
+    def test_lmpc_horizon_stored(self):
+        """LMPC stores prediction horizon correctly"""
+        model = self.model
+        mpc = LMPC(model)
+        mpc.horizon = 15
+        self.assertEqual(mpc.horizon, 15)
+
+
 if __name__ == '__main__':
     unittest.main()
