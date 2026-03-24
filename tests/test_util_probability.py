@@ -76,10 +76,10 @@ class TestPriorFactory(unittest.TestCase):
         prior = Prior.delta()
         self.assertIsInstance(prior, DeltaPrior)
 
-    def test_prior_students_t_factory_raises_bug(self):
-        """Prior.students_t() raises TypeError due to known scipy/CasADi incompatibility"""
-        with self.assertRaises(TypeError):
-            Prior.students_t(mean=0., variance=1., nu=3.)
+    def test_prior_students_t_factory(self):
+        """Prior.students_t() creates a StudentsTPrior"""
+        prior = Prior.students_t(mean=0., variance=1., nu=3.)
+        self.assertIsNotNone(prior)
 
 
 class TestGaussianPrior(unittest.TestCase):
@@ -171,22 +171,35 @@ class TestDeltaPrior(unittest.TestCase):
 
 
 class TestStudentsTPrior(unittest.TestCase):
-    """Tests for StudentsTPrior
+    """Tests for StudentsTPrior"""
 
-    NOTE: StudentsTPrior._initialize() calls scipy.special.gammaln on a
-    CasADi symbolic variable, which raises a TypeError. This is a known bug
-    in the library. Tests below document this behaviour.
-    """
+    def test_students_t_prior_creation(self):
+        """StudentsTPrior can be created without error"""
+        prior = StudentsTPrior(mean=0., variance=1., nu=3.)
+        self.assertIsNotNone(prior)
 
-    def test_students_t_prior_creation_raises_bug(self):
-        """StudentsTPrior creation raises TypeError due to scipy/CasADi incompatibility (known bug)"""
-        with self.assertRaises(TypeError):
-            StudentsTPrior(mean=0., variance=1., nu=3.)
+    def test_students_t_prior_name(self):
+        """StudentsTPrior has correct name"""
+        prior = StudentsTPrior(mean=0., variance=1., nu=3.)
+        self.assertEqual(prior.name, 'Students_T')
 
-    def test_prior_students_t_factory_raises_bug(self):
-        """Prior.students_t() raises TypeError due to the same known bug"""
-        with self.assertRaises(TypeError):
-            Prior.students_t(mean=0., variance=1., nu=3.)
+    def test_students_t_prior_nu(self):
+        """StudentsTPrior stores degrees-of-freedom correctly"""
+        prior = StudentsTPrior(mean=0., variance=1., nu=5.)
+        self.assertEqual(prior.nu, 5.)
+
+    def test_prior_students_t_factory(self):
+        """Prior.students_t() factory creates a StudentsTPrior"""
+        prior = Prior.students_t(mean=0., variance=1., nu=3.)
+        self.assertIsNotNone(prior)
+
+    def test_students_t_prior_log_pdf(self):
+        """StudentsTPrior log-pdf can be evaluated at a numeric point"""
+        import casadi as ca
+        prior = StudentsTPrior(mean=0., variance=1., nu=5.)
+        # Distribution.__call__ returns the log-pdf when log=True
+        result = prior._pdf(ca.DM(0.), ca.DM(0.), ca.DM(1.), ca.DM(5.), log=True)
+        self.assertIsInstance(result, ca.DM)
 
 
 if __name__ == '__main__':

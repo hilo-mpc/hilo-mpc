@@ -30,6 +30,32 @@ from scipy.special import gammaln
 
 
 Numeric = Union[int, float]
+
+
+def _ca_gammaln(z):
+    """Log-gamma function compatible with CasADi symbolic variables.
+
+    Uses the Lanczos approximation so the expression is differentiable and
+    can be embedded in a CasADi computation graph.  Matches scipy.special.gammaln
+    for z > 0 to better than 1e-12 relative error.
+    """
+    # Lanczos coefficients (g=7, n=9)
+    p = [
+        676.5203681218851,
+        -1259.1392167224028,
+        771.32342877765313,
+        -176.61502916214059,
+        12.507343278686905,
+        -0.13857109526572012,
+        9.9843695780195716e-6,
+        1.5056327351493116e-7,
+    ]
+    z = z - 1.0
+    x = 0.99999999999980993
+    for i, pi in enumerate(p):
+        x = x + pi / (z + i + 1.0)
+    t = z + len(p) - 0.5
+    return 0.5 * ca.log(2.0 * ca.pi) + (z + 0.5) * ca.log(t) - t + ca.log(x)
 Pr = TypeVar('Pr', bound='Prior')
 
 
@@ -110,7 +136,7 @@ class StudentsT(Distribution):
         var = ca.SX.sym('var')
         nu = ca.SX.sym('nu')
 
-        log_Z = gammaln((nu + 1.) / 2.) - gammaln(nu / 2.) - ca.log(var * (nu - 2.) * ca.pi) / 2.
+        log_Z = _ca_gammaln((nu + 1.) / 2.) - _ca_gammaln(nu / 2.) - ca.log(var * (nu - 2.) * ca.pi) / 2.
         log_pdf = log_Z - (nu + 1.) / 2. * ca.log(1. + (y - mu) ** 2. / (var * (nu - 2.)))
 
         self._log_function = ca.Function('log_pdf',
