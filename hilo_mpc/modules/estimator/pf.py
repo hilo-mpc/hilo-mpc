@@ -75,7 +75,6 @@ class ParticleFilter(_Estimator):
                 K = .2
             self._roughening_tuning_param = K
 
-        self._setup_normpdf()
         self._sample_size = 15
         self._pdf = lhsnorm
         self._transpose_pdf = None
@@ -87,14 +86,16 @@ class ParticleFilter(_Estimator):
         """
         self._type = 'particle filter'
 
-    def _setup_normpdf(self):
+    def _setup_normpdf(self, n_y, n_samples):
         """
 
+        :param n_y: Number of measurements
+        :param n_samples: Number of samples
         :return:
         """
-        x = ca.SX.sym('x')
-        mu = ca.SX.sym('mu')
-        sigma = ca.SX.sym('sigma')
+        x = ca.SX.sym('x', n_y, n_samples)
+        mu = ca.SX.sym('mu', n_y)
+        sigma = ca.SX.sym('sigma', n_y)
 
         y = ca.exp(-.5 * ((x - mu) / sigma) ** 2) / (ca.sqrt(2 * ca.pi) * sigma)
 
@@ -155,9 +156,24 @@ class ParticleFilter(_Estimator):
         Y = ca.SX.sym('Y', n_y, n_samples)
         R = ca.SX.sym('R', (n_y, n_y))
 
-        q = self._normpdf(Y, y, ca.sqrt(R))  # Since R is usually a diagonal matrix, we can use ca.sqrt() here. We need
-        # to change this, if we have non-diagonal matrices, i.e. covariance entries.
-        q /= ca.sum2(q)
+        # Calculate element-wise normal pdf for each measurement and sample
+        # normpdf_vals will have shape (n_y, n_samples)
+        # Since R is usually a diagonal matrix, extract the diagonal and take square root to get standard deviations
+        sigma = ca.sqrt(ca.diag(R))  # Extract diagonal elements and take sqrt, shape: (n_y,)
+        # Note: Y contains the predicted measurements for each sample, y contains the actual measurements
+        # normpdf computes the likelihood of each predicted measurement given the actual measurement
+        normpdf_vals = self._normpdf(Y, y, sigma)
+        
+        # For multiple measurements, combine probabilities by summing log-probabilities across measurements
+        # For each sample (column), we want to multiply the probabilities across all measurements (rows)
+        # Using log space: log(p1 * p2 * ... * pn) = log(p1) + log(p2) + ... + log(pn)
+        log_likelihoods = ca.log(normpdf_vals)  # shape: (n_y, n_samples)
+        log_joint_likelihood = ca.sum1(log_likelihoods)  # Sum across measurements for each sample, shape: (1, n_samples)
+        
+        # Normalize using logsumexp for numerical stability
+        # logsumexp expects a column vector, so transpose first
+        log_normalization = ca.logsumexp(log_joint_likelihood.T)
+        q = ca.exp(log_joint_likelihood - log_normalization)
 
         self._update_function = ca.Function('likelihood',
                                             [y, Y, R],
@@ -175,11 +191,11 @@ class ParticleFilter(_Estimator):
         if self._transpose_pdf:
             X = X.T
         elif self._transpose_pdf is None:
-            if X.shape != (2, self._sample_size):
+            if X.shape != (self._n_x, self._sample_size):
                 X = X.T
-                if X.shape != (2, self._sample_size):
-                    raise ValueError(f"Dimension mismatch. Expected dimension 2x{self._sample_size}, got "
-                                     f"{X.shape[1]}x{X.shape[0]}.")
+                if X.shape != (self._n_x, self._sample_size):
+                    raise ValueError(f"Dimension mismatch. Expected dimension {self._n_x}x{self._sample_size}, got "
+                                     f"{X.shape[0]}x{X.shape[1]}.")
                 self._transpose_pdf = True
             else:
                 self._transpose_pdf = False
@@ -289,6 +305,11 @@ class ParticleFilter(_Estimator):
             self._sample_size = n_s
 
         self._propagate_particles(n_s)
+        
+        # Setup normpdf with the correct dimensions before evaluating likelihood
+        n_y = self._model.n_y
+        self._setup_normpdf(n_y, n_s)
+        
         self._evaluate_likelihood(n_s)
 
         n_x = self._model.n_x
