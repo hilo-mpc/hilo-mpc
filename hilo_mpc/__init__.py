@@ -38,6 +38,11 @@ import hilo_mpc.modules.control_loop as cl
 import hilo_mpc.modules.optimizer as opti
 import hilo_mpc.util.plotting as plotting
 import hilo_mpc.util.session as session
+import hilo_mpc.modules.rl.q_learning as ql
+import hilo_mpc.modules.rl.dqn as dqn_mod
+import hilo_mpc.modules.rl.policy as rl_policy
+import hilo_mpc.modules.rl.replay_buffer as rb
+import hilo_mpc.modules.rl.base as rl_base
 
 
 Model = dyn_mod.Model
@@ -95,6 +100,14 @@ QP = QuadraticProgram
 NonlinearProgram = opti.NonlinearProgram
 NLP = NonlinearProgram
 Session = session.Session
+
+RLBase = rl_base.RLBase
+QLearningAgent = ql.QLearningAgent
+DQNAgent = dqn_mod.DQNAgent
+EpsilonGreedyPolicy = rl_policy.EpsilonGreedyPolicy
+GreedyPolicy = rl_policy.GreedyPolicy
+SoftmaxPolicy = rl_policy.SoftmaxPolicy
+ReplayBuffer = rb.ReplayBuffer
 
 get_plot_backend = plotting.get_plot_backend
 set_plot_backend = plotting.set_plot_backend
@@ -173,5 +186,12 @@ __all__ = [
     'NLP',
     'Session',
     'get_plot_backend',
-    'set_plot_backend'
+    'set_plot_backend',
+    'RLBase',
+    'QLearningAgent',
+    'DQNAgent',
+    'EpsilonGreedyPolicy',
+    'GreedyPolicy',
+    'SoftmaxPolicy',
+    'ReplayBuffer',
 ]
