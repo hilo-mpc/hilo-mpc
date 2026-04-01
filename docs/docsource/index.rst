@@ -23,23 +23,29 @@ At the moment HILO-MPC supports:
    3. Model predictive control for trajectory tracking
    4. PID controller and linear quadratic regulator
 
-2. Machine Learning
+2. Reinforcement Learning
+
+   1. Q-Learning (tabular, discretised state-action spaces)
+   2. Deep Q-Network (DQN) with experience replay and target network
+   3. Modular exploration policies (epsilon-greedy, greedy, softmax)
+
+3. Machine Learning
 
    1. Artificial neural networks
    2. Gaussian processes
 
-3. Estimation
+4. Estimation
 
    1. Moving horizon estimation
    2. Kalman filter (including nonlinear extensions)
    3. Particle filter
 
-4. Modeling
+5. Modeling
 
    1. Ordinary differential equations
    2. Differential algebraic equations
 
-5. Embedded
+6. Embedded
 
    1. :math:`\mu\text{AO-MPC}` (code generation software for linear model predictive control)
 
@@ -66,12 +72,14 @@ At the moment HILO-MPC supports:
    examples/CSTR_Example
    examples/learn_mpc
    examples/opcua_pendulum
+   examples/rl_cartpole
 
 .. toctree::
    :maxdepth: 1
    :caption: Modules:
 
    modules/controllers
+   modules/reinforcement_learning
    modules/machinelearnings
    modules/modellings
    modules/estimators
@@ -81,6 +89,7 @@ At the moment HILO-MPC supports:
    :caption: API:
 
    api/controllers
+   api/reinforcement_learning
    api/learning
    api/modelling
    api/estimators
