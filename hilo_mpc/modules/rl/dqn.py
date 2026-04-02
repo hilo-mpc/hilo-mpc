@@ -23,6 +23,7 @@
 
 from typing import List, Optional, Sequence, Tuple
 
+import casadi as ca
 import numpy as np
 
 from .base import RLBase
@@ -30,99 +31,167 @@ from .policy import EpsilonGreedyPolicy
 from .replay_buffer import ReplayBuffer
 
 
-class _SimpleNN:
+class _CasADiNN:
     """
-    Lightweight feedforward neural network implemented in NumPy.
+    Feedforward neural network built entirely with CasADi symbolic expressions.
 
-    Used internally by :class:`DQNAgent` to avoid a hard dependency on
-    PyTorch or TensorFlow.  Architecture: fully-connected layers with ReLU
-    activations on hidden layers and a linear output layer.
+    The network architecture is fully-connected with ReLU activations on all
+    hidden layers and a linear output layer.  All weights are stored as a
+    single flat :class:`casadi.DM` parameter vector so that CasADi's
+    automatic differentiation can be applied directly to the MSE loss.
+
+    Parameters are initialised with Xavier/Glorot scaling.  The forward pass
+    and gradient are compiled once as :class:`casadi.Function` objects and
+    then re-used efficiently for every prediction and update.
 
     :param n_inputs: Number of input features.
     :param hidden_layers: Sizes of the hidden layers.
-    :param n_outputs: Number of output units.
+    :param n_outputs: Number of output units (one per discrete action).
     """
 
     def __init__(self, n_inputs: int, hidden_layers: Tuple[int, ...],
                  n_outputs: int) -> None:
         """Constructor method"""
         sizes = [n_inputs] + list(hidden_layers) + [n_outputs]
-        self._weights: List[np.ndarray] = []
-        self._biases: List[np.ndarray] = []
+        self._sizes = sizes
+        self._n_layers = len(sizes) - 1
+
+        # Compute flat-parameter slice indices for each layer: (W_start, W_end, b_start, b_end)
+        self._param_slices: List[Tuple[int, int, int, int]] = []
+        total_params = 0
+        for i in range(self._n_layers):
+            n_in, n_out = sizes[i], sizes[i + 1]
+            w_start = total_params
+            total_params += n_in * n_out
+            b_start = total_params
+            total_params += n_out
+            self._param_slices.append((w_start, w_start + n_in * n_out,
+                                       b_start, b_start + n_out))
+        self._total_params = total_params
+
+        # ---- Build symbolic forward pass --------------------------------
+        x_sym = ca.SX.sym('x', n_inputs)
+        params_sym = ca.SX.sym('params', total_params)
+
+        h = x_sym
+        for i, (ws, we, bs, be) in enumerate(self._param_slices):
+            n_in, n_out = sizes[i], sizes[i + 1]
+            W_flat = params_sym[ws:we]
+            b = params_sym[bs:be]
+            # Reshape column-major flat vector to (n_in, n_out) weight matrix
+            W = ca.reshape(W_flat, n_in, n_out)
+            z = W.T @ h + b
+            # ReLU on hidden layers, linear on output
+            h = ca.fmax(0, z) if i < self._n_layers - 1 else z
+
+        q_sym = h  # shape (n_outputs,)
+        self._f_forward = ca.Function(
+            'q_net', [x_sym, params_sym], [q_sym],
+            ['x', 'params'], ['q']
+        )
+
+        # ---- Build gradient function via automatic differentiation -------
+        y_target_sym = ca.SX.sym('y_target', n_outputs)
+        loss = ca.sumsqr(q_sym - y_target_sym) / n_outputs  # MSE
+        grad = ca.gradient(loss, params_sym)
+        self._f_grad = ca.Function(
+            'q_grad', [x_sym, params_sym, y_target_sym], [grad],
+            ['x', 'params', 'y_target'], ['grad']
+        )
+
+        # ---- Xavier / Glorot parameter initialisation -------------------
         rng = np.random.default_rng()
-        for i in range(len(sizes) - 1):
-            # Xavier / Glorot initialisation
-            scale = np.sqrt(2.0 / sizes[i])
-            self._weights.append(rng.standard_normal((sizes[i], sizes[i + 1])) * scale)
-            self._biases.append(np.zeros(sizes[i + 1]))
-        self._n_layers = len(self._weights)
+        params_init = np.zeros(total_params)
+        for i, (ws, we, bs, be) in enumerate(self._param_slices):
+            n_in = sizes[i]
+            scale = np.sqrt(2.0 / n_in)
+            params_init[ws:we] = rng.standard_normal(we - ws) * scale
+            # biases initialised to zero
+        self._params = ca.DM(params_init)
+
+    # ------------------------------------------------------------------
+    # Forward pass
+    # ------------------------------------------------------------------
 
     def predict(self, x: np.ndarray) -> np.ndarray:
-        """Forward pass for a single sample."""
-        a = np.array(x, dtype=np.float64).flatten()
-        for i, (w, b) in enumerate(zip(self._weights, self._biases)):
-            a = a @ w + b
-            if i < self._n_layers - 1:
-                a = np.maximum(0.0, a)  # ReLU
-        return a
+        """Forward pass for a single sample, returns a NumPy array."""
+        x_dm = ca.DM(np.array(x, dtype=np.float64).flatten())
+        result = self._f_forward(x_dm, self._params)
+        return np.array(result).flatten()
 
     def predict_batch(self, X: np.ndarray) -> np.ndarray:
-        """Forward pass for a batch of samples."""
-        a = np.array(X, dtype=np.float64)
-        for i, (w, b) in enumerate(zip(self._weights, self._biases)):
-            a = a @ w + b
-            if i < self._n_layers - 1:
-                a = np.maximum(0.0, a)
-        return a
+        """
+        Forward pass for a batch of samples.
+
+        :param X: Input matrix of shape ``(batch_size, n_inputs)``.
+        :return: Q-value matrix of shape ``(batch_size, n_outputs)``.
+        """
+        batch_size = X.shape[0]
+        # map() expects inputs as columns: (n_inputs, batch_size)
+        X_dm = ca.DM(np.array(X, dtype=np.float64).T)
+        params_rep = ca.repmat(self._params, 1, batch_size)
+        f_map = self._f_forward.map(batch_size)
+        result = f_map(X_dm, params_rep)  # (n_outputs, batch_size)
+        return np.array(result).T         # (batch_size, n_outputs)
+
+    # ------------------------------------------------------------------
+    # Gradient update
+    # ------------------------------------------------------------------
 
     def train(self, X: np.ndarray, y_target: np.ndarray, lr: float) -> None:
         """
-        One gradient descent step minimising MSE loss via backpropagation.
+        One gradient descent step minimising MSE loss.
 
-        :param X: Input batch of shape ``(batch, n_inputs)``.
-        :param y_target: Target Q-values of shape ``(batch, n_outputs)``.
+        Gradients are computed via CasADi automatic differentiation applied
+        to the symbolic forward pass, then averaged over the batch.
+
+        :param X: Input batch of shape ``(batch_size, n_inputs)``.
+        :param y_target: Target Q-values of shape ``(batch_size, n_outputs)``.
         :param lr: Learning rate.
         """
-        n = len(X)
-        # ---- forward pass (store activations and pre-activations) ----
-        activations = [np.array(X, dtype=np.float64)]
-        pre_acts = []
-        a = activations[0]
-        for i, (w, b) in enumerate(zip(self._weights, self._biases)):
-            z = a @ w + b
-            pre_acts.append(z)
-            a = np.maximum(0.0, z) if i < self._n_layers - 1 else z
-            activations.append(a)
+        batch_size = X.shape[0]
+        X_dm = ca.DM(np.array(X, dtype=np.float64).T)          # (n_inputs, batch_size)
+        y_dm = ca.DM(np.array(y_target, dtype=np.float64).T)   # (n_outputs, batch_size)
+        params_rep = ca.repmat(self._params, 1, batch_size)
 
-        # ---- backward pass (MSE gradient: d/dout = 2*(out - target)/n) ----
-        delta = 2.0 * (activations[-1] - y_target) / n
-        for i in range(self._n_layers - 1, -1, -1):
-            dw = activations[i].T @ delta / n
-            db = delta.mean(axis=0)
-            self._weights[i] -= lr * dw
-            self._biases[i] -= lr * db
-            if i > 0:
-                delta = delta @ self._weights[i].T
-                # ReLU derivative: zero out where pre-activation <= 0
-                delta = delta * (pre_acts[i - 1] > 0)
+        f_grad_map = self._f_grad.map(batch_size)
+        grad_batch = f_grad_map(X_dm, params_rep, y_dm)  # (total_params, batch_size)
+        grad_mean = ca.sum2(grad_batch) / batch_size      # (total_params, 1)
+
+        self._params = self._params - lr * grad_mean
+
+    # ------------------------------------------------------------------
+    # Weight serialisation (used for target network sync)
+    # ------------------------------------------------------------------
 
     def get_weights(self) -> List[Tuple[np.ndarray, np.ndarray]]:
-        """Return a deep copy of all weight/bias pairs."""
-        return [(w.copy(), b.copy()) for w, b in zip(self._weights, self._biases)]
+        """Return a list of ``(W_array, b_array)`` pairs (deep copy)."""
+        params_np = np.array(self._params).flatten()
+        result = []
+        for i, (ws, we, bs, be) in enumerate(self._param_slices):
+            n_in, n_out = self._sizes[i], self._sizes[i + 1]
+            W = params_np[ws:we].reshape(n_in, n_out).copy()
+            b = params_np[bs:be].copy()
+            result.append((W, b))
+        return result
 
     def set_weights(self, weights: List[Tuple[np.ndarray, np.ndarray]]) -> None:
-        """Overwrite weights from a list of ``(W, b)`` pairs."""
-        for i, (w, b) in enumerate(weights):
-            self._weights[i] = w.copy()
-            self._biases[i] = b.copy()
+        """Overwrite parameters from a list of ``(W, b)`` pairs."""
+        params_np = np.array(self._params).flatten().copy()
+        for (W, b), (ws, we, bs, be) in zip(weights, self._param_slices):
+            params_np[ws:we] = np.array(W).flatten()
+            params_np[bs:be] = np.array(b).flatten()
+        self._params = ca.DM(params_np)
 
 
 class DQNAgent(RLBase):
     """
     Deep Q-Network (DQN) agent with experience replay and a target network.
 
-    Uses a lightweight NumPy-based feedforward neural network so that no
-    external ML framework (PyTorch, TensorFlow) is required.
+    The Q-network is implemented using CasADi symbolic expressions so that
+    all gradient computations are performed via automatic differentiation
+    rather than manual backpropagation.  No external ML framework (PyTorch,
+    TensorFlow) is required.
 
     **Interface** (mirrors MPC)::
 
@@ -165,8 +234,8 @@ class DQNAgent(RLBase):
         self._batch_size = int(batch_size)
         self._buffer_size = int(buffer_size)
         self._target_update_freq = int(target_update_freq)
-        self._network: Optional[_SimpleNN] = None
-        self._target_network: Optional[_SimpleNN] = None
+        self._network: Optional[_CasADiNN] = None
+        self._target_network: Optional[_CasADiNN] = None
         self._replay_buffer: Optional[ReplayBuffer] = None
         self._step_count: int = 0
 
@@ -179,7 +248,10 @@ class DQNAgent(RLBase):
 
     def setup(self, options: Optional[dict] = None) -> None:
         """
-        Initialise the Q-network, target network, and replay buffer.
+        Initialise the CasADi Q-network, target network, and replay buffer.
+
+        The symbolic forward pass and gradient functions are compiled here
+        once so they can be re-used efficiently during training.
 
         Must be called after :meth:`set_action_space` and
         :meth:`set_reward_function`.
@@ -196,8 +268,8 @@ class DQNAgent(RLBase):
         n_states = self._model.n_x
         n_actions = len(self._action_space)
 
-        self._network = _SimpleNN(n_states, self._hidden_layers, n_actions)
-        self._target_network = _SimpleNN(n_states, self._hidden_layers, n_actions)
+        self._network = _CasADiNN(n_states, self._hidden_layers, n_actions)
+        self._target_network = _CasADiNN(n_states, self._hidden_layers, n_actions)
         self._target_network.set_weights(self._network.get_weights())
 
         self._replay_buffer = ReplayBuffer(self._buffer_size)
@@ -218,6 +290,9 @@ class DQNAgent(RLBase):
         """
         Return the greedy action (highest Q-value) for state *x0*.
 
+        The Q-values are computed by evaluating the CasADi forward pass
+        function with the current parameter vector.
+
         :param x0: Current system state.
         :return: Optimal action shaped ``(n_u, 1)``.
         :rtype: np.ndarray
@@ -234,7 +309,7 @@ class DQNAgent(RLBase):
                reward: float, next_state: np.ndarray, done: bool) -> None:
         """
         Store a transition and, if the buffer is large enough, run a
-        gradient update on the Q-network.
+        CasADi automatic-differentiation gradient update on the Q-network.
 
         :param state: State before the action.
         :param action: Action that was applied.
@@ -267,7 +342,13 @@ class DQNAgent(RLBase):
         return self._action_space[action_idx].reshape(-1, 1)
 
     def _train_step(self) -> None:
-        """Sample a minibatch and perform one gradient descent step."""
+        """
+        Sample a minibatch and perform one CasADi gradient descent step.
+
+        TD targets are computed with the target network (numpy output), then
+        the gradient update is performed entirely within CasADi via the
+        pre-compiled ``q_grad`` function.
+        """
         states, actions, rewards, next_states, dones = self._replay_buffer.sample(
             self._batch_size
         )
@@ -279,6 +360,7 @@ class DQNAgent(RLBase):
         current_q = self._network.predict_batch(states)
         current_q[np.arange(self._batch_size), actions] = targets_vec
 
+        # Gradient step via CasADi automatic differentiation
         self._network.train(states, current_q, self._learning_rate)
 
     # ------------------------------------------------------------------
@@ -286,8 +368,8 @@ class DQNAgent(RLBase):
     # ------------------------------------------------------------------
 
     @property
-    def network(self) -> Optional[_SimpleNN]:
-        """The online Q-network."""
+    def network(self) -> Optional[_CasADiNN]:
+        """The online CasADi Q-network."""
         return self._network
 
     @property
