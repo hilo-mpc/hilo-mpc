@@ -155,8 +155,12 @@ class ParticleFilter(_Estimator):
         Y = ca.SX.sym('Y', n_y, n_samples)
         R = ca.SX.sym('R', (n_y, n_y))
 
-        q = self._normpdf(Y, y, ca.sqrt(R))  # Since R is usually a diagonal matrix, we can use ca.sqrt() here. We need
+        # Compute joint likelihood as product of per-measurement likelihoods.
+        # Since R is usually a diagonal matrix, we can use ca.sqrt() element-wise here. We need
         # to change this, if we have non-diagonal matrices, i.e. covariance entries.
+        q = self._normpdf(Y[0, :], y[0], ca.sqrt(R[0, 0]))
+        for j in range(1, n_y):
+            q = q * self._normpdf(Y[j, :], y[j], ca.sqrt(R[j, j]))
         q /= ca.sum2(q)
 
         self._update_function = ca.Function('likelihood',
@@ -175,10 +179,10 @@ class ParticleFilter(_Estimator):
         if self._transpose_pdf:
             X = X.T
         elif self._transpose_pdf is None:
-            if X.shape != (2, self._sample_size):
+            if X.shape != (self._n_x, self._sample_size):
                 X = X.T
-                if X.shape != (2, self._sample_size):
-                    raise ValueError(f"Dimension mismatch. Expected dimension 2x{self._sample_size}, got "
+                if X.shape != (self._n_x, self._sample_size):
+                    raise ValueError(f"Dimension mismatch. Expected dimension {self._n_x}x{self._sample_size}, got "
                                      f"{X.shape[1]}x{X.shape[0]}.")
                 self._transpose_pdf = True
             else:
@@ -409,7 +413,11 @@ class ParticleFilter(_Estimator):
 
             # Roughening
             if self._roughening:
-                dx = np.max(X, axis=1) - np.min(X, axis=1)
+                X_np = np.asarray(X.full(), dtype=float)
+                dx = np.max(X_np, axis=1) - np.min(X_np, axis=1)
+                # Replace NaN (invalid particles) and zeros (collapsed particles) so the
+                # roughening covariance is always positive-definite.
+                dx = np.maximum(np.nan_to_num(dx, nan=0.0), np.finfo(float).eps)
                 dx = self._pdf(np.zeros(self._n_x), self._roughening_tuning_param * np.diag(dx) *
                                self._sample_size ** (-1 / self._n_x), self._sample_size)
                 if self._transpose_pdf:
