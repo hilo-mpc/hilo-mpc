@@ -320,6 +320,75 @@ class TestParticleFilterOtherTunableParameterSetters(TestCase):
         self.assertEqual(pf.sample_size, 20)
 
 
+class TestParticleFilterMultipleMeasurements(TestCase):
+    """Tests for PF with n_y > 1, covering the bug reported in issue #44."""
+
+    def _make_lorenz_model(self):
+        """Return a set-up Lorenz attractor model with 3 states and 3 measurements."""
+        model = Model(plot_backend='bokeh')
+        states = model.set_dynamical_states(['x1', 'x2', 'x3'])
+        inputs = model.set_inputs(['u1', 'u2', 'u3'])
+        model.set_measurements(['o1', 'o2', 'o3'])
+        model.set_measurement_equations(states)
+
+        x1 = states[0]
+        x2 = states[1]
+        x3 = states[2]
+        u1 = inputs[0]
+        u2 = inputs[1]
+        u3 = inputs[2]
+
+        c = np.array([10., 28., 8 / 3])
+        dx1 = c[0] * (x2 - x1) + u1
+        dx2 = c[1] * x1 - x2 - x1 * x3 + u2
+        dx3 = x1 * x2 - c[2] * x3 + u3
+
+        model.set_dynamical_equations([dx1, dx2, dx3])
+        model.setup(dt=0.001)
+        model.set_initial_conditions(x0=[0., 0., 0.])
+        return model
+
+    def test_particle_filter_setup_n_y_greater_than_1(self) -> None:
+        """Regression test for issue #44: PF.setup() must not raise for n_y > 1."""
+        model = self._make_lorenz_model()
+        pf = PF(model, roughening=True, plot_backend='bokeh')
+        # Previously raised: RuntimeError: Input 0 (i0) has mismatching shape. Got 3-by-15.
+        pf.setup()
+        self.assertIsNotNone(pf._update_function)
+
+    def test_particle_filter_setup_single_measurement_unchanged(self) -> None:
+        """The n_y = 1 path must still work after the fix."""
+        model = Model(plot_backend='bokeh', discrete=True)
+        model.set_dynamical_states('x')
+        model.set_measurements('y')
+        model.set_dynamical_equations('x/2 + 25*dt*x/(1 + x^2)')
+        model.set_measurement_equations('x^2/20')
+        model.setup(dt=1.)
+
+        pf = PF(model, plot_backend='bokeh')
+        pf.setup()
+        self.assertIsNotNone(pf._update_function)
+
+    def test_particle_filter_estimate_n_y_greater_than_1(self) -> None:
+        """End-to-end: PF.estimate() must produce a state vector of the right shape for n_y > 1."""
+        np.random.seed(0)
+        model = self._make_lorenz_model()
+        # Use roughening=False here; roughening is tested separately in the setup test.
+        # When all particles start at the Lorenz fixed point with zero process noise the
+        # particles collapse after resampling and the roughening step fails with a singular
+        # covariance — that is a separate pre-existing issue unrelated to issue #44.
+        pf = PF(model, plot_backend='bokeh')
+        pf.setup()
+
+        pf.R = np.diag([0.1, 0.1, 0.1])
+        pf.set_initial_guess([0., 0., 0.])
+
+        pf.estimate(y=[0., 0., 0.], u=[0., 0., 0.])
+
+        x_est = pf.solution.get_by_id('x:f')
+        self.assertEqual(x_est.shape, (3, 1))
+
+
 class TestParticleFilterEstimation(TestCase):
     """"""
     # TODO: Tests for transpose_pdf equal to True and False + dimension mismatch error (maybe the first 2 can be
@@ -341,77 +410,56 @@ class TestParticleFilterEstimation(TestCase):
 
         self.model = model
 
-    # def test_particle_filter_no_measurement_equations(self) -> None:
-    #     """
-    #
-    #     :return:
-    #     """
-    #     model = self.model
-    #     model.setup(dt=.1)
-    #
-    #     pf = PF(model, plot_backend='bokeh')
-    #     # FIXME: Update setup according to _KalmanFilter class
-    #     # TODO: Finish once bugs are fixed
+    def test_particle_filter_one_step(self) -> None:
+        """PF with 2 measurements (n_y=2) must complete one estimation step."""
+        np.random.seed(0)
+        model = self.model
+        model.set_measurement_equations(['T', 'cB'])
+        model.setup(dt=.1)
 
-    # def test_particle_filter_one_step(self) -> None:
-    #     """
-    #
-    #     :return:
-    #     """
-    #     model = self.model
-    #     model.set_measurement_equations(['T', 'cB'])
-    #     model.setup(dt=.1)
-    #
-    #     pf = PF(model, plot_backend='bokeh')
-    #     # FIXME: Move call to method ParticleFilter._setup_normpdf from ParticleFilter.__init__ to ParticleFilter.setup
-    #     #  and add dimensions. Right now the particle filter will only work for one measurement.
-    #     pf.setup()
-    #
-    #     pf.R = np.diag([.25, .01])
-    #     pf.set_initial_guess([299.876, .217108, 20.])
-    #     pf.set_initial_parameter_values([.15, 303.15, .13, .00025, 15., .14])
-    #
-    #     pf.estimate(y=[300.941, .245805], u=.01)
-    #     # TODO: Finish once bugs are fixed
+        pf = PF(model, plot_backend='bokeh')
+        pf.setup()
 
-    # def test_particle_filter_one_step_roughening(self) -> None:
-    #     """
-    #
-    #     :return:
-    #     """
-    #     model = self.model
-    #     model.set_measurement_equations(['T', 'cB'])
-    #     model.setup(dt=.1)
-    #
-    #     pf = PF(model, roughening=True, plot_backend='bokeh')
-    #     # FIXME: Move call to method ParticleFilter._setup_normpdf from ParticleFilter.__init__ to ParticleFilter.setup
-    #     #  and add dimensions. Right now the particle filter will only work for one measurement.
-    #     pf.setup()
-    #
-    #     pf.R = np.diag([.25, .01])
-    #     pf.set_initial_guess([299.876, .217108, 20.])
-    #     pf.set_initial_parameter_values([.15, 303.15, .13, .00025, 15., .14])
-    #
-    #     pf.estimate(y=[300.941, .245805], u=.01)
-    #     # TODO: Finish once bugs are fixed
+        pf.R = np.diag([.25, .01])
+        pf.set_initial_guess([299.876, .217108, 20.])
+        pf.set_initial_parameter_values([.15, 303.15, .13, .00025, 15., .14])
+
+        pf.estimate(y=[300.941, .245805], u=.01)
+
+        x_est = pf.solution.get_by_id('x:f')
+        self.assertEqual(x_est.shape, (3, 1))
+
+    def test_particle_filter_one_step_roughening(self) -> None:
+        """PF with roughening and 2 measurements must complete one estimation step.
+
+        A realistic P0 (matching the scale of each state) is provided so that initial
+        particles are spread out and do not collapse to a single point after resampling,
+        which would make the roughening covariance singular.
+        """
+        np.random.seed(42)
+        model = self.model
+        model.set_measurement_equations(['T', 'cB'])
+        model.setup(dt=.1)
+
+        pf = PF(model, roughening=True, plot_backend='bokeh')
+        pf.setup(n_samples=30)
+
+        pf.R = np.diag([.25, .01])
+        # P0 diagonal values are chosen relative to the magnitude of each state so that
+        # particles are well spread and dx > 0 in every dimension after resampling.
+        pf.set_initial_guess([299.876, .217108, 20.], P0=[25., 0.01, 25.])
+        pf.set_initial_parameter_values([.15, 303.15, .13, .00025, 15., .14])
+
+        pf.estimate(y=[300.941, .245805], u=.01)
+
+        x_est = pf.solution.get_by_id('x:f')
+        self.assertEqual(x_est.shape, (3, 1))
 
     # def test_particle_filter_one_step_prior_editing_K_supplied(self) -> None:
+    #     """PF with prior editing, custom K, and 2 measurements.
+    #
+    #     This test is skipped because prior_editing has a pre-existing bug when n_y > 1:
+    #     `ca.sum2(need_roughening)` returns a (n_y,) vector instead of a scalar, so
+    #     `int(ca.sum2(...))` raises a CasADi "is_scalar() failed" error.  That bug is
+    #     independent of the issue #44 fix and requires a separate fix.
     #     """
-    #
-    #     :return:
-    #     """
-    #     model = self.model
-    #     model.set_measurement_equations(['T', 'cB'])
-    #     model.setup(dt=.1)
-    #
-    #     pf = PF(model, prior_editing=True, K=.02, plot_backend='bokeh')
-    #     # FIXME: Move call to method ParticleFilter._setup_normpdf from ParticleFilter.__init__ to ParticleFilter.setup
-    #     #  and add dimensions. Right now the particle filter will only work for one measurement.
-    #     pf.setup(n_samples=20)
-    #
-    #     pf.R = np.diag([.25, .01])
-    #     pf.set_initial_guess([299.876, .217108, 20.])
-    #     pf.set_initial_parameter_values([.15, 303.15, .13, .00025, 15., .14])
-    #
-    #     pf.estimate(y=[300.941, .245805], u=.01)
-    #     # TODO: Finish once bugs are fixed
